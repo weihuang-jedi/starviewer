@@ -1,0 +1,19 @@
+#!/bin/csh -f
+
+ set echo
+
+ set os = `uname -s`
+
+ if("Darwin" == ${os}) then
+    #nv -mpas data/MPAS.sample_subset.nc
+     nv -mpas -subset data/t2m_cdf2_from_65536002.nc
+
+     exit
+ endif
+
+ if("Linux" == ${os}) then
+     vglrun ./main/main -mpas /glade/p/work/huangwei/data/MPAS.sample_subset.nc
+
+     exit
+ endif
+

@@ -1,0 +1,123 @@
+<HTML>
+
+<HEAD>
+    <TITLE>
+        Start NV
+    </TITLE>
+</HEAD>
+
+<BODY BGCOLOR=EEEEFF TEXT=004466 LINK=0099FF ALINK=0099FF VLINK=0099FF>
+<BR>
+<FONT SIZE=6>
+<CENTER>
+        How To Run NV on Geyser
+</CENTER>
+
+<HR>
+<BR>
+        <H1><A NAME=geyser>How to Run on Geyser:</A></H1>
+<BR>
+        <ol>
+            <li>add /glade/apps/contrib/nv/bin to your path</li>
+            <li>add /glade/apps/contrib/nv/lib to your LD_LIBRARY_PATH</li>
+            <li>set /glade/apps/contrib/nv/data as environment variable NV_DATA</li>
+            <li>have NCARG_ROOT setup properly, so NV can find NCL color table.
+		example NCARG_ROOT: /glade/apps/opt/ncl/6.2.0/gnu/4.7.2</li>
+            <li>follow instructions from CISL web site on how to do
+		<a href = "http://www2.cisl.ucar.edu/resources/geyser_caldera/visualization" target ="_blank">
+		visualization on geyser</a> to setup</li>
+            <li>run "nv4se your-se-data" for CAM-SE data</li>
+            <li>run "nv4fv your-fv-data" for CAM-FV data</li>
+        </ol>
+
+<P>
+A C-shell scrip to setup nv environment:
+<pre>
+ setenv PATH "/glade/apps/contrib/nv/bin:${PATH}"
+ setenv NV_DATA /glade/apps/contrib/nv/data
+ setenv LD_LIBRARY_PATH "/glade/apps/contrib/nv/lib:${LD_LIBRARY_PATH}"
+</pre>
+<BR>
+
+Below are step by step of running nv on geyser on Mac.
+<BR>
+<BR>
+(Linux users should have something similar. Please refer to
+<a href = "http://www2.cisl.ucar.edu/resources/geyser_caldera/visualization" target ="_blank">
+                CISL web site</a> on how to do visualization on geyser)
+<BR>
+<BR>
+
+<ol>
+	<li>
+		If you logged on to yellowstone, submit a batch job first:
+<BR>
+		<P>
+		bsub -Is -q geyser -W 6:00 -n 1 -P YOUR_PROJECT_NUMBER_START_WITH_P tcsh
+<BR>
+		<P>
+		Which will log you on to geyser.
+	</li>
+
+	<li>
+		on geyser, run:
+<BR>
+		<P>
+	 	/opt/TurboVNC/bin/vncserver -geometry 1600x1200
+<BR>
+		<P>
+		You will get something like:
+<BR>
+		<P>
+		New 'X' desktop is geyserXX:Y
+	</li>
+
+	<li>
+		Back to you local system, run:
+<BR>
+		<P>
+		vncviewer geyserXX.ucar.edu:Y
+<BR>
+		<P>
+		Here XX, and Y must match the one you get from geyser.
+		<P>
+<BR>
+		Fellow the instruction to log on to geyser again.
+		But, this time, you are connectted through virtual GL channel,
+		which allow you to run OpenGL through turboVNC.
+		<P>
+<BR>
+		nv4se, nv4fv are scripts, which have already invoked vglrun,
+		and customrized to cam-se, or cam-fv.
+	</li>
+
+	<li>
+		Now a new window will pop up. In the new window:
+		<P>
+<BR>
+		press and hold on "Applications", and move to "System Tools",
+		and then choose "Terminal".
+		<P>
+<BR>
+		This will give you a new terminal (in the new window).
+		<P>
+<BR>
+		The font may be too small. If that is the case, then hold on
+		"control" and "shift", and press "+" key to increase the font size.
+	</li>
+
+        <li>
+		Go to your working directory.
+<P>
+<BR>
+		Run nv4se, or nv4fv in this new terminal ONLY.
+	</li>
+
+        <li>
+		Hope everything worked for you.
+	</li>
+</ol>
+
+</BODY>
+</HTML>
+

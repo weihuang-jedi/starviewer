@@ -1,0 +1,905 @@
+Steps to add a New work station:
+(Here the QtWorkstations)
+
+(in ni/src/lib/hlu)
+1. Edit CairoWorkstation.h   CairoWorks
+	to add workstation ID:
+
+svn diff  CairoWorkstation.h   CairoWorks ationP.h
+Index: CairoWorkstation.h
+===================================================================
+--- CairoWorkstation.h  (revision 13979)
++++ CairoWorkstation.h  (working copy)
+@@ -1,5 +1,5 @@
+ /*
+- *      $Id: CairoWorkstation.h,v 1.6 2010-03-16 20:31:29 brownrig Exp $
++ *      $Id$
+  */
+ 
+ #ifndef    _NCarioWorkstation_h
+@@ -58,11 +58,13 @@
+     NhlCPDF = 2,
+     NhlCTIFF = 3,
+     NhlCX11 = 4,
+-    NhlCEPS = 5        
++    NhlCEPS = 5,
++    NhlCQT = 6
+ } NhlCairoFormat;
+ 
+ extern NhlClass NhlcairoDocumentWorkstationClass;
+ extern NhlClass NhlcairoImageWorkstationClass;
+ extern NhlClass NhlcairoWindowWorkstationClass;
++extern NhlClass NhlcairoQtWorkstationClass;
+ 
+ #endif /* _NCairoWorkstation_h */
+
+Property changes on: CairoWorkstation.h
+___________________________________________________________________
+Added: svn:keywords
+   + URL Rev Author Date Id
+
+Index: CairoWorkstationP.h
+===================================================================
+--- CairoWorkstationP.h (revision 13979)
++++ CairoWorkstationP.h (working copy)
+@@ -1,5 +1,5 @@
+ /*
+- *  $Id: CairoWorkstationP.h,v 1.5 2010-03-16 20:32:30 brownrig Exp $
++ *  $Id$
+  */
+ 
+ # ifndef    _NCairoWorkstationP_h
+@@ -20,6 +20,7 @@
+ # define    CTIFF       (43)
+ # define    CX11        (44)
+ # define    CEPS        (45)
++# define    CQT         (46)
+ 
+ /* We are creating distinct workstation objects for PS/PDF versus image-based cairo output formats.
+  * However, we'll use common methods and structs. In the struct below, some fields are applicable
+@@ -77,5 +78,6 @@
+ extern NhlCairoWorkstationClassRec    NhlcairoDocumentWorkstationClassRec;
+ extern NhlCairoWorkstationClassRec    NhlcairoImageWorkstationClassRec;
+ extern NhlCairoWorkstationClassRec    NhlcairoWindowWorkstationClassRec;
++extern NhlCairoWorkstationClassRec    NhlcairoQtWorkstationClassRec;
+ 
+ # endif /* _NCairoWorkstationP_h */
+
+Property changes on: CairoWorkstationP.h
+___________________________________________________________________
+Added: svn:keywords
+   + URL Rev Author Date Id
+
+2. Edit CairoWorkstation.c
+	to add related functions:
+
+
+Index: CairoWorkstation.c
+===================================================================
+--- CairoWorkstation.c	(revision 13979)
++++ CairoWorkstation.c	(working copy)
+@@ -1,5 +1,5 @@
+ /*
+- *      $Id: CairoWorkstation.c,v 1.8 2010-03-29 16:30:03 brownrig Exp $
++ *      $Id$
+  */
+ 
+ #include   <stdio.h>
+@@ -137,6 +137,43 @@
+         _NhlRES_NOSACCESS, (NhlFreeFunc) NhlFree},
+ };
+ 
++static NhlResource resourcesQtWS[] = {
++    {NhlNwkFormat, NhlCwkFormat, NhlTCairoFormat, sizeof (NhlCairoFormat),
++        Oset(format), NhlTImmediate, _NhlUSET((NhlPointer) NhlCQT),
++        _NhlRES_NOSACCESS, NULL},
++
++    {"no.res", "no.res", NhlTBoolean, sizeof (NhlBoolean), Oset(window_id_set),
++        NhlTImmediate, _NhlUSET((NhlPointer) True),
++        _NhlRES_NOACCESS | _NhlRES_PRIVATE, NULL},
++    {NhlNwkWindowId, NhlCwkWindowId, NhlTInteger, sizeof (int), Oset(window_id),
++        NhlTProcedure, _NhlUSET((NhlPointer) _NhlResUnset), _NhlRES_NOSACCESS, NULL},
++    {"no.res", "no.res", NhlTBoolean, sizeof (NhlBoolean), Oset(pause_set),
++        NhlTImmediate, _NhlUSET((NhlPointer) True),
++        _NhlRES_NOACCESS | _NhlRES_PRIVATE, NULL},
++    {NhlNwkPause, NhlCwkPause, NhlTBoolean, sizeof (NhlBoolean),
++        Oset(pause), NhlTProcedure, _NhlUSET((NhlPointer) _NhlResUnset), 0, NULL},
++
++    {"no.res", "no.res", NhlTInteger, sizeof (int), Oset(xwinconfig.type),
++        NhlTImmediate, _NhlUSET((NhlPointer) NGC_XWINCONFIG),
++        _NhlRES_NOACCESS | _NhlRES_PRIVATE, NULL},
++    {NhlNpositionX, NhlCpositionX, NhlTInteger, sizeof (int), Oset(xwinconfig.x),
++        NhlTImmediate, _NhlUSET((NhlPointer) 0), _NhlRES_NOSACCESS, NULL},
++    {NhlNpositionY, NhlCpositionY, NhlTInteger, sizeof (int), Oset(xwinconfig.y),
++        NhlTImmediate, _NhlUSET((NhlPointer) 0), _NhlRES_NOSACCESS, NULL},
++    {NhlNwkWidth, NhlCwkWidth, NhlTInteger, sizeof (int),
++        Oset(xwinconfig.width),
++        NhlTImmediate, _NhlUSET((NhlPointer) 512), _NhlRES_NOSACCESS, NULL},
++    {NhlNwkHeight, NhlCwkHeight, NhlTInteger, sizeof (int),
++        Oset(xwinconfig.height), NhlTImmediate,
++        _NhlUSET((NhlPointer) 512), _NhlRES_NOSACCESS, NULL},
++    {NhlNwkTitle, NhlCwkTitle, NhlTString, sizeof (NhlString),
++        Oset(xwinconfig.title), NhlTImmediate, _NhlUSET((NhlPointer) NULL),
++        _NhlRES_NOSACCESS, (NhlFreeFunc) NhlFree},
++    {NhlNwkIconTitle, NhlCwkIconTitle, NhlTString, sizeof (NhlString),
++        Oset(xwinconfig.icon_title), NhlTImmediate, _NhlUSET((NhlPointer) NULL),
++        _NhlRES_NOSACCESS, (NhlFreeFunc) NhlFree},
++};
++
+ /* forward declarations of helper functions */
+ static NhlErrorTypes fixupFilename(NhlCairoWorkstationLayer layer, char* filenameSuffix, char* callingFunc);
+ static NhlErrorTypes checkUlLRBounds(NhlCairoWorkstationLayerPart*, char*);
+@@ -165,17 +202,22 @@
+         NhlLayer new, _NhlArgList args, int num_args);
+ static NhlErrorTypes CairoWindowWorkstationInitialize(NhlClass class, NhlLayer req,
+         NhlLayer new, _NhlArgList args, int num_args);
++static NhlErrorTypes CairoQtWorkstationInitialize(NhlClass class, NhlLayer req,
++        NhlLayer new, _NhlArgList args, int num_args);
+ 
+ 
+ static NhlErrorTypes CairoDocumentWorkstationOpen(NhlLayer instance);
+ static NhlErrorTypes CairoImageWorkstationOpen(NhlLayer instance);
+ static NhlErrorTypes CairoWindowWorkstationOpen(NhlLayer instance);
++static NhlErrorTypes CairoQtWorkstationOpen(NhlLayer instance);
+ 
+ static NhlErrorTypes CairoDocumentWorkstationActivate(NhlLayer instance);
+ static NhlErrorTypes CairoImageWorkstationActivate(NhlLayer instance);
+ static NhlErrorTypes CairoWindowWorkstationActivate(NhlLayer instance);
++static NhlErrorTypes CairoQtWorkstationActivate(NhlLayer instance);
+ 
+ static NhlErrorTypes CairoWindowWorkstationClear(NhlLayer instance);
++static NhlErrorTypes CairoQtWorkstationClear(NhlLayer instance);
+ 
+ /* class-record for PS/PDF output formats */
+ NhlCairoWorkstationClassRec NhlcairoDocumentWorkstationClassRec = {
+@@ -372,9 +414,75 @@
+ 
+ };
+ 
++/* class-record for qt-based output formats */
++NhlCairoWorkstationClassRec NhlcairoQtWorkstationClassRec = {
++    {
++        /* class_name           */ "qtWorkstationClass",
++        /* nrm_class            */ NrmNULLQUARK,
++        /* layer_size           */ sizeof (NhlCairoWorkstationLayerRec),
++        /* class_inited         */ False,
++        /* superclass           */ (NhlClass) & NhlworkstationClassRec,
++        /* cvt_table            */ NULL,
++
++        /* layer_resources      */ resourcesQtWS,
++        /* num_resources        */ NhlNumber(resourcesQtWS),
++        /* all_resources        */ NULL,
++        /* callbacks            */ NULL,
++        /* num_callbacks        */ 0,
++        /* class_callbacks      */ NULL,
++        /* num_class_callbacks  */ 0,
++
++        /* class_part_initialize */ CairoWorkstationClassPartInitialize,
++        /* class_initialize      */ CairoWorkstationClassInitialize,
++        /* layer_initialize      */ CairoQtWorkstationInitialize,
++        /* layer_set_values      */ CairoWorkstationSetValues,
++        /* layer_set_values_hook */ NULL,
++        /* layer_get_values      */ CairoWorkstationGetValues,
++        /* layer_reparent        */ NULL,
++        /* layer_destroy         */ CairoWorkstationDestroy,
++
++        /* child_resources       */ NULL,
++
++        /* layer_draw            */ NULL,
++
++        /* layer_pre_draw        */ NULL,
++        /* layer_draw_segonly    */ NULL,
++        /* layer_post_draw       */ NULL,
++        /* layer_clear           */ NULL
++    },
++
++    {
++        /* current_wks_count */ NhlInheritCurrentWksCount,
++        /* gks_wks_recs      */ NhlInheritGksWksRecs,
++        /* hlu_wks_flag      */ NhlInheritHluWksFlag,
++        /* def_background    */
++        {1.0, 1.0, 1.0},
++        /* rgb_dbm           */ NULL,
++        /* pal               */ NhlInheritPalette,
++        /* open_work         */ CairoQtWorkstationOpen,
++        /* close_work        */ NhlInheritClose,
++        /* activate_work     */ CairoQtWorkstationActivate,
++        /* deactivate_work   */ NhlInheritDeactivate,
++        /* alloc_colors      */ NhlInheritAllocateColors,
++        /* update_work       */ NhlInheritUpdate,
++        /* clear_work        */ CairoQtWorkstationClear,
++        /* lineto_work       */ NhlInheritLineTo,
++        /* fill_work         */ NhlInheritFill,
++        /* marker_work       */ NhlInheritMarker,
++        /* notify_work       */ NULL,
++        /* update_drawbb     */ NULL
++    },
++
++    {
++        /* foo  */ 0
++    }
++
++};
++
+ NhlClass NhlcairoDocumentWorkstationClass = (NhlClass) & NhlcairoDocumentWorkstationClassRec;
+ NhlClass NhlcairoImageWorkstationClass = (NhlClass) & NhlcairoImageWorkstationClassRec;
+ NhlClass NhlcairoWindowWorkstationClass = (NhlClass) & NhlcairoWindowWorkstationClassRec;
++NhlClass NhlcairoQtWorkstationClass = (NhlClass) & NhlcairoQtWorkstationClassRec;
+ 
+ /*
+  * Function:    nhlfcairoXXXXXworkstationclass
+@@ -402,6 +510,10 @@
+ _NHLCALLF(nhlfcairowindowworkstationclass, NHLFCAIROWINDOWWORKSTATIONCLASS)
+ (void) { return NhlcairoWindowWorkstationClass; }
+ 
++NhlClass
++_NHLCALLF(nhlfcairoqtworkstationclass, NHLFCAIROQTWORKSTATIONCLASS)
++(void) { return NhlcairoQtWorkstationClass; }
++
+ /*
+  * Function:    CairoWorkstationClassPartInitialize
+  *
+@@ -460,6 +572,11 @@
+             {NhlCX11, "X11"}
+         };
+ 
++        _NhlEnumVals qtFormats[] = {
++            {NhlCQT, "QT"}
++        };
++
++
+         _NhlEnumVals orientvals[] = {
+             {NhlPORTRAIT, "Portrait"},
+             {NhlLANDSCAPE, "Landscape"}
+@@ -472,6 +589,8 @@
+                 imageFormats, NhlNumber(imageFormats));
+         (void) _NhlRegisterEnumType(NhlcairoWindowWorkstationClass, NhlTCairoFormat,
+                 windowFormats, NhlNumber(windowFormats));
++        (void) _NhlRegisterEnumType(NhlcairoQtWorkstationClass, NhlTCairoFormat,
++                qtFormats, NhlNumber(qtFormats));
+ 
+         (void) _NhlRegisterEnumType(NhlcairoDocumentWorkstationClass, NhlTWorkOrientation,
+                 orientvals, NhlNumber(orientvals));
+@@ -607,6 +726,9 @@
+     NhlErrorTypes ret = NhlNOERROR;
+     char* tstr;
+ 
++    fprintf(stderr, "file %s, line: %d, function: %s\n",
++                     __FILE__, __LINE__, __PRETTY_FUNCTION__);
++
+     newCairo->work.gkswksconid = 0;
+     cairoLayer->dev_bounds_updated = False;
+ 
+@@ -669,7 +791,78 @@
+     return ret;
+ }
+ 
++static NhlErrorTypes
++CairoQtWorkstationInitialize(NhlClass lclass, NhlLayer req, NhlLayer new, _NhlArgList args, int num_args) {
++    char func[] = "CairoQtWorkstationInitialize";
+ 
++    NhlCairoWorkstationLayer newCairo = (NhlCairoWorkstationLayer) new;
++    NhlCairoWorkstationLayerPart *cairoLayer = &newCairo->cairo;
++    NhlErrorTypes ret = NhlNOERROR;
++    char* tstr;
++
++    fprintf(stderr, "file %s, line: %d, function: %s\n",
++                     __FILE__, __LINE__, __PRETTY_FUNCTION__);
++
++    newCairo->work.gkswksconid = 0;
++    cairoLayer->dev_bounds_updated = False;
++
++    /*
++     * Set gkswkstype
++     */
++    if(cairoLayer->format != NhlCQT)
++    {
++        NHLPERROR((NhlWARNING, NhlEUNKNOWN,
++                "%s: Invalid format \"%d\" defaulting to QT",
++                func, cairoLayer->format));
++    }
++    newCairo->work.gkswkstype = CQT;
++
++    cairoLayer->pause = True;
++
++    if (cairoLayer->window_id_set)
++    {
++        newCairo->work.gkswksconid = cairoLayer->window_id;
++        /*
++         * Force pause to False if the user provides a window id
++         * GKS can't grab event's and still allow the user to grab
++         * events.
++         */
++        if ((cairoLayer->pause_set) && (cairoLayer->pause))
++        {
++            NHLPERROR((NhlINFO, NhlEUNKNOWN,
++                    "%s:If the %s resource is specified, the %s resource must be False",
++                    func, NhlNwkWindowId, NhlNwkPause));
++            ret = NhlINFO;
++        }
++        cairoLayer->pause = False;
++    }
++
++    if (!cairoLayer->xwinconfig.title)
++        cairoLayer->xwinconfig.title = (char*) newCairo->base.name;
++    tstr = cairoLayer->xwinconfig.title;
++    cairoLayer->xwinconfig.title =
++            (char*) NhlMalloc((unsigned) strlen(tstr) + 1);
++    if (!cairoLayer->xwinconfig.title) {
++        NHLPERROR((NhlFATAL, ENOMEM, NULL));
++        return NhlFATAL;
++    }
++    strcpy(cairoLayer->xwinconfig.title, tstr);
++
++    if (!cairoLayer->xwinconfig.icon_title)
++        cairoLayer->xwinconfig.icon_title = (char*) newCairo->base.name;
++    tstr = cairoLayer->xwinconfig.icon_title;
++    cairoLayer->xwinconfig.icon_title =
++            (char*) NhlMalloc((unsigned) strlen(tstr) + 1);
++    if (!cairoLayer->xwinconfig.icon_title) {
++        NHLPERROR((NhlFATAL, ENOMEM, NULL));
++        return NhlFATAL;
++    }
++    strcpy(cairoLayer->xwinconfig.icon_title, tstr);
++
++    return ret;
++}
++
++
+ /*
+  * Function:    CairoWorkstationSetValues
+  *
+@@ -788,6 +981,10 @@
+             NhlFree(cairo->xwinconfig.title);
+         if (cairo->xwinconfig.icon_title)
+             NhlFree(cairo->xwinconfig.icon_title);
++    }
++    else if (cairo->format == NhlCQT) {
++        fprintf(stderr, "file %s, line: %d, function: %s\n",
++                        __FILE__, __LINE__, __PRETTY_FUNCTION__);
+     } else {
+         if (cairo->filename)
+             NhlFree(cairo->filename);
+@@ -974,6 +1171,39 @@
+ *****/
+ }
+ 
++static NhlErrorTypes
++CairoQtWorkstationOpen(NhlLayer l) {
++    char func[] = "QtWorkstationOpen";
++    NhlCairoWorkstationLayerPart *cairo = &((NhlCairoWorkstationLayer) l)->cairo;
++    Gescape_in_data gesc_in_xwconf;
++    NhlErrorTypes ret;
++
++    /* we need to calculate the NDC frame within the image... */
++    int minRange = (cairo->xwinconfig.width < cairo->xwinconfig.height) ? cairo->xwinconfig.width : cairo->xwinconfig.height;
++    int adjust = (cairo->xwinconfig.width - minRange) / 2;
++    cairo->lower_x = adjust;
++    cairo->upper_x = cairo->xwinconfig.width - adjust;
++    adjust = (cairo->xwinconfig.height - minRange) / 2;
++    cairo->lower_y = adjust;
++    cairo->upper_y = cairo->xwinconfig.height - adjust;
++
++    /* Note that these can be set for the "next" workstation */
++    c_ngseti("lx", cairo->lower_x);
++    c_ngseti("ux", cairo->upper_x);
++    c_ngseti("ly", cairo->lower_y);
++    c_ngseti("uy", cairo->upper_y);
++
++    /* image width/height must be set before opening workstation */
++    cairo->xwinconfig.work_id = -1; /* part of the escape mechanism; -1 means "apply to *next* workstation */
++    gesc_in_xwconf.escape_r1.data = &cairo->xwinconfig;
++    gesc_in_xwconf.escape_r1.size = sizeof(cairo->xwinconfig);
++    gescape(NGESC_CNATIVE, &gesc_in_xwconf, NULL, NULL);
++
++    ret = (*NhlworkstationClassRec.work_class.open_work)(l);
++
++    return ret;
++}
++
+ /*
+  * Function:    CairoXXXXXWorkstationActivate
+  *
+@@ -1026,6 +1256,12 @@
+     return (*(lc->work_class.activate_work))(l);
+ }
+ 
++static NhlErrorTypes
++CairoQtWorkstationActivate(NhlLayer l) {
++    NhlWorkstationClass lc = (NhlWorkstationClass) NhlworkstationClass;
++    return (*(lc->work_class.activate_work))(l);
++}
++
+ /*
+  * Function:	CairoWindowWorkstationClear
+  *
+@@ -1051,6 +1287,13 @@
+     return (*(wksClass->work_class.clear_work))(layer);
+ }
+ 
++static NhlErrorTypes
++CairoQtWorkstationClear(NhlLayer layer) {
++    NhlWorkstationClass wksClass = (NhlWorkstationClass) NhlworkstationClass;
++
++    return (*(wksClass->work_class.clear_work))(layer);
++}
++
+ /*
+  * fixupFilename()
+  *
+
+Property changes on: CairoWorkstation.c
+___________________________________________________________________
+Added: svn:keywords
+   + URL Rev Author Date Id
+
+
+3. Edit cdrivers/cro.h
+	to add the workstation id
+
+svn diff  cdrivers/cro.h
+Index: cdrivers/cro.h
+===================================================================
+--- cdrivers/cro.h      (revision 13979)
++++ cdrivers/cro.h      (working copy)
+@@ -136,7 +136,13 @@
+ #define CTIFF               43  /* cairo (geo)TIFF   */
+ #define CX11                44  /* cairo x11 surface */
+ #define CEPS                45  /* cairo EPS */
++#define CQT                 46  /* cairo Qt */
+ 
++#include <cairo/cairo.h>
++#include <cairo/cairo-ps.h>
++#include <cairo/cairo-pdf.h>
++#include <cairo/cairo-ft.h>
++
+ typedef enum {MONO, COLOR} cro_color;
+ 
+ typedef struct  CROPoint_       {
+@@ -243,7 +249,9 @@
+ 
+ #endif  /* NGCALLF */
+ 
++extern cairo_surface_t *qt_surface;
+ 
+ void reverse_chars(char *);
++void setCairoQtSurface(cairo_surface_t *surface);
+ 
+ #endif  /* _cro_driver_ */
+
+4. Edit  cdrivers/cro.c
+	to add related code
+
+svn diff  cdrivers/cro.c
+
+Index: cdrivers/cro.c
+===================================================================
+--- cdrivers/cro.c	(revision 13979)
++++ cdrivers/cro.c	(working copy)
+@@ -21,11 +21,6 @@
+ #include <math.h>
+ #include <time.h>
+ 
+-#include <cairo/cairo.h>
+-#include <cairo/cairo-ps.h>
+-#include <cairo/cairo-pdf.h>
+-#include <cairo/cairo-ft.h>
+-
+ #include <math.h>
+ #include <stdlib.h>
+ #include <errno.h>
+@@ -82,6 +77,8 @@
+ static cairo_t         *cairoContexts[NUM_CONTEXT];
+ static int             cairoEnvIndices[NUM_CONTEXT];
+ 
++cairo_surface_t *qt_surface = NULL;
++
+ static int getCairoEnvIndex(int wksId) {
+     int i;
+     for (i = 0; i < NUM_CONTEXT; i++) {
+@@ -291,6 +288,10 @@
+       croActivateX11(psa, getSurface(psa->wks_id));
+       setSurfaceTransform(psa);
+     }
++    else if (psa->wks_type == CQT) {
++      fprintf(stderr, "\nfile %s, line: %d, function: %s\n",
++                       __FILE__, __LINE__, __PRETTY_FUNCTION__);
++    }
+ 
+     return (0);
+ }
+@@ -531,6 +532,21 @@
+         free(outputFile);
+     }
+ 
++    else if (psa->wks_type == CQT)
++    {
++        fprintf(stderr, "\nfile %s, line: %d, function: %s\n",
++                         __FILE__, __LINE__, __PRETTY_FUNCTION__);
++        fprintf(stderr, "\tWrite image to qt-painter.\n\n");
++
++        ret = cairo_qt_surface_get_image(getSurface(psa->wks_id));
++        if (ret != 0)
++            ret = ERR_CRO_OPN;
++
++      /*
++       *psa->frame_count++;
++       */
++    }
++
+     psa->pict_empty = TRUE;
+ 
+     return ret;
+@@ -552,8 +568,18 @@
+         free(psa->ctable);
+ 
+     if (psa->wks_type == CX11)
++    {
+         croFreeNativeSurface(getSurface(psa->wks_id));
++    }
++    else if (psa->wks_type == CQT)
++    {
++        fprintf(stderr, "\nfile %s, line: %d, function: %s\n",
++                         __FILE__, __LINE__, __PRETTY_FUNCTION__);
++        fprintf(stderr, "\tWrite image to qt-painter.\n\n");
+ 
++        croFreeNativeSurface(getSurface(psa->wks_id));
++    }
++
+     cairo_destroy(getContext(psa->wks_id));
+     removeCairoEnv(psa->wks_id);
+     free(psa);
+@@ -850,6 +876,12 @@
+ }
+ 
+ 
++void setCairoQtSurface(cairo_surface_t *surface)
++{
++    qt_surface = surface;
++}
++
++
+ int cro_OpenWorkstation(GKSC *gksc) {
+ 
+     char *sptr = (char *) gksc->s.list;
+@@ -859,6 +891,9 @@
+     extern int orig_wks_id;
+     static CROClipRect rect;
+ 
++    fprintf(stderr, "\nfile %s, line: %d, function: %s\n",
++                     __FILE__, __LINE__, __PRETTY_FUNCTION__);
++
+     if (getenv("CRO_TRACE")) {
+         printf("Got to cro_OpenWorkstation\n");
+     }
+@@ -949,6 +984,33 @@
+         psa->image_height = cairo_xlib_surface_get_height(surface);
+     }
+ 
++    else if (psa->wks_type == CQT)
++    {
++        /*
++         *  Create a QT (painter) workstation.
++         *  QPainter *painter;
++         *  surface = cairo_qt_surface_create(painter, psa->image_width, psa->image_height);
++         */
++
++        fprintf(stderr, "\nfile %s, line: %d, function: %s\n",
++                         __FILE__, __LINE__, __PRETTY_FUNCTION__);
++        fprintf(stderr, "\tpsa->image_width = %d, psa->image_height = %d\n",
++                         (int) psa->image_width, (int) psa->image_height);
++        fprintf(stderr, "\tWe should create surface with QPainter.\n");
++        fprintf(stderr, "\tBut as link to Qt could be pain, we just use other function to create a surface.\n\n");
++
++        if(NULL != qt_surface)
++            surface = qt_surface;
++        else
++            surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, psa->image_width, psa->image_height);
++
++        context = cairo_create(surface);
++
++        cairo_scale(context, psa->image_width, psa->image_height);
++
++        saveCairoEnv(orig_wks_id, context, surface);
++    }
++
+     /*
+      *  Set fill rule to even/odd.
+      */
+
+
+5. Edit awi/gksbd.f
+	to add workstation ID
+
+(Here increased the WK as well).
+
+svn diff  awi/gksbd.f
+Index: awi/gksbd.f
+===================================================================
+--- awi/gksbd.f (revision 13977)
++++ awi/gksbd.f (working copy)
+@@ -215,14 +215,14 @@
+ C       STR    -- CHARACTER VARIABLE FOR PASSING CHARACTERS
+ C
+ C-----------------------------------------------------------------------
+-      DATA KSLEV,WK/0, 26/
++      DATA KSLEV,WK/0, 27/
+ C**************************************************************************
+ C******** Be sure and change the dimension of LSWK in gkscom.h when    ****
+ C******** adding a new workstation type (as well as changing the value ****
+ C******** of WK above to the same number).                              ****
+ C**************************************************************************
+       DATA LSWK/1,3,7,8,9,10,11,12,20,21,22,23,24,25,26,27,28,29,30,31,
+-     +  40,41,42,43,44,45/
++     +          40,41,42,43,44,45,46/
+ C**************************************************************************
+       DATA MOPWK,MACWK,MNT
+      +    /   15,   15,  1/
+
+6. Edit  awi/gkscom.h
+	to increase size of LSWK
+
+svn diff  awi/gkscom.h
+Index: awi/gkscom.h
+===================================================================
+--- awi/gkscom.h        (revision 13977)
++++ awi/gkscom.h        (working copy)
+@@ -15,7 +15,7 @@
+      +               RWKSP(IWDIM)  , GKSCLP
+       INTEGER        NOPWK , NACWK , WCONID, NUMSEG, SEGS  , CURSEG,
+      +               SEGLEN, MXSREC, SEGDEL, GKSCLP
+-      COMMON/GKOPDT/ OPS   , KSLEV , WK    , LSWK(26)      ,
++      COMMON/GKOPDT/ OPS   , KSLEV , WK    , LSWK(27)      ,
+      +               MOPWK , MACWK , MNT
+       INTEGER        OPS   , WK
+       COMMON/GKSTAT/ SOPWK(MXNWK)  , SACWK(MXNWK)  , CPLI  , CLN   ,
+
+
+7. The following change make it almost worked.
+
+Revision: 13986
+Author:   starviewer
+Date:     2012-12-04 14:58:25 -0700 (Tue, 04 Dec 2012)
+Log Message:
+-----------
+Add function croActivateQt, and function to set painter width/height
+
+Modified Paths:
+--------------
+   ncarg/branches/newh5/ncarg2d/src/libncarg_gks/cdrivers/cro.c
+   ncarg/branches/newh5/ncarg2d/src/libncarg_gks/cdrivers/cro.h
+   ncarg/branches/newh5/ncarg2d/src/libncarg_gks/cdrivers/crodisplay.c
+
+
+Index: cdrivers/crodisplay.c
+===================================================================
+--- cdrivers/crodisplay.c	(revision 13979)
++++ cdrivers/crodisplay.c	(working copy)
+@@ -12,6 +12,7 @@
+ #include <cairo/cairo-xlib.h>
+ #include <ncarg/gksP.h>
+ #include "gksc.h"
++#include "cro.h"
+ #include "croddi.h"
+ #include "x.h"
+ 
+@@ -399,3 +400,67 @@
+ 
+     return;
+ }
++
++/* This function is modified from croActivateX11 above. Wei Huang */
++void croActivateQt(CROddp *psa)
++{
++    cairo_t* context = getContext(psa->wks_id);
++
++    CoordSpace square_screen;
++
++    double width  = (double) qt_painter_width;
++    double height = (double) qt_painter_height;
++
++#if 0
++    static int qtInitBack = 1;
++
++    if(qtInitBack)
++    {
++        cairo_surface_flush(qt_surface);
++        qtInitBack = 0;
++    }
++#endif
++
++  /*
++   *fprintf(stderr, "\nin funtion: <%s>, line: %d, file: <%s>\n",
++   *                 __PRETTY_FUNCTION__, __LINE__, __FILE__);
++   */
++
++    cairo_scale(context, width, height);
++
++    psa->image_width  = qt_painter_width;
++    psa->image_height = qt_painter_height;
++
++    psa->dspace.llx = (double) 0.0;
++    psa->dspace.lly = (double) 0.0;
++    psa->dspace.urx = width - 1.0;
++    psa->dspace.ury = height - 1.0;
++  /*
++   *square_screen = ComputeLargestSquare
++   *               (psa->dspace.llx, psa->dspace.lly,
++   *                psa->dspace.urx, psa->dspace.ury);
++   */
++    square_screen = ComputeLargestSquare((double)0.0, height, width, (double)0.0);
++
++    psa->dspace.llx = square_screen.llx;
++    psa->dspace.urx = square_screen.urx;
++    psa->dspace.lly = square_screen.ury;   /* note flip of y-axis */
++    psa->dspace.ury = square_screen.lly;   /*         "           */
++
++    psa->dspace.xspan = ((psa->dspace.urx) - (psa->dspace.llx));
++    psa->dspace.yspan = ((psa->dspace.ury) - (psa->dspace.lly));
++
++    if (psa->cro_clip.null == FALSE)
++    {
++      psa->cro_clip.llx = psa->dspace.llx;
++      psa->cro_clip.lly = psa->dspace.lly;
++      psa->cro_clip.urx = psa->dspace.urx;
++      psa->cro_clip.ury = psa->dspace.ury;
++    }
++
++  /*
++   *fprintf(stderr, "out funtion: <%s>, line: %d, file: <%s>\n",
++   *                 __PRETTY_FUNCTION__, __LINE__, __FILE__);
++   */
++}
++
+Index: cdrivers/cro.c
+===================================================================
+--- cdrivers/cro.c	(revision 13981)
++++ cdrivers/cro.c	(working copy)
+@@ -78,6 +78,8 @@
+ static int             cairoEnvIndices[NUM_CONTEXT];
+ 
+ cairo_surface_t *qt_surface = NULL;
++int qt_painter_width  = 1200;
++int qt_painter_height = 900;
+ 
+ static int getCairoEnvIndex(int wksId) {
+     int i;
+@@ -88,7 +90,7 @@
+     }
+ }
+ 
+-static cairo_t* getContext(int wksId) {
++cairo_t* getContext(int wksId) {
+     return cairoContexts[getCairoEnvIndex(wksId)];
+ }
+ 
+@@ -289,8 +291,12 @@
+       setSurfaceTransform(psa);
+     }
+     else if (psa->wks_type == CQT) {
+-      fprintf(stderr, "\nfile %s, line: %d, function: %s\n",
+-                       __FILE__, __LINE__, __PRETTY_FUNCTION__);
++    /*
++     *fprintf(stderr, "\nfile %s, line: %d, function: %s\n",
++     *                 __FILE__, __LINE__, __PRETTY_FUNCTION__);
++     */
++      croActivateQt(psa);
++      setSurfaceTransform(psa);
+     }
+ 
+     return (0);
+@@ -538,13 +544,16 @@
+                          __FILE__, __LINE__, __PRETTY_FUNCTION__);
+         fprintf(stderr, "\tWrite image to qt-painter.\n\n");
+ 
++        psa->image_width  = qt_painter_width;
++        psa->image_height = qt_painter_height;
++
+         ret = cairo_qt_surface_get_image(getSurface(psa->wks_id));
+         if (ret != 0)
+             ret = ERR_CRO_OPN;
+ 
+       /*
+-       *psa->frame_count++;
+        */
++        psa->frame_count++;
+     }
+ 
+     psa->pict_empty = TRUE;
+@@ -570,6 +579,9 @@
+     if (psa->wks_type == CX11)
+     {
+         croFreeNativeSurface(getSurface(psa->wks_id));
++        cairo_destroy(getContext(psa->wks_id));
++        removeCairoEnv(psa->wks_id);
++        free(psa);
+     }
+     else if (psa->wks_type == CQT)
+     {
+@@ -577,13 +589,11 @@
+                          __FILE__, __LINE__, __PRETTY_FUNCTION__);
+         fprintf(stderr, "\tWrite image to qt-painter.\n\n");
+ 
+-        croFreeNativeSurface(getSurface(psa->wks_id));
++      /*
++       *croFreeNativeSurface(getSurface(psa->wks_id));
++       */
+     }
+ 
+-    cairo_destroy(getContext(psa->wks_id));
+-    removeCairoEnv(psa->wks_id);
+-    free(psa);
+-
+     return (0);
+ }
+ 
+@@ -881,7 +891,13 @@
+     qt_surface = surface;
+ }
+ 
++void setCairoQtWinSize(int width, int height)
++{
++    qt_painter_width = width;
++    qt_painter_height = height;
++}
+ 
++
+ int cro_OpenWorkstation(GKSC *gksc) {
+ 
+     char *sptr = (char *) gksc->s.list;
+@@ -986,6 +1002,9 @@
+ 
+     else if (psa->wks_type == CQT)
+     {
++        double width  = (double) qt_painter_width;
++        double height = (double) qt_painter_height;
++
+         /*
+          *  Create a QT (painter) workstation.
+          *  QPainter *painter;
+@@ -1005,10 +1024,11 @@
+             surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, psa->image_width, psa->image_height);
+ 
+         context = cairo_create(surface);
++        cairo_scale(context, width, height);
++        saveCairoEnv(orig_wks_id, context, surface);
+ 
+-        cairo_scale(context, psa->image_width, psa->image_height);
+-
+-        saveCairoEnv(orig_wks_id, context, surface);
++        psa->image_height = qt_painter_height;
++        psa->image_width  = qt_painter_width;
+     }
+ 
+     /*
+@@ -1021,8 +1041,10 @@
+      */
+     cairo_set_line_cap(context, CAIRO_LINE_CAP_ROUND);
+     cairo_set_line_join(context, CAIRO_LINE_JOIN_ROUND);
+-    cairo_surface_destroy(surface);
+ 
++    if(CQT != psa->wks_type)
++        cairo_surface_destroy(surface);
++
+     /*
+      *  Set the default linewidth.
+      */
+Index: cdrivers/cro.h
+===================================================================
+--- cdrivers/cro.h	(revision 13981)
++++ cdrivers/cro.h	(working copy)
+@@ -250,8 +250,14 @@
+ #endif  /* NGCALLF */
+ 
+ extern cairo_surface_t *qt_surface;
++extern int qt_painter_width;
++extern int qt_painter_height;
+ 
++cairo_t* getContext(int wksId);
++
+ void reverse_chars(char *);
++
+ void setCairoQtSurface(cairo_surface_t *surface);
++void setCairoQtWinSize(int width, int height);
+ 
+ #endif  /* _cro_driver_ */

@@ -1,0 +1,19 @@
+#!/bin/csh -f
+
+ if($# > 0) then
+    set flnm = $1
+ else
+    echo "Usage: $0 your-camse-1.0-degree-filename"
+    exit -1
+ endif
+
+ set os = `uname -s`
+
+ if("Linux" == ${os}) then
+     vglrun nv -mappingfile $NV_DATA/camse_1degree_mapping.nc \
+        -camse $flnm
+ else
+     nv -mappingfile $NV_DATA/camse_1degree_mapping.nc \
+	-camse $flnm
+ endif
+

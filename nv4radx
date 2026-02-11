@@ -1,0 +1,14 @@
+#!/bin/csh -f
+
+ set echo
+
+ set os = `uname -s`
+
+#rm /Users/huangwei/work/nv/lib/libradx*
+#make
+
+#nv -radx /Users/huangwei/test/ncltest/ncl_radar/Oklahoma_2013052000_data/KTLX20130520_000122_V06 >&! print.out
+ nv -radx /Users/huangwei/test/ncltest/ncl_radar/Oklahoma_2013052000_data/KTLX20130520_000122_V06
+
+#vglrun ./main/main -radar /glade/p/work/huangwei/data/MPAS.sample_subset.nc
+

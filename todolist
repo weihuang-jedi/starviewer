@@ -1,0 +1,11 @@
+1. re-display capabitility:
+	a. Save status of each step to a file
+	b. Repeat previous steps with the status from the file.
+
+2. streamline with multiple time steps
+
+3. Apply color table in logarithm.
+
+    i = n (exp(v/vmax) - 1)/(e - 1)
+
+4. Radar isosurface with tetrahedron.

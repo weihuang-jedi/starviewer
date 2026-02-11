@@ -1,0 +1,17 @@
+#!/bin/csh -f
+
+ if($# > 0) then
+    set flnm = $1
+ else
+    echo "Usage: $0 your-pop-filename"
+    exit -1
+ endif
+
+ set os = `uname -s`
+
+ if("Linux" == ${os}) then
+     vglrun nv -pop $flnm
+ else
+     nv -pop $flnm
+ endif
+

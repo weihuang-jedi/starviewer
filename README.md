@@ -1,2 +1,1 @@
-# starviewer
-Visualization App
+# My project's README

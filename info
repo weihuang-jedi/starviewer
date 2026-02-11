@@ -1,0 +1,121 @@
+NV
+
+	08/21/2013
+
+	svn cp https://subversion.ucar.edu/huangwei/nv/trunk \
+	       https://subversion.ucar.edu/huangwei/branches/new_nv \
+		-m "Create a new branch to re-org, which move menu to control panel"
+
+	09/24/2013
+
+	svn cp  https://subversion.ucar.edu/ncldev/nv/trunk \
+		https://subversion.ucar.edu/ncldev/nv/branches/mpi_nv \
+		-m "Create a branch for mpi"
+
+	Working Copy Root Path: /Users/huangwei/ncl/src/nv
+	URL: https://subversion.ucar.edu/ncldev/nv
+	Repository Root: https://subversion.ucar.edu/ncldev
+	Repository UUID: 10fe2890-8a40-4696-8b1d-7ccbb19c398e
+	Revision: 14531
+
+	svn up
+		At revision 14562.
+
+	svn mv https://subversion.ucar.edu/ncldev/nv \
+		https://subversion.ucar.edu/ncldev/nv_trunk \
+		-m "NV, should have made it trunk (at the beginning)"
+
+	svn mv https://subversion.ucar.edu/ncldev/nv_trunk \
+		https://subversion.ucar.edu/ncldev/nv/trunk \
+		-m "NV, should have made it trunk (at the beginning)"
+
+
+NGQ
+	Never Gone Quit
+
+	NCL integrated with openGL and displayed by Qt
+
+02/17/2013
+
+	To compile on yellowstone, all other depended libs have to compile
+	with -fPIC flags.
+
+02/05/2013
+
+	At revision 4329.
+	Tue Feb  5 09:43:09 MST 2013
+
+   svn cp https://subversion.ucar.edu/huangwei/trunk/ncltest/ncl_qt \
+	https://subversion.ucar.edu/huangwei/tags/ngq_0_2 \
+	-m "Before demo at NCL_DEV meeting"
+
+	Committed revision 4330.
+	Tue Feb  5 09:44:38 MST 2013
+
+01/24/13
+   
+	Thu Jan 24 08:29:56 MST 2013
+	At revision 4272.
+
+   svn cp https://subversion.ucar.edu/huangwei/trunk/ncltest/ncl_qt \
+	https://subversion.ucar.edu/huangwei/tags/ngq_0_1 \
+	-m "Got most wanted features"
+
+	Committed revision 4273.
+
+01/15/13
+
+   Committed revision 4235.
+   Tue Jan 15 08:42:56 MST 2013
+   
+   svn cp https://subversion.ucar.edu/huangwei/trunk/ncltest/ncl_qt \
+	https://subversion.ucar.edu/huangwei/tags/ngq_0_0 \
+	-m "Save a before clean up"
+
+   Committed revision 4238.
+   Tue Jan 15 08:45:47 MST 2013
+
+
+12/16/12
+
+   svn cp https://subversion.ucar.edu/huangwei/trunk/ncltest/ncl_qt \
+	https://subversion.ucar.edu/huangwei/branches/qt_painter \
+	-m "Same a painter version, just in case"
+
+	Committed revision 4181.
+
+
+
+1. Check color table.
+	done by add colorTable in shared directory.
+	(01/09/2013)
+
+2. Check plot true boundary, then we can use it for mapping.
+
+3. background opacity
+	Solved by changes in cro.c
+	(Thought so, and it seems this way (for a while), but then did not work any more).
+
+4. add map
+	map worked for global data. (01/11/2013)
+
+
+https://developer.apple.com/library/mac/documentation/DeveloperTools/Conceptual/DynamicLibraries/100-Articles/UsingDynamicLibraries.html
+
+Installing Dependent Libraries
+
+Before you can use a dynamic library as a dependent library, the library and its header files must be installed on your computer. The standard locations for header files are ~/include, /usr/local/include and /usr/include. The standard locations for dynamic libraries are ~/lib, /usr/local/lib, and /usr/lib.
+
+You may also place the .dylib file at a nonstandard location in your file system, but you must add that location to one of these environment variables:
+
+LD_LIBRARY_PATH
+DYLD_LIBRARY_PATH
+DYLD_FALLBACK_LIBRARY_PATH
+For details on how to add paths to these environment variables, see Opening Dynamic Libraries. To learn about installing dependent libraries in a relocatable directory, see Run-Path Dependent Libraries.
+
+If you don't want to change the environment variables and you want to place the dynamic library in a nonstandard location, you must specify where in your file system you placed the library when you link your image. See the description of the compiler -dylib_file option in http://gcc.gnu.org/onlinedocs/gcc/Darwin-Options.html#Darwin-Options for details.
+
+export LD_LIBRARY_PATH=/usr/local/lib/nv
+export DYLD_LIBRARY_PATH=/opt/local/lib:/Users/weihuang/anaconda2/lib
+export DYLD_FALLBACK_LIBRARY_PATH=/usr/local/lib:/usr/lib
+

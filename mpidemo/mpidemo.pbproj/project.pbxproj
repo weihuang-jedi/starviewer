@@ -1,0 +1,470 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 34;
+	objects = {
+		D7BA7D76DAB5DD13389D6332 = {
+			buildActionMask = 2147483647;
+			files = (
+				);
+			generatedFileNames = (
+				);
+			isa = PBXShellScriptBuildPhase;
+			name = "Qt Qmake";
+			neededFileNames = (
+				);
+			shellPath = "/bin/sh";
+			shellScript = "make\ -C\ /Users/weihuang/src/nv/mpidemo\ -f\ \'mpidemo.pbproj/qt_makeqmake.mak\'";
+		};
+		7596535D1ED96AB2530C0442 = {
+			isa = PBXFileReference;
+			name = "mpicube.cpp";
+			path = "mpicube.cpp";
+			refType = 4;
+		};
+		B60F91DBA663B4290563C01A = {
+			fileRef = "7596535D1ED96AB2530C0442";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		6717561F6DCD0B358F5882AF = {
+			isa = PBXFileReference;
+			name = "mpicolor.cpp";
+			path = "mpicolor.cpp";
+			refType = 4;
+		};
+		B6488DCB50541E40DB4A65E3 = {
+			fileRef = "6717561F6DCD0B358F5882AF";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		A075720089E0DC8722D99995 = {
+			isa = PBXFileReference;
+			name = "mpiviewer.cpp";
+			path = "mpiviewer.cpp";
+			refType = 4;
+		};
+		7EE3088ACC99277463EB4A7A = {
+			fileRef = "A075720089E0DC8722D99995";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		2A3420B63A72B7C4F8201C8C = {
+			isa = PBXFileReference;
+			name = "mpiprocessor.cpp";
+			path = "mpiprocessor.cpp";
+			refType = 4;
+		};
+		DCC7E7A15C402F7FC49761EB = {
+			fileRef = "2A3420B63A72B7C4F8201C8C";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		221E82EAA70D92FE53001339 = {
+			isa = PBXFileReference;
+			name = "mpitranslator.cpp";
+			path = "mpitranslator.cpp";
+			refType = 4;
+		};
+		34A5CC7C646BC88973E030C0 = {
+			fileRef = "221E82EAA70D92FE53001339";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		0CEA6884488F584589BE15B5 = {
+			isa = PBXFileReference;
+			name = "moc_mpitranslator.cpp";
+			path = "moc_mpitranslator.cpp";
+			refType = 4;
+		};
+		2C33668FFBB10E7B637415D6 = {
+			fileRef = "0CEA6884488F584589BE15B5";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		D049759D5AFC54EAB1D865B9 = {
+			isa = PBXFileReference;
+			name = "mpicube.h";
+			path = "mpicube.h";
+			refType = 4;
+		};
+		93AB80AA87512165C68B7230 = {
+			isa = PBXFileReference;
+			name = "mpicolor.h";
+			path = "mpicolor.h";
+			refType = 4;
+		};
+		90C03939F411540E3E20395A = {
+			isa = PBXFileReference;
+			name = "mpiviewer.h";
+			path = "mpiviewer.h";
+			refType = 4;
+		};
+		2A3420B63A72B7C4F8201C8C = {
+			isa = PBXFileReference;
+			name = "mpiprocessor.cpp";
+			path = "mpiprocessor.cpp";
+			refType = 4;
+		};
+		5D77F43E1CE4918514BF4FCF = {
+			isa = PBXFileReference;
+			name = "mpitranslator.h";
+			path = "mpitranslator.h";
+			refType = 4;
+		};
+		C817A41DB23A13B9B6BF736D = {
+			isa = PBXFileReference;
+			name = "mpidemo.pro";
+			path = "mpidemo.pro";
+			refType = 4;
+		};
+		883D7615C4D2DE3FA1218F12 = {
+			isa = PBXGroup;
+			children = (
+				"D049759D5AFC54EAB1D865B9",
+				"93AB80AA87512165C68B7230",
+				"90C03939F411540E3E20395A",
+				"2A3420B63A72B7C4F8201C8C",
+				"5D77F43E1CE4918514BF4FCF");
+			name = "Headers";
+			refType = 4;
+		};
+		FB61758D0F0FDA4BA867C3D5 = {
+			isa = PBXGroup;
+			children = (
+				"7596535D1ED96AB2530C0442",
+				"6717561F6DCD0B358F5882AF",
+				"A075720089E0DC8722D99995",
+				"2A3420B63A72B7C4F8201C8C",
+				"221E82EAA70D92FE53001339");
+			name = "Sources";
+			refType = 4;
+		};
+		7CABE3C80E79AD2B307756D2 = {
+			isa = PBXGroup;
+			children = (
+				"C817A41DB23A13B9B6BF736D");
+			name = "Sources [qmake]";
+			refType = 4;
+		};
+		46E892BBB6BB6952967E0561 = {
+			isa = PBXGroup;
+			children = (
+				"0CEA6884488F584589BE15B5");
+			name = "Temporary Sources";
+			refType = 4;
+		};
+		A0A52A2ADF7A1E2A99738674 = {
+			buildActionMask = 2147483647;
+			files = (
+				);
+			generatedFileNames = (
+				"B60F91DBA663B4290563C01A",
+				"B6488DCB50541E40DB4A65E3",
+				"7EE3088ACC99277463EB4A7A",
+				"DCC7E7A15C402F7FC49761EB",
+				"34A5CC7C646BC88973E030C0",
+				"2C33668FFBB10E7B637415D6");
+			isa = PBXShellScriptBuildPhase;
+			name = "Qt Preprocessors";
+			neededFileNames = (
+				"B60F91DBA663B4290563C01A",
+				"B6488DCB50541E40DB4A65E3",
+				"7EE3088ACC99277463EB4A7A",
+				"DCC7E7A15C402F7FC49761EB",
+				"34A5CC7C646BC88973E030C0",
+				"2C33668FFBB10E7B637415D6");
+			shellPath = "/bin/sh";
+			shellScript = "make\ -C\ /Users/weihuang/src/nv/mpidemo\ -f\ \'mpidemo.pbproj/qt_preprocess.mak\'";
+		};
+		C29B8785722055ED95EF7B57 = {
+			buildActionMask = 2147483647;
+			files = (
+				"B60F91DBA663B4290563C01A",
+				"B6488DCB50541E40DB4A65E3",
+				"7EE3088ACC99277463EB4A7A",
+				"DCC7E7A15C402F7FC49761EB",
+				"34A5CC7C646BC88973E030C0",
+				"2C33668FFBB10E7B637415D6");
+			isa = PBXSourcesBuildPhase;
+			name = "Build Sources";
+		};
+		C374004D45E01156F931B37D = {
+			isa = PBXFrameworkReference;
+			name = "QtOpenGL.framework";
+			path = "/Library/Frameworks/QtOpenGL.framework";
+			refType = 0;
+		};
+		450A0D11527AF164AEFE7377 = {
+			fileRef = "C374004D45E01156F931B37D";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		9B36DA7E32F0304E780E7972 = {
+			isa = PBXFrameworkReference;
+			name = "QtGui.framework";
+			path = "/Library/Frameworks/QtGui.framework";
+			refType = 0;
+		};
+		501667F26B3C1FF6767A7C12 = {
+			fileRef = "9B36DA7E32F0304E780E7972";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7BC2E65A5E699A5E5D834CA2 = {
+			isa = PBXFrameworkReference;
+			name = "QtCore.framework";
+			path = "/Library/Frameworks/QtCore.framework";
+			refType = 0;
+		};
+		069D05B0128AE5DC7EE31738 = {
+			fileRef = "7BC2E65A5E699A5E5D834CA2";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		DA18A6831232F53228631AD1 = {
+			isa = PBXFrameworkReference;
+			name = "OpenGL.framework";
+			path = "/System/Library/Frameworks/OpenGL.framework";
+			refType = 0;
+		};
+		BCEF71E1EDFB18DA77DC750B = {
+			fileRef = "DA18A6831232F53228631AD1";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C6766F86E49E9C8701C8E637 = {
+			isa = PBXFrameworkReference;
+			name = "AGL.framework";
+			path = "/System/Library/Frameworks/AGL.framework";
+			refType = 0;
+		};
+		0C6D4628EE0B0D1479A20551 = {
+			fileRef = "C6766F86E49E9C8701C8E637";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		ED1E82605DD74B483AF3C982 = {
+			children = (
+				"C374004D45E01156F931B37D",
+				"9B36DA7E32F0304E780E7972",
+				"7BC2E65A5E699A5E5D834CA2",
+				"DA18A6831232F53228631AD1",
+				"C6766F86E49E9C8701C8E637");
+			isa = PBXGroup;
+			name = "External Frameworks and Libraries";
+			path = "";
+			refType = 4;
+		};
+		2A1043669E6E5A7426EA502A = {
+			buildActionMask = 2147483647;
+			files = (
+				"450A0D11527AF164AEFE7377",
+				"501667F26B3C1FF6767A7C12",
+				"069D05B0128AE5DC7EE31738",
+				"BCEF71E1EDFB18DA77DC750B",
+				"0C6D4628EE0B0D1479A20551");
+			isa = PBXFrameworksBuildPhase;
+			name = "Frameworks & Libraries";
+		};
+		F6069D5A5DA8AA28EDB8B3C6 = {
+			name = "Project Copy";
+			buildActionMask = 2147483647;
+			dstPath = "/usr/local/lib/nv";
+			dstSubfolderSpec = 0;
+			files = (
+"07E0DFA73EB56DCB9E28CDD9");
+			isa = PBXCopyFilesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		07E0DFA73EB56DCB9E28CDD9 = {
+			fileRef = "27E917444FC7CD81764DBB0D";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		05596AB53D8D521C69802C27 = {
+			children = (
+				"FB61758D0F0FDA4BA867C3D5",
+				"46E892BBB6BB6952967E0561",
+				"883D7615C4D2DE3FA1218F12",
+				"7CABE3C80E79AD2B307756D2",
+				"ED1E82605DD74B483AF3C982");
+			isa = PBXGroup;
+			name = "mpidemo";
+			path = "";
+			refType = 4;
+		};
+		27E917444FC7CD81764DBB0D = {
+			isa = PBXFileReference;
+			explicitFileType = "compiled.mach-o.dylib";
+			path = "libmpidemo.dylib";
+			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		068F80C7519D0528FB08E821 = {
+			children = (
+				"27E917444FC7CD81764DBB0D");
+			isa = PBXGroup;
+			name = "Products";
+			refType = 4;
+		};
+		186CDDCE72E0E968FCF16E4D = {
+			buildPhases = (
+				"D7BA7D76DAB5DD13389D6332",
+				"A0A52A2ADF7A1E2A99738674",
+				"F6069D5A5DA8AA28EDB8B3C6",
+				"C29B8785722055ED95EF7B57",
+				"2A1043669E6E5A7426EA502A");
+			buildSettings = {
+				CC = "/usr/bin/clang";
+				CPLUSPLUS = "/usr/bin/clang++";
+				HEADER_SEARCH_PATHS = (
+					"/Library/Frameworks/QtCore.framework/Versions/4/Headers",
+					"/usr/include/QtCore",
+					"/Library/Frameworks/QtGui.framework/Versions/4/Headers",
+					"/usr/include/QtGui",
+					"/Library/Frameworks/QtOpenGL.framework/Versions/4/Headers",
+					"/usr/include/QtOpenGL",
+					"/usr/include",
+					"/opt/local/include",
+					"/usr/local/include",
+					"/opt/X11/include",
+					"/opt/X11/include/freetype2",
+					"/opt/local/libexec/qt4/include",
+					"../../../lib/NCLDEV/include",
+					"../include",
+					"../shared",
+					"../translator",
+					"/System/Library/Frameworks/OpenGL.framework/Headers",
+					"/System/Library/Frameworks/AGL.framework/Headers/",
+					".",
+					"/usr/local/include",
+					"/System/Library/Frameworks/CarbonCore.framework/Headers",
+					"/usr/local/Qt4.7/mkspecs/macx-xcode");
+				LIBRARY_SEARCH_PATHS = (
+					"$(DESTDIR)",
+					"/Library/Frameworks",
+					"/System/Library/Frameworks/");
+				OPTIMIZATION_CFLAGS = (
+					);
+				OTHER_CFLAGS = (
+					"-g",
+					"-DUSENCL",
+					"-g",
+					"-Wall",
+					"-W",
+					"-fPIC",
+					"-DQT_OPENGL_LIB",
+					"-DQT_GUI_LIB",
+					"-DQT_CORE_LIB",
+					"-DQT_SHARED");
+				OTHER_CPLUSPLUSFLAGS = (
+					"-g",
+					"-DUSENCL",
+					"-DGL_GLEXT_PROTOTYPES",
+					"-g",
+					"-Wall",
+					"-W",
+					"-fPIC",
+					"-DQT_OPENGL_LIB",
+					"-DQT_GUI_LIB",
+					"-DQT_CORE_LIB",
+					"-DQT_SHARED");
+				LEXFLAGS = "";
+				YACCFLAGS = "-d";
+				OTHER_REZFLAGS = "";
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "";
+				PREBINDING = NO;
+				BUILD_ROOT = "/Users/weihuang/src/nv/mpidemo";
+				OTHER_LDFLAGS = (
+						"-g",
+						"-single_module",
+						"-dynamiclib",
+						"-L$(DESTDIR)",
+						"-L/Library/Frameworks",
+						"-F/Library/Frameworks",
+						"-liconv.2.4.0",
+						"-lshared",
+						"-ltranslator");
+				INSTALL_DIR = "/usr/local/lib/nv/";
+				INSTALL_PATH = "";
+				DYLIB_CURRENT_VERSION = "1.0.0";
+				DYLIB_COMPATIBILITY_VERSION = "1.0";
+				MACOSX_DEPLOYMENT_TARGET = "10.4";
+				LIBRARY_STYLE = "DYNAMIC";
+				PRODUCT_NAME = "libmpidemo";
+				DESTDIR = "";
+			};
+			conditionalBuildSettings = {
+			};
+			dependencies = (
+				);
+			productReference = "27E917444FC7CD81764DBB0D";
+			shouldUseHeadermap = 1;
+			name = "libmpidemo";
+			productName = "libmpidemo";
+			isa = PBXLibraryTarget;
+			startupPath = "<<ProjectDirectory>>";
+			productInstallPath = "/usr/local/lib/nv/";
+		};
+		8D0921A599A626D1569D9498 = {
+			buildRules = (
+				);
+			buildSettings = {
+				COPY_PHASE_STRIP = "NO";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = "YES";
+				GCC_OPTIMIZATION_LEVEL = "0";
+			};
+			isa = "PBXBuildStyle";
+			name = "Development";
+		};
+		4CFAD8B741C7FF5A47E1CF98 = {
+			buildRules = (
+				);
+			buildSettings = {
+				COPY_PHASE_STRIP = "YES";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = "NO";
+			};
+			isa = "PBXBuildStyle";
+			name = "Deployment";
+		};
+		91B15E841AA80083484172DE = {
+			buildStyles = (
+				"8D0921A599A626D1569D9498");
+			hasScannedForEncodings = 1;
+			isa = PBXProject;
+			mainGroup = "05596AB53D8D521C69802C27";
+			projectDirPath = "";
+			targets = (
+				"186CDDCE72E0E968FCF16E4D");
+		};
+	};
+	rootObject = "91B15E841AA80083484172DE";
+}

@@ -1,0 +1,101 @@
+<HTML>
+
+<HEAD>
+    <TITLE>
+        SV
+    </TITLE>
+</HEAD>
+
+<BODY BGCOLOR=EEEEFF TEXT=004466 LINK=0099FF ALINK=0099FF VLINK=0099FF>
+<BR>
+<BR>
+<CENTER>
+<FONT SIZE=6>
+	SV
+</FONT>
+<BR>
+<FONT SIZE=5>
+	-- Star Viewer, a visualization tool that integrates
+<a href = "http://www.ncl.ucar.edu" target ="CENT_PANEL">NCL</a>,
+<a href = "http://www.opengl.org" target ="CENT_PANEL">openGL</a>,
+and then uses
+<a href = "http://qt-project.org/" target ="CENT_PANEL">QT</a>
+as a graphical user interface.
+</FONT>
+<BR>
+	Star Viewer
+</CENTER>
+
+<FONT SIZE=4>
+<BR><BR> 
+	The Star Viewer (SV) integrates NCL with OpenGL,
+	and then uses Qt as graphical user interface to
+	display images generated from NCL or images from OpenGL.
+	Currently, SV can view data from the CAM-FV, CAM-SE,
+	POP, WRF and MPAS models.
+<BR><BR> 
+	SV uses NCL's file reader which can easily handle the netCDF-3/4
+	file formats used by the models. Since NCL's file reader can
+	readily  handle GRIB-1/2 and the various 'flavors' of HDF,
+	future SV applications could include datasets in these formats.
+<BR><BR> 
+	SV has inherited all color tables from NCL.
+	This allows users to specify colormaps best suited to the data.
+<BR><BR> 
+	Programmed in OpenGL, users can use the same high quality tools
+	developed for video games to view their scientific data.
+<BR>
+<HR>
+
+	An image of Relative-Humidity cross-setion (from CAM-SE) on sphere.
+<BR>
+<CENTER>
+	<img src="images/camse_screenshot.png" alt="SV Home Image" height="600" width="800" /> 
+</CENTER>
+<BR>
+<HR>
+
+	An image of Cloud (rain component) and wind vector (from WRF).
+<BR>
+<CENTER>
+	<img src="wrf/vectorPqrain.png" alt="WRF QRAIN AND WIND VECTOR" height="600" width="600" /> 
+</CENTER>
+<BR>
+<HR>
+
+                A short movie of a bumped field from CAM-SE.
+<CENTER>
+        <a href = "camse/camse_tmq.mov" name = "#tmp_movie" target ="CENT_PANEL">Click Here to play the movie.</a>
+</CENTER>
+<BR>
+<HR>
+
+<BR>
+        Volume rendering in SV.
+<BR>
+<HR>
+
+        Raycasting:
+<BR>
+<CENTER>
+        <img src="images/raycasting.bmp" alt="SV Raycasting Image" height="600" width="600" />
+</CENTER>
+<BR>
+<HR>
+
+        Raytracing:
+<BR>
+<CENTER>
+        <img src="images/raytracing.bmp" alt="SV Raytracing Image" height="600" width="600" />
+</CENTER>
+<BR>
+<HR>
+
+<BR> 
+Mail comments/suggestions to: <A HREF="mailto:sv.starviewer@gmail.com">Star Viewer</A>.
+</FONT>
+<BR>
+
+</BODY>
+</HTML>
+

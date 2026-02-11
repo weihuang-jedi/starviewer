@@ -1,0 +1,175 @@
+How to compile:
+
+NV dependency:
+
+1. Qt
+2. Cairo
+3. NCL
+
+Here are some general info on how to get and install each piece:
+
+1. Qt
+
+	http://qt-project.org/
+
+	(Wei uses Qt-4.7.4 (on Geyser, CSG installed 4.8).
+		DONOT use Qt 5.0 or above, as there are some thing
+		did not work for NV)
+
+	The easiest way is downloading the binaries.
+
+2. Cairo
+
+	http://cairographics.org/
+
+	(Wei uses 1.12.6)
+
+	(The newest is 1.12.14)
+
+	Wei's Cairo configure options:
+
+#!/bin/csh -f
+
+ setenv CC      gcc
+ setenv CXX     g++
+ setenv FC      gfortran
+
+ setenv CAIRO_NO_MUTEX  1
+ setenv HAS_PIXMAN_GLYPHS       0
+
+ setenv pixman_CFLAGS   "-I/usr/local/pixman/0.26.2/include/pixman-1"
+ setenv pixman_LIBS     "-L/usr/local/pixman/0.26.2/lib -lpixman-1"
+
+#setenv qt_CFLAGS       "-pipe -g -gdwarf-2 -mmacosx-version-min=10.12 -DQT_GUI_LIB -DQT_CORE_LIB -I/Applications/Qt/Desktop/Qt/474/gcc/mkspecs/default -I. -I/Applications/Qt/Desktop/Qt/474/gcc/lib/QtCore.framework/Versions/4/Headers -I/Applications/Qt/Desktop/Qt/474/gcc/include/QtCore -I/Applications/Qt/Desktop/Qt/474/gcc/lib/QtGui.framework/Versions/4/Headers -I/Applications/Qt/Desktop/Qt/474/gcc/include/QtGui -I/Applications/Qt/Desktop/Qt/474/gcc/include -I. -F/Applications/Qt/Desktop/Qt/474/gcc/lib"
+#setenv qt_LIBS         "-F/Applications/Qt/Desktop/Qt/474/gcc/lib -L/Applications/Qt/Desktop/Qt/474/gcc/lib -framework QtGui -framework QtCore"
+
+ setenv qt_CFLAGS       "-pipe -g -gdwarf-2 -mmacosx-version-min=10.12 -DQT_GUI_LIB -DQT_CORE_LIB -I/Applications/Qt/Desktop/Qt/474/gcc/mkspecs/default -I. -I/Applications/Qt/Desktop/Qt/474/gcc/lib/QtGui.framework/Versions/4/Headers -I/Applications/Qt/Desktop/Qt/474/gcc/include/QtGui -I/Applications/Qt/Desktop/Qt/474/gcc/include -I. -F/Applications/Qt/Desktop/Qt/474/gcc/lib"
+ setenv qt_LIBS         "-F/Applications/Qt/Desktop/Qt/474/gcc/lib -L/Applications/Qt/Desktop/Qt/474/gcc/lib -framework QtGui"
+
+ ./configure \
+        --prefix=/Users/huangwei/ncl/external_lib/cairo/1.12.6 \
+        --disable-shared \
+        --enable-pthread=no \
+        --enable-static \
+        --enable-qt=yes \
+        --enable-gl \
+        --enable-png \
+        --disable-quartz \
+        --disable-quartz-font \
+        --disable-silent-rules
+
+
+NOTE: There are few executables are hard to generate.
+	But since NCL nor NV use them, one can just do:
+ touch ./test/any2ppm
+ touch ./test/cairo-test-suite
+ touch ./perf/cairo-analyse-trace
+ touch ./perf/cairo-perf-trace
+ touch ./perf/cairo-perf-micro
+	to skip it.
+
+3. NCL
+
+Here is Wei's NCL configure options:
+
+/*
+ *      This file was created by the Configure script.
+ */
+
+#ifdef FirstSite
+
+#endif /* FirstSite */
+
+
+#ifdef SecondSite
+
+#define YmakeRoot /Users/huangwei/ncl/NCLDEV
+
+#define NetCDFlib -lnetcdf -lcurl
+
+#define HDFlib -lmfhdf -ldf -ljpeg -lz -lsz
+
+#define LibSearch \
+        -L/usr/local/netcdf/4.2.1.1/lib \
+        -L/usr/local/hdf5/1.8.9/lib \
+        -L/usr/local/hdf/4.2.6/lib \
+        -L/usr/local/hdfeos/2.17v1.00/lib \
+        -L/usr/local/hdfeos5/1.14/lib \
+        -L/Users/huangwei/ncl/external_lib/cairo/1.12.6/lib \
+        -L/usr/local/zlib/1.2.7/lib \
+        -L/usr/local/szip/2.1/lib \
+        -L/usr/local/gcc/4.7.2/lib \
+        -L/usr/local/pixman/0.26.2/lib \
+        -L/usr/X11/lib \
+        -L/usr/lib \
+        -L/usr/local/lib \
+        -L/opt/local/lib
+#define IncSearch \
+        -I/usr/local/netcdf/4.2.1.1/include \
+        -I/usr/local/hdf5/1.8.9/include \
+        -I/usr/local/hdf/4.2.6/include \
+        -I/usr/local/hdfeos/2.17v1.00/include \
+        -I/usr/local/hdfeos5/1.14/include \
+        -I/Users/huangwei/ncl/external_lib/cairo/1.12.6/include \
+        -I/usr/local/zlib/1.2.7/include \
+        -I/usr/local/szip/2.1/include \
+        -I/opt/local/include/freetype2 \
+        -I/opt/local/include/udunits2 \
+        -I/usr/local/gcc/4.7.2/include \
+        -I/usr/local/pixman/0.26.2/include \
+        -I/usr/X11/include \
+        -I/usr/include \
+        -I/usr/local/include \
+        -I/opt/local/include
+
+#define JIRA1530 1
+#define BuildCAIRO 1
+#define BuildGDAL 1
+#define BuildHDF 1
+#define BuildHDFEOS 1
+#define BuildHDF5 1
+#define BuildHDFEOS5 1
+#define BuildGRIB2 1
+
+#define BuildOpenCL 1
+#define BuildQtEnabled 1
+#define UseNetCDF4Features 1
+
+#define BuildV5D 0
+
+#endif /* SecondSite */
+
+
+4. NV
+
+a. configure
+
+	just type "configure".
+
+	This needs to be generalized, as now it works only for Wei's setup.
+
+b. generate Makefile(s)
+
+	type "qmake" to generate Makefile(s)
+
+	This may contain something did not work on Mac.
+
+I used a script (myqmake) to modify the generated Makefile
+
+#!/bin/csh -f 
+
+ qmake
+
+ foreach f ( `find . -type f -name Makefile -print` )
+    sed -e "s/-arch / /g" $f > tmp_file
+    sed -e "s/-Xarch_x86_64 / /g" tmp_file > tmp2_file
+    sed -e "s/x86_64 / /g" tmp2_file > $f
+    rm -f tmp_file tmp2_file
+ end
+
+
+c. make
+
+	(Or type "compile", if you have "myqmake" on your Mac)
+
+

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+ set -x
+
+ LD_LIBRARY_PATH=/usr/local/lib/nv
+ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib
+ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/local/lib
+ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/local/lib/gcc48
+ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/X11/lib
+ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/local/libexec/qt4/lib
+ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+ export LD_LIBRARY_PATH
+#export DYLD_LIBRARY_PATH=$LD_LIBRARY_PATH
+ export DYLD_LIBRARY_PATH=/usr/local/lib/nv
+
+ nv -mpi mpi
+

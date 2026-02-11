@@ -1,0 +1,16 @@
+#!/bin/sh
+
+ LD_LIBRARY_PATH=/usr/local/lib/nv
+ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/local/lib
+ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/local/lib/gcc48
+ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/X11/lib
+ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/local/libexec/qt4/lib
+ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib
+ export LD_LIBRARY_PATH
+#export DYLD_LIBRARY_PATH=$LD_LIBRARY_PATH
+ export DYLD_LIBRARY_PATH=/usr/local/lib/nv
+
+ nv -mappingfile /Users/weihuang/src/nv/data/reorderedCbasedSEMapping.nc \
+    -camse /Users/weihuang/src/mynv/data/cam_se_jan01.nc
+

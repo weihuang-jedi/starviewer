@@ -1,0 +1,18 @@
+#!/bin/csh -f
+
+ if($# > 0) then
+    set flnm = $1
+ else
+    set flnm = /Users/weihuang/travel/agu2014/data/gpm/2A.F16.SSMIS.GPROF2014v1-4.20141118-S175231-E193426.057197.V03A.HDF5
+   #echo "Usage: $0 your-hdf-filename"
+   #exit -1
+ endif
+
+ set os = `uname -s`
+
+ if("Linux" == ${os}) then
+     vglrun nv -hdf $flnm
+ else
+     nv -hdf $flnm
+ endif
+

@@ -1,0 +1,19 @@
+#!/bin/csh -f
+
+ set echo
+
+ set os = `uname -s`
+
+ if("Darwin" == ${os}) then
+    #nv -radar data/MPAS.sample_subset.nc
+     nv -radar /Users/huangwei/test/ncltest/ncl_radar/Oklahoma_2013052000_data/KTLX20130520_000122_V06.gz KTLX
+
+     exit
+ endif
+
+ if("Linux" == ${os}) then
+     vglrun ./main/main -radar /glade/p/work/huangwei/data/MPAS.sample_subset.nc
+
+     exit
+ endif
+

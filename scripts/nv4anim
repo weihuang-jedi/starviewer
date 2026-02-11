@@ -1,0 +1,5 @@
+#!/bin/csh -f
+
+ nv -mappingfile $NV_DATA/reorderedCbasedSEMapping.nc \
+    -camse data/cam_se_jan01.nc
+

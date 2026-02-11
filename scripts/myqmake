@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#qmake -makefile
+#qmake
+ qmake -spec macx-g++
+
+ f=Makefile
+ sed -e "s/-arch / /g" $f > tmp2_file
+ sed -e "s/-Xarch_x86_64 / /g" tmp2_file > tmp_file
+ sed -e "s/x86_64 / /g" tmp_file > tmp2_file
+ sed -e "s/-mmacosx-version-min=10.5 / /g" tmp2_file > $f
+ rm -f tmp_file tmp2_file
+

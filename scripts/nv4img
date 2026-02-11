@@ -1,0 +1,10 @@
+#!/bin/csh -f
+
+ set os = `uname -s`
+
+ if("Linux" == ${os}) then
+     vglrun nv -test test
+ else
+     nv -test test
+ endif
+

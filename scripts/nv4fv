@@ -1,0 +1,17 @@
+#!/bin/csh -f
+
+ if($# > 0) then
+    set flnm = $1
+ else
+    echo "Usage: $0 your-camfv-filename"
+    exit -1
+ endif
+
+ set os = `uname -s`
+
+ if("Linux" == ${os}) then
+     vglrun nv $flnm
+ else
+     nv $flnm
+ endif
+

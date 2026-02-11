@@ -1,0 +1,78 @@
+Running NV on Mavericks
+Inbox
+x 
+
+Mary Haley
+8:25 AM (55 minutes ago)
+
+to me, David, Rick 
+
+Categorize this message as:Personal 
+Never show this again
+Hi guys,
+
+Just an FYI that I was able to get the VNC stuff working on my Mavericks
+home Mac using the same steps for my work Mac.
+I didn't have to right click that "TurboVNC.pkg" file, however;
+I was able to just open and run it with a double-click.
+
+I played around with NV last night and have some comments/questions for Wei. 
+
+First, though, I have to say I was impressed by the tool when looked at a 1.0 degree grid.
+It was quick and I didn't manage to make it core dump.
+I only briefly tried the 0.25 degree grid. This one was noticeably slower.
+I would have expected maybe 4x slow down, but it seemed a little more than that. Maybe I was just tired.
+
+Here are my comments:
+
+"nv4se1.0d" is awkward to type. Also, the "1" can look like an "l" in documentation.
+I suggest making this just "nv" if possible, as we discussed last night,
+or something easier like "nv4camse".
+
+The default globe that comes up is too big for the screen.
+It would be nice to have it fully visible upon first opening it.
+
+There were a lot of options on the plotting window (like "help") that either don't work,
+or I have no clue what they do.
+I think for the purpose of making this tool easy,
+you don't want a bunch of options or features that don't really work or do anything.
+
+For every variable I plotted, I kept wishing I had more information (metadata) about it.
+I think the dimension sizes came up under "Variable Info",
+but this text started overlapping and was hard to read.
+It would be good to have at least the "long_name" and "units".
+Really, all the metadata should be accessible,
+because you don't always know what "TMQ" means.
+
+What is the "reset" button supposed to do?
+I thought it would get me back to the initial state, but it didn't seem to work.
+
+When you click on the "flat" option, I think it should give you the map right side up.
+:-)  I kept getting it upside down and had to reorient it. 
+
+The map outlines seem to be really irregular.
+Sometimes they are lines, sometimes they have gaps,
+and sometimes they become dots.
+This is a bit disconcerting.
+I think the "dots" thing happened when using the slider with a 3D variable.
+It would be nice to have a "map off" button like you do with the color bar.
+Maybe there is one and I didn't see it.
+
+It wasn't obvious to me how to quit out of "nv".
+I found a "quit" button, but then the graphics window stayed up.
+I had to "x" out of this.
+
+Just to see what would happen,
+I tried opening a 0.25 deg file with the 1.0 "nv" script.
+It didn't complain, but it brought up a plot that looked wrong.
+
+The text for the 2D and 3D variables seemed small.
+(And I agree with Steve that there should be labels indicating that these are 2D and 3D variables).
+Can the text size be increased through NV?
+All-in-all, I was very encouraged by what I saw. Once I had a real mouse,
+it was much more intuitive to zoom in on the image and rotate it.
+I always hate using the laptop mouse pad for these things.
+
+I will try to test some more today or this weekend.
+I hope to install the VNC software on my windows machine at home.
+
