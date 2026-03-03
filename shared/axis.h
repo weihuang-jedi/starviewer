@@ -14,7 +14,7 @@
 //class Axis : public QGLWidget
 class Axis
 {
-    Q_OBJECT				//  Qt magic macro
+    // Q_OBJECT				//  Qt magic macro
     private:
         double _ratio;
         double _axis_length;

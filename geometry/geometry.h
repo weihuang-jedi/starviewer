@@ -3,8 +3,6 @@
 
 //$Id: geometry.h 4833 2013-11-05 15:49:31Z starviewer $
 
-#include <QtOpenGL>
-
 #include <iostream>
 
 #include <stdlib.h>

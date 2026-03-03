@@ -3,7 +3,9 @@
 
 //$Id: basegeometry.h 4865 2014-01-01 15:49:23Z starviewer $
 
-#include <QtOpenGL>
+#include <string>          // <--- Add this for 'string'
+#include <QString>         // <--- Add this if you want to use Qt strings
+#include <QOpenGLWidget>
 
 using namespace std;
 
