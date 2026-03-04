@@ -25,6 +25,9 @@
 //$Id$
 
 #include <iostream>
+#include <QtOpenGL>
+#include <string>
+#include <cmath>
 
 //Projection codes for proj_info structure:
 #define PROJ_LATLON	0

@@ -1,10 +1,31 @@
-file(GLOB_RECURSE SOURCES *.cpp *.h *.ui *.qrc)
+# 0. Find NetCDF using environment hints
+set(NetCDF_INCLUDE_DIRS $ENV{NETCDF_C_ROOT}/include)
+set(NetCDF_LIBRARIES $ENV{NETCDF_C_ROOT}/lib/libnetcdf.so)
+find_path(NetCDF_INCLUDE_DIRS NAMES netcdf.h HINTS $ENV{NETCDF_C_ROOT}/include)
+find_library(NetCDF_LIBRARIES NAMES netcdf HINTS $ENV{NETCDF_C_ROOT}/lib)
 
-# Create a library for this module
-add_library(stateboundary STATIC ${SOURCES})
+# 1. Find the required Qt5 components
+find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
 
-# Allow other modules to find these headers
-target_include_directories(stateboundary PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+# 2. Define the library
+file(GLOB STATEBOUNDARY_SOURCES *.cpp *.h)
+add_library(stateboundary STATIC ${STATEBOUNDARY_SOURCES})
 
-# Link Qt5
-target_link_libraries(stateboundary PUBLIC Qt5::Core Qt5::Widgets Qt5::Gui)
+
+# 3. Add include directories
+# This ensures it can find headers from siblings if needed
+target_include_directories(stateboundary PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/shared
+    ${NetCDF_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../nclapp
+)
+
+# 4. Link the Qt5 OpenGL library
+# Linking to Qt5::OpenGL automatically adds the necessary include paths to the compiler
+target_link_libraries(stateboundary PRIVATE 
+    ${NetCDF_LIBRARIES}
+    Qt5::Widgets 
+    Qt5::OpenGL
+    shared
+)

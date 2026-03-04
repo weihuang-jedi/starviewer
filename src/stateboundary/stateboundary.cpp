@@ -1,5 +1,3 @@
-#include <QtOpenGL>
-#include <string.h>
 #include "stateboundary.h"
 
 StateBoundary::StateBoundary()

@@ -1,10 +1,28 @@
 file(GLOB_RECURSE SOURCES *.cpp *.h *.ui *.qrc)
 
-# Create a library for this module
-add_library(coastline STATIC ${SOURCES})
+# 0. Find NetCDF using environment hints
+find_path(NetCDF_INCLUDE_DIRS NAMES netcdf.h HINTS $ENV{NETCDF_C_ROOT}/include)
+find_library(NetCDF_LIBRARIES NAMES netcdf HINTS $ENV{NETCDF_C_ROOT}/lib)
 
-# Allow other modules to find these headers
-target_include_directories(coastline PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+# 1. Find the OpenGL component of Qt5
+find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
 
-# Link Qt5
-target_link_libraries(coastline PUBLIC Qt5::Core Qt5::Widgets Qt5::Gui)
+# 2. Define the library
+file(GLOB COASTLINE_SOURCES *.cpp *.h)
+add_library(coastline STATIC ${COASTLINE_SOURCES})
+
+# --- ADD THIS SECTION ---
+# 3. Tell the compiler where to find netcdf.h
+target_include_directories(coastline PRIVATE
+    ${NetCDF_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../nclapp  # Path to nclapp headers
+)
+# ------------------------
+
+# 4. Link the libraries
+target_link_libraries(coastline PRIVATE
+    ${NetCDF_LIBRARIES}
+    Qt5::Widgets
+    Qt5::OpenGL
+    shared
+)

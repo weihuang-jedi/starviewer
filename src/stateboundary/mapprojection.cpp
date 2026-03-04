@@ -1,6 +1,3 @@
-#include <QtOpenGL>
-#include <string.h>
-#include <math.h>
 #include "mapprojection.h"
 
 MapProjection::MapProjection()
