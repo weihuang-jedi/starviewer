@@ -5,11 +5,9 @@
 #include <stdio.h>
 #include <iostream>
 
-#ifdef LINUX
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glext.h>
-#endif
 
 #include <QtOpenGL>
 

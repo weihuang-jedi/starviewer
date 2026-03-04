@@ -1,9 +1,12 @@
-//$Id: contour.cpp 5271 2014-12-18 04:07:16Z starviewer $
+#include "contour.h"
+
+#ifdef debug
+#undef debug
+#endif
 
 #include <ncarg/hlu/MapPlot.h>
-
 #include "nclInterface.h"
-#include "contour.h"
+
 
 //Constructor
 Contour::Contour(ColorTable *ct)

@@ -11,7 +11,7 @@
 //
 //  Constructor
 //
-Topography::Topography()
+Topography::Topography(QWidget *)
 {
     int n;
 
@@ -41,10 +41,16 @@ Topography::Topography()
     _cntlon = 0.0;
 
     _loadImage();
+    initializeGL();
 }
 
 Topography::~Topography()
 {
+}
+
+void Topography::initializeGL() {
+    initializeOpenGLFunctions(); // This "links" glGenerateMipmap at runtime
+    // ...
 }
 
 void Topography::_setupRegionInfo()

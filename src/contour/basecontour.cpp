@@ -1,8 +1,12 @@
-//$Id: basecontour.cpp 4833 2013-11-05 15:49:31Z starviewer $
+// 1. Include the header that contains Qt first
+#include "basecontour.h"
+
+// 2. If NCL's MapPlot.h still causes issues, undefine 'debug' before including it
+#ifdef debug
+#undef debug
+#endif
 
 #include <ncarg/hlu/MapPlot.h>
-
-#include "basecontour.h"
 #include "nclInterface.h"
 
 //Constructor

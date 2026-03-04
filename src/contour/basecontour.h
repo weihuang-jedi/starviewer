@@ -17,11 +17,7 @@
 
 #include <QtOpenGL>
 
-#ifdef LINUX
 #include <cairo/cairo.h>
-#else
-#include <cairo.h>
-#endif
 
 using namespace std;
 

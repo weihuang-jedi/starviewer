@@ -15,6 +15,7 @@
 #include <GL/glext.h>
 #endif
 
+#include <QOpenGLFunctions>
 #include <QtOpenGL/QGLWidget>
 #include <QString>
 
@@ -25,10 +26,11 @@
 
 using namespace std;
 
-class Topography
+class Topography : public QGLWidget, protected QOpenGLFunctions 
 {
+    Q_OBJECT
     public:
-        Topography();	//  Constructor
+        Topography(QWidget *parent = nullptr);
         ~Topography();	//  Destructor
 
         void draw();
@@ -45,6 +47,12 @@ class Topography
         double* get_area() { return _area; };
 
         GLuint get_tid(int n) { return _tid[n]; };
+
+    protected:
+        // Now this will correctly override the virtual function in QGLWidget
+        void initializeGL() override; 
+        void paintGL() override;
+        void resizeGL(int w, int h) override;
 
     private:
         NVOptions* nvoptions;
