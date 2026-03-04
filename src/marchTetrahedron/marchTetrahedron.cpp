@@ -1,5 +1,3 @@
-#include <QtOpenGL>
-
 //
 // Marching Cubes Example Program 
 // by Cory Bloyd (corysama@yahoo.com)

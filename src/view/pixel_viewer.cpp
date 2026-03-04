@@ -23,6 +23,8 @@ Pixel_Viewer::Pixel_Viewer(NVOptions* opt)
 
     numberShaderPasses = 1;
 
+    initializeGL();
+
   //Image texture
     glGenTextures(1,&img);
     glBindTexture(GL_TEXTURE_2D,img);
@@ -38,6 +40,14 @@ Pixel_Viewer::~Pixel_Viewer()
         delete [] colorMap;
 
     delete evaluator;
+}
+
+void Pixel_Viewer::initializeGL() {
+    // This connects the glCreateShader, glLinkProgram, etc. symbols
+    initializeOpenGLFunctions();
+
+    // Now your existing code will work
+    // createShaderProg(...);
 }
 
 void Pixel_Viewer::_setup_shader(NV_FRAG_Type type, const char* name)

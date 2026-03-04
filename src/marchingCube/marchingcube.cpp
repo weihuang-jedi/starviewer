@@ -1,7 +1,3 @@
-//$Id: marchingcube.cpp 5339 2015-02-22 04:21:52Z starviewer $
-
-#include <QtOpenGL>
-
 //
 // Marching Cubes Example Program 
 // by Cory Bloyd (corysama@yahoo.com)

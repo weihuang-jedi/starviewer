@@ -4,9 +4,9 @@
 #define _SpreadSheet_H
 
 #include <QtGui/QtGui>
-#include <QtGui/QWidget>
-#include <QtGui/QTableWidget>
-#include <QtGui/QTableWidgetItem>
+#include <QWidget>
+#include <QTableWidget>
+#include <QTableWidgetItem>
 #include <iostream>
 
 #include "evaluator.h"

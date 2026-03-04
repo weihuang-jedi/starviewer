@@ -19,6 +19,9 @@
 #include "nvoptions.h"
 #include "geometry.h"
 
+#include <QOpenGLFunctions>
+#include <QtOpenGL/QGLWidget> // or QOpenGLWidget
+
 using namespace std;
 
 typedef enum
@@ -37,8 +40,9 @@ typedef enum
     NV_FRAG_NUMBERS,
 } NV_FRAG_Type;
 
-class Pixel_Viewer
+class Pixel_Viewer : public QGLWidget, protected QOpenGLFunctions
 {
+    Q_OBJECT
     public:
         Pixel_Viewer(NVOptions* opt);       	// Constructor
        ~Pixel_Viewer();		// Destructor
@@ -55,6 +59,9 @@ class Pixel_Viewer
 
         void set_fillValue(double v) { fillValue = v; };
         void set_hasFillValue(bool v) { hasFillValue = v; };
+
+    protected:
+        void initializeGL() override; // Must be overridden to initialize functions
 
     private:
         ColorTable* colorTable;
