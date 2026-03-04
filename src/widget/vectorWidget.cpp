@@ -1,7 +1,3 @@
-// $Id: vectorWidget.cpp 5315 2015-02-06 21:24:34Z starviewer $
-
-#include <QtGui/QApplication>
-
 #include "vectorWidget.h"
 
 VectorWidget::VectorWidget(QWidget* parent)

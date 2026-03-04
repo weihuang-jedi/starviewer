@@ -1,5 +1,3 @@
-#include <QtGui/QApplication>
-
 #include "pixelWidget.h"
 
 //Constructor for Viewer widget

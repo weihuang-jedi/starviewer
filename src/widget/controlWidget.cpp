@@ -1,7 +1,3 @@
-#include <QtGui/QApplication>
-
-// $Id: controlWidget.cpp 5315 2015-02-06 21:24:34Z starviewer $
-
 #include "controlWidget.h"
 #include "colorTable.h"
 
@@ -355,3 +351,4 @@ void ControlWidget::selectNCL()
     translator->selectNCL(2);
 }
 
+#include "controlWidget.moc"

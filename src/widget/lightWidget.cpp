@@ -1,7 +1,3 @@
-#include <QtGui/QApplication>
-
-// $Id: lightWidget.cpp 5315 2015-02-06 21:24:34Z starviewer $
-
 #include "lightWidget.h"
 
 LightWidget::LightWidget(QWidget* parent) : QWidget(parent)

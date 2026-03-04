@@ -2,10 +2,15 @@
 #define _DisplayWidget_H
 
 #include <QtGui/QtGui>
-#include <QtGui/QWidget>
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QCheckBox>
-#include <QtGui/QPushButton>
+#include <QWidget>
+#include <QDoubleSpinBox>
+#include <QCheckBox>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QSlider>
+#include <QObject>
+#include <QGridLayout>
+#include <QApplication>
 
 #include <iostream>
 

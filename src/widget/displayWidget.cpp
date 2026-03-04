@@ -1,5 +1,3 @@
-#include <QtGui/QApplication>
-
 #include "displayWidget.h"
 
 //Constructor for Viewer widget

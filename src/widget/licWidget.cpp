@@ -1,7 +1,3 @@
-#include <QtGui/QApplication>
-
-// $Id: licWidget.cpp 5315 2015-02-06 21:24:34Z starviewer $
-
 #include "licWidget.h"
 
 LICWidget::LICWidget(QWidget* parent) : QWidget(parent)

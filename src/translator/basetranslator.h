@@ -14,16 +14,13 @@
 #include <sstream>
 #include <string>
 
-#ifdef LINUX
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glext.h>
-#endif
 
-#include <QtGui/QKeyEvent>
-#include <QtGui/QImage>
-
-#include <QtOpenGL/QGLWidget>
+#include <QKeyEvent>
+#include <QImage>
+#include <QGLWidget>
 #include <QString>
 #include <QTimer>
 

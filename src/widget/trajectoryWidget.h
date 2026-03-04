@@ -4,13 +4,17 @@
 // $Id: trajectoryWidget.h 5315 2015-02-06 21:24:34Z starviewer $
 
 #include <QtGui/QtGui>
-#include <QtGui/QWidget>
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QCheckBox>
-#include <QtGui/QPushButton>
-#include <QtGui/QPushButton>
-
+#include <QWidget>
+#include <QDoubleSpinBox>
+#include <QCheckBox>
+#include <QPushButton>
+#include <QRadioButton>
 #include <QTimer>
+#include <QSlider>
+#include <QObject>
+#include <QLabel>
+#include <QGridLayout>
+#include <QApplication>
 
 #include <iostream>
 

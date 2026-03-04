@@ -204,7 +204,7 @@ void BaseTranslator::mouseMoveEvent(QMouseEvent* e)
 //
 void BaseTranslator::wheelEvent(QWheelEvent* e)
 {
-   if(e->delta() < 0)
+   if(e->angleDelta().y() < 0)
    {
      //Zoom out
        if(nvoptions->get_cb(NV_ISPERSPECTIVE))
@@ -233,7 +233,7 @@ void BaseTranslator::wheelEvent(QWheelEvent* e)
        }
    }
 
-   updateGL();   //  Request redisplay
+   update();   //  Request redisplay
 }
 
 void BaseTranslator::keyPressEvent(QKeyEvent *event)

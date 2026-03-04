@@ -1,7 +1,3 @@
-// $Id: trajectoryWidget.cpp 5315 2015-02-06 21:24:34Z starviewer $
-
-#include <QtGui/QApplication>
-
 #include "trajectoryWidget.h"
 
 TrajectoryWidget::TrajectoryWidget(QWidget* parent)
