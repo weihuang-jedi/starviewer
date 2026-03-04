@@ -1,3 +1,5 @@
+#include <QThread>
+
 class MyThread : public QThread {	
 
 public:

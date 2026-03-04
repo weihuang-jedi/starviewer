@@ -13,7 +13,7 @@
 #include <string>
 
 #include <QtOpenGL/QGLWidget>
-#include <QtString>
+#include <QString>
 #include <QtGui/QKeyEvent>
 
 using namespace std;

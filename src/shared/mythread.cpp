@@ -1,3 +1,6 @@
+#include "mythread.h"
+#include <QThread>
+
 MyThread::MyThread(QObject *parent)
         : QThread(parent), _bFinished( false )
 {
