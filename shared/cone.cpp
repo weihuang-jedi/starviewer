@@ -1,6 +1,6 @@
 #include "cone.h"
 
-#include <QtOpenGL>
+#include <QOpenGLWidget>
 
 Cone::Cone()
 {

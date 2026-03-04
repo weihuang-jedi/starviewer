@@ -1,7 +1,7 @@
 #ifndef TEXTURE3D_H
 #define TEXTURE3D_H
 
-#include <QtOpenGL>
+#include <QOpenGLWidget>
 
 #include <iostream>
 

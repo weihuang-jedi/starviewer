@@ -1,6 +1,6 @@
 //$Id: texturekeeper.cpp 4865 2014-01-01 15:49:23Z starviewer $
 
-#include <QtOpenGL>
+#include <QOpenGLWidget>
 
 #include "texturekeeper.h"
 

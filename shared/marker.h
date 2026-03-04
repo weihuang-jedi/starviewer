@@ -1,20 +1,20 @@
 #ifndef MARKER_H
 #define MARKER_H
 
-#include <QtOpenGL>
-#include <QGLWidget>
-#include <QString>
-
 #include <iostream>
 #include <vector>
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <ctype.h>
+
+#include <QtWidgets/QOpenGLWidget>
+#include <QtWidgets>
+#include <string>         // Ensure this is here for your string variables
 
 using namespace std;
 
-class Marker : public QGLWidget
+class Marker : public QOpenGLWidget
 {
     Q_OBJECT				//  Qt magic macro
     private:

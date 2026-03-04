@@ -1,5 +1,5 @@
 #include "cylinder.h"
-#include <QtOpenGL>
+#include <QOpenGLWidget>
 
 using namespace std;
 

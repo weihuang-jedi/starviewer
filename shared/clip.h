@@ -13,8 +13,11 @@
 #include <iostream>
 #include <stdio.h>
 
+#include <QGroupBox>       // Ensure this is correct (not QtGui/qgroupbox.h)
+#include <QDoubleSpinBox>  // For dsb_a, dsb_b, etc.
+#include <QGridLayout>     // For lay_clip
 #include <QtGui/QtGui>
-#include <QtGui/qgroupbox.h>
+#include <QGroupBox>
 
 class QCheckBox;
 class QGroupBox;

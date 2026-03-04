@@ -1,6 +1,6 @@
 //$Id: lister.cpp 4833 2013-11-05 15:49:31Z starviewer $
 
-#include <QtOpenGL>
+#include <QOpenGLWidget>
 
 #include "lister.h"
 

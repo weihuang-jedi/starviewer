@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 #include <QtGui/QtGui>
-#include <QtGui/qgroupbox.h>
+#include <QGroupBox>
 
 class QCheckBox;
 class QGroupBox;

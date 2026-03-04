@@ -1,10 +1,22 @@
 file(GLOB_RECURSE SOURCES *.cpp *.h *.ui *.qrc)
 
-# Create a library for this module
+# 1. Remove "OpenGL" from the find_package list
+find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+
+# 2. Create the library FIRST before linking
 add_library(shared STATIC ${SOURCES})
 
-# Allow other modules to find these headers
+# 3. Allow other modules to find headers
 target_include_directories(shared PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-# Link Qt5
-target_link_libraries(shared PUBLIC Qt5::Core Qt5::Widgets Qt5::Gui)
+# 4. Link only the available modules
+target_link_libraries(shared 
+    PUBLIC 
+        Qt5::Core 
+        Qt5::Widgets 
+        Qt5::Gui
+)
+

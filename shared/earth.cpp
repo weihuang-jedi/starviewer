@@ -1,4 +1,4 @@
-#include <QtOpenGL>
+#include <QOpenGLWidget>
 #include <earth.h>
 
 #define Cos(th) cos(3.1416*(th)/180.0)

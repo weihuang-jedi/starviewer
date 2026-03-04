@@ -1,7 +1,7 @@
 #ifndef _Texture1D_H
 #define _Texture1D_H
 
-#include <QtOpenGL>
+#include <QOpenGLWidget>
 
 #ifdef LINUX
 #include <GL/gl.h>

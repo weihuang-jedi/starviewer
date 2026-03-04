@@ -1,4 +1,4 @@
-#include <QtOpenGL>
+#include <QOpenGLWidget>
 #include "axis.h"
 
 //

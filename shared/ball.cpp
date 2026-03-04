@@ -1,4 +1,4 @@
-#include <QtOpenGL>
+#include <QOpenGLWidget>
 #include "ball.h"
 
 //Constructor

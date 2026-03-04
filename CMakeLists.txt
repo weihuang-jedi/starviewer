@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD 11)
 
 # Find Qt5
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui)
+
+# Note: In some systems, it's 'Qt5OpenGL', not just 'OpenGL' inside Widgets.
 #find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
 #target_link_libraries(geometry PRIVATE Qt5::Widgets Qt5::OpenGL)
 

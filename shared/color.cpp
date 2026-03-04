@@ -1,4 +1,4 @@
-#include <QtOpenGL>
+#include <QOpenGLWidget>
 #include <color.h>
 
 //

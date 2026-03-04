@@ -1,6 +1,6 @@
 #ifndef FRAME_H
 #define FRAME_H
-#include <QtOpenGL>
+#include <QOpenGLWidget>
 
 using namespace std;
 

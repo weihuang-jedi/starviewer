@@ -1,5 +1,5 @@
 #include "equalcylinder.h"
-#include <QtOpenGL>
+#include <QOpenGLWidget>
 
 EqualCylinder::EqualCylinder()
 {
