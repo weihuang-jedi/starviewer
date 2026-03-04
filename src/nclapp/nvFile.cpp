@@ -753,7 +753,7 @@ string NVFile::get_att_value(string an)
     return attvalue;
 }
 
-string NVFile::_tolower(string is)
+string NVFile::toLowerString(string is)
 {
     string ls;
     char cstr[256];
@@ -799,7 +799,7 @@ void NVFile::_check_coords()
            (0 == varname.compare("XLAT_V")))
             continue;
 
-        lowcoordname = _tolower(var->get_name());
+        lowcoordname = toLowerString(var->get_name());
 
       //cout << "\tcoords " << n << ": " << var->get_name() << ", lowcoordname.size() = " << lowcoordname.size() << endl;
       //cout << "\tlowcoordname = " << lowcoordname << endl;
@@ -970,7 +970,7 @@ void NVFile::_recheck_coords()
     for(i = 0; i < ndims; ++i)
     {
         dimname = dims[i].get_name();
-        lowdimname = _tolower(dimname);
+        lowdimname = toLowerString(dimname);
 
         pos = lowdimname.find("lon");
 

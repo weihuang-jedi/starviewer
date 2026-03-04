@@ -1,10 +1,15 @@
-file(GLOB_RECURSE SOURCES *.cpp *.h *.ui *.qrc)
+# 1. Find NetCDF using CMake's search logic
+set(NetCDF_INCLUDE_DIRS $ENV{NETCDF_C_ROOT}/include)
+set(NetCDF_LIBRARIES $ENV{NETCDF_C_ROOT}/lib/libnetcdf.so)
+find_path(NetCDF_INCLUDE_DIRS NAMES netcdf.h)
+find_library(NetCDF_LIBRARIES NAMES netcdf)
 
-# Create a library for this module
-add_library(nclapp STATIC ${SOURCES})
+# 2. Define the library
+file(GLOB NCLAPP_SOURCES *.cpp *.h)
+add_library(nclapp STATIC ${NCLAPP_SOURCES})
 
-# Allow other modules to find these headers
-target_include_directories(nclapp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+# 3. Add the include directory (The fix for your fatal error)
+target_include_directories(nclapp PUBLIC ${NetCDF_INCLUDE_DIRS})
 
-# Link Qt5
-target_link_libraries(nclapp PUBLIC Qt5::Core Qt5::Widgets Qt5::Gui)
+# 4. Link the actual NetCDF library
+target_link_libraries(nclapp PRIVATE ${NetCDF_LIBRARIES} Qt5::Widgets shared)

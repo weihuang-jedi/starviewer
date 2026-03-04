@@ -12,6 +12,7 @@ class QGroupBox;
 class QLabel;
 class QSlider;
 class QSpinBox;
+class QGridLayout;
 
 class SliderNSpin : public QGroupBox
 {

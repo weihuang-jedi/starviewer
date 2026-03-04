@@ -1,3 +1,8 @@
+#include <QSlider>
+#include <QSpinBox>
+#include <QGridLayout>
+#include <QBoxLayout>
+
 #include "sliderNspin.h"
 
 SliderNSpin::SliderNSpin(Qt::Orientation orientation, const QString &title,

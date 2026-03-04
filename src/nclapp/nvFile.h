@@ -139,7 +139,7 @@ class NVFile
         void _recheck_coords();
         void _build_timestring(bool first);
 
-        string _tolower(string is);
+        string toLowerString(string is);
 
         bool _isVar(string vn);
 

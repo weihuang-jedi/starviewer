@@ -4,8 +4,9 @@
 
 #module load qt/5.15.14
 #module load ncl/6.6.2
+#module load netcdf-c/4.9.0
 
- mkdir build
+ mkdir -p build
 
  cd build
  rm -rf *
