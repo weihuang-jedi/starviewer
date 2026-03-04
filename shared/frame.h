@@ -20,6 +20,13 @@ class Frame
         int _nx;
         int _ny;
         int _nz;
+        double _sx = 1.0;
+        double _sy = 1.0;
+        double _sz = 1.0;
+        double _tx = 1.0;
+        double _ty = 1.0;
+        double _tz = 1.0;
+        double _phmax = 50000.0;
 };
 #endif
 

@@ -15,7 +15,7 @@
 #include <GL/glext.h>
 #endif
 
-#include <QGLWidget>
+#include <QtOpenGL/QGLWidget>
 #include <QString>
 
 #include <iostream>

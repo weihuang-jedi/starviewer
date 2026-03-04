@@ -16,7 +16,7 @@
 #endif
 
 #include <QtGui/QKeyEvent>
-#include <QGLWidget>
+#include <QtOpenGL/QGLWidget>
 #include <QString>
 #include <QTimer>
 

@@ -1,4 +1,5 @@
 #include <QOpenGLWidget>
+#include <cmath>
 #include "axis.h"
 
 //
@@ -42,8 +43,8 @@ void Axis::_setup()
 void Axis::_x_axis(double x, double length, double angle)
 {
     double arc = GL_PI/180.0;
-    double d_l = length * cos(angle * arc);
-    double d_h = length * sin(angle * arc);
+    double d_l = length * std::cos(angle * arc);
+    double d_h = length * std::sin(angle * arc);
     double x1  = x - d_l;
     double y1  = + d_h;
     double y2  = - d_h;
@@ -81,8 +82,8 @@ void Axis::_x_axis(double x, double length, double angle)
 void Axis::_y_axis(double y, double length, double angle)
 {
     double arc = GL_PI/180.0;
-    double d_l = length * cos(angle * arc);
-    double d_h = length * sin(angle * arc);
+    double d_l = length * std::cos(angle * arc);
+    double d_h = length * std::sin(angle * arc);
     double y1  = y - d_l;
     double x1  = + d_h;
     double x2  = - d_h;
@@ -120,8 +121,8 @@ void Axis::_y_axis(double y, double length, double angle)
 void Axis::_z_axis(double z, double length, double angle)
 {
     double arc = GL_PI/180.0;
-    double d_l = length * cos(angle * arc);
-    double d_h = length * sin(angle * arc);
+    double d_l = length * std::cos(angle * arc);
+    double d_h = length * std::sin(angle * arc);
     double z1  = z - d_l;
     double x1  = + d_h;
     double x2  = - d_h;

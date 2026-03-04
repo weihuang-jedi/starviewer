@@ -1,4 +1,5 @@
-#include <QOpenGLWidget>
+// #include <QOpenGLWidget>
+// #include <QOpenGLFunctions>
 #include <earth.h>
 
 #define Cos(th) cos(3.1416*(th)/180.0)
@@ -38,6 +39,11 @@ Earth::~Earth()
        free(lat);
     if(NULL != ter)
        free(ter);
+}
+
+void Earth::initializeGL() {
+    initializeOpenGLFunctions(); // This "activates" the function pointers
+    // ...
 }
 
 void Earth::_fatal(const char* format , ...)

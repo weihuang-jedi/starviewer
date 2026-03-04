@@ -23,7 +23,7 @@
 #include <QtGui/QKeyEvent>
 #include <QtGui/QImage>
 
-#include <QGLWidget>
+#include <QtOpenGL/QGLWidget>
 #include <QString>
 #include <QTimer>
 

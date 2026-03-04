@@ -1,10 +1,10 @@
+#include <QPainter>
 #include "marker.h"
 
 //
 //  Constructor
 //
-Marker::Marker(QWidget* parent)
-             : QGLWidget(parent)
+Marker::Marker(QWidget* parent) : QOpenGLWidget(parent)
 {
     _setup();
 }
@@ -38,9 +38,18 @@ void Marker::draw()
 
     glColor4f(1.0, 0.0, 0.0, 0.75);
 
-    renderText(0.0, 0.0, 0.0, _varname.c_str());
+    QPainter painter(this);
+    painter.setPen(Qt::white); // or whatever color you want
+    painter.setFont(QFont("Arial", 12));
+
+    // painter.drawText works with pixel coordinates,
+    // but you can use project points if needed.
+    painter.drawText(10, 20, QString::fromStdString(_varname));
+    painter.end();
 
 /*
+    renderText(0.0, 0.0, 0.0, _varname.c_str());
+
   //glEnable (GL_LINE_STIPPLE);
   //    glLineStipple (1, 0x0101);  //dotted
   //    drawOneLine(0.0, 0.0, 0.0, 0.0, 0.0, -z);

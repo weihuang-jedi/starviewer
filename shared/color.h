@@ -6,7 +6,7 @@
  * http://cd.textfiles.com/fishandmore/Fish/Graphics/Applications/DKBTrace/DATA/colour.dat
  */
 
-#include <QGLWidget>
+#include <QtOpenGL/QGLWidget>
 #include <QString>
 
 typedef struct _color_field_struct

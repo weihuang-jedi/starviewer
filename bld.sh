@@ -2,4 +2,11 @@
 
  set -x
 
- cmake .. -DQt5_DIR=/apps/spack-2024-12/linux-rocky9-x86_64/gcc-11.4.1/qt-5.15.14-at4e3ixmq44lwb7mn2gqjcd3gbg5omjq
+#module load qt/5.15.14
+#module load ncl/6.6.2
+
+ mkdir build
+
+ cd build
+
+ cmake .. -DQt5_DIR=/apps/contrib/spack-stack-1.1/gcc-11.3.1/qt-5.15.14-mfeuvcidmyqoi2m5i2tfrk6yd7xtk6pt

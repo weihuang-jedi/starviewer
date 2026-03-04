@@ -1,4 +1,9 @@
-#include <clip.h>
+#include <QCheckBox>
+#include <QDoubleSpinBox>
+#include <QGridLayout>
+#include <QLabel>        // <--- Add this for QLabel support
+#include <QString>      // <--- Recommended for translation support
+#include "clip.h"
 
 //
 //  Constructor

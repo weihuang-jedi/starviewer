@@ -12,12 +12,13 @@
 #include <GL/glu.h>
 #include <GL/glext.h>
 
-#include <QGLWidget>
+#include <QOpenGLFunctions>
+#include <QtOpenGL/QGLWidget>
 #include <QString>
 
 using namespace std;
 
-class Earth
+class Earth : public QGLWidget, protected QOpenGLFunctions
 {
     public:
         Earth(const char *flnm);         //  Constructor
@@ -31,8 +32,8 @@ class Earth
         void draw_plane(float z);
         void bump_plane(float z);
 
+        void initializeGL();
         void set_radius(double r) { radius = r; };
-
         void set_texture_id(GLuint id) {_texture_id = id;};
         GLuint get_texture_id() {return _texture_id;};
 

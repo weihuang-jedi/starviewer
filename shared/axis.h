@@ -1,7 +1,7 @@
 #ifndef AXIS_H
 #define AXIS_H
 
-#include <QGLWidget>
+#include <QtOpenGL/QGLWidget>
 #include <QString>
 
 #ifndef GL_PI
@@ -11,10 +11,9 @@
 #define Cos(th) cos(3.1415926/180*(th))
 #define Sin(th) sin(3.1415926/180*(th))
 
-//class Axis : public QGLWidget
-class Axis
+class Axis : public QGLWidget
 {
-    // Q_OBJECT				//  Qt magic macro
+    Q_OBJECT				//  Qt magic macro
     private:
         double _ratio;
         double _axis_length;

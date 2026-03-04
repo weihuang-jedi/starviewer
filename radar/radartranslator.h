@@ -9,7 +9,7 @@
 #include <math.h>
 #include <assert.h>
 
-#include <QGLWidget>
+#include <QtOpenGL/QGLWidget>
 #include <QString>
 #include <QKeyEvent>
 #include <QTimer>
