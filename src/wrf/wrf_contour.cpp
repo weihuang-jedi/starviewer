@@ -1,9 +1,14 @@
-//$Id: wrf_contour.cpp 5103 2014-04-09 22:27:17Z starviewer $
-
+// 1. Include NCL/NCARG headers first
 #include <ncarg/hlu/MapPlot.h>
 
+// 2. Kill the 'debug' macro defined by NCL's headers
+#ifdef debug
+#undef debug
+#endif
+
+// 3. NOW include your project headers and Qt
 #include "nclInterface.h"
-#include "wrf_contour.h"
+#include "wrf_contour.h" // This likely includes QtOpenGL/Qt
 
 //Constructor
 WRF_Contour::WRF_Contour(ColorTable *ct)

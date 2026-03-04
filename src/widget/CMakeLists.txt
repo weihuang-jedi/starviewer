@@ -20,9 +20,9 @@ find_path(GLU_INCLUDE_DIR NAMES GL/glu.h
     PATH_SUFFIXES GL
 )
 
-message(STATUS "DEBUG: OpenGL Include Dir is: ${OPENGL_INCLUDE_DIR}")
-message(STATUS "DEBUG: GLU Library is: ${GLU_LIBRARY}")
-message(STATUS "FOUND GLU AT: ${GLU_INCLUDE_DIR}")
+# message(STATUS "DEBUG: OpenGL Include Dir is: ${OPENGL_INCLUDE_DIR}")
+# message(STATUS "DEBUG: GLU Library is: ${GLU_LIBRARY}")
+# message(STATUS "FOUND GLU AT: ${GLU_INCLUDE_DIR}")
 
 # Create a library for this module
 add_library(widget STATIC ${SOURCES})
