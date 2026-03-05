@@ -1,17 +1,6 @@
 #ifndef _MainWindow_H
 #define _MainWindow_H
 
-//$Id: mainwindow.h 5323 2015-02-20 17:38:57Z starviewer $
-
-#include <QtGui/QMainWindow>
-
-QT_BEGIN_NAMESPACE
-class QAction;
-class QActionGroup;
-class QLabel;
-class QMenu;
-QT_END_NAMESPACE
-
 #define USE_RSL_VARS
 //#include "rsl.h"
 
@@ -38,7 +27,7 @@ QT_END_NAMESPACE
 
 #include "generaltranslator.h"
 #include "wrftranslator.h"
-#include "mpastranslator.h"
+// #include "mpastranslator.h"
 #include "camsetranslator.h"
 #include "poptranslator.h"
 #ifdef UseRADX
@@ -49,6 +38,7 @@ QT_END_NAMESPACE
 #include "mpitranslator.h"
 #include "hdftranslator.h"
 
+#include <QMainWindow>
 QT_BEGIN_NAMESPACE
 class QAction;
 class QActionGroup;
@@ -77,7 +67,7 @@ class MainWindow : public QMainWindow
       //Applications
         void general();
         void wrf();
-        void mpas();
+      //void mpas();
         void camse();
         void pop();
       //void radx();
@@ -109,7 +99,7 @@ class MainWindow : public QMainWindow
         GeneralTranslator* general_translator;
         WRFTranslator* wrf_translator;
         POPTranslator* pop_translator;
-        MPASTranslator* mpas_translator;
+      //MPASTranslator* mpas_translator;
         CAMseTranslator* camse_translator;
       //RadxTranslator* radx_translator;
       //VTKTranslator* vtk_translator;
@@ -163,7 +153,7 @@ class MainWindow : public QMainWindow
 
         QAction *generalAct;
         QAction *wrfAct;
-        QAction *mpasAct;
+      //QAction *mpasAct;
         QAction *camseAct;
         QAction *popAct;
         QAction *radxAct;

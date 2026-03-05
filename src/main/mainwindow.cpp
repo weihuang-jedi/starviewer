@@ -1,7 +1,3 @@
-//$Id: mainwindow.cpp 5339 2015-02-22 04:21:52Z starviewer $
-
-#include <QtGui/QApplication>
-
 #include "mainwindow.h"
 
 MainWindow::MainWindow(string flnm, bool isList,
