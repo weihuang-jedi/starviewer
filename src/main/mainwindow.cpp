@@ -73,9 +73,9 @@ void MainWindow::_setup()
         case POP:
             pop();
             break;
-        case MPAS:
-            mpas();
-            break;
+      //case MPAS:
+      //    mpas();
+      //    break;
         case WRF:
           //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
             wrf();
@@ -108,7 +108,7 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 
     menu.addAction(generalAct);
     menu.addAction(wrfAct);
-    menu.addAction(mpasAct);
+  //menu.addAction(mpasAct);
     menu.addAction(camseAct);
     menu.addAction(popAct);
     menu.addAction(hdfAct);
@@ -268,6 +268,7 @@ void MainWindow::wrf()
     _setup_display();
 }
 
+/*
 void MainWindow::mpas()
 {
     mpas_translator = new MPASTranslator(colorTable, nvoptions,
@@ -281,6 +282,7 @@ void MainWindow::mpas()
     _setup_controlPanel();
     _setup_display();
 }
+*/
 
 void MainWindow::camse()
 {
@@ -444,10 +446,10 @@ void MainWindow::createActions()
     wrfAct->setStatusTip(tr("Try to activate 'wrf' application"));
     connect(wrfAct, SIGNAL(triggered()), this, SLOT(wrf()));
 
-    mpasAct = new QAction(tr("&MPAS"), this);
+  //mpasAct = new QAction(tr("&MPAS"), this);
   //mpasAct->setShortcut(QKeySequence::Global);
-    mpasAct->setStatusTip(tr("Try to activate 'mpas' application"));
-    connect(mpasAct, SIGNAL(triggered()), this, SLOT(mpas()));
+  //mpasAct->setStatusTip(tr("Try to activate 'mpas' application"));
+  //connect(mpasAct, SIGNAL(triggered()), this, SLOT(mpas()));
 
     camseAct = new QAction(tr("&CAMse"), this);
   //camseAct->setShortcut(QKeySequence::Global);
@@ -567,7 +569,7 @@ void MainWindow::createMenus()
     appsMenu = menuBar()->addMenu(tr("&PlotTypes"));
     appsMenu->addAction(generalAct);
     appsMenu->addAction(wrfAct);
-    appsMenu->addAction(mpasAct);
+  //appsMenu->addAction(mpasAct);
     appsMenu->addAction(camseAct);
     appsMenu->addAction(popAct);
     appsMenu->addAction(hdfAct);

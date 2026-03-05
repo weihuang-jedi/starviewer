@@ -11,9 +11,9 @@ Axis::Axis()
     _setup();
 }
 
-//Axis::~Axis()
-//{
-//}
+Axis::~Axis()
+{
+}
 
 void Axis::draw()
 {

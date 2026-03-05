@@ -53,6 +53,9 @@ void Topography::initializeGL() {
     // ...
 }
 
+void Topography::resizeGL(int w, int h) { /* maybe add glViewport(0,0,w,h); */ }
+void Topography::paintGL() { /* your draw code */ }
+
 void Topography::_setupRegionInfo()
 {
     double v;

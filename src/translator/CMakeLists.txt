@@ -34,6 +34,8 @@ target_include_directories(translator PUBLIC
     ${GLU_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/geometry
     ${CMAKE_SOURCE_DIR}/shared
+    ${CMAKE_SOURCE_DIR}/leveler
+    ${CMAKE_SOURCE_DIR}/spreadsheet
     ${CMAKE_SOURCE_DIR}/coastline
     ${CMAKE_SOURCE_DIR}/nclapp
     ${CMAKE_SOURCE_DIR}/contour

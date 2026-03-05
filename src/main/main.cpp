@@ -1,4 +1,5 @@
-#include <QtGui/QApplication>
+/*
+#include <QApplication>
 
 #include <iostream>
 #include <fstream>
@@ -8,6 +9,7 @@
 #include <algorithm>
 
 #include "nclInterface.h"
+*/
 #include "mainwindow.h"
 
 using namespace std;
