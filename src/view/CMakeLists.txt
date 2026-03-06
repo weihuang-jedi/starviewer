@@ -16,6 +16,8 @@ target_include_directories(view PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/geometry
     ${CMAKE_SOURCE_DIR}/shared
+    ${CMAKE_SOURCE_DIR}/spreadsheet
+    ${CMAKE_SOURCE_DIR}/leveler
     ${CMAKE_SOURCE_DIR}/nclapp
     ${CMAKE_SOURCE_DIR}/coastline
     ${CMAKE_SOURCE_DIR}/contour

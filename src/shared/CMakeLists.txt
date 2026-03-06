@@ -1,4 +1,4 @@
-file(GLOB_RECURSE SOURCES *.cpp *.h *.ui *.qrc)
+file(GLOB_RECURSE SOURCES *.cpp *.h *.f *.ui *.qrc)
 
 # 1. Remove "OpenGL" from the find_package list
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)

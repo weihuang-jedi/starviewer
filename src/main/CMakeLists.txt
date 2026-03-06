@@ -21,6 +21,25 @@ set(HDF5_ROOT "/apps/spack-managed/gcc-11.3.1/hdf5-1.12.2-w7j5cujjvt45evmlqi6yyf
 find_library(HDF5_LIB NAMES hdf5 PATHS ${HDF5_ROOT}/lib NO_DEFAULT_PATH)
 find_library(HDF5_HL_LIB NAMES hdf5_hl PATHS ${HDF5_ROOT}/lib NO_DEFAULT_PATH)
 
+# Replace these with the actual paths you found from the 'spack find' command
+#set(UDUNITS_LIB "/apps/spack-managed/gcc-11.3.1/udunits-2.2.28-yejcsju74d43ulira4kz7flaghyd5cmf/lib/libudunits2.a")
+#set(HDFEOS_LIB  "/path/from/spack/lib/libhdfeos.a")
+
+# --- Find NCL-specific helper libraries ---
+# udunits2 fixes: cdRel2Comp, calendar_type
+find_library(UDUNITS_LIB NAMES udunits2 PATHS /apps/spack-managed/gcc-11.3.1/*/lib)
+
+# hdfeos fixes: cuErrorOccurred
+#find_library(HDFEOS_LIB NAMES hdfeos PATHS /apps/spack-managed/gcc-11.3.1/*/lib)
+
+# Gspread (optional but often needed for NCL symbols)
+#find_library(GSPREAD_LIB NAMES gspread PATHS /apps/spack-managed/gcc-11.3.1/*/lib)
+
+# Check if we found them (optional but helpful for debugging)
+if(NOT UDUNITS_LIB)
+    message(WARNING "UDUNITS not found. cdRel2Comp errors may persist.")
+endif()
+
 # 3. Find NCL Libraries
 find_library(NCL_LIB NAMES ncl PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
 
@@ -29,20 +48,19 @@ find_package(ZLIB REQUIRED)
 find_library(SZIP_LIB NAMES sz szip)
 find_library(CURL_LIB NAMES curl)
 find_library(HLU_LIB NAMES hlu PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
-find_library(NCARG_LIB NAMES ncarg PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
 find_library(GKS_LIB NAMES ncarg_gks PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
+find_library(NFP_LIB NAMES nfp PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
+find_library(NCARG_LIB NAMES ncarg PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
 find_library(NGMATH_LIB NAMES ngmath PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
 find_library(COMMON_LIB NAMES ncarg_c PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
+find_library(SPHERE_LIB NAMES sphere3.1_dp PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
+find_library(NFPFORT_LIB NAMES nfpfort PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
+find_library(FFTPACK_LIB NAMES fftpack5_dp PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
+find_library(LAPACK_LIB NAMES lapack_ncl PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
+find_library(BLAS_LIB NAMES blas_ncl PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
 
-# Look for the internal NCL interpreter library
-# Change this line:
-find_library(NI_LIB NAMES ni PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
-
-# To this (Check if it exists before using it):
-find_library(NI_LIB NAMES ni PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
-if(NOT NI_LIB)
-    set(NI_LIB "") # Set to empty string so it doesn't trigger "NOTFOUND"
-endif()
+# Look for the NCL I/O and Interpreter library
+find_library(NI_LIB NAMES nio PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
 
 find_package(Freetype REQUIRED)
 
@@ -103,60 +121,94 @@ target_include_directories(starviewer PUBLIC
     ${NetCDF_INCLUDE_DIRS}
 )
 
+# message("HLU_LIB: ${HLU_LIB}")
+# message("GKS_LIB: ${GKS_LIB}")
+# message("NCARG_LIB: ${NCARG_LIB}")
+# message("NGMATH_LIB: ${NGMATH_LIB}")
+# message("COMMON_LIB: ${COMMON_LIB}")
+
 #   mpas
 target_link_libraries(starviewer PRIVATE
-    # 1. UI and High-Level View Logic
-    view
+    # 1. High-level UI Modules (Must come before main/executable)
     control
+    translator      # Fixes TestTranslator and MPITranslator
+    widget          # Fixes UI components
+    mpidemo         # Fixes mpidemo symbols
 
-    # 2. Logic Engines (The things View/Control call)
-    contour        # Fixes Contour:: references
-    marchingCube   # Fixes Leveler:: references (since Leveler is in marchingCube)
-
-    # 3. Base Internal Logic
-    shared
-    geometry
-    nclapp
-    translator
+    # 2. Logic and Data Modules
+    test
     wrf
     camse
     pop
     hdf
+    nclapp
+    view
+    control
+    contour
+    shared
+    geometry
+    trajectory
+    windvector
+    topography
+    coastline
+    coastline2
+    marchingCube
+    leveler
+    lic
+    picking
+    spreadsheet
+    stateboundary
+    control
+    view
+    leveler
 
-    # 4. NCL Core
-    ${NCL_LIB}
-    ${NI_LIB}       # Will be empty if not found, which is fine
+    # 3. THE NCL CORE GROUP (Critical for get_dimensions and ESprintf)
+    -Wl,--start-group
+    ${NCL_LIB}      # libncl.a
+    ${NI_LIB}       # libnio.a
+    ${HLU_LIB}      # libhlu.a
+  # ${NCARG_LIB}    # libncarg.a
+  # ${COMMON_LIB}   # libncarg_c.a
+    ${UDUNITS_LIB}  # libudunits2.a
+   #${HDFEOS_LIB}   # libhdfeos.a
+   #${GSPREAD_LIB}
+    -Wl,--end-group
 
-    # 5. NCL Support & Graphics (Order: HLU -> NCARG -> GKS)
-    ${HLU_LIB}
-    ${NCARG_LIB}
+    # 4. System Graphics and Fortran Runtimes
     ${GKS_LIB}
+    ${NFPFORT_LIB}
+    ${SPHERE_LIB}
     ${NGMATH_LIB}
-    ${COMMON_LIB}
-
-    # 6. System Graphics Engines (Order: Cairo -> FreeType -> X11)
     ${CAIRO_LIBRARIES}
     ${FREETYPE_LIBRARIES}
-    X11
-    Xext
-    Xrender
-
-    # 7. Language & Parallelism
-    gfortran
+    ${NFP_LIB}
+  # ${COMMON_LIB}   # libncarg_c.a
+    X11 Xext Xrender
+    gfortran        # VITAL for the Fortran symbols in NCL and shared
     OpenMP::OpenMP_CXX
 
-    # 8. System Formats & Math
+    # 5. Data Formats and Math
     ${NetCDF_LIBRARIES}
     ${HDF5_HL_LIB}
     ${HDF5_LIB}
     ${ZLIB_LIBRARIES}
-    ${SZIP_LIB}
-    ${CURL_LIB}
+    ${NCL_LIB}      # libncl.a
+    ${NCARG_LIB}    # libncarg.a
+    ${COMMON_LIB}   # libncarg_c.a
+    ${FFTPACK_LIB}    # libfftpack5_dp.a
+    ${LAPACK_LIB}    # liblapack_ncl.a
+    ${BLAS_LIB}    # libblas_ncl.a
+    gfortran
+    curl
     m
     dl
 
-    # 9. Qt and OpenGL
+    # 6. Qt Framework
     Qt5::Widgets
     Qt5::OpenGL
-    ${GLU_LIBRARY}
+)
+
+# 7. Add the Multiple Definition Flag
+set_target_properties(starviewer PROPERTIES
+    LINK_FLAGS "-Wl,--allow-multiple-definition"
 )
