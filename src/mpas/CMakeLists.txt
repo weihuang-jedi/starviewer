@@ -41,9 +41,12 @@ target_include_directories(mpas PUBLIC
     ${CMAKE_SOURCE_DIR}/view
     ${CMAKE_SOURCE_DIR}/windvector
     ${CMAKE_SOURCE_DIR}/marchingCube
+    ${CMAKE_SOURCE_DIR}/marchTetrahedron
     ${CMAKE_SOURCE_DIR}/translator
     ${CMAKE_SOURCE_DIR}/trajectory
     ${CMAKE_SOURCE_DIR}/lic
+    ${CMAKE_SOURCE_DIR}/ncreader
+    ${CMAKE_SOURCE_DIR}/leveler
     ${NetCDF_INCLUDE_DIRS}
 )
 

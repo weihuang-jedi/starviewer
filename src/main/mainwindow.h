@@ -27,7 +27,7 @@
 
 #include "generaltranslator.h"
 #include "wrftranslator.h"
-// #include "mpastranslator.h"
+#include "mpastranslator.h"
 #include "camsetranslator.h"
 #include "poptranslator.h"
 #ifdef UseRADX
@@ -67,7 +67,7 @@ class MainWindow : public QMainWindow
       //Applications
         void general();
         void wrf();
-      //void mpas();
+        void mpas();
         void camse();
         void pop();
       //void radx();
@@ -99,7 +99,7 @@ class MainWindow : public QMainWindow
         GeneralTranslator* general_translator;
         WRFTranslator* wrf_translator;
         POPTranslator* pop_translator;
-      //MPASTranslator* mpas_translator;
+        MPASTranslator* mpas_translator;
         CAMseTranslator* camse_translator;
       //RadxTranslator* radx_translator;
       //VTKTranslator* vtk_translator;
@@ -153,7 +153,7 @@ class MainWindow : public QMainWindow
 
         QAction *generalAct;
         QAction *wrfAct;
-      //QAction *mpasAct;
+        QAction *mpasAct;
         QAction *camseAct;
         QAction *popAct;
         QAction *radxAct;

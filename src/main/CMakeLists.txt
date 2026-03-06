@@ -127,7 +127,6 @@ target_include_directories(starviewer PUBLIC
 # message("NGMATH_LIB: ${NGMATH_LIB}")
 # message("COMMON_LIB: ${COMMON_LIB}")
 
-#   mpas
 target_link_libraries(starviewer PRIVATE
     # 1. High-level UI Modules (Must come before main/executable)
     control
@@ -138,6 +137,7 @@ target_link_libraries(starviewer PRIVATE
     # 2. Logic and Data Modules
     test
     wrf
+    mpas
     camse
     pop
     hdf
