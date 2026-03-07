@@ -10,8 +10,9 @@
 #include <QtOpenGL>
 
 #include "point3d.h"
-#include "geompas.h"
+#include "ncreader.h"
 #include "texture1d.h"
+#include "leveler.h"
 
 using namespace std;
 
@@ -31,11 +32,11 @@ class MPAS3dTexture
 
         void display(int tl);
 
-        void set_geompas(GeoMPAS *geompas);
+        void set_geompas(ncReader *geompas);
         void set_leveler(Leveler *leveler) { _leveler = leveler; };
 
     private:
-        GeoMPAS   *_geompas;
+        ncReader  *_geompas;
         Leveler   *_leveler;
         Texture1d *_texture1d;
 

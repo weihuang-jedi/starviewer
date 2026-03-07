@@ -27,6 +27,7 @@
 
 #include "generaltranslator.h"
 #include "wrftranslator.h"
+#include "ufstranslator.h"
 #include "mpastranslator.h"
 #include "camsetranslator.h"
 #include "poptranslator.h"
@@ -67,6 +68,7 @@ class MainWindow : public QMainWindow
       //Applications
         void general();
         void wrf();
+        void ufs();
         void mpas();
         void camse();
         void pop();
@@ -98,6 +100,7 @@ class MainWindow : public QMainWindow
         BaseTranslator* translator;
         GeneralTranslator* general_translator;
         WRFTranslator* wrf_translator;
+        UFSTranslator* ufs_translator;
         POPTranslator* pop_translator;
         MPASTranslator* mpas_translator;
         CAMseTranslator* camse_translator;
@@ -153,6 +156,7 @@ class MainWindow : public QMainWindow
 
         QAction *generalAct;
         QAction *wrfAct;
+        QAction *ufsAct;
         QAction *mpasAct;
         QAction *camseAct;
         QAction *popAct;

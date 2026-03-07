@@ -113,6 +113,7 @@ target_include_directories(starviewer PUBLIC
     ${CMAKE_SOURCE_DIR}/widget
     ${CMAKE_SOURCE_DIR}/lic
     ${CMAKE_SOURCE_DIR}/wrf
+    ${CMAKE_SOURCE_DIR}/ufs
     ${CMAKE_SOURCE_DIR}/pop
     ${CMAKE_SOURCE_DIR}/camse
     ${CMAKE_SOURCE_DIR}/hdf
@@ -137,6 +138,7 @@ target_link_libraries(starviewer PRIVATE
     # 2. Logic and Data Modules
     test
     wrf
+    ufs
     mpas
     camse
     pop

@@ -86,6 +86,8 @@ int main(int argc, char *argv[])
             nvoptions->set_model(CAMSE);
         else if(0 == tmpstr.compare("-wrf"))
             nvoptions->set_model(WRF);
+        else if(0 == tmpstr.compare("-ufs"))
+            nvoptions->set_model(UFS);
         else if(0 == tmpstr.compare("-mpas"))
             nvoptions->set_model(MPAS);
         else if(0 == tmpstr.compare("-pop"))

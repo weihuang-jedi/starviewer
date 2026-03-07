@@ -80,6 +80,10 @@ void MainWindow::_setup()
           //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
             wrf();
             break;
+        case UFS:
+          //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
+            ufs();
+            break;
       //case RADX:
       //    radx();
       //    break;
@@ -108,6 +112,7 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 
     menu.addAction(generalAct);
     menu.addAction(wrfAct);
+    menu.addAction(ufsAct);
     menu.addAction(mpasAct);
     menu.addAction(camseAct);
     menu.addAction(popAct);
@@ -162,6 +167,10 @@ void MainWindow::_setup_controlPanel()
     switch(nvoptions->get_model())
     {
         case WRF:
+           //controlPanel->selectNCL();
+           //controlPanel->disable_ncl();
+             break;
+        case UFS:
            //controlPanel->selectNCL();
            //controlPanel->disable_ncl();
              break;
@@ -262,6 +271,20 @@ void MainWindow::wrf()
     translator = wrf_translator;
 
     setWindowTitle(tr("NV for WRF"));
+
+    _setup_controlPanel();
+
+    _setup_display();
+}
+
+void MainWindow::ufs()
+{
+    ufs_translator = new UFSTranslator(colorTable, nvoptions,
+                                       fileName.toStdString(),
+                                       isFileList);
+    translator = ufs_translator;
+
+    setWindowTitle(tr("NV for UFS"));
 
     _setup_controlPanel();
 
@@ -444,6 +467,11 @@ void MainWindow::createActions()
     wrfAct->setStatusTip(tr("Try to activate 'wrf' application"));
     connect(wrfAct, SIGNAL(triggered()), this, SLOT(wrf()));
 
+    ufsAct = new QAction(tr("&UFS"), this);
+  //ufsAct->setShortcut(QKeySequence::Global);
+    ufsAct->setStatusTip(tr("Try to activate 'ufs' application"));
+    connect(ufsAct, SIGNAL(triggered()), this, SLOT(ufs()));
+
     mpasAct = new QAction(tr("&MPAS"), this);
   //mpasAct->setShortcut(QKeySequence::Global);
     mpasAct->setStatusTip(tr("Try to activate 'mpas' application"));
@@ -567,6 +595,7 @@ void MainWindow::createMenus()
     appsMenu = menuBar()->addMenu(tr("&PlotTypes"));
     appsMenu->addAction(generalAct);
     appsMenu->addAction(wrfAct);
+    appsMenu->addAction(ufsAct);
     appsMenu->addAction(mpasAct);
     appsMenu->addAction(camseAct);
     appsMenu->addAction(popAct);
