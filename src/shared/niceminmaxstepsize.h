@@ -1,4 +1,6 @@
-//$Id: niceminmaxstepsize.h 4946 2014-02-03 17:04:17Z starviewer $
+#ifndef NICE_MIN_MAX_STEP_SIZE_H
+#define NICE_MIN_MAX_STEP_SIZE_H
+
 //This code is based on	<nicevals.c> from NCL.
 /************************************************************************
 *									*
@@ -99,4 +101,4 @@ class NiceMinMaxStepSize
 	float max_flt;
 	float step_flt;
 };
-
+#endif // NICE_MIN_MAX_STEP_SIZE_H

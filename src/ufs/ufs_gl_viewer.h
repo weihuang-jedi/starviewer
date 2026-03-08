@@ -1,8 +1,6 @@
 #ifndef _UFS_GL_Viewer_H
 #define _UFS_GL_Viewer_H
 
-//$Id: ufs_gl_viewer.h 5321 2015-02-20 03:20:52Z starviewer $
-
 #include <iostream>
 #include <vector>
 #include <stdio.h>

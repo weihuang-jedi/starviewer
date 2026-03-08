@@ -22,6 +22,7 @@ typedef enum
 {
     NOMODEL = 0x0000,
     WRF     = 0x0001,
+    UFS     = 0x0101,
     CCSM    = 0x0010,
     CAM     = 0x0020,
     CAMFV   = 0x0021,

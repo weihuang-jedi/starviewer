@@ -1,0 +1,13 @@
+#!/bin/bash
+
+module load qt/5.15.14
+module load ncl/6.6.2
+
+#ldd /work2/noaa/epic/weihuang/nv/starviewer/build/main/starviewer | grep "not found"
+
+#/work2/noaa/epic/weihuang/nv/starviewer/build/main/starviewer \
+#	 -ufs /work2/noaa/epic/weihuang/nv/data/ufs-atm-history/gfs.t12z.atm.f000.nc
+
+ gdb --args \
+ /work2/noaa/epic/weihuang/nv/starviewer/build/main/starviewer\
+ 	-ufs /work2/noaa/epic/weihuang/nv/data/ufs-atm-history/gfs.t12z.atm.f000.nc
