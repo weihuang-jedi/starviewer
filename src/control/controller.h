@@ -9,6 +9,7 @@
 #include <string>
 
 #include "nvFile.h"
+#include "ncreader.h"
 #include "nvoptions.h"
 #include "gl_viewer.h"
 #include "ncl_viewer.h"
@@ -73,6 +74,7 @@ class Controller
 
     protected:
         NVFile*     nvfile;
+        ncReader*   ncfile;
         Geometry*   geometry;
         ColorTable* colorTable;
         NCL_Viewer* nclviewer;

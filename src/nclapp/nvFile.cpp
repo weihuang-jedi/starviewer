@@ -34,8 +34,8 @@ void NVFile::_setup(string flnm, bool isList)
 
     string fn;
 
-  //cout << "\tEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-  //cout << "\t\tflnm = " << flnm << endl;
+    cout << "\tEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    cout << "\t\tflnm = " << flnm << endl;
 
     natts = 0;
     ndims = 0;
@@ -43,7 +43,7 @@ void NVFile::_setup(string flnm, bool isList)
     nfils = 0;
     ncoords = 0;
 
-  //cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     prevfile = -1;
     currfile = 0;
@@ -77,35 +77,35 @@ void NVFile::_setup(string flnm, bool isList)
         fileList.push_back(flnm);
     }
 
-  //cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-  //cout << "\tnfils: " << nfils << endl;
+    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    cout << "\tnfils: " << nfils << endl;
 
     initializeNcl();
 
-  //cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-  //cout << "\tnfils: " << nfils << endl;
+    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    cout << "\tnfils: " << nfils << endl;
 
     filehandler = new NclFileHandler[nfils];
     ntimes = new int[nfils];
 
-  //cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     timevarname = "unknown";
 
     for(n = 0; n < nfils; ++n)
     {
-      //cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-      //cout << "\tfileList[" << n << "] = " << fileList[n] << endl;
+        cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+        cout << "\tfileList[" << n << "] = " << fileList[n] << endl;
         fn = fileList[n];
         filehandler[n].open(fn);
         ntimes[n] = _get_file_time_size(n);
     }
 
-  //cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     _set_file_property();
 
-  //cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void NVFile::_set_file_property()

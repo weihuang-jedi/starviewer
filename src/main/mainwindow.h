@@ -27,7 +27,7 @@
 
 #include "generaltranslator.h"
 #include "wrftranslator.h"
-#include "ufstranslator.h"
+#include "ufs_translator.h"
 #include "mpastranslator.h"
 #include "camsetranslator.h"
 #include "poptranslator.h"

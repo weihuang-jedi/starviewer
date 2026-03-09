@@ -1,67 +1,84 @@
-//$Id: ufs_geometry.cpp 4865 2014-01-01 15:49:23Z starviewer $
-
 #include "ufs_geometry.h"
 
-UFS_Geometry::UFS_Geometry() : Geometry()
+UFSGeometry::UFSGeometry()
 {
-    Geometry::_set_default();
-
     _set_default();
 }
 
-UFS_Geometry::~UFS_Geometry()
+UFSGeometry::~UFSGeometry()
 {
-    if(NULL != _lon)
-        delete [] _lon;
-    if(NULL != _lat)
-        delete [] _lat;
+    if(NULL != _xSphere)
+        delete [] _xSphere;
+    if(NULL != _ySphere)
+        delete [] _ySphere;
+    if(NULL != _zSphere)
+        delete [] _zSphere;
+
+    if(NULL != _xFlat)
+        delete [] _xFlat;
+    if(NULL != _yFlat)
+        delete [] _yFlat;
 }
 
-void UFS_Geometry::_set_default()
+void UFSGeometry::_set_default()
 {
-    Xstaggered = false;
-    Ystaggered = false;
-    Zstaggered = false;
+    _xSphere = NULL;
+    _ySphere = NULL;
+    _zSphere = NULL;
 
-    _nx = 0;
-    _ny = 0;
-    _nz = 0;
-    _nt = 0;
-    _nm = 0;
-
-    _lon = NULL;
-    _lat = NULL;
-    _hgt = NULL;
-
-    _ulon = NULL;
-    _ulat = NULL;
-
-    _vlon = NULL;
-    _vlat = NULL;
+    _xFlat = NULL;
+    _yFlat = NULL;
 
     reset();
 } 
 
-void UFS_Geometry::reset_dimension()
+void UFSGeometry::reset_dimension()
 {
-    Xstaggered = false;
-    Ystaggered = false;
-    Zstaggered = false;
-
-    _nx = 1;
-    _ny = 1;
     _nz = 1;
-    _nt = 1;
-    _nm = 1;
+
+    _ufs__lev = 1;
+  //_ufs__ncol = 1;
 }
 
-void UFS_Geometry::reset()
+void UFSGeometry::reset()
 {
     reset_dimension();
 }
 
-void UFS_Geometry::print()
+void UFSGeometry::print()
 {
    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+   cout << "Info of <" << name << ">:" << endl;
+}
+
+void UFSGeometry::setup_ufs_()
+{
+    double pi = 3.1415926535897932;
+    double arc = pi / 180.0;
+    double delt;
+    int n;
+
+    _xSphere = new double[_ufs__ncol];
+    _ySphere = new double[_ufs__ncol];
+    _zSphere = new double[_ufs__ncol];
+
+    _xFlat = new double[_ufs__ncol];
+    _yFlat = new double[_ufs__ncol];
+
+    _hmax = 0.0;
+    _hmin = 10000.0;
+    for(n = 0; n < _ufs__ncol; ++n)
+    {
+        delt = cos(_ufs__lat[n] * arc);
+        _xSphere[n] = delt * sin(_ufs__lon[n] * arc);
+        _ySphere[n] =        sin(_ufs__lat[n] * arc);
+        _zSphere[n] = delt * cos(_ufs__lon[n] * arc);
+
+        if(_ufs__lon[n] > 180)
+            _xFlat[n] = _ufs__lon[n]/180.0 - 2.0;
+        else
+            _xFlat[n] = _ufs__lon[n]/180.0;
+        _yFlat[n] = _ufs__lat[n]/180.0;
+    }
 }
 

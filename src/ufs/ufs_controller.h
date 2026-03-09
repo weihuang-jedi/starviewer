@@ -1,96 +1,119 @@
-#ifndef _UFS_Controller_H
-#define _UFS_Controller_H
-
-//$Id: ufs_controller.h 4968 2014-02-13 15:32:52Z starviewer $
+#ifndef _UFSCONTROLLER_H
+#define _UFSCONTROLLER_H
 
 #include <QtOpenGL>
-#include <vector>
 
-#include "ufs_gl_viewer.h"
-#include "ufs_ncl_viewer.h"
-#include "ufs_geometry.h"
-#include "marchingcube.h"
-#include "controller.h"
-#include "windvector.h"
-#include "trajectory.h"
+#include <iostream>
+
+#include "nvFile.h"
+#include "ncreader.h"
+#include "ufs_viewer.h"
 #include "locator.h"
-#include "lic.h"
 
 using namespace std;
 
-class UFS_Controller : public Controller
+#ifndef NAME_LENG
+#define NAME_LENG	1024
+#endif
+
+class UFSController
 {
     public:
-        UFS_Controller(ColorTable *ct, NVOptions* opt,
-                       const char *fn, bool isList = false);
-       ~UFS_Controller();
+        UFSController(ColorTable* ct, NVOptions* opt,
+                        const char* fn, bool isList = false);
+       ~UFSController();
 
         void setup();
-        void draw();
-        void set2dvarname(string vn);
-        void set3dvarname(string vn);
-        void set_fileNtime(int nf, int nt);
 
+        int get_ufs__ncenters() { return geometry->get_ufs__ncenters(); };
+        int get_ufs__ncorners() { return geometry->get_ufs__ncorners(); };
+        int get_ufs__ncol() { return geometry->get_ufs__ncol(); };
+
+        int get_nz() { return geometry->get_ufs__lev(); };
+        int get_nt() { return geometry->get_nt(); };
+        int get_tl() { return _tvalue; };
+
+        void set_mappingFile(string mfnm);
+
+        void set_colorTable(ColorTable* ct);
         void set_locator(Locator* l);
 
-        void setup_vector();
-        void unset_vector();
+        void set1dvarname(string vn);
+        void set2dvarname(string vn);
+        void set3dvarname(string vn);
 
-        void update_colormap();
-        void draw_isosurface();
-        void draw_lic();
-        void draw_vector();
-        void draw_trajectory();
+        void draw();
 
+        string get_varname() { return _varname; };
+        string get_title() { return _title; };
         string* get_timestring();
 
-        int get_ndv(int n);
-        string* get_ndvNames(int n);
+      //Evaluator* get_evaluator() { return evaluator; };
+        UFSGeometry* get_geometry() { return geometry; };
 
-        float get_maxval() { return _maxval; };
-        float get_minval() { return _minval; };
+        double get_minval() { return _minval; };
+        double get_maxval() { return _maxval; };
+
+        int get_callList();
+        void update_file(const char* fn);
+
+        int get_curTime() { return _curTime; };
+        int get_ndv(int n);
+        int get_nfils() { return nvfile->get_nfils(); };
+        int* get_ntimes() { return _ntimes; };
+
+        string* get_ndvNames(int n);
+        void set_fileNtime(int nf, int nt);
 
     protected:
-        UFS_Geometry* ufs_geometry;
-        UFS_NCL_Viewer* ufs_nclviewer;
-        UFS_GL_Viewer*  ufs_glviewer;
-        WindVector* windvector;
-        Trajectory* trajectory;
-        LineIntegralConvolution* lic;
-        MarchingCube marchingCube;
+        NVFile* nvfile;
+        ncReader* ncfile;
+        NVFile* mappingfile;
+        UFSGeometry* geometry;
+        ColorTable* colorTable;
+        NVOptions* nvoptions;
+        CoastLine* coastline;
+      //Lister* lister;
         Locator* locator;
 
-        vector<string> ufs_timestring;
+        char _flnm[NAME_LENG];
 
-        float* lon;
-        float* lat;
+        UFS2dViewer* ufs_viewer;
+      //UFS3dViewer* ufs_3dviewer;
 
-        float* u1;
-        float* v1;
-        float* w1;
-        float* h1;
+        int _max_frame;
+        int _time_interval;
 
-        float* u2;
-        float* v2;
-        float* w2;
-        float* h2;
+        string _varname;
+        string _timestr;
+        string _title;
 
-        float* ua;
-        float* va;
-        float* wa;
-        float* ha;
+        int _preFile;
+        int _curFile;
+        int _maxFile;
 
-        float maxspd;
+        int _glbTime;
+        int _curTime;
+        int _maxTime;
 
-        int nxs, nys, nzs;
-        int nxp, nyp, nzp;
+        int _tvalue;
 
-        bool drawWindVector;
+        bool _sphere;
+        bool _ball;
+        bool _initialized;
 
-        void _setup4ufs();
-        void _setup_ufs_timestring();
+        int* _ntimes;
+        int* _grdsize;
+        int* _varsize;
 
-        void _get_vector(int nt);
+        double* _value;
+        double _minval;
+        double _maxval;
+
+        void _set_glbTime();
+
+        bool _hasMappingFile;
+        string _mappingFilename;
 };
 #endif
 

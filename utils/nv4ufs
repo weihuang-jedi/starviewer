@@ -1,7 +1,8 @@
 #!/bin/bash
 
-module load qt/5.15.14
-module load ncl/6.6.2
+#module purge
+#module use moduledir
+#module load hercules.gnu 
 
 #ldd /work2/noaa/epic/weihuang/nv/starviewer/build/main/starviewer | grep "not found"
 

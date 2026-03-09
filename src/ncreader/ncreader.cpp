@@ -21,6 +21,9 @@ ncReader::~ncReader() {
         delete[] lon;
         delete[] lat;
     }
+
+    if (NULL != _dimsize) delete[] _dimsize;
+    if (NULL != _ntimes) delete[] _ntimes;
 }
  
 void ncReader::_get_dim_info() {
@@ -28,6 +31,9 @@ void ncReader::_get_dim_info() {
     char recname[NC_MAX_NAME+1];
     size_t length, recs;
     cout << "ncid: " << ncid << endl;
+
+    if (NULL == _dimsize) _dimsize = new int(num_dims);
+    if (NULL == _ntimes) _dimsize = new int(1);
 
     // Get Dimensions
     cout << " Dimensions (" << num_dims << "):" << endl;
@@ -38,6 +44,7 @@ void ncReader::_get_dim_info() {
         if (status != NC_NOERR) handle_error(status);
 	
 	dim_length[n] = length;
+	_dimsize[n] = (int) length;
  
         status = nc_inq_dim(ncid, n, recname, &recs);
         if (status != NC_NOERR) handle_error(status);

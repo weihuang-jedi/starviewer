@@ -53,6 +53,9 @@ class ncReader {
 
     bool _isMPAS = false;
     bool _isUFS = true;
+
+    int* _dimsize;
+    int* _ntimes;
  
   public:
     // declare constructor and deconstructor methods
@@ -100,5 +103,13 @@ class ncReader {
     float* getPhalf() { return phalf; };
     float* getLon() { return lon; };
     float* getLat() { return lat; };
+
+    // simulate ncl functions.
+    double* get_dv( const char* vn ) { return getDouble(vn); };
+    float* get_fv( const char* vn ) { return getFloat(vn); };
+    int*   get_grdsize() { return _dimsize; };
+    int*   get_varsize();
+    int*   get_ntimes() { return _ntimes; };
+
 };
 #endif

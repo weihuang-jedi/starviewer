@@ -66,10 +66,11 @@ void NclFileHandler::open(string fn)
 {
     _flnm = fn;
 
-  //cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
-  //cout << "\tfilename: <" << _flnm << ">" << endl;
+    cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
+    cout << "\tfilename: <" << _flnm << ">" << endl;
+    cout << "\tfilename: <" << _flnm.c_str() << ">" << endl;
  
-    _nclfile = NclCreateFile(fn.c_str());
+    _nclfile = NclCreateFile(_flnm.c_str());
 
     _check_atts();
     _check_dims();

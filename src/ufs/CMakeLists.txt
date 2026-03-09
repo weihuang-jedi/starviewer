@@ -40,6 +40,7 @@ target_include_directories(ufs PUBLIC
     ${CMAKE_SOURCE_DIR}/stateboundary
     ${CMAKE_SOURCE_DIR}/contour
     ${CMAKE_SOURCE_DIR}/control
+    ${CMAKE_SOURCE_DIR}/ncreader
     ${CMAKE_SOURCE_DIR}/view
     ${CMAKE_SOURCE_DIR}/windvector
     ${CMAKE_SOURCE_DIR}/marchingCube

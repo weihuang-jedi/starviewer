@@ -14,6 +14,7 @@
 #include <netcdf.h>
 
 #include "nclInterface.h"
+// #include "ncreader.h"
 
 using namespace std;
 
@@ -44,6 +45,8 @@ class CoastLine
     protected:
         NclFile nclfile;
         NclVar  nclvar;
+
+      //ncReader ncfile;
 
         int plotLevel;
         int maxPlotLevel;
