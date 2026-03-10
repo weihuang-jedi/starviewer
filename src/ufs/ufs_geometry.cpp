@@ -34,10 +34,10 @@ void UFSGeometry::_set_default()
 
 void UFSGeometry::reset_dimension()
 {
-    _nz = 1;
-
-    _ufs__lev = 1;
-  //_ufs__ncol = 1;
+    _nlon = 1;
+    _nlat = 1;
+    _nlev = 1;
+    _ntim = 1;
 }
 
 void UFSGeometry::reset()
@@ -51,19 +51,19 @@ void UFSGeometry::print()
    cout << "Info of <" << name << ">:" << endl;
 }
 
-void UFSGeometry::setup_ufs_()
+void UFSGeometry::setup()
 {
-    double pi = 3.1415926535897932;
-    double arc = pi / 180.0;
-    double delt;
+    float pi = 3.1415926535897932;
+    float arc = pi / 180.0;
+    float delt;
     int n;
 
-    _xSphere = new double[_ufs__ncol];
-    _ySphere = new double[_ufs__ncol];
-    _zSphere = new double[_ufs__ncol];
+    _xSphere = new float[_ufs__ncol];
+    _ySphere = new float[_ufs__ncol];
+    _zSphere = new float[_ufs__ncol];
 
-    _xFlat = new double[_ufs__ncol];
-    _yFlat = new double[_ufs__ncol];
+    _xFlat = new float[_ufs__ncol];
+    _yFlat = new float[_ufs__ncol];
 
     _hmax = 0.0;
     _hmin = 10000.0;

@@ -31,59 +31,45 @@ class UFSGeometry
         void reset();
         void reset_dimension();
 
-        double* get_xSphere() { return _xSphere; };
-        double* get_ySphere() { return _ySphere; };
-        double* get_zSphere() { return _zSphere; };
+        float* get_xSphere() { return _xSphere; };
+        float* get_ySphere() { return _ySphere; };
+        float* get_zSphere() { return _zSphere; };
 
-        double* get_xFlat() { return _xFlat; };
-        double* get_yFlat() { return _yFlat; };
+        float* get_xFlat() { return _xFlat; };
+        float* get_yFlat() { return _yFlat; };
 
       //UFS
-        void setup_ufs_();
+        void setup();
 
-        void set_ufs__lon(double* v) { _ufs__lon = v; };
-        void set_ufs__lat(double* v) { _ufs__lat = v; };
-        void set_ufs__lev(int n) { _ufs__lev = n; };
-        void set_ufs__ncol(int n) { _ufs__ncol = n; };
-        void set_ufs__ncenters(int n) { _ufs__ncenters = n; };
-        void set_ufs__ncorners(int n) { _ufs__ncorners = n; };
-        void set_ufs__element_corners(int* ecs) { _ufs__element_corners = ecs; };
+        void set_lon(float* v) { _lon = v; };
+        void set_lat(float* v) { _lat = v; };
+        void set_lev(float* v) { _lev = v; };
 
-        double* get_ufs__lon() { return _ufs__lon; };
-        double* get_ufs__lat() { return _ufs__lat; };
-        int* get_ufs__element_corners() { return _ufs__element_corners; };
-        int  get_ufs__ncenters() { return _ufs__ncenters; };
-        int  get_ufs__ncorners() { return _ufs__ncorners; };
-        int  get_ufs__ncol() { return _ufs__ncol; };
-        int  get_ufs__lev() { return _ufs__lev; };
+        float* get_lon() { return _lon; };
+        float* get_lat() { return _lat; };
+        float* get_lev() { return _lev; };
 
     protected:
         string name;
 
-        int  _nz;
-        int  _nt;
-        int  _nm;
-        int  _nTime;
+        float* _xSphere;
+        float* _ySphere;
+        float* _zSphere;
 
-        double* _xSphere;
-        double* _ySphere;
-        double* _zSphere;
+        float _hmax;
+        float _hmin;
 
-        double _hmax;
-        double _hmin;
+        float* _xFlat;
+        float* _yFlat;
 
-        double* _xFlat;
-        double* _yFlat;
+        float* _lon;
+        float* _lat;
+        float* _lev;
 
-      //for UFS
-        double* _ufs__lon;
-        double* _ufs__lat;
-
-        int* _ufs__element_corners;
-        int  _ufs__ncenters;
-        int  _ufs__ncorners;
-        int  _ufs__ncol;
-        int  _ufs__lev;
+        int _nlon;
+        int _nlat;
+        int _ulev;
+        int _ntim;
         
     private:
         void _set_default();

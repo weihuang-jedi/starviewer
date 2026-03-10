@@ -52,9 +52,15 @@ void UFSController::setup()
 {
     int n;
 
-    _ntimes = nvfile->get_ntimes();
+    cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
-    _maxFile = get_nfils();
+    _ntimes = ncfile->get_ntimes();
+
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\t_ntimes = << _ntimes << endl;
+
+  //_maxFile = get_nfils();
+    _maxFile = 1;
 
     _maxTime = 0;
     for(n = 0; n < _maxFile; ++n)
@@ -70,6 +76,8 @@ void UFSController::setup()
     geometry->set_ufs__lon(nvfile->get_dv("lon"));
     geometry->set_ufs__lat(nvfile->get_dv("lat"));
     geometry->setup_ufs_();
+
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
   //_varname = string("sst");
     _varname = string("PSL");
@@ -115,6 +123,7 @@ void UFSController::setup()
     ufs_viewer->setup(_varname, _value);
     _minval = ufs_viewer->get_minval();
     _maxval = ufs_viewer->get_maxval();
+    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void UFSController::draw()

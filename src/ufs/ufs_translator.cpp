@@ -75,7 +75,7 @@ void UFSTranslator::setup()
   //}
 
   //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    ufs_controller->set_mappingFile(_mappingFilename);
+  //ufs_controller->set_mappingFile(_mappingFilename);
   //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufs_controller->setup();
 

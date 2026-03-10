@@ -102,6 +102,7 @@ target_include_directories(starviewer PUBLIC
     ${CMAKE_SOURCE_DIR}/coastline2
     ${CMAKE_SOURCE_DIR}/topography
     ${CMAKE_SOURCE_DIR}/nclapp
+    ${CMAKE_SOURCE_DIR}/ncreader
     ${CMAKE_SOURCE_DIR}/stateboundary
     ${CMAKE_SOURCE_DIR}/contour
     ${CMAKE_SOURCE_DIR}/control
@@ -144,6 +145,7 @@ target_link_libraries(starviewer PRIVATE
     pop
     hdf
     nclapp
+    ncreader
     view
     control
     contour

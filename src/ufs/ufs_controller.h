@@ -66,8 +66,8 @@ class UFSController
         void set_fileNtime(int nf, int nt);
 
     protected:
-        NVFile* nvfile;
         ncReader* ncfile;
+        NVFile* nvfile;
         NVFile* mappingfile;
         UFSGeometry* geometry;
         ColorTable* colorTable;
