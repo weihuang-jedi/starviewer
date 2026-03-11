@@ -15,21 +15,21 @@ class Evaluator
         Evaluator(size_t sz = 0);
        ~Evaluator();
 
-        void set_value(double *v);
-        void set_value(size_t sz, double *v);
+        void set_value(float *v);
+        void set_value(size_t sz, float *v);
 
-        void set_FillValue(double dv, bool hfv = true);
+        void set_FillValue(float dv, bool hfv = true);
 
-        double get_min() { return _minval; };
-        double get_max() { return _maxval; };
+        float get_min() { return _minval; };
+        float get_max() { return _maxval; };
 
     private:
         size_t _size;
         bool _hasFillValue;
 
-        double _minval;
-        double _maxval;
-        double _dblFillValue;
+        float _minval;
+        float _maxval;
+        float _dblFillValue;
 };
 #endif
 

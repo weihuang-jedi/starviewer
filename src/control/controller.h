@@ -8,7 +8,6 @@
 #include <iostream>
 #include <string>
 
-#include "nvFile.h"
 #include "ncreader.h"
 #include "nvoptions.h"
 #include "gl_viewer.h"
@@ -52,7 +51,8 @@ class Controller
         int get_nt() { return _nt; };
 
         int get_curTime() { return _curTime; };
-        int get_nfils() { return nvfile->get_nfils(); };
+      //int get_nfiles() { return ncfile->get_nfiles(); };
+        int get_nfiles() { return 1; };
         int* get_ntimes() { return _ntimes; };
 
         virtual int get_ndv(int n);
@@ -62,18 +62,17 @@ class Controller
 
         Geometry* get_geometry() { return geometry; };
 
-        double get_minval() { return _minval; };
-        double get_maxval() { return _maxval; };
+        float get_minval() { return _minval; };
+        float get_maxval() { return _maxval; };
 
         string get_title() { return _title; };
 
-        double get_valueAt(int i, int j);
+        float get_valueAt(int i, int j);
 
         void setup_spreadsheet();
         void update_spreadsheet(int n);
 
     protected:
-        NVFile*     nvfile;
         ncReader*   ncfile;
         Geometry*   geometry;
         ColorTable* colorTable;
@@ -113,9 +112,9 @@ class Controller
         int* _grdsize;
         int* _varsize;
 
-        double* _value;
-        double _minval;
-        double _maxval;
+        float* _value;
+        float _minval;
+        float _maxval;
 };
 #endif
 

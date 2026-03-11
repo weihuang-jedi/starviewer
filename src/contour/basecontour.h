@@ -50,8 +50,8 @@ class BaseContour
         void set_colorTable(ColorTable *ct) { colorTable = ct; };
         void set_evaluator(Evaluator *ev) { evaluator = ev; };
 
-        void set_nt(int nt) { _nt = nt; };
-        void set_nm(int nm) { _nm = nm; };
+        void set_nt(int v) { _nt = v; };
+        void set_nf(int v) { _nf = v; };
 
 
         void reset();
@@ -155,7 +155,7 @@ class BaseContour
         int _ny;
         int _nz;
         int _nt;
-        int _nm;
+        int _nf;
 
         int _time;
         int _opacity;
@@ -164,7 +164,7 @@ class BaseContour
         int _ony;
         int _onz;
         int _ont;
-        int _onm;
+        int _onf;
 
         int gridsizes;
 

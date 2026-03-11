@@ -103,7 +103,7 @@ class WRF_Geometry : public Geometry
 
         void set_lon(double* v) { _lon = v; };
         void set_lat(double* v) { _lat = v; };
-        void set_hgt(double* v) { _hgt = v; };
+        void set_hgt(float* v) { _hgt = v; };
 
         void set_ulon(double* v) { _ulon = v; };
         void set_ulat(double* v) { _ulat = v; };
@@ -113,7 +113,7 @@ class WRF_Geometry : public Geometry
 
         double* get_lon() { return _lon; };
         double* get_lat() { return _lat; };
-        double* get_hgt() { return _hgt; };
+        float* get_hgt() { return _hgt; };
 
         double* get_ulon() { return _ulon; };
         double* get_ulat() { return _ulat; };
@@ -144,7 +144,7 @@ class WRF_Geometry : public Geometry
 
         double* _lon;
         double* _lat;
-        double* _hgt;
+        float* _hgt;
 
         double* _ulon;
         double* _ulat;

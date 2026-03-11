@@ -80,7 +80,7 @@ void SpreadSheet::set_geometry(Geometry* gm)
   //table->setItemDelegate(new SpreadSheetDelegate());
 }
 
-void SpreadSheet::setup(string vn, double *var)
+void SpreadSheet::setup(string vn, float *var)
 {
     int i, j, j1, n;
     QString label;

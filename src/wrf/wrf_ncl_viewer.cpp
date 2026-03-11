@@ -106,10 +106,10 @@ void WRF_NCL_Viewer::_display_all()
 
 void WRF_NCL_Viewer::_display_Xplane(int xs)
 {
-    float s1, t1, s2, t2;
-    float x1, y1, z1, y2, z2;
+    double s1, t1, s2, t2;
+    double x1, y1, z1, y2, z2;
 
-    float scl = 1.0;
+    double scl = 1.0;
 
     unsigned int tid;
 
@@ -196,10 +196,10 @@ void WRF_NCL_Viewer::_display_Xplane(int xs)
 
 void WRF_NCL_Viewer::_display_Yplane(int ys)
 {
-    float s1, t1, s2, t2;
-    float x1, y1, z1, x2, z2;
+    double s1, t1, s2, t2;
+    double x1, y1, z1, x2, z2;
 
-    float scl = 1.0;
+    double scl = 1.0;
 
     unsigned int tid;
 
@@ -286,10 +286,10 @@ void WRF_NCL_Viewer::_display_Yplane(int ys)
 
 void WRF_NCL_Viewer::_display_Zplane(int zs)
 {
-    float s1, t1, s2, t2;
-    float x1, y1, z1, x2, y2;
+    double s1, t1, s2, t2;
+    double x1, y1, z1, x2, y2;
 
-    float scl = 1.0;
+    double scl = 1.0;
 
     unsigned int tid;
 
@@ -403,15 +403,15 @@ void WRF_NCL_Viewer::_display_with_bump()
 void WRF_NCL_Viewer::_display_Xplane_with_bump(int xs)
 {
     int   j, k, m;
-    float bs, bf;
-    float delty, deltz;
-    float delty2;
-    float sx, sy, sz;
+    double bs, bf;
+    double delty, deltz;
+    double delty2;
+    double sx, sy, sz;
 
     float *pltvar = NULL;
 
-    float s1, t1, s2, t2;
-    float x1, y1, z1, x2, y2, z2;
+    double s1, t1, s2, t2;
+    double x1, y1, z1, x2, y2, z2;
 
     unsigned int tid;
 
@@ -534,15 +534,15 @@ void WRF_NCL_Viewer::_display_Xplane_with_bump(int xs)
 void WRF_NCL_Viewer::_display_Yplane_with_bump(int ys)
 {
     int   i, k, m;
-    float bs, bf;
-    float deltx, deltz;
-    float deltx2;
-    float sx, sy, sz;
+    double bs, bf;
+    double deltx, deltz;
+    double deltx2;
+    double sx, sy, sz;
 
     float *pltvar = NULL;
 
-    float s1, t1, s2, t2;
-    float x1, y1, z1, x2, y2, z2;
+    double s1, t1, s2, t2;
+    double x1, y1, z1, x2, y2, z2;
 
     unsigned int tid;
 
@@ -665,14 +665,14 @@ void WRF_NCL_Viewer::_display_Yplane_with_bump(int ys)
 void WRF_NCL_Viewer::_display_Zplane_with_bump(int zs)
 {
     int   i, j, n;
-    float bs, bf;
-    float deltx, delty;
-    float sx, sy, sz;
+    double bs, bf;
+    double deltx, delty;
+    double sx, sy, sz;
 
-    double* pltvar = NULL;
+    float* pltvar = NULL;
 
-    float s1, t1, s2, t2;
-    float x1, y1, z1, x2, y2, z2;
+    double s1, t1, s2, t2;
+    double x1, y1, z1, x2, y2, z2;
 
     unsigned int tid;
 
@@ -835,20 +835,20 @@ void WRF_NCL_Viewer::_display_on_height_surface()
 void WRF_NCL_Viewer::_display_Xplane_on_height_surface(int xs)
 {
     int j, k, m;
-    float* height = NULL;
-    double* values = NULL;
+    double* height = NULL;
+    float* values = NULL;
 
-    float deltx, delty, deltz, delty2;
-    float sx, sy, sz;
+    double deltx, delty, deltz, delty2;
+    double sx, sy, sz;
 
-    float s1, t1, s2, t2;
-    float x1, y1, z1, y2, z2;
+    double s1, t1, s2, t2;
+    double x1, y1, z1, y2, z2;
 
     unsigned int tid;
 
     values = geometry->get_hgt();
 
-    height = new float[nz * ny];
+    height = new double[nz * ny];
 
     for(k = 0; k < nz; ++k)
     {
@@ -963,21 +963,21 @@ void WRF_NCL_Viewer::_display_Xplane_on_height_surface(int xs)
 void WRF_NCL_Viewer::_display_Yplane_on_height_surface(int ys)
 {
     int i, k, m;
-    float *height = NULL;
-    double* values = NULL;
+    double *height = NULL;
+    float* values = NULL;
 
-    float deltx,  delty, deltz;
-    float deltx2;
-    float sx, sy, sz;
+    double deltx,  delty, deltz;
+    double deltx2;
+    double sx, sy, sz;
 
-    float s1, t1, s2, t2;
-    float x1, y1, z1, x2, z2;
+    double s1, t1, s2, t2;
+    double x1, y1, z1, x2, z2;
 
     unsigned int tid;
 
     values = geometry->get_hgt();
 
-    height = new float[nz * nx];
+    height = new double[nz * nx];
 
     for(k = 0; k < nz; ++k)
     {
@@ -1088,14 +1088,14 @@ void WRF_NCL_Viewer::_display_Yplane_on_height_surface(int ys)
 void WRF_NCL_Viewer::_display_Zplane_on_height_surface(int zs)
 {
     int i, j, n;
-    double* height = NULL;
-    double* values = NULL;
+    float* height = NULL;
+    float* values = NULL;
 
-    float deltx, delty;
-    float sx, sy, sz;
+    double deltx, delty;
+    double sx, sy, sz;
 
-    float s1, t1, s2, t2;
-    float x1, y1, z1, x2, y2, z2;
+    double s1, t1, s2, t2;
+    double x1, y1, z1, x2, y2, z2;
 
     unsigned int tid;
 
@@ -1243,14 +1243,14 @@ void WRF_NCL_Viewer::_display_on_sphere()
 void WRF_NCL_Viewer::_display_Xplane_on_sphere(int xs)
 {
     int j, k, m, n;
-    float* height = NULL;
-    double* values = NULL;
+    double* height = NULL;
+    float* values = NULL;
 
-    float delty, deltz;
-    float sy, sz;
+    double delty, deltz;
+    double sy, sz;
 
-    float s1, t1;
-    float x1, y1, z1;
+    double s1, t1;
+    double x1, y1, z1;
 
     unsigned int tid;
 
@@ -1278,7 +1278,7 @@ void WRF_NCL_Viewer::_display_Xplane_on_sphere(int xs)
 
     values = geometry->get_hgt();
 
-    height = new float[ny * nz];
+    height = new double[ny * nz];
 
     for(k = 0; k < nz; ++k)
     {
@@ -1332,14 +1332,14 @@ void WRF_NCL_Viewer::_display_Xplane_on_sphere(int xs)
 void WRF_NCL_Viewer::_display_Yplane_on_sphere(int ys)
 {
     int i, k, m, n;
-    float* height = NULL;
-    double* values = NULL;
+    double* height = NULL;
+    float* values = NULL;
 
-    float deltx, deltz;
-    float sx, sz;
+    double deltx, deltz;
+    double sx, sz;
 
-    float s1, t1;
-    float x1, y1, z2;
+    double s1, t1;
+    double x1, y1, z2;
 
     unsigned int tid;
 
@@ -1366,7 +1366,7 @@ void WRF_NCL_Viewer::_display_Yplane_on_sphere(int ys)
         return;
 
     values = geometry->get_hgt();
-    height = new float[nx * nz];
+    height = new double[nx * nz];
 
     for(k = 0; k < nz; ++k)
     {
@@ -1420,14 +1420,14 @@ void WRF_NCL_Viewer::_display_Yplane_on_sphere(int ys)
 void WRF_NCL_Viewer::_display_Zplane_on_sphere(int zs)
 {
     int i, j, n;
-    double* height = NULL;
-    double* values = NULL;
+    float* height = NULL;
+    float* values = NULL;
 
-    float deltx, delty;
-    float sx, sy, sz;
+    double deltx, delty;
+    double sx, sy, sz;
 
-    float s1, t1;
-    float x1, y1, z1;
+    double s1, t1;
+    double x1, y1, z1;
 
     unsigned int tid;
 
@@ -1507,10 +1507,10 @@ void WRF_NCL_Viewer::_display_Global_on_sphere()
 {
     int i, j;
 
-    float deltx, delty;
+    double deltx, delty;
 
-    float s1, t1, t2;
-    float x1, y1, y2;
+    double s1, t1, t2;
+    double x1, y1, y2;
 
     unsigned int tid;
 
@@ -1526,7 +1526,7 @@ void WRF_NCL_Viewer::_display_Global_on_sphere()
 
     for(j = -90; j < 90; j += 5)
     {
-        y1 = (float) j;
+        y1 = (double) j;
         y2 = y1 + 5.0;
         t1 = contour->get_yStart() + delty * (0.5 + y1/180.0);
         t2 = contour->get_yStart() + delty * (0.5 + y2/180.0);
@@ -1534,7 +1534,7 @@ void WRF_NCL_Viewer::_display_Global_on_sphere()
         glBegin(GL_QUAD_STRIP);
         for(i = 0; i <= 360; i += 5)
         {
-            x1 = (float) i;
+            x1 = (double) i;
             s1 = contour->get_xStart() + deltx*x1/360.0;
             _Vertex(x1, y1, 0.505, 1.0 - s1, 1.0 - t1);
             _Vertex(x1, y2, 0.505, 1.0 - s1, 1.0 - t2);
@@ -1564,11 +1564,11 @@ void WRF_NCL_Viewer::set_geometry(WRF_Geometry *gm)
     contour->set_nz(geometry->get_nz());
 }
 
-void WRF_NCL_Viewer::setup(string vn, double *var)
+void WRF_NCL_Viewer::setup(string vn, float *var)
 {
     size_t sz;
     Evaluator evaluator;
-    double* hgt = geometry->get_hgt();
+    float* hgt = geometry->get_hgt();
 
   //cout << "\tEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
   //cout << "\tplot var name: " << vn << endl;
@@ -1635,24 +1635,24 @@ void WRF_NCL_Viewer::set_OP(bool s)
 }
 
 //Draw vertex in polar coordinates
-void WRF_NCL_Viewer::_Vertex(float lon, float lat, float r, float s, float t)
+void WRF_NCL_Viewer::_Vertex(double lon, double lat, double r, double s, double t)
 {
-    float x = r*Cos(lon)*Cos(lat);
-    float y =          r*Sin(lat);
-    float z = r*Sin(lon)*Cos(lat);
+    double x = r*Cos(lon)*Cos(lat);
+    double y =          r*Sin(lat);
+    double z = r*Sin(lon)*Cos(lat);
   //glNormal3f(x,y,z);
     glTexCoord2f(s, t);
     glVertex3f(x,y,z);
 }
 
-void WRF_NCL_Viewer::_point(float x, float y, float z, float s, float t)
+void WRF_NCL_Viewer::_point(double x, double y, double z, double s, double t)
 {
     glTexCoord2d(s, 1.0 - t);
     glVertex3f(x,y,z);
 }
 
-void WRF_NCL_Viewer::_xQuad(float x1, float y1, float z1, float y2, float z2,
-                    float s1, float t1, float s2, float t2)
+void WRF_NCL_Viewer::_xQuad(double x1, double y1, double z1, double y2, double z2,
+                            double s1, double t1, double s2, double t2)
 {
     _point(x1, y1, z1, s1, t1);
     _point(x1, y2, z1, s2, t1);
@@ -1660,8 +1660,8 @@ void WRF_NCL_Viewer::_xQuad(float x1, float y1, float z1, float y2, float z2,
     _point(x1, y1, z2, s1, t2);
 }
 
-void WRF_NCL_Viewer::_yQuad(float x1, float y1, float z1, float x2, float z2,
-                    float s1, float t1, float s2, float t2)
+void WRF_NCL_Viewer::_yQuad(double x1, double y1, double z1, double x2, double z2,
+                            double s1, double t1, double s2, double t2)
 {
     _point(x1, y1, z1, s1, t1);
     _point(x2, y1, z1, s2, t1);
@@ -1669,8 +1669,8 @@ void WRF_NCL_Viewer::_yQuad(float x1, float y1, float z1, float x2, float z2,
     _point(x1, y1, z2, s1, t2);
 }
 
-void WRF_NCL_Viewer::_zQuad(float x1, float y1, float x2, float y2, float z2,
-                    float s1, float t1, float s2, float t2)
+void WRF_NCL_Viewer::_zQuad(double x1, double y1, double x2, double y2, double z2,
+                            double s1, double t1, double s2, double t2)
 {
     _point(x1, y1, z2, s1, t1);
     _point(x2, y1, z2, s2, t1);

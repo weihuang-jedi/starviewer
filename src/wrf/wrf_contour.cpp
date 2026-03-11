@@ -342,7 +342,7 @@ unsigned int WRF_Contour::get_textureID()
     return newTextureID;
 }
 
-void WRF_Contour::setup(string vn, double *var)
+void WRF_Contour::setup(string vn, float *var)
 {
     size_t sz = 0;
     Evaluator evaluator;
@@ -584,15 +584,15 @@ unsigned int WRF_Contour::get_zid(int n)
         flon = new float[_ny * _nx];
         flat = new float[_ny * _nx];
 
-        double* thevar = &_value[n * _ny * _nx];
+        float* thevar = &_value[n * _ny * _nx];
         for(j = 0; j < _ny; ++j)
         {
             k = j * _nx;
             for(i = 0; i < _nx; ++i)
             {
                 pltvar[k+i] = thevar[k+i];
-                flon[k+i] = lon[k+i];
-                flat[k+i] = lat[k+i];
+                flon[k+i] = (float) lon[k+i];
+                flat[k+i] = (float) lat[k+i];
             }
         }
 

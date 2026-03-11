@@ -62,7 +62,7 @@ void GeneralTranslator::setup()
 
     _title = controller->get_title();
     _timestr = controller->get_timestring();
-    _maxFile = controller->get_nfils();
+    _maxFile = controller->get_nfiles();
     _nTimes  = controller->get_ntimes();
 
     _maxTime = 0;

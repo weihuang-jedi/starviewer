@@ -321,7 +321,7 @@ void GL_Viewer::_display_Xplane(int xs)
     int j, k, n;
     double f;
     double x, z1, z2;
-    double value[nz][ny];
+    float value[nz][ny];
 
     for(k = 0; k < nz; ++k)
     {
@@ -387,7 +387,7 @@ void GL_Viewer::_display_Yplane(int ys)
     int i, k, n;
     double f;
     double y, z1, z2;
-    double value[nz][nx];
+    float value[nz][nx];
 
     for(k = 0; k < nz; ++k)
     {
@@ -472,7 +472,7 @@ void GL_Viewer::_display_Yplane(int ys)
 void GL_Viewer::_display_Zplane(int zs)
 {
     int i, j, n;
-    double *pltvar = NULL;
+    float *pltvar = NULL;
     double f;
     double y1, y2, z;
 
@@ -747,7 +747,7 @@ void GL_Viewer::_display_Xplane_with_bump(int xs)
     double amp = 0.2;
     double offset = 0.5;
     double x1, y1, z1, z2;
-    double value[nz][ny];
+    float value[nz][ny];
 
     for(k = 0; k < nz; ++k)
     {
@@ -801,7 +801,7 @@ void GL_Viewer::_display_Yplane_with_bump(int ys)
     double amp = 0.2;
     double offset = 0.5;
     double x1, y1, z1, z2;
-    double value[nz][nx];
+    float value[nz][nx];
     
     for(k = 0; k < nz; ++k)
     {
@@ -846,7 +846,7 @@ void GL_Viewer::_display_Yplane_with_bump(int ys)
 void GL_Viewer::_display_Zplane_with_bump(int zs)
 {
     int i, j, n;
-    double *pltvar = NULL;
+    float *pltvar = NULL;
     double f;
     double amp = 0.2;
     double offset = 0.5;
@@ -966,8 +966,8 @@ void GL_Viewer::_display_Xplane_on_height_surface(int xs)
     double f;
     double x1, y1, z1, z2;
     double height[nz][ny];
-    double values[nz][ny];
-    double *terrain = geometry->get_lev();
+    float values[nz][ny];
+    float *terrain = geometry->get_lev();
     
     for(k = 0; k < nz; ++k)
     {
@@ -1021,8 +1021,8 @@ void GL_Viewer::_display_Yplane_on_height_surface(int ys)
     double f;
     double x1, y1, z1, z2;
     double height[nz][nx];
-    double values[nz][nx];
-    double *terrain = geometry->get_lev();
+    float values[nz][nx];
+    float *terrain = geometry->get_lev();
     
     for(k = 0; k < nz; ++k)
     {
@@ -1076,7 +1076,7 @@ void GL_Viewer::_display_Zplane_on_height_surface(int zs)
     double *height = NULL;
     double f;
     double x1, y1, y2, z1;
-    double *terrain = geometry->get_lev();
+    float *terrain = geometry->get_lev();
     
     n = zs * geometry->get_nx() * geometry->get_ny();
     pltvar = &_var[n];
@@ -1192,7 +1192,7 @@ void GL_Viewer::_display_Xplane_on_sphere(int xs)
     int j, k, n;
     double f;
     double height[nz][ny];
-    double values[nz][ny];
+    float values[nz][ny];
 
     if(xs >= nx)
         return;
@@ -1249,8 +1249,7 @@ void GL_Viewer::_display_Yplane_on_sphere(int ys)
     int i, k, n;
     double f;
     double height[nz][nx];
-    double values[nz][nx];
-  //double *terrain = geometry->get_lev();
+    float values[nz][nx];
 
     if((ys < 10) || (ys > ny - 10))
         return;
@@ -1316,9 +1315,7 @@ void GL_Viewer::_display_Zplane_on_sphere(int zs)
     int i, j, n;
     double f;
     double height;
-    double* pltvar = NULL;
-  //double* height = NULL;
-  //double* terrain = geometry->get_lev();
+    float* pltvar = NULL;
 
     if(zs >= nz)
         return;
@@ -1384,7 +1381,7 @@ void GL_Viewer::set_geometry(Geometry *gm)
     geometry = gm;
 }
 
-void GL_Viewer::setup(string vn, double *var)
+void GL_Viewer::setup(string vn, float *var)
 {
     size_t gridsize = 0;
 
@@ -1443,7 +1440,7 @@ void GL_Viewer::set_selecting(bool s)
 
 void GL_Viewer::_display_on_map()
 {
-    double height;
+    float height;
 
     if(geometry->get_has1dLon() && geometry->get_has1dLat())
     {
@@ -1480,7 +1477,7 @@ void GL_Viewer::_display_Zplane_on_map_1d(int zs)
     int i, j, n;
     double f;
     double height;
-    double* pltvar = NULL;
+    float* pltvar = NULL;
 
     if(zs >= nz)
         return;
@@ -1536,7 +1533,7 @@ void GL_Viewer::_display_Zplane_on_map_2d(int zs)
     int i, j, n;
     double f;
     double height;
-    double* pltvar = NULL;
+    float* pltvar = NULL;
 
     if(zs >= nz)
         return;
@@ -1652,7 +1649,7 @@ void GL_Viewer::_get_factor()
 
 void GL_Viewer::_display_on_sphere_map()
 {
-    double height;
+    float height;
 
     if(geometry->get_has1dLon() && geometry->get_has1dLat())
     {
@@ -1680,7 +1677,7 @@ void GL_Viewer::_display_Zplane_on_sphere_map_1d(int zs)
     int i, j, n;
     double f;
     double height;
-    double* pltvar = NULL;
+    float* pltvar = NULL;
 
     if(zs >= nz)
         return;
@@ -1735,7 +1732,7 @@ void GL_Viewer::_display_Zplane_on_sphere_map_2d(int zs)
     int i, j, n, n1, n2;
     double f;
     double height;
-    double* pltvar = NULL;
+    float* pltvar = NULL;
 
     if(zs >= nz)
         return;

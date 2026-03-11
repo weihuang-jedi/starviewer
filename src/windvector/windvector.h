@@ -35,7 +35,7 @@ class WindVector
 
         void setup(int nx, int ny, int nz,
                    float* u, float* v, float*w);
-        void setup_position(float* lon, float* lat);
+        void setup_position(double* lon, double* lat);
 
         void set_colorTable(ColorTable *ct) { colorTable = ct; };
 
@@ -55,8 +55,8 @@ class WindVector
         float* _v;
         float* _w;
 
-        float* _lon;
-        float* _lat;
+        double* _lon;
+        double* _lat;
 
         void _display_all();
 

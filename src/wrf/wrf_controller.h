@@ -1,10 +1,10 @@
 #ifndef _WRF_Controller_H
 #define _WRF_Controller_H
 
-//$Id: wrf_controller.h 4968 2014-02-13 15:32:52Z starviewer $
-
 #include <QtOpenGL>
 #include <vector>
+
+#include "nvFile.h"
 
 #include "wrf_gl_viewer.h"
 #include "wrf_ncl_viewer.h"
@@ -47,10 +47,11 @@ class WRF_Controller : public Controller
         int get_ndv(int n);
         string* get_ndvNames(int n);
 
-        float get_maxval() { return _maxval; };
-        float get_minval() { return _minval; };
+        double get_maxval() { return _maxval; };
+        double get_minval() { return _minval; };
 
     protected:
+	NVFile* nvfile;
         WRF_Geometry* wrf_geometry;
         WRF_NCL_Viewer* wrf_nclviewer;
         WRF_GL_Viewer*  wrf_glviewer;
@@ -62,8 +63,8 @@ class WRF_Controller : public Controller
 
         vector<string> wrf_timestring;
 
-        float* lon;
-        float* lat;
+        double* lon;
+        double* lat;
 
         float* u1;
         float* v1;

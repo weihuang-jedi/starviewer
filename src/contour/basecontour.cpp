@@ -38,7 +38,7 @@ BaseContour::BaseContour(ColorTable *ct)
     _ony = 0;
     _onz = 0;
     _ont = 0;
-    _onm = 0;
+    _onf = 0;
 
     _opacity = 100;
 
@@ -385,7 +385,7 @@ void BaseContour::setup(string vn, float *var)
     set_ny(geometry->get_ny());
     set_nz(geometry->get_nz());
     set_nt(geometry->get_nt());
-    set_nm(geometry->get_nm());
+    set_nf(geometry->get_nf());
 
     _time = 0;
   //_opacity = 100;

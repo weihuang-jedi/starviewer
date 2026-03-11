@@ -36,7 +36,7 @@ void Geometry::reset()
     _ny = 1;
     _nz = 1;
     _nt = 1;
-    _nm = 1;
+    _nf = 1;
 
     _hasFillValue = false;
     _fillValue = 0.0;

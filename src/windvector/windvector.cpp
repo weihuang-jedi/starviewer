@@ -462,7 +462,7 @@ void WindVector::_display_arrow_onZplane()
     }
 }
 
-void WindVector::setup_position(float* lon, float* lat)
+void WindVector::setup_position(double* lon, double* lat)
 {
     _lon = lon;
     _lat = lat;

@@ -116,8 +116,8 @@ void WRF_Controller::setup()
     size_t i;
     size_t xy_size;
     size_t gridsize;
-    double* ph = NULL;
-    double* phb = NULL;
+    float* ph = NULL;
+    float* phb = NULL;
 
     _grdsize = nvfile->get_grdsize();
     _ntimes = nvfile->get_ntimes();
@@ -153,8 +153,8 @@ void WRF_Controller::setup()
 
     xy_size = _nx * _ny;
     gridsize = xy_size * _nz;
-    ph  = nvfile->get_dv("PH");
-    phb = nvfile->get_dv("PHB");
+    ph  = nvfile->get_fv("PH");
+    phb = nvfile->get_fv("PHB");
 
     for(i = 0; i < gridsize; ++i)
         ph[i] = 0.5*(phb[i] + ph[i] + phb[i + xy_size] + ph[i + xy_size]);
@@ -168,8 +168,8 @@ void WRF_Controller::setup()
     wrf_geometry->unset_Zstaggered();
 
     _varname = "HGT";
-    _value = nvfile->get_dv(_varname);
-    _title = nvfile->get_title();
+    _value = nvfile->get_fv(_varname);
+    _title = _varname;
     _setup_wrf_timestring();
 
     _varsize = nvfile->get_varsize();
@@ -209,7 +209,7 @@ void WRF_Controller::set2dvarname(string vn)
     wrf_geometry->unset_Ystaggered();
     wrf_geometry->unset_Zstaggered();
 
-    _value = nvfile->get_dv(_varname);
+    _value = nvfile->get_fv(_varname);
     _title = nvfile->get_title();
 
     _varsize = nvfile->get_varsize();
@@ -260,7 +260,7 @@ void WRF_Controller::set3dvarname(string vn)
     wrf_geometry->unset_Ystaggered();
     wrf_geometry->unset_Zstaggered();
 
-    _value = nvfile->get_dv(_varname);
+    _value = nvfile->get_fv(_varname);
     _title = nvfile->get_title();
 
     _varsize = nvfile->get_varsize();
@@ -298,8 +298,8 @@ void WRF_Controller::set3dvarname(string vn)
     _minval = wrf_glviewer->get_minval();
     _maxval = wrf_glviewer->get_maxval();
 
-    lon = nvfile->get_fv(string("XLONG"));
-    lat = nvfile->get_fv(string("XLAT"));
+    lon = nvfile->get_dv(string("XLONG"));
+    lat = nvfile->get_dv(string("XLAT"));
 
     if(nvoptions->get_cb(NV_ISOSURFACEON))
     {
@@ -563,7 +563,7 @@ void WRF_Controller::set_fileNtime(int nf, int nt)
 
         nvfile->select_file(nf);
 
-        _value = nvfile->get_dv(_varname);
+        _value = nvfile->get_fv(_varname);
         _title = nvfile->get_title();
         _nt = _ntimes[_curFile];
         _setup_wrf_timestring();
@@ -736,8 +736,9 @@ void WRF_Controller::draw_isosurface()
           //cout << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
           //cout << "\t_minval = " << _minval << ", _maxval = " << _maxval << endl;
 
+	    double vg = _value[gridsize];
             marchingCube.setup(wrf_geometry->get_nx(), wrf_geometry->get_ny(), wrf_geometry->get_nz(),
-                               &_value[gridsize], _minval, _maxval);
+                               &vg, _minval, _maxval);
         }
 
         marchingCube.display();

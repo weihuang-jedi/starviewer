@@ -50,14 +50,14 @@ class Pixel_Viewer : public QGLWidget, protected QOpenGLFunctions
         void draw();
 
         void reset();
-        void setup(string vn, double* var);
+        void setup(string vn, float* var);
         void set_geometry(Geometry* gm) { geometry = gm; };
         void set_colorTable(ColorTable* ct);
 
-        double get_minval() { return vMinimum; };
-        double get_maxval() { return vMaximum; };
+        float get_minval() { return vMinimum; };
+        float get_maxval() { return vMaximum; };
 
-        void set_fillValue(double v) { fillValue = v; };
+        void set_fillValue(float v) { fillValue = v; };
         void set_hasFillValue(bool v) { hasFillValue = v; };
 
     protected:
@@ -75,27 +75,28 @@ class Pixel_Viewer : public QGLWidget, protected QOpenGLFunctions
         float* colorMap;
         int numberofcolors;
 
-        double* _var;
-        double* pltvar;
+        float* _var;
+        float* pltvar;
 
         double* lon;
         double* lat;
-        double* lev;
+        float* lev;
 
-        double fillValue;
+        float fillValue;
         bool hasFillValue;
 
         int nx, ny, nz;
         int numberShaderPasses;
-        double vMinimum, vMaximum, scale, zScale;
+        float vMinimum, vMaximum;
+        double scale, zScale;
         string name;
 
         int shader[NV_FRAG_NUMBERS];
         int shaderID;
 
-        float _screenWidth, _screenHeight;
+        double _screenWidth, _screenHeight;
 
-        float dX, dY;
+        double dX, dY;
 
       //These routines are copied from CSCIX239. Spring, 2013 CU Boulder.
         void errCheck(const char *where);
@@ -106,7 +107,7 @@ class Pixel_Viewer : public QGLWidget, protected QOpenGLFunctions
         void _initialize();
         void _parameter_setup();
         void _createTexture(int zs);
-        void _setColor(double f, unsigned char* color4f);
+        void _setColor(float f, unsigned char* color4f);
         void _setup_shader(NV_FRAG_Type type, const char* name);
 };
 #endif

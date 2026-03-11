@@ -11,17 +11,16 @@
 
 using namespace std;
 
-class UFSGeometry
+class UFSGeometry : public Geometry
 {
     public:
         UFSGeometry();
        ~UFSGeometry();
 
-        int  get_nz() { return _nz; };
-        int  get_nt() { return _nt; };
-
-        void  set_nz(int nz) { _nz = nz; };
-        void  set_nt(int nt) { _nt = nt; };
+        int  get_nlon() { return _nlon; };
+        int  get_nlat() { return _nlat; };
+        int  get_nlev() { return _nlev; };
+        int  get_ntim() { return _ntim; };
 
         string get_name() { return name; };
 
@@ -45,9 +44,8 @@ class UFSGeometry
         void set_lat(float* v) { _lat = v; };
         void set_lev(float* v) { _lev = v; };
 
-        float* get_lon() { return _lon; };
-        float* get_lat() { return _lat; };
-        float* get_lev() { return _lev; };
+        void set_lon(double* v);
+        void set_lat(double* v);
 
     protected:
         string name;
@@ -62,15 +60,6 @@ class UFSGeometry
         float* _xFlat;
         float* _yFlat;
 
-        float* _lon;
-        float* _lat;
-        float* _lev;
-
-        int _nlon;
-        int _nlat;
-        int _ulev;
-        int _ntim;
-        
     private:
         void _set_default();
 };

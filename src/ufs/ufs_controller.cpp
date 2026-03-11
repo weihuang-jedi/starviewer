@@ -51,16 +51,16 @@ UFSController::~UFSController()
 void UFSController::setup()
 {
     int n;
+    int _maxFile = 1;
 
     cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     _ntimes = ncfile->get_ntimes();
 
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\t_ntimes = << _ntimes << endl;
+    cout << "\t_ntim = " << _ntim << endl;
 
   //_maxFile = get_nfils();
-    _maxFile = 1;
 
     _maxTime = 0;
     for(n = 0; n < _maxFile; ++n)
@@ -68,19 +68,30 @@ void UFSController::setup()
 
   //lister = new Lister[_maxTime];
 
-    geometry->set_ufs__ncol(nvfile->get_dim_size("ncol"));
-    geometry->set_ufs__lev(nvfile->get_dim_size("lev"));
-    geometry->set_nz(nvfile->get_dim_size("lev"));
-    geometry->set_nt(nvfile->get_dim_size("time"));
+    geometry->set_nlon(ncfile->getNlon());
+    geometry->set_nlat(ncfile->getNlat());
+    geometry->set_nlev(ncfile->getNlev());
+    geometry->set_ntim(_maxTime);
 
-    geometry->set_ufs__lon(nvfile->get_dv("lon"));
-    geometry->set_ufs__lat(nvfile->get_dv("lat"));
-    geometry->setup_ufs_();
+    geometry->set_lon(ncfile->getLon());
+    geometry->set_lat(ncfile->getLat());
+    geometry->set_lev(ncfile->getPfull());
+
+  //geometry->set_lon2d(ncfile->get_lon2d());
+  //geometry->set_lat2d(ncfile->get_lat2d());
+
+    geometry->setup();
+
+    geometry->set_has1dLon(true);
+    geometry->set_has1dLat(true);
+
+    geometry->set_has2dLon(false);
+    geometry->set_has2dLat(false);
 
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
   //_varname = string("sst");
-    _varname = string("PSL");
+    _varname = string("hgtsfc");
 
     _sphere = false;
     _ball = false;

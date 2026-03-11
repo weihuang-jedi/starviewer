@@ -40,7 +40,7 @@ class GL_Viewer
       //void _marchingCubeSetup();
 
         void reset();
-        void setup(string vn, double* var);
+        void setup(string vn, float* var);
         void set_geometry(Geometry* geometry);
         void set_colorTable(ColorTable* ct);
 
@@ -50,13 +50,13 @@ class GL_Viewer
         void set_opacity(int o);
         void set_OP(bool v);
 
-        double get_minval() { return vMinimum; };
-        double get_maxval() { return vMaximum; };
+        float get_minval() { return vMinimum; };
+        float get_maxval() { return vMaximum; };
 
-        void set_fillValue(double v) { fillValue = v; };
+        void set_fillValue(float v) { fillValue = v; };
         void set_hasFillValue(bool v) { hasFillValue = v; };
 
-        double get_fillValue() { return fillValue; };
+        float get_fillValue() { return fillValue; };
         bool  get_hasFillValue() { return hasFillValue; };
 
     protected:
@@ -101,10 +101,10 @@ class GL_Viewer
 
         double* lon;
         double* lat;
-        double* lev;
+        float* lev;
 
-        double* pltvar;
-        double fillValue;
+        float* pltvar;
+        float fillValue;
         bool  hasFillValue;
 
         void _parameter_setup();
@@ -128,8 +128,8 @@ class GL_Viewer
         bool _hasGeoInfo;
         bool need_adjust;
 
-        double* _var;
-        double _xfactor;
+        float* _var;
+        float _xfactor;
 
         int* _xlist;
         int* _ylist;

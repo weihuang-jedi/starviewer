@@ -41,12 +41,17 @@ class ncReader {
 
     vector<size_t> dim_length;
 
-    float* grid_xt;
-    float* grid_yt;
+    double* grid_xt;
+    double* grid_yt;
+    double* lon;
+    double* lat;
+    double* lon2d;
+    double* lat2d;
+
     float* pfull;
     float* phalf;
-    float* lon;
-    float* lat;
+    float* _ak;
+    float* _bk;
 
     void _get_dim_info();
     void _get_var_info();
@@ -56,6 +61,13 @@ class ncReader {
 
     int* _dimsize;
     int* _ntimes;
+
+    int _nlon;
+    int _nlat;
+    int _nlev;
+    int _ntim;
+    int _nfull;
+    int _nhalf;
  
   public:
     // declare constructor and deconstructor methods
@@ -91,18 +103,26 @@ class ncReader {
     int getNumV2ds() { return num_v2ds; };
     int getNumDims() { return num_dims; };
 
+    int getNlon() { return _nlon; };
+    int getNlat() { return _nlat; };
+    int getNlev() { return _nlev; };
+    int getNtim() { return _ntim; };
+
     vector<string> getDimNames() { return dim_names; };
     vector<string> getV2dNames() { return v2d_names; };
     vector<string> getV3dNames() { return v3d_names; };
 
     double* getTim() { return time; };
 
-    float* getGridXt() { return grid_xt; };
-    float* getGridYt() { return grid_yt; };
+    double* getGridXt() { return grid_xt; };
+    double* getGridYt() { return grid_yt; };
+    double* getLon2d() { return lon2d; };
+    double* getLat2d() { return lat2d; };
     float* getPfull() { return pfull; };
     float* getPhalf() { return phalf; };
-    float* getLon() { return lon; };
-    float* getLat() { return lat; };
+    double* getLon() { return lon; };
+    double* getLat() { return lat; };
+    float* getLev() { return pfull; };
 
     // simulate ncl functions.
     double* get_dv( const char* vn ) { return getDouble(vn); };
@@ -111,5 +131,6 @@ class ncReader {
     int*   get_varsize();
     int*   get_ntimes() { return _ntimes; };
 
+    void select_file(int nf);
 };
 #endif

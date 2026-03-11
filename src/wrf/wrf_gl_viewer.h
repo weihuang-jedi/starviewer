@@ -33,7 +33,7 @@ class WRF_GL_Viewer
         void scaleNtranslate();
 
         void reset();
-        void setup(string vn, double *var);
+        void setup(string vn, float *var);
         void set_geometry(WRF_Geometry *geometry);
 
         void set_opacity(int o);
@@ -66,7 +66,7 @@ class WRF_GL_Viewer
         int  _opacity;
         bool _hasOP;
 
-        double *_var;
+        float *_var;
 
         void _display_all();
         void _display_with_bump();
@@ -103,19 +103,19 @@ class WRF_GL_Viewer
         double deg2rad;
         double _xfactor;
         double oneover;
-        float xStart, yStart;
-        float xyDelt, zDelt;
-        float vMinimum, vMaximum, scale, zScale;
-        float niceMin, niceMax;
+        double xStart, yStart;
+        double xyDelt, zDelt;
+        double vMinimum, vMaximum, scale, zScale;
+        double niceMin, niceMax;
 
         double *lon;
         double *lat;
-        double *pltvar;
+        float *pltvar;
 
         void _parameter_setup();
         void _get_factor();
         void _planeVertex(double lon, double lat, double height, double f);
-        void _sphere1dVertex(float lon, float lat, float r, float f);
+        void _sphere1dVertex(double lon, double lat, double r, double f);
 
         bool first_time;
 };

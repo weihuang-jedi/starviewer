@@ -20,6 +20,8 @@ ncReader::~ncReader() {
         delete[] time;
         delete[] lon;
         delete[] lat;
+        delete[] lon2d;
+        delete[] lat2d;
     }
 
     if (NULL != _dimsize) delete[] _dimsize;
@@ -49,6 +51,19 @@ void ncReader::_get_dim_info() {
         status = nc_inq_dim(ncid, n, recname, &recs);
         if (status != NC_NOERR) handle_error(status);
 	dim_names[n] = recname;
+
+	if (recname == "grid_xt")
+            _nlon = (int) length;
+	if (recname == "grid_yt")
+            _nlat = (int) length;
+	if (recname == "phalf")
+            _nhalf = (int) length;
+	if (recname == "pfull") {
+            _nfull = (int) length;
+            _nlev = (int) length;
+	}
+	if (recname == "time")
+            _ntim = (int) length;
 
         cout << "  - " << dim_names[n] << ": " << dim_length[n] << endl;
     }
@@ -113,8 +128,23 @@ void ncReader::handle_error(int status) {
  
 // Function to dimensions, and variables
 void ncReader::exploreFile() {
+    int i = 0;
+    int j = 0;
     int n = 0;
+    size_t attr_len;
+
     num_grps = 1;
+
+    status = nc_inq_attlen(ncid, NC_GLOBAL, "ak", &attr_len);
+    if (status != NC_NOERR) handle_error(status);
+
+    _ak = new float[attr_len];
+    _bk = new float[attr_len];
+
+    status = nc_get_att_float(ncid, NC_GLOBAL, "ak", _ak);
+    if (status != NC_NOERR) handle_error(status);
+    status = nc_get_att_float(ncid, NC_GLOBAL, "bk", _bk);
+    if (status != NC_NOERR) handle_error(status);
 
     _get_dim_info();
     _get_var_info();
@@ -136,13 +166,35 @@ void ncReader::exploreFile() {
 
 
     // Find element with var name
-    grid_xt = getFloat("grid_xt");
-    grid_yt = getFloat("grid_yt");
+    grid_xt = getDouble("grid_xt");
+    grid_yt = getDouble("grid_yt");
+    lon2d = getDouble("lon");
+    lat2d = getDouble("lat");
+    time = getDouble("time");
+
     pfull = getFloat("pfull");
     phalf = getFloat("phalf");
-    time = getDouble("time");
-    lon = getFloat("lon");
-    lat = getFloat("lat");
+
+    double* lon = new double[_nlon];
+    double* lat = new double[_nlat];
+
+    for (i=0; i<_nlon; ++i) {
+	lon[i] = lon2d[i];
+	cout << "lon[" << i << "]= " << lon[i] << endl;
+    }
+    for (j=0; j<_nlat; ++j) {
+	n = j*_nlon;
+	lat[j] = lat2d[n];
+	cout << "lat[" << j << "]= " << lat[j] << endl;
+    }
+
+   /*
+    double* DBLlev = new double[_nlev];
+    for (n=0; n<_nlev; ++n) {
+	DBLlev[n] = pfull[n];
+	cout << "pfull[" << n << "]= " << pfull[n] << endl;
+    }
+    */
 }
  
 /*
@@ -226,5 +278,9 @@ size_t ncReader::getVarSize(const char* var_name) {
     }
 
     return var_length;
+}
+
+void ncReader::select_file(int nf) {
+    cout << "Select file No.: " << nf << endl;
 }
 

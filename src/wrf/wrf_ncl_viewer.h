@@ -36,7 +36,7 @@ class WRF_NCL_Viewer
         void _marchingCubeSetup();
 
         void reset();
-        void setup(string vn, double *var);
+        void setup(string vn, float *var);
         void set_geometry(WRF_Geometry *geometry);
 
         void set_colorTable(ColorTable *ct);
@@ -45,8 +45,8 @@ class WRF_NCL_Viewer
         void set_OP(bool v);
         void update_colormap() { contour->update_colormap(); }
 
-        double get_min() { return _minval; };
-        double get_max() { return _maxval; };
+        float get_min() { return _minval; };
+        float get_max() { return _maxval; };
 
     protected:
         NVOptions *nvoptions;
@@ -61,26 +61,26 @@ class WRF_NCL_Viewer
         int  _opacity;
         bool _hasOP;
 
-        double *_var;
+        float *_var;
 
-        double _minval;
-        double _maxval;
+        float _minval;
+        float _maxval;
 
         float _hmin;
         float _hmax;
 
-        void _Vertex(float lon, float lat, float r, float s, float t);
+        void _Vertex(double lon, double lat, double r, double s, double t);
 
-        void _xQuad(float x1, float y1, float z1, float y2, float z2,
-                    float s1, float t1, float s2, float t2);
+        void _xQuad(double x1, double y1, double z1, double y2, double z2,
+                    double s1, double t1, double s2, double t2);
 
-        void _yQuad(float x1, float y1, float z1, float x2, float z2,
-                    float s1, float t1, float s2, float t2);
+        void _yQuad(double x1, double y1, double z1, double x2, double z2,
+                    double s1, double t1, double s2, double t2);
 
-        void _zQuad(float x1, float y1, float x2, float y2, float z2,
-                    float s1, float t1, float s2, float t2);
+        void _zQuad(double x1, double y1, double x2, double y2, double z2,
+                    double s1, double t1, double s2, double t2);
 
-        void _point(float x, float y, float z, float s, float t);
+        void _point(double x, double y, double z, double s, double t);
 
     private:
         int nx, ny, nz;

@@ -22,13 +22,23 @@ class Geometry : public BaseGeometry
         void reset();
         void reset_dimension();
 
+        void set_nlon(int v) { _nlon = v; };
+        void set_nlat(int v) { _nlat = v; };
+        void set_nlev(int v) { _nlev = v; };
+
         void set_lon(double* v) { _lon = v; };
         void set_lat(double* v) { _lat = v; };
-        void set_lev(double* v) { _lev = v; };
+        void set_lev(float* v) { _lev = v; };
 
         double* get_lon() { return _lon; };
         double* get_lat() { return _lat; };
-        double* get_lev() { return _lev; };
+        float* get_lev() { return _lev; };
+
+        void set_lon2d(double* v) { _lon2d = v; };
+        void set_lat2d(double* v) { _lat2d = v; };
+
+        double* get_lon2d() { return _lon2d; };
+        double* get_lat2d() { return _lat2d; };
 
         void set_has1dLon(bool v) { _has1dLon = v; };
         void set_has1dLat(bool v) { _has1dLat = v; };
@@ -62,15 +72,24 @@ class Geometry : public BaseGeometry
 
         double* _lon;
         double* _lat;
-        double* _lev;
+        float* _lev;
 
-        void _set_default();
+        double* _lon2d;
+        double* _lat2d;
+
+        int   _nlon;
+        int   _nlat;
+        int   _nlev;
 
         int   nlabels;
+
         float* xbvalues;
         float* ylvalues;
+
         char** xblabels;
         char** yllabels;
+
+        void _set_default();
 };
 #endif
 

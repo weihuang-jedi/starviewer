@@ -392,7 +392,7 @@ unsigned int Contour::get_textureID(unsigned int textureID)
 #endif
 }
 
-void Contour::setup(string vn, double *var)
+void Contour::setup(string vn, float *var)
 {
     size_t size;
 

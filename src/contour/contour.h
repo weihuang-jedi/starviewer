@@ -47,7 +47,7 @@ class Contour
         void set_ny(int n);
         void set_nz(int n);
 
-        void setup(string vn, double* var);
+        void setup(string vn, float* var);
         void set_geometry(Geometry* gm) { geometry = gm; };
         void set_opacity(int opacity) { _opacity = opacity; };
         void set_colorTable(ColorTable* ct) { colorTable = ct; };
@@ -55,8 +55,8 @@ class Contour
         void reinitialize();
         void update_colormap();
 
-        double get_min() { return _minval; }
-        double get_max() { return _maxval; }
+        float get_min() { return _minval; }
+        float get_max() { return _maxval; }
 
         float get_xStart() { return _xStart; }
         float get_yStart() { return _yStart; }
@@ -114,15 +114,15 @@ class Contour
         int dataid;
         int cnid;
 
-        double _minval;
-        double _maxval;
+        float _minval;
+        float _maxval;
 
-        double* _value;
+        float* _value;
         string _varname;
 
-        double* lon;
-        double* lat;
-        double* lev;
+        float* lon;
+        float* lat;
+        float* lev;
 
         float _xStart;
         float _yStart;

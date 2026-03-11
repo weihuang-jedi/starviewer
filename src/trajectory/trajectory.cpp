@@ -246,7 +246,7 @@ void Trajectory::draw()
     glEndList();
 }
 
-void Trajectory::setup_position(float* lon, float* lat)
+void Trajectory::setup_position(double* lon, double* lat)
 {
     _lon = lon;
     _lat = lat;
@@ -280,13 +280,13 @@ void Trajectory::draw_earth_image(float z)
        {
            x = _xStart + _xyDelt * i;
 
-           s0 = _lon[n + i] / 360.0;
-           t0 = _lat[n + i] / 180.0;
+           s0 = (float) _lon[n + i] / 360.0;
+           t0 = (float) _lat[n + i] / 180.0;
            glTexCoord2d(0.5 + s0, 0.5 + t0);
            glVertex3d(x, y0, z);
 
-           s1 = _lon[n + _nx + i] / 360.0;
-           t1 = _lat[n + _nx + i] / 180.0;
+           s1 = (float) _lon[n + _nx + i] / 360.0;
+           t1 = (float) _lat[n + _nx + i] / 180.0;
            glTexCoord2d(0.5 + s1, 0.5 + t1);
            glVertex3d(x, y1, z);
        }

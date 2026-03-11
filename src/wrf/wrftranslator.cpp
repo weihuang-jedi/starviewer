@@ -76,7 +76,7 @@ void WRFTranslator::setup()
   //_varname = wrf_controller->get_varname();
     _title = wrf_controller->get_title();
     _timestr = wrf_controller->get_timestring();
-    _maxFile = wrf_controller->get_nfils();
+    _maxFile = wrf_controller->get_nfiles();
     _nTimes  = wrf_controller->get_ntimes();
     _maxval  = wrf_controller->get_maxval();
     _minval  = wrf_controller->get_minval();

@@ -15,22 +15,22 @@ Evaluator::~Evaluator()
 {
 }
 
-void Evaluator::set_FillValue(double dv, bool hfv)
+void Evaluator::set_FillValue(float dv, bool hfv)
 {
     _hasFillValue = hfv;
     _dblFillValue = dv;
 }
 
-void Evaluator::set_value(size_t sz, double *v)
+void Evaluator::set_value(size_t sz, float *v)
 {
     _size = sz;
     set_value(v);
 }
 
-void Evaluator::set_value(double *v)
+void Evaluator::set_value(float *v)
 {
     size_t i;
-    double nearFillValue;
+    float nearFillValue;
 
     _minval = 1.0e200;
     _maxval = -_minval;

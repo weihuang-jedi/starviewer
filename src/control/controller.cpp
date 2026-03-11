@@ -26,7 +26,7 @@ Controller::Controller(ColorTable *ct, NVOptions* opt,
     _curTime = 0;
 
     geometry = NULL;
-    nvfile = NULL;
+    ncfile = NULL;
     glviewer = NULL;
     nclviewer = NULL;
     pixelviewer = NULL;
@@ -37,8 +37,8 @@ Controller::~Controller()
 {
     if(NULL != geometry)
         delete geometry;
-    if(NULL != nvfile)
-        delete nvfile;
+    if(NULL != ncfile)
+        delete ncfile;
     if(NULL != glviewer)
         delete glviewer;
     if(NULL != nclviewer)
@@ -54,65 +54,42 @@ void Controller::setup()
   //cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
   //     << ", file: <" << __FILE__ << ">" << endl;
 
-    nvfile = new NVFile(_flnm, _isFileList);
-    _grdsize = nvfile->get_grdsize();
-    _ntimes = nvfile->get_ntimes();
+    ncfile = new ncReader(_flnm.c_str());
+    _grdsize = ncfile->get_grdsize();
+    _ntimes = ncfile->get_ntimes();
 
     geometry = new Geometry();
     geometry->set_name(_flnm);
-    geometry->set_mx(_grdsize[2]);
-    geometry->set_my(_grdsize[1]);
-    geometry->set_mz(_grdsize[0]);
+    geometry->set_mx(_grdsize[3]);
+    geometry->set_my(_grdsize[2]);
+    geometry->set_mz(_grdsize[1]);
     geometry->set_nt(_ntimes[0]);
 
-    geometry->set_has1dLon(nvfile->get_has1dLon());
-    if(nvfile->get_has1dLon())
-       geometry->set_lon(nvfile->get_lon_value());
-    geometry->set_has1dLat(nvfile->get_has1dLat());
-    if(nvfile->get_has1dLat())
-       geometry->set_lat(nvfile->get_lat_value());
-    geometry->set_has1dLev(nvfile->get_has1dLev());
-    if(nvfile->get_has1dLev())
-       geometry->set_lev(nvfile->get_lev_value());
+    geometry->set_has1dLon(true);
+    geometry->set_has1dLat(true);
+    geometry->set_has1dLev(true);
+    geometry->set_lon(ncfile->getLon());
+    geometry->set_lat(ncfile->getLat());
+    geometry->set_lev(ncfile->getLev());
 
-    geometry->set_has2dLon(nvfile->get_has2dLon());
-    if(nvfile->get_has2dLon())
-       geometry->set_lon(nvfile->get_lon_value());
-    geometry->set_has2dLat(nvfile->get_has2dLat());
-    if(nvfile->get_has2dLat())
-       geometry->set_lat(nvfile->get_lat_value());
+    geometry->set_has2dLon(true);
+    geometry->set_lon2d(ncfile->getLon2d());
+    geometry->set_has2dLat(true);
+    geometry->set_lat2d(ncfile->getLat2d());
 
-    _varname = nvfile->get_varname(2);
+    cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: "
+         << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
-  //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: "
-  //     << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tnvfile->get_has2dLon() name: <" << nvfile->get_has2dLon() << ">" << endl;
-  //cout << "\tnvfile->get_has2dLat() name: <" << nvfile->get_has2dLon() << ">" << endl;
+    _value = ncfile->getFloat(_varname.c_str());
+  //_title = ncfile->get_title();
 
-    if(0 == _varname.compare("unknown"))
-    {
-        _varname = nvfile->get_varname(3);
+    geometry->set_hasFillValue(false);
+  //if(geometry->get_hasFillValue())
+  //   geometry->set_fillValue(ncfile->get_fillValue());
 
-      //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: "
-      //     << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-      //cout << "\tvariable name: <" << _varname << ">" << endl;
-    }
-
-  //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: "
-  //     << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tvariable name: <" << _varname << ">" << endl;
-
-    _value = nvfile->get_dv(_varname);
-    _title = nvfile->get_title();
-
-    geometry->set_hasFillValue(nvfile->get_hasFillValue());
-    if(geometry->get_hasFillValue())
-       geometry->set_fillValue(nvfile->get_fillValue());
-
-    _varsize = nvfile->get_varsize();
-    geometry->set_nx(_varsize[2]);
-    geometry->set_ny(_varsize[1]);
-    geometry->set_nz(_varsize[0]);
+    geometry->set_nx(ncfile->getNlon());
+    geometry->set_ny(ncfile->getNlat());
+    geometry->set_nz(ncfile->getNlev());
 
   //geometry->print();
 
@@ -132,9 +109,9 @@ void Controller::setup()
   //cout << "\ttitle: <" << _title << ">" << endl;
 
   //We need to setup 2 viewers, no matter which one is currently used.
-    nclviewer = new NCL_Viewer(colorTable, nvoptions);
-    nclviewer->set_geometry(geometry);
-    nclviewer->setup(_varname, _value);
+  //nclviewer = new NCL_Viewer(colorTable, nvoptions);
+  //nclviewer->set_geometry(geometry);
+  //nclviewer->setup(_varname, _value);
 
     glviewer = new GL_Viewer(colorTable, nvoptions);
     glviewer->set_geometry(geometry);
@@ -180,15 +157,14 @@ void Controller::set_fileNtime(int nf, int nt)
         if(_initialized)
             free(_value);
 
-        nvfile->select_file(nf);
+        ncfile->select_file(nf);
 
-        _value = nvfile->get_dv(_varname);
-        _title = nvfile->get_title();
+        _value = ncfile->getFloat(_varname.c_str());
+      //_title = ncfile->get_title();
 
-        _varsize = nvfile->get_varsize();
-        geometry->set_nx(_varsize[2]);
-        geometry->set_ny(_varsize[1]);
-        geometry->set_nz(_varsize[0]);
+        geometry->set_nx(ncfile->getNlon());
+        geometry->set_ny(ncfile->getNlat());
+        geometry->set_nz(ncfile->getNlev());
 
         geometry->set_nt(_ntimes[_curFile]);
 
@@ -203,7 +179,7 @@ void Controller::set_fileNtime(int nf, int nt)
     gridsize = _curTime * geometry->get_nx() *  geometry->get_ny() *  geometry->get_nz();
 
     pixelviewer->setup(_varname, &_value[gridsize]);
-    nclviewer->setup(_varname, &_value[gridsize]);
+  //nclviewer->setup(_varname, &_value[gridsize]);
     glviewer->setup(_varname, &_value[gridsize]);
 }
 
@@ -264,13 +240,12 @@ void Controller::set2dvarname(string vn)
     if(_initialized)
         free(_value);
 
-    _value = nvfile->get_dv(vn);
-    _title = nvfile->get_title();
+    _value = ncfile->getFloat(vn.c_str());
+    _title = vn;
 
-    _varsize = nvfile->get_varsize();
-    geometry->set_nx(_varsize[2]);
-    geometry->set_ny(_varsize[1]);
-    geometry->set_nz(_varsize[0]);
+    geometry->set_nx(ncfile->getNlon());
+    geometry->set_ny(ncfile->getNlat());
+    geometry->set_nz(1);
 
     _initialized = true;
 
@@ -280,7 +255,8 @@ void Controller::set2dvarname(string vn)
     cout << "select geometry->get_ny() = " << geometry->get_ny() << endl;
     cout << "select geometry->get_nz() = " << geometry->get_nz() << endl;
 
-    if(nvfile->get_hasFillValue())
+   /*
+    if(ncfile->get_hasFillValue())
     {
         glviewer->set_hasFillValue(true);
         glviewer->set_fillValue(nvfile->get_fillValue());
@@ -288,6 +264,7 @@ void Controller::set2dvarname(string vn)
         geometry->set_hasFillValue(nvfile->get_hasFillValue());
         geometry->set_fillValue(nvfile->get_fillValue());
     }
+   */
 
     pixelviewer->setup(vn, _value);
     nclviewer->setup(vn, _value);
@@ -313,15 +290,14 @@ void Controller::set3dvarname(string vn)
     if(_initialized)
         free(_value);
 
-    _value = nvfile->get_dv(vn);
-    _title = nvfile->get_title();
+    _value = ncfile->getFloat(vn.c_str());
+    _title = vn;
 
     _initialized = true;
 
-    _varsize = nvfile->get_varsize();
-    geometry->set_nx(_varsize[2]);
-    geometry->set_ny(_varsize[1]);
-    geometry->set_nz(_varsize[0]);
+    geometry->set_nx(ncfile->getNlon());
+    geometry->set_ny(ncfile->getNlat());
+    geometry->set_nz(ncfile->getNlev());
 
     cout << "file: " << __FILE__ << ", line: " << __LINE__ << endl;
     cout << "select var <" << vn << ">" << endl;
@@ -329,6 +305,7 @@ void Controller::set3dvarname(string vn)
     cout << "select geometry->get_ny() = " << geometry->get_ny() << endl;
     cout << "select geometry->get_nz() = " << geometry->get_nz() << endl;
 
+   /*
     if(nvfile->get_hasFillValue())
     {
         glviewer->set_hasFillValue(true);
@@ -337,6 +314,7 @@ void Controller::set3dvarname(string vn)
         geometry->set_hasFillValue(nvfile->get_hasFillValue());
         geometry->set_fillValue(nvfile->get_fillValue());
     }
+    */
 
     pixelviewer->setup(vn, _value);
     nclviewer->setup(vn, _value);
@@ -360,17 +338,28 @@ void Controller::update_colormap()
 
 int Controller::get_ndv(int n)
 {
-    return nvfile->get_ndv(n);
+    cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
+         << ", file: <" << __FILE__ << ">" << endl;
+  //return nvfile->get_ndv(n);
+    return 1;
 }
 
 string* Controller::get_ndvNames(int n)
 {
-    return nvfile->get_ndvNames(n);
+    cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
+         << ", file: <" << __FILE__ << ">" << endl;
+    string* vn = new string[2];
+    return vn;
+  //return nvfile->get_ndvNames(n);
 }
 
 string* Controller::get_timestring()
 {
-    return nvfile->get_timestr();
+    cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
+         << ", file: <" << __FILE__ << ">" << endl;
+    string* vn = new string[2];
+    return vn;
+  //return nvfile->get_timestr();
 } 
 
 void Controller::setup_vector()
@@ -385,7 +374,7 @@ void Controller::unset_vector()
          << ", file: <" << __FILE__ << ">" << endl;
 }
 
-double Controller::get_valueAt(int i, int j)
+float Controller::get_valueAt(int i, int j)
 {
   //size_t n = i + (j + nvoptions->get_zsec() * _ny) * _nx;
     size_t n = i + j * _nx;

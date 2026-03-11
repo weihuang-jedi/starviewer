@@ -20,14 +20,14 @@ class SpreadSheet : public QWidget
         SpreadSheet(QWidget* parent=0);       	// Constructor
        ~SpreadSheet();		// Destructor
 
-        void setup(string vn, double* var);
+        void setup(string vn, float* var);
         void set_geometry(Geometry* gm);
         void set_level(int n) { level = n; };
 
-        double get_minval() { return vMinimum; };
-        double get_maxval() { return vMaximum; };
+        float get_minval() { return vMinimum; };
+        float get_maxval() { return vMaximum; };
 
-        void set_fillValue(double v) { fillValue = v; };
+        void set_fillValue(float v) { fillValue = v; };
         void set_hasFillValue(bool v) { hasFillValue = v; };
 
         void clear();
@@ -39,20 +39,20 @@ class SpreadSheet : public QWidget
         Evaluator* evaluator;
         Geometry* geometry;
 
-        double* _var;
-        double* pltvar;
+        float* _var;
+        float* pltvar;
 
         double* lon;
         double* lat;
-        double* lev;
+        float* lev;
 
-        double fillValue;
+        float fillValue;
         bool hasFillValue;
 
         int level;
         int nx, ny, nz;
         int widgetWidth, widgetHeight;
-        double vMinimum, vMaximum;
+        float vMinimum, vMaximum;
         string name;
 };
 #endif

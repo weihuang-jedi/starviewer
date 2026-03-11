@@ -44,7 +44,7 @@ class WRF_Contour
         void set_ny(int n) { _ny = n; };
         void set_nz(int n) { _nz = n; };
 
-        void setup(string vn, double *var);
+        void setup(string vn, float *var);
         void set_geometry(WRF_Geometry *gm) { geometry = gm; };
         void set_opacity(int opacity) { _opacity = opacity; };
         void set_colorTable(ColorTable *ct) { colorTable = ct; };
@@ -55,20 +55,20 @@ class WRF_Contour
         float get_min() { return _minval; }
         float get_max() { return _maxval; }
 
-        float get_xStart() { return _xStart; }
-        float get_yStart() { return _yStart; }
-        float get_xEnd() { return _xEnd; }
-        float get_yEnd() { return _yEnd; }
+        double get_xStart() { return _xStart; }
+        double get_yStart() { return _yStart; }
+        double get_xEnd() { return _xEnd; }
+        double get_yEnd() { return _yEnd; }
 
-        float get_yStartX() { return _yStartX; }
-        float get_zStartX() { return _zStartX; }
-        float get_yEndX() { return _yEndX; }
-        float get_zEndX() { return _zEndX; }
+        double get_yStartX() { return _yStartX; }
+        double get_zStartX() { return _zStartX; }
+        double get_yEndX() { return _yEndX; }
+        double get_zEndX() { return _zEndX; }
 
-        float get_xStartY() { return _xStartY; }
-        float get_zStartY() { return _zStartY; }
-        float get_xEndY() { return _xEndY; }
-        float get_zEndY() { return _zEndY; }
+        double get_xStartY() { return _xStartY; }
+        double get_zStartY() { return _zStartY; }
+        double get_xEndY() { return _xEndY; }
+        double get_zEndY() { return _zEndY; }
 
         void initialize();
         void finalize();
@@ -110,30 +110,30 @@ class WRF_Contour
         int dims[2];
 
         string _varname;
-        double* _value;
+        float* _value;
         float* pltvar;
 
         double* lon;
         double* lat;
-        double* lev;
+        float* lev;
 
-        double _minval;
-        double _maxval;
+        float _minval;
+        float _maxval;
 
-        float _xStart;
-        float _yStart;
-        float _xEnd;
-        float _yEnd;
+        double _xStart;
+        double _yStart;
+        double _xEnd;
+        double _yEnd;
 
-        float _yStartX;
-        float _zStartX;
-        float _yEndX;
-        float _zEndX;
+        double _yStartX;
+        double _zStartX;
+        double _yEndX;
+        double _zEndX;
 
-        float _xStartY;
-        float _zStartY;
-        float _xEndY;
-        float _zEndY;
+        double _xStartY;
+        double _zStartY;
+        double _xEndY;
+        double _zEndY;
 
         float vpx;
         float vpy;

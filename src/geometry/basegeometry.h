@@ -27,7 +27,7 @@ class BaseGeometry
         int get_ny() { return _ny; };
         int get_nz() { return _nz; };
         int get_nt() { return _nt; };
-        int get_nm() { return _nm; };
+        int get_nf() { return _nf; };
 
         void set_mx(int mx) { _mx = mx; };
         void set_my(int my) { _my = my; };
@@ -37,7 +37,7 @@ class BaseGeometry
         void set_ny(int ny) { _ny = ny; };
         void set_nz(int nz) { _nz = nz; };
         void set_nt(int nt) { _nt = nt; };
-        void set_nm(int nm) { _nm = nm; };
+        void set_nf(int nf) { _nf = nf; };
 
         void set_hasFillValue(bool v) { _hasFillValue = v; };
         bool get_hasFillValue() { return _hasFillValue; };
@@ -59,7 +59,7 @@ class BaseGeometry
         int  _ny;
         int  _nz;
         int  _nt;
-        int  _nm;
+        int  _nf;
 
         bool _hasFillValue;
         double _fillValue;

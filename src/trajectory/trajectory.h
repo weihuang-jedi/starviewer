@@ -45,7 +45,7 @@ class Trajectory
 
         void setup(int nx, int ny, int nz,
                    float* u, float* v, float* w, float* h);
-        void setup_position(float* lon, float* lat);
+        void setup_position(double* lon, double* lat);
 
         void set_colorTable(ColorTable *ct) { colorTable = ct; };
 
@@ -75,8 +75,8 @@ class Trajectory
         float* _w2;
         float* _h2;
 
-        float* _lon;
-        float* _lat;
+        double* _lon;
+        double* _lat;
 
         float* _tracer;
 

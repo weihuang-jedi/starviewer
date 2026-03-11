@@ -83,7 +83,7 @@ void Pixel_Viewer::_initialize()
    dY = 1.0/_screenHeight;
 }
 
-void Pixel_Viewer::setup(string vn, double *var)
+void Pixel_Viewer::setup(string vn, float *var)
 {
     size_t gridsize = 0;
 
@@ -272,8 +272,8 @@ void Pixel_Viewer::draw()
 
     if(NULL != nvoptions)
     {
-       _screenWidth = (float) nvoptions->get_screenWidth();
-       _screenHeight = (float) nvoptions->get_screenHeight();
+       _screenWidth = (double) nvoptions->get_screenWidth();
+       _screenHeight = (double) nvoptions->get_screenHeight();
 
        dX = 1.0/_screenWidth;
        dY = 1.0/_screenHeight;
@@ -464,7 +464,7 @@ void Pixel_Viewer::_parameter_setup()
 void Pixel_Viewer::_createTexture(int zs)
 {
     int i, j, n;
-    double f;
+    float f;
 
     size_t grid_size;
 
@@ -511,7 +511,7 @@ void Pixel_Viewer::_createTexture(int zs)
     free(imgbits);
 }
 
-void Pixel_Viewer::_setColor(double f, unsigned char* color4f)
+void Pixel_Viewer::_setColor(float f, unsigned char* color4f)
 {
     int i, n, n1;
     float d;

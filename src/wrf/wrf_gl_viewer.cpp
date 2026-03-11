@@ -118,7 +118,7 @@ void WRF_GL_Viewer::_parameter_setup()
     size_t sz;
     Evaluator evaluator;
     string tex1dName = texture1d->get_name();
-    double* hgt = geometry->get_hgt();
+    float* hgt = geometry->get_hgt();
 
     if(0 != tex1dName.compare(colorTable->get_name()))
     {
@@ -275,9 +275,9 @@ void WRF_GL_Viewer::_display_all()
 void WRF_GL_Viewer::_display_Xplane(int xs)
 {
     int j, k, n;
-    float f;
-    float x1, y1, z1, z2;
-    float value[nz][ny];
+    double f;
+    double x1, y1, z1, z2;
+    double value[nz][ny];
 
     for(k = 0; k < nz; ++k)
     {
@@ -321,9 +321,9 @@ void WRF_GL_Viewer::_display_Xplane(int xs)
 void WRF_GL_Viewer::_display_Yplane(int ys)
 {
     int i, k, n;
-    float f;
-    float x1, y1, z1, z2;
-    float value[nz][nx];
+    double f;
+    double x1, y1, z1, z2;
+    double value[nz][nx];
 
     for(k = 0; k < nz; ++k)
     {
@@ -367,9 +367,9 @@ void WRF_GL_Viewer::_display_Yplane(int ys)
 void WRF_GL_Viewer::_display_Zplane(int zs)
 {
     int i, j, n;
-    double *pltvar = NULL;
-    float f;
-    float x1, y1, y2, z1;
+    float *pltvar = NULL;
+    double f;
+    double x1, y1, y2, z1;
 
 #if 0
     double color4v[4];
@@ -396,7 +396,7 @@ void WRF_GL_Viewer::_display_Zplane(int zs)
 
     if(1 < nz)
     {
-       z1 = (float) zs / (nz - 1.0);
+       z1 = (double) zs / (nz - 1.0);
     }
     else
     {
@@ -504,11 +504,11 @@ void WRF_GL_Viewer::_display_with_bump()
 void WRF_GL_Viewer::_display_Xplane_with_bump(int xs)
 {
     int j, k, n;
-    float f;
-    float amp = 0.2;
-    float offset = 0.5;
-    float x1, y1, z1, z2;
-    float value[nz][ny];
+    double f;
+    double amp = 0.2;
+    double offset = 0.5;
+    double x1, y1, z1, z2;
+    double value[nz][ny];
 
     for(k = 0; k < nz; ++k)
     {
@@ -553,11 +553,11 @@ void WRF_GL_Viewer::_display_Xplane_with_bump(int xs)
 void WRF_GL_Viewer::_display_Yplane_with_bump(int ys)
 {
     int i, k, n;
-    float f;
-    float amp = 0.2;
-    float offset = 0.5;
-    float x1, y1, z1, z2;
-    float value[nz][nx];
+    double f;
+    double amp = 0.2;
+    double offset = 0.5;
+    double x1, y1, z1, z2;
+    double value[nz][nx];
     
     for(k = 0; k < nz; ++k)
     {
@@ -602,12 +602,12 @@ void WRF_GL_Viewer::_display_Yplane_with_bump(int ys)
 void WRF_GL_Viewer::_display_Zplane_with_bump(int zs)
 {
     int i, j, n;
-    double *pltvar = NULL;
-    float f;
-    float amp = 0.2;
-    float offset = 0.5;
+    float *pltvar = NULL;
+    double f;
+    double amp = 0.2;
+    double offset = 0.5;
 
-    float x1, y1, y2, z1;
+    double x1, y1, y2, z1;
 
     n = zs * geometry->get_nx() * geometry->get_ny();
 
@@ -615,7 +615,7 @@ void WRF_GL_Viewer::_display_Zplane_with_bump(int zs)
 
     if(1 < nz)
     {
-       z1 = (float) zs / (nz - 1.0);
+       z1 = (double) zs / (nz - 1.0);
     }
     else
     {
@@ -698,11 +698,11 @@ void WRF_GL_Viewer::_display_on_height_surface()
 void WRF_GL_Viewer::_display_Xplane_on_height_surface(int xs)
 {
     int j, k, n;
-    float f;
-    float x1, y1, z1, z2;
+    double f;
+    double x1, y1, z1, z2;
     float height[nz][ny];
     float values[nz][ny];
-    double* terrain = geometry->get_hgt();
+    float* terrain = geometry->get_hgt();
     
     for(k = 0; k < nz; ++k)
     {
@@ -748,11 +748,11 @@ void WRF_GL_Viewer::_display_Xplane_on_height_surface(int xs)
 void WRF_GL_Viewer::_display_Yplane_on_height_surface(int ys)
 {
     int i, k, n;
-    float f;
-    float x1, y1, z1, z2;
+    double f;
+    double x1, y1, z1, z2;
     float height[nz][nx];
     float values[nz][nx];
-    double* terrain = geometry->get_hgt();
+    float* terrain = geometry->get_hgt();
     
     for(k = 0; k < nz; ++k)
     {
@@ -798,10 +798,10 @@ void WRF_GL_Viewer::_display_Yplane_on_height_surface(int ys)
 void WRF_GL_Viewer::_display_Zplane_on_height_surface(int zs)
 {
     int i, j, n;
-    double* height = NULL;
-    float f;
-    float x1, y1, y2, z1;
-    double* terrain = geometry->get_hgt();
+    float* height = NULL;
+    double f;
+    double x1, y1, y2, z1;
+    float* terrain = geometry->get_hgt();
     
     n = zs * geometry->get_nx() * geometry->get_ny();
     pltvar = &_var[n];
@@ -908,15 +908,15 @@ void WRF_GL_Viewer::_display_on_sphere()
 }
 
 //Draw vertex in polar coordinates
-void WRF_GL_Viewer::_sphere1dVertex(float lon, float lat, float r, float f)
+void WRF_GL_Viewer::_sphere1dVertex(double lon, double lat, double r, double f)
 {
-    float lamda = lon * deg2rad;
-    float phi   = lat * deg2rad;
-    float dist  = r * cos(phi);
+    double lamda = lon * deg2rad;
+    double phi   = lat * deg2rad;
+    double dist  = r * cos(phi);
 
-    float x = dist * sin(lamda);
-    float z = dist * cos(lamda);
-    float y =    r * sin(phi);
+    double x = dist * sin(lamda);
+    double z = dist * cos(lamda);
+    double y =    r * sin(phi);
 
     glTexCoord1f(f);
     glNormal3f(x, y, z);
@@ -926,12 +926,12 @@ void WRF_GL_Viewer::_sphere1dVertex(float lon, float lat, float r, float f)
 void WRF_GL_Viewer::_display_Xplane_on_sphere(int xs)
 {
     int j, k, n;
-    float f;
-    float amp = 0.2 * zScale;
-    float x1, y1, z1;
+    double f;
+    double amp = 0.2 * zScale;
+    double x1, y1, z1;
     float height[nz][ny];
     float values[nz][ny];
-    double* terrain = geometry->get_hgt();
+    float* terrain = geometry->get_hgt();
 
     if(xs >= nx)
         return;
@@ -995,12 +995,12 @@ void WRF_GL_Viewer::_display_Xplane_on_sphere(int xs)
 void WRF_GL_Viewer::_display_Yplane_on_sphere(int ys)
 {
     int i, k, n;
-    float f;
-    float amp = 0.2 * zScale;
-    float x1, y1, z1;
+    double f;
+    double amp = 0.2 * zScale;
+    double x1, y1, z1;
     float height[nz][nx];
     float values[nz][nx];
-    double* terrain = geometry->get_hgt();
+    float* terrain = geometry->get_hgt();
 
     if(ys >= ny)
         return;
@@ -1065,11 +1065,11 @@ void WRF_GL_Viewer::_display_Yplane_on_sphere(int ys)
 void WRF_GL_Viewer::_display_Zplane_on_sphere(int zs)
 {
     int i, j, n;
-    float f;
-    float amp = 0.2 * zScale;
-    float x1, y1, z1;
-    double* height = NULL;
-    double* terrain = geometry->get_hgt();
+    double f;
+    double amp = 0.2 * zScale;
+    double x1, y1, z1;
+    float* height = NULL;
+    float* terrain = geometry->get_hgt();
 
     if(zs >= nz)
         return;
@@ -1137,7 +1137,7 @@ void WRF_GL_Viewer::set_geometry(WRF_Geometry *gm)
     geometry = gm;
 }
 
-void WRF_GL_Viewer::setup(string vn, double *var)
+void WRF_GL_Viewer::setup(string vn, float *var)
 {
     _varname  = vn;
     _var = var;
@@ -1200,7 +1200,7 @@ void WRF_GL_Viewer::saveDataset()
     fwrite(&nxp, 1, sizeof(int), outfl);
     fwrite(&nyp, 1, sizeof(int), outfl);
     fwrite(&nzp, 1, sizeof(int), outfl);
-    fwrite(_var, nxyz, sizeof(float), outfl);
+    fwrite(_var, nxyz, sizeof(double), outfl);
 
     fclose(outfl);
 }
@@ -1250,8 +1250,8 @@ void WRF_GL_Viewer::_display_Zplane_on_map(int zs)
 {
     int i, j, n;
     double f;
-    double height;
-    double* pltvar = NULL;
+    float height;
+    float* pltvar = NULL;
 
     if(zs >= nz)
         return;
@@ -1260,7 +1260,7 @@ void WRF_GL_Viewer::_display_Zplane_on_map(int zs)
     pltvar = &_var[n];
 
   //height = (double) zs / (double) geometry->get_nz() - 0.5;
-    height = (double) zs / (double) geometry->get_nz();
+    height = (float) zs / (float) geometry->get_nz();
 
   //_zlist[zs] = glGenLists(1);
   //glNewList(_zlist[zs], GL_COMPILE);
@@ -1371,8 +1371,8 @@ void WRF_GL_Viewer::_display_Zplane_on_sphere_map(int zs)
 {
     int i, j, n, n1, n2;
     double f;
-    double height;
-    double* pltvar = NULL;
+    float height;
+    float* pltvar = NULL;
 
     if(zs >= nz)
         return;
@@ -1383,7 +1383,7 @@ void WRF_GL_Viewer::_display_Zplane_on_sphere_map(int zs)
   //cout << "Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\tnx = " << nx << ", ny = " << ny << ", nz = " << nz << ", n = " << n << endl;
 
-    height = 0.501 + (double) zs / nz;
+    height = 0.501 + (float) zs / nz;
 
   //_zlist[zs] = glGenLists(1);
   //glNewList(_zlist[zs], GL_COMPILE);

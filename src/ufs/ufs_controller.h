@@ -25,12 +25,10 @@ class UFSController
 
         void setup();
 
-        int get_ufs__ncenters() { return geometry->get_ufs__ncenters(); };
-        int get_ufs__ncorners() { return geometry->get_ufs__ncorners(); };
-        int get_ufs__ncol() { return geometry->get_ufs__ncol(); };
-
-        int get_nz() { return geometry->get_ufs__lev(); };
-        int get_nt() { return geometry->get_nt(); };
+        int get_nlon() { return geometry->get_nlon(); };
+        int get_nlat() { return geometry->get_nlat(); };
+        int get_nlev() { return geometry->get_nlev(); };
+        int get_ntim() { return geometry->get_ntim(); };
         int get_tl() { return _tvalue; };
 
         void set_mappingFile(string mfnm);
