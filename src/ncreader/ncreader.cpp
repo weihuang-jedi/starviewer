@@ -17,7 +17,8 @@ ncReader::~ncReader() {
         delete[] grid_yt;
         delete[] pfull;
         delete[] phalf;
-        delete[] time;
+        delete[] _time;
+        delete[] _time_iso;
         delete[] lon;
         delete[] lat;
         delete[] lon2d;
@@ -54,16 +55,21 @@ void ncReader::_get_dim_info() {
 
 	if (recname == "grid_xt")
             _nlon = (int) length;
-	if (recname == "grid_yt")
+	else if (recname == "grid_yt")
             _nlat = (int) length;
-	if (recname == "phalf")
+	else if (recname == "phalf")
             _nhalf = (int) length;
-	if (recname == "pfull") {
+	else if (recname == "pfull") {
             _nfull = (int) length;
             _nlev = (int) length;
 	}
-	if (recname == "time")
+	else if (recname == "time")
             _ntim = (int) length;
+	else if (recname == "nchars")
+	{
+            _nchars = (int) length;
+            _time_iso = new char[_nchars];
+	}
 
         cout << "  - " << dim_names[n] << ": " << dim_length[n] << endl;
     }
@@ -170,7 +176,9 @@ void ncReader::exploreFile() {
     grid_yt = getDouble("grid_yt");
     lon2d = getDouble("lon");
     lat2d = getDouble("lat");
-    time = getDouble("time");
+    _time = getDouble("time");
+    _time_iso = getChar("time_iso");
+    _timestring = _time_iso;
 
     pfull = getFloat("pfull");
     phalf = getFloat("phalf");
@@ -207,6 +215,24 @@ double* ncReader::getDouble(const string var_name) {
 }
 */
  
+char* ncReader::getChar(const char* var_name) {
+    int var_id;
+    size_t var_length = 1;
+    size_t length = 1;
+
+    status = nc_inq_varid (ncid, var_name, &var_id);
+    if (status != NC_NOERR) handle_error(status);
+
+    var_length = getVarSize(var_name);
+
+    char* value = new char[var_length];
+
+    status = nc_get_var_text(ncid, var_id, value);
+    if (status != NC_NOERR) handle_error(status);
+
+    return value;
+}
+
 float* ncReader::getFloat(const char* var_name) {
     int var_id;
     size_t var_length = 1;

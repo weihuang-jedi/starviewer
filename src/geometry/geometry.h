@@ -25,6 +25,7 @@ class Geometry : public BaseGeometry
         void set_nlon(int v) { _nlon = v; };
         void set_nlat(int v) { _nlat = v; };
         void set_nlev(int v) { _nlev = v; };
+        void set_ntim(int v) { _ntim = v; };
 
         void set_lon(double* v) { _lon = v; };
         void set_lat(double* v) { _lat = v; };
@@ -33,6 +34,11 @@ class Geometry : public BaseGeometry
         double* get_lon() { return _lon; };
         double* get_lat() { return _lat; };
         float* get_lev() { return _lev; };
+
+        int get_nlon() { return _nlon; };
+        int get_nlat() { return _nlat; };
+        int get_nlev() { return _nlev; };
+        int get_ntim() { return _ntim; };
 
         void set_lon2d(double* v) { _lon2d = v; };
         void set_lat2d(double* v) { _lat2d = v; };
@@ -80,6 +86,7 @@ class Geometry : public BaseGeometry
         int   _nlon;
         int   _nlat;
         int   _nlev;
+        int   _ntim;
 
         int   nlabels;
 

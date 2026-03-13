@@ -62,7 +62,7 @@ void UFS2dViewer::set_geometry(UFSGeometry *gm)
     _initialize();
 }
 
-void UFS2dViewer::setup(string vn, double *var)
+void UFS2dViewer::setup(string vn, float *var)
 {
     reset();
 
@@ -71,14 +71,12 @@ void UFS2dViewer::setup(string vn, double *var)
 
     _evaluate(_var);
 
-    lev = geometry->get_ufs__lev();
-
     previoustimelevel = -1;
 }
 
 void UFS2dViewer::reset()
 {
-    lister->reinitialize(_nlon+1, _nlat+1, geometry->get_ufs__lev()+1);
+    lister->reinitialize(_nlon+1, _nlat+1, geometry->get_nlev()+1);
 }
 
 void UFS2dViewer::_initialize()
@@ -90,91 +88,34 @@ void UFS2dViewer::_initialize()
 
     previoustimelevel = -1;
 
-    ncenters = geometry->get_ufs__ncenters();
-    ncorners = geometry->get_ufs__ncorners();
-    ncol     = geometry->get_ufs__ncol();
-    lev      = geometry->get_ufs__lev();
+    _nlon = geometry->get_nlon();
+    _nlat = geometry->get_nlat();
+    _nlev = geometry->get_nlev();
 
-    element_corners = geometry->get_ufs__element_corners();
+    _lon = geometry->get_lon();
+    _lat = geometry->get_lat();
+    _lev = geometry->get_lev();
 
-    lon = geometry->get_ufs__lon();
-    lat = geometry->get_ufs__lat();
-
-  //lister->reinitialize(361, 181, lev);
+  //lister->reinitialize(361, 181, _nlev);
 
     _xFlat = geometry->get_xFlat();
     _yFlat = geometry->get_yFlat();
 
-    if(0 != _nBoundaryPoints)
-        return;
+    _deltlon = _lon[1] - _lon[0];
+    _deltlat = _lat[1] - _lat[0];
 
-    _innerPoints = new bool[ncenters];
+    geometry->set_ntim(1);
 
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tncenters = " << ncenters << ", ncorners = " << ncorners << endl;
-
-  //#pragma omp parallel for
-    for(n = 0; n < ncenters; ++n)
-    {
-        j = n * ncorners;
-
-        positive = 0;
-        negative = 0;
-        _innerPoints[n] = true;
-        for(i = 0; i < ncorners; ++i)
-        {
-            m = element_corners[j+i];
-
-            if(0.75 < _xFlat[m])
-                ++positive;
-            else if(-0.75 > _xFlat[m])
-                ++negative;
-
-            if(NEAR_NORTH_POLE < _yFlat[m])
-            {
-              //North Pole
-                _innerPoints[n] = false;
-                ++_nBoundaryPoints;
-                north_pole_cols.push_back(n);
-                ++num_north_pole_cols;
-
-                positive = 0;
-                negative = 0;
-
-                break;
-            }
-            else if(NEAR_SOUTH_POLE > _yFlat[m])
-            {
-              //South Pole
-                _innerPoints[n] = false;
-                ++_nBoundaryPoints;
-                south_pole_cols.push_back(n);
-                ++num_south_pole_cols;
-
-                positive = 0;
-                negative = 0;
-                
-                break;
-            }
-        }
-
-        if(positive && negative)
-        {
-            _innerPoints[n] = false;
-            ++_nBoundaryPoints;
-            boundary_cols.push_back(n);
-            ++num_boundary_cols;
-        }
-    }
-
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tncenters = " << ncenters << ", _nBoundaryPoints = " << _nBoundaryPoints << endl;
-  //cout << "\tnum_south_pole_cols = " << num_south_pole_cols << ", num_north_pole_cols = " << num_north_pole_cols
-  //     << ", num_boundary_cols = " << num_boundary_cols << endl;
+    cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\n" << _deltlon << " _lon: " <<  _lon << endl;
+    cout << "\n" << _deltlat << " _lat: " <<  _lat << endl;
+    cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFS2dViewer::draw()
 {
+    size_t nsquare = _nlon * _nlat;
+
   //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\tnvoptions->get_tsec() = " << nvoptions->get_tsec() << ", previoustimelevel = " << previoustimelevel << endl;
 
@@ -198,7 +139,7 @@ void UFS2dViewer::draw()
     if(current_timelevel >= geometry->get_nt())
         return;
 
-    if((geometry->get_ufs__lev() <= nvoptions->get_zsec()) && (0 > nvoptions->get_zsec()))
+    if((geometry->get_nlev() <= nvoptions->get_zsec()) && (0 > nvoptions->get_zsec()))
         return;
 
 #if 0
@@ -214,7 +155,7 @@ void UFS2dViewer::draw()
     }
 #endif
 
-    pltvar = &_var[current_timelevel * ncol];
+    pltvar = &_var[current_timelevel * _nlon * _nlat];
 
     zcl = lister->get_zid(nvoptions->get_zsec());
     ycl = lister->get_yid(nvoptions->get_ysec());
@@ -246,7 +187,7 @@ void UFS2dViewer::draw()
     {
         if(nvoptions->get_cb(NV_FLATON))
         {
-            if(nvoptions->get_zsec() < lev)
+            if(nvoptions->get_zsec() < _nlev)
             {
                 if(zcl)
                     glCallList(zcl);
@@ -274,7 +215,7 @@ void UFS2dViewer::draw()
         }
         else
         {
-            if(nvoptions->get_zsec() < lev)
+            if(nvoptions->get_zsec() < _nlev)
             {
                 if(zcl)
                     glCallList(zcl);
@@ -332,7 +273,7 @@ void UFS2dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact
 void UFS2dViewer::_sphereDisplay()
 {
     int i, j, k, m, n;
-
+    size_t npos;
     double sv = 1.0;
     double fact;
     double radius = 1.001;
@@ -345,9 +286,8 @@ void UFS2dViewer::_sphereDisplay()
 
   //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\t_varname: <" << _varname << ">, lev = " << lev << endl;
-  //cout << "\tncenters = " << ncenters << ", nvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
 
-    radius = 0.725 + 0.5 * ( 1.0 - (k + 1.0) / lev);
+    radius = 0.725 + 0.5 * ( 1.0 - (k + 1.0) / _nlev);
 
     locator->set_height(radius);
 
@@ -378,14 +318,13 @@ void UFS2dViewer::_sphereDisplay()
 
     glBegin(GL_QUADS);
   //#pragma omp parallel for
-    for(n = 0; n < ncenters; ++n)
-    {
-        j = n * ncorners;
-        for(i = 0; i < ncorners; ++i)
+    for(j = 0; j < _nlat; ++j) {
+        n = j * _nlon;
+        for(i = 0; i < _nlon; ++i)
         {
-            m = element_corners[j+i];
-            fact = sv * (pltvar[m+k*ncol] - _valmin);
-            _lonlat2xyz(lon[m], lat[m], radius, fact);
+	    npos = n + i;
+            fact = sv * (pltvar[npos] - _valmin);
+            _lonlat2xyz(_lon[npos], _lat[npos], radius, fact);
         }
     }
     glEnd();
@@ -410,17 +349,17 @@ void UFS2dViewer::_sphereDisplay()
 
 void UFS2dViewer::_flatDisplay()
 {
-    int i, j, k, m, n, num;
-    int numProcessedBoundaryPoints = 0;
+    int i, i1, j, j1, k;
+    size_t npos;
 
     double sv = 1.0;
     double fact;
     double height = 0.00;
 
-    double xb[ncorners];
-    double yb[ncorners];
-    double vb[ncorners];
-    double fb[ncorners];
+    double xb[4];
+    double yb[4];
+    double vb[4];
+    double fb[4];
 
     GLfloat line_width = 1.0;
 
@@ -434,9 +373,9 @@ void UFS2dViewer::_flatDisplay()
 
     k = nvoptions->get_zsec();
 
-    height = 0.8 * (0.5 - (k + 1.0) / lev);
+    height = 0.8 * (0.5 - (k + 1.0) / _nlev);
 
-    if(1 == lev)
+    if(1 == _nlev)
         height = 0.001;
 
     locator->set_height(height);
@@ -468,7 +407,7 @@ void UFS2dViewer::_flatDisplay()
         glVertex3d(-1.0, -0.5, height);
     glEnd();
 
-    if(1 == lev)
+    if(1 == _nlev)
     {
         glEnable(GL_POLYGON_OFFSET_FILL);
         glPolygonOffset(1, 1);
@@ -482,611 +421,27 @@ void UFS2dViewer::_flatDisplay()
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
     glBegin(GL_QUADS);
-    for(n = 0; n < ncenters; ++n)
+    for(j = 1; j < _nlat; ++j)
     {
-        if(_innerPoints[n])
+        for(i = 1; i < _nlon; ++i)
         {
-            j = n * ncorners;
-
-            for(i = 0; i < ncorners; ++i)
+	    for(j1=j-1; j1<j+1; ++j1)
             {
-                m = element_corners[j+i];
-                fact = sv * (pltvar[m+k*ncol] - _valmin);
-                glTexCoord1d(fact);
+	        for(i1=i-1; i1<i+1; ++i1)
+                {
+		    npos = j1*_nlon + i1;
+                    fact = sv * (pltvar[npos] - _valmin);
+                    glTexCoord1d(fact);
 
-                glVertex3d(_xFlat[m], _yFlat[m], height);
+                    glVertex3d(_xFlat[npos], _yFlat[npos], height);
+                }
             }
         }
     }
     glEnd();
 
-  //handle South Pole
-    for(num = 0; num < num_south_pole_cols; ++num)
-    {
-        n = south_pole_cols[num];
 
-        j = n * ncorners;
-
-        for(i = 0; i < ncorners; ++i)
-        {
-            m = element_corners[j+i];
-            vb[i] = pltvar[m+k*ncol];
-            fb[i] = sv * (vb[i] - _valmin);
-
-            xb[i] = _xFlat[m];
-            yb[i] = _yFlat[m];
-        }
-
-      //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-      //     << ", line: " << __LINE__ << endl;
-      //cout << "\txb[0] = " << xb[0] << ", xb[1] = " << xb[1] << ", xb[2] = " << xb[2] << ", xb[3] = " << xb[3] << endl;
-      //cout << "\tyb[0] = " << yb[0] << ", yb[1] = " << yb[1] << ", yb[2] = " << yb[2] << ", yb[3] = " << yb[3] << endl;
-
-        if(NEAR_SOUTH_POLE > yb[0])
-        {
-          //Point 0 at South pole
-          //Make 2 quads: 0, 1, 0, 2 and 0, 2, 0, 3.
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_QUAD_STRIP);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[1], yb[0], height);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[1], yb[1], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[2], yb[0], height);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[2], yb[2], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[3], yb[0], height);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[3], yb[3], height);
-
-            glEnd();
-
-            continue;
-        }
-        else if(NEAR_SOUTH_POLE > yb[1])
-        {
-          //Point 1 at South pole
-          //Make 2 quads: 1, 0, 1, 2 and 1, 2, 1, 3.
-
-            if((NEAR_NEGATIVE_ZERO < xb[2]) && (NEAR_NEGATIVE_ZERO < xb[3]) && (NEAR_WEST_BOUNDARY > xb[0]))
-                xb[0] = 1.0;
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_QUAD_STRIP);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[0], yb[1], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[0], yb[0], height);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[3], yb[1], height);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[3], yb[3], height);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[2], yb[1], height);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[2], yb[2], height);
-
-            glEnd();
-
-            continue;
-        }
-        else if(NEAR_SOUTH_POLE > yb[2])
-        {
-          //Point 2 at South pole
-          //Make 2 quads: 2, 0, 2, 1 and 2, 1, 2, 3.
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_QUAD_STRIP);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[1], yb[2], height);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[1], yb[1], height);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[0], yb[2], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[0], yb[0], height);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[3], yb[2], height);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[3], yb[3], height);
-
-            glEnd();
-
-            continue;
-        }
-        else if(NEAR_SOUTH_POLE > yb[3])
-        {
-          //Point 3 at South pole
-          //Make 2 quads: 3, 0, 3, 1 and 3, 1, 3, 2.
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_QUAD_STRIP);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[2], yb[3], height);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[2], yb[2], height);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[1], yb[3], height);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[1], yb[1], height);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[0], yb[3], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[0], yb[0], height);
-
-            glEnd();
-
-            continue;
-        }
-        else
-        {
-            cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-                 << ", line: " << __LINE__ << endl;
-            cout << "\txb[0] = " << xb[0] << ", xb[1] = " << xb[1] << ", xb[2] = " << xb[2] << ", xb[3] = " << xb[3] << endl;
-            cout << "\tyb[0] = " << yb[0] << ", yb[1] = " << yb[1] << ", yb[2] = " << yb[2] << ", yb[3] = " << yb[3] << endl;
-        }
-    }
-
-  //Handle North Pole
-    for(num = 0; num < num_north_pole_cols; ++num)
-    {
-        n = north_pole_cols[num];
-
-        j = n * ncorners;
-
-        for(i = 0; i < ncorners; ++i)
-        {
-            m = element_corners[j+i];
-            vb[i] = pltvar[m+k*ncol];
-            fb[i] = sv * (vb[i] - _valmin);
-
-            xb[i] = _xFlat[m];
-            yb[i] = _yFlat[m];
-        }
-
-      //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-      //     << ", line: " << __LINE__ << endl;
-      //cout << "\txb[0] = " << xb[0] << ", xb[1] = " << xb[1] << ", xb[2] = " << xb[2] << ", xb[3] = " << xb[3] << endl;
-      //cout << "\tyb[0] = " << yb[0] << ", yb[1] = " << yb[1] << ", yb[2] = " << yb[2] << ", yb[3] = " << yb[3] << endl;
-
-        if(NEAR_NORTH_POLE < yb[0])
-        {
-          //Point 0 is at North Pole.
-          //Make 2 quads: 0, 1, 0, 2 and 0, 2, 0, 3.
-
-            if((NEAR_NEGATIVE_ZERO < xb[2]) && (NEAR_NEGATIVE_ZERO < xb[3]) && (NEAR_WEST_BOUNDARY > xb[1]))
-                xb[1] = 1.0;
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_QUAD_STRIP);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[1], yb[0], height);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[1], yb[1], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[2], yb[0], height);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[2], yb[2], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[3], yb[0], height);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[3], yb[3], height);
-
-            glEnd();
-
-            continue;
-        }
-        else if(NEAR_NORTH_POLE < yb[1])
-        {
-          //Point 1 is at North Pole.
-          //Make 2 quads: 1, 0, 1, 2 and 1, 2, 1, 3.
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_QUAD_STRIP);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[0], yb[1], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[0], yb[0], height);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[3], yb[1], height);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[3], yb[3], height);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[2], yb[1], height);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[2], yb[2], height);
-
-            glEnd();
-
-            continue;
-        }
-        else if(NEAR_NORTH_POLE < yb[2])
-        {
-          //Point 2 is at North Pole.
-          //Make 2 quads: 2, 0, 2, 1 and 2, 1, 2, 3. 
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_QUAD_STRIP);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[1], yb[2], height); 
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[1], yb[1], height); 
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[0], yb[2], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[0], yb[0], height);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[3], yb[2], height); 
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[3], yb[3], height);
-
-            glEnd();
-
-            continue;
-        }
-        else if(NEAR_NORTH_POLE < yb[3])
-        {
-          //Point 3 is at North Pole.
-          //Make 2 quads: 3, 0, 3, 1 and 3, 1, 3, 2.
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_QUAD_STRIP);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[2], yb[3], height);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[2], yb[2], height);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[1], yb[3], height);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[1], yb[1], height);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[0], yb[3], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[0], yb[0], height);
-
-            glEnd();
-
-            continue;
-        }
-        else
-        {
-            cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-                 << ", line: " << __LINE__ << endl;
-            cout << "\txb[0] = " << xb[0] << ", xb[1] = " << xb[1] << ", xb[2] = " << xb[2] << ", xb[3] = " << xb[3] << endl;
-            cout << "\tyb[0] = " << yb[0] << ", yb[1] = " << yb[1] << ", yb[2] = " << yb[2] << ", yb[3] = " << yb[3] << endl;
-        }
-    }
-
-  //The middle boundary
-    for(num = 0; num < num_boundary_cols; ++num)
-    {
-        n = boundary_cols[num];
-
-        j = n * ncorners;
-
-        for(i = 0; i < ncorners; ++i)
-        {
-            m = element_corners[j+i];
-            vb[i] = pltvar[m+k*ncol];
-            fb[i] = sv * (vb[i] - _valmin);
-
-            xb[i] = _xFlat[m];
-            yb[i] = _yFlat[m];
-        }
-
-        if((NEAR_POSITIVE_ZERO > xb[0]) && (NEAR_POSITIVE_ZERO > xb[1]))
-        {
-            if((NEAR_EAST_BOUNDARY < xb[2]) && (NEAR_EAST_BOUNDARY < xb[3]))
-            {
-                xb[2] = -1.0;
-                xb[3] = -1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_QUADS);
-
-                glTexCoord1d(fb[0]);
-                glVertex3d(xb[0], yb[0], height);
-
-                glTexCoord1d(fb[1]);
-                glVertex3d(xb[1], yb[1], height);
-
-                glTexCoord1d(fb[2]);
-                glVertex3d(xb[2], yb[2], height);
-
-                glTexCoord1d(fb[3]);
-                glVertex3d(xb[3], yb[3], height);
-
-                glEnd();
-
-                continue;
-            }
-
-            if((NEAR_EAST_BOUNDARY < xb[2]) && (NEAR_WEST_BOUNDARY > xb[3])) 
-            {
-                xb[2] = -1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_QUADS);
-
-                glTexCoord1d(fb[0]);
-                glVertex3d(xb[0], yb[0], height);
-
-                glTexCoord1d(fb[1]);
-                glVertex3d(xb[1], yb[1], height);
-
-                glTexCoord1d(fb[2]);
-                glVertex3d(xb[2], yb[2], height);
-
-                glTexCoord1d(fb[3]);
-                glVertex3d(xb[3], yb[3], height);
-
-                glEnd();
-
-                continue;
-            }
-
-            if((NEAR_WEST_BOUNDARY > xb[2]) && (NEAR_EAST_BOUNDARY < xb[3]))
-            {
-                xb[3] = -1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_QUADS);
-
-                glTexCoord1d(fb[0]);
-                glVertex3d(xb[0], yb[0], height);
-
-                glTexCoord1d(fb[1]);
-                glVertex3d(xb[1], yb[1], height);
-
-                glTexCoord1d(fb[2]);
-                glVertex3d(xb[2], yb[2], height);
-
-                glTexCoord1d(fb[3]);
-                glVertex3d(xb[3], yb[3], height);
-
-                glEnd();
-
-                continue;
-            }
-        }
-
-        if((NEAR_POSITIVE_ZERO > xb[2]) && (NEAR_POSITIVE_ZERO > xb[3]))
-        {
-            if((NEAR_EAST_BOUNDARY < xb[0]) && (NEAR_EAST_BOUNDARY < xb[1])) 
-            {
-                xb[0] = -1.0;
-                xb[1] = -1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_QUADS);
-
-                glTexCoord1d(fb[0]);
-                glVertex3d(xb[0], yb[0], height);
-
-                glTexCoord1d(fb[1]);
-                glVertex3d(xb[1], yb[1], height);
-
-                glTexCoord1d(fb[2]);
-                glVertex3d(xb[2], yb[2], height);
-
-                glTexCoord1d(fb[3]);
-                glVertex3d(xb[3], yb[3], height);
-
-                glEnd();
-
-                continue;
-            }
-
-            if((NEAR_WEST_BOUNDARY > xb[0]) && (NEAR_EAST_BOUNDARY < xb[1])) 
-            {
-                xb[1] = -1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_QUADS);
-
-                glTexCoord1d(fb[0]);
-                glVertex3d(xb[0], yb[0], height);
-
-                glTexCoord1d(fb[1]);
-                glVertex3d(xb[1], yb[1], height);
-
-                glTexCoord1d(fb[2]);
-                glVertex3d(xb[2], yb[2], height);
-
-                glTexCoord1d(fb[3]);
-                glVertex3d(xb[3], yb[3], height);
-
-                glEnd();
-
-                continue;
-            }
-
-            if((NEAR_EAST_BOUNDARY < xb[0]) && (NEAR_WEST_BOUNDARY > xb[1]))
-            {
-                xb[0] = -1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_QUADS);
-
-                glTexCoord1d(fb[0]);
-                glVertex3d(xb[0], yb[0], height);
-
-                glTexCoord1d(fb[1]);
-                glVertex3d(xb[1], yb[1], height);
-
-                glTexCoord1d(fb[2]);
-                glVertex3d(xb[2], yb[2], height);
-
-                glTexCoord1d(fb[3]);
-                glVertex3d(xb[3], yb[3], height);
-
-                glEnd();
-
-                continue;
-            }
-        }
-
-        if((NEAR_NEGATIVE_ZERO < xb[2]) && (NEAR_NEGATIVE_ZERO < xb[3]))
-        {
-            if((NEAR_WEST_BOUNDARY > xb[0]) && (NEAR_WEST_BOUNDARY > xb[1]))
-            {
-                xb[0] = 1.0;
-                xb[1] = 1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_QUADS);
-
-                glTexCoord1d(fb[0]);
-                glVertex3d(xb[0], yb[0], height);
-
-                glTexCoord1d(fb[1]);
-                glVertex3d(xb[1], yb[1], height);
-
-                glTexCoord1d(fb[2]);
-                glVertex3d(xb[2], yb[2], height);
-
-                glTexCoord1d(fb[3]);
-                glVertex3d(xb[3], yb[3], height);
-
-                glEnd();
-
-                continue;
-            }
-
-            if((NEAR_WEST_BOUNDARY > xb[0]) && (NEAR_EAST_BOUNDARY < xb[1]))
-            {
-                xb[0] = 1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_QUADS);
-
-                glTexCoord1d(fb[0]);
-                glVertex3d(xb[0], yb[0], height);
-
-                glTexCoord1d(fb[1]);
-                glVertex3d(xb[1], yb[1], height);
-
-                glTexCoord1d(fb[2]);
-                glVertex3d(xb[2], yb[2], height);
-
-                glTexCoord1d(fb[3]);
-                glVertex3d(xb[3], yb[3], height);
-
-                glEnd();
-
-                continue;
-            }
-
-            if((NEAR_EAST_BOUNDARY < xb[0]) && (NEAR_WEST_BOUNDARY > xb[1]))
-            {
-                xb[1] = 1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_QUADS);
-
-                glTexCoord1d(fb[0]);
-                glVertex3d(xb[0], yb[0], height);
-
-                glTexCoord1d(fb[1]);
-                glVertex3d(xb[1], yb[1], height);
-
-                glTexCoord1d(fb[2]);
-                glVertex3d(xb[2], yb[2], height);
-
-                glTexCoord1d(fb[3]);
-                glVertex3d(xb[3], yb[3], height);
-
-                glEnd();
-
-                continue;
-            }
-        }
-
-        cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-             << ", line: " << __LINE__ << endl;
-        cout << "\tnum = " << num << endl;
-        cout << "\tyb[1] = " << yb[1] << ", yb[2] = " << yb[2] << endl;
-        cout << "\txb[1] = " << xb[1] << ", xb[2] = " << xb[2] << endl;
-        cout << "\tyb[0] = " << yb[0] << ", yb[3] = " << yb[3] << endl;
-        cout << "\txb[0] = " << xb[0] << ", xb[3] = " << xb[3] << endl;
-    }
-
-    if(numProcessedBoundaryPoints != _nBoundaryPoints)
-    {
-        cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-        cout << "\tnumProcessedBoundaryPoints = " << numProcessedBoundaryPoints
-             << ", _nBoundaryPoints = " << _nBoundaryPoints << endl;
-    }
-
-    if(1 == lev)
+    if(1 == _nlev)
         glDisable(GL_POLYGON_OFFSET_FILL);
     glDisable(GL_TEXTURE_1D);
 
@@ -1105,15 +460,15 @@ void UFS2dViewer::_flatDisplay()
     glEndList();
 }
 
-void UFS2dViewer::_evaluate(double *var)
+void UFS2dViewer::_evaluate(float *var)
 {
-    int size;
-    int n = 0;
+    size_t size;
+    size_t n = 0;
     char vn[128];
 
     strcpy(vn, _varname.c_str());
 
-    size = geometry->get_ufs__ncol() * geometry->get_ufs__lev();
+    size = geometry->get_nlon() * geometry->get_nlat() * geometry->get_nlev();
 
     _valmax = var[0];
     _valmin = var[0];
@@ -1152,7 +507,8 @@ void UFS2dViewer::reset_texture1d(ColorTable *ct)
 
 void UFS2dViewer::draw_sphere_grids()
 {
-    int i, j, m, n;
+    int i, j;
+    size_t npos;
 
     double radius = 1.001;
 
@@ -1165,7 +521,7 @@ void UFS2dViewer::draw_sphere_grids()
     _ySphere = geometry->get_ySphere();
     _zSphere = geometry->get_zSphere();
 
-    radius = 0.75 + 0.5 * ( 1.0 - (nvoptions->get_zsec() + 1.0) / lev);
+    radius = 0.75 + 0.5 * ( 1.0 - (nvoptions->get_zsec() + 1.0) / _nlev);
 
     glPushMatrix();
 
@@ -1177,19 +533,15 @@ void UFS2dViewer::draw_sphere_grids()
     glLineWidth(line_width);
 
   //#pragma omp parallel for
-    for(n = 0; n < ncenters; ++n)
+    for(j = 0; j < _nlat; ++j)
     {
-        j = n * ncorners;
+        npos = j*_nlon;
 
         glBegin(GL_LINE_STRIP);
-            for(i = 0; i < ncorners; ++i)
-            {
-                m = element_corners[j+i];
-                glVertex3d(radius * _xSphere[m], radius * _ySphere[m], radius * _zSphere[m]);
-            }
-
-            m = element_corners[j];
-            glVertex3d(radius * _xSphere[m], radius * _ySphere[m], radius * _zSphere[m]);
+        for(i = 0; i < _nlon; ++i)
+        {
+            glVertex3d(radius * _xSphere[npos+i], radius * _ySphere[npos+i], radius * _zSphere[npos+i]);
+        }
         glEnd();
     }
     glEnd();
@@ -1199,21 +551,17 @@ void UFS2dViewer::draw_sphere_grids()
 
 void UFS2dViewer::draw_plane_grids()
 {
-    int i, j, m, n, num;
-
-    int numProcessedBoundaryPoints = 0;
+    int i, j;
+    size_t npos;
 
     double height = 0.01;
-
-    double xb[ncorners];
-    double yb[ncorners];
 
     GLfloat line_width = 1.0;
 
   //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\tncenters = " << ncenters << endl;
 
-    height = 0.8 * (0.5 - (nvoptions->get_zsec() + 1.0) / lev);
+    height = 0.8 * (0.5 - (nvoptions->get_zsec() + 1.0) / _nlev);
 
     glPushMatrix();
 
@@ -1225,480 +573,15 @@ void UFS2dViewer::draw_plane_grids()
 
     glLineWidth(line_width);
 
-    for(n = 0; n < ncenters; ++n)
+    for(j = 0; j < _nlat; ++j)
     {
-        if(_innerPoints[n])
+        npos = j*_nlon;
+        glBegin(GL_LINE_STRIP);
+        for(i = 0; i < _nlon; ++i)
         {
-            j = n * ncorners;
-
-            glBegin(GL_LINE_STRIP);
-                for(i = 0; i < ncorners; ++i)
-                {
-                    m = element_corners[j+i];
-                    glVertex3d(_xFlat[m], _yFlat[m], height);
-                }
-
-                m = element_corners[j];
-                glVertex3d(_xFlat[m], _yFlat[m], height);
-            glEnd();
+            glVertex3d(_xFlat[i], _yFlat[j], height);
         }
-    }
-
-  //handle South Pole
-    for(num = 0; num < num_south_pole_cols; ++num)
-    {
-        n = south_pole_cols[num];
-
-        j = n * ncorners;
-
-        for(i = 0; i < ncorners; ++i)
-        {
-            m = element_corners[j+i];
-            xb[i] = _xFlat[m];
-            yb[i] = _yFlat[m];
-        }
-
-      //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-      //     << ", line: " << __LINE__ << endl;
-      //cout << "\txb[0] = " << xb[0] << ", xb[1] = " << xb[1] << ", xb[2] = " << xb[2] << ", xb[3] = " << xb[3] << endl;
-      //cout << "\tyb[0] = " << yb[0] << ", yb[1] = " << yb[1] << ", yb[2] = " << yb[2] << ", yb[3] = " << yb[3] << endl;
-
-        if(NEAR_SOUTH_POLE > yb[0])
-        {
-          //Point 0 at South pole
-          //Make 2 quads: 0, 1, 0, 2 and 0, 2, 0, 3.
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_LINE_STRIP);
-                glVertex3d(xb[1], yb[0], height);
-                glVertex3d(xb[1], yb[1], height);
-                glVertex3d(xb[2], yb[2], height);
-                glVertex3d(xb[2], yb[0], height);
-                glVertex3d(xb[1], yb[0], height);
-            glEnd();
-
-            glBegin(GL_LINE_STRIP);
-                glVertex3d(xb[2], yb[0], height);
-                glVertex3d(xb[2], yb[2], height);
-                glVertex3d(xb[3], yb[3], height);
-                glVertex3d(xb[3], yb[0], height);
-                glVertex3d(xb[2], yb[0], height);
-            glEnd();
-
-            continue;
-        }
-        else if(NEAR_SOUTH_POLE > yb[1])
-        {
-          //Point 1 at South pole
-          //Make 2 quads: 1, 2, 3, 1 and 1, 3, 0, 1.
-
-            if((NEAR_NEGATIVE_ZERO < xb[2]) && (NEAR_NEGATIVE_ZERO < xb[3]) && (NEAR_WEST_BOUNDARY > xb[0]))
-                xb[0] = 1.0;
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_LINE_STRIP);
-                glVertex3d(xb[2], yb[1], height);
-                glVertex3d(xb[2], yb[2], height);
-                glVertex3d(xb[3], yb[3], height);
-                glVertex3d(xb[3], yb[1], height);
-                glVertex3d(xb[2], yb[1], height);
-            glEnd();
-
-            glBegin(GL_LINE_STRIP);
-                glVertex3d(xb[3], yb[1], height);
-                glVertex3d(xb[3], yb[3], height);
-                glVertex3d(xb[0], yb[0], height);
-                glVertex3d(xb[0], yb[1], height);
-                glVertex3d(xb[3], yb[1], height);
-            glEnd();
-
-            continue;
-        }
-        else if(NEAR_SOUTH_POLE > yb[2])
-        {
-          //Point 2 at South pole
-          //Make 2 quads: 2, 3, 0, 2 and 2, 0, 1, 2.
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_LINE_STRIP);
-                glVertex3d(xb[3], yb[2], height);
-                glVertex3d(xb[3], yb[3], height);
-                glVertex3d(xb[0], yb[0], height);
-                glVertex3d(xb[0], yb[2], height);
-                glVertex3d(xb[3], yb[2], height);
-            glEnd();
-
-            glBegin(GL_LINE_STRIP);
-                glVertex3d(xb[0], yb[2], height);
-                glVertex3d(xb[0], yb[0], height);
-                glVertex3d(xb[1], yb[1], height);
-                glVertex3d(xb[1], yb[2], height);
-                glVertex3d(xb[0], yb[2], height);
-            glEnd();
-
-            continue;
-        }
-        else if(NEAR_SOUTH_POLE > yb[3])
-        {
-          //Point 3 at South pole
-          //Make 2 quads: 3, 0, 1, 3 and 3, 1, 2, 3.
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_LINE_STRIP);
-                glVertex3d(xb[0], yb[3], height);
-                glVertex3d(xb[0], yb[0], height);
-                glVertex3d(xb[1], yb[1], height);
-                glVertex3d(xb[1], yb[3], height);
-                glVertex3d(xb[0], yb[3], height);
-            glEnd();
-
-            glBegin(GL_LINE_STRIP);
-                glVertex3d(xb[1], yb[3], height);
-                glVertex3d(xb[1], yb[1], height);
-                glVertex3d(xb[2], yb[2], height);
-                glVertex3d(xb[2], yb[3], height);
-                glVertex3d(xb[1], yb[3], height);
-            glEnd();
-
-            continue;
-        }
-        else
-        {
-            cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-                 << ", line: " << __LINE__ << endl;
-            cout << "\txb[0] = " << xb[0] << ", xb[1] = " << xb[1] << ", xb[2] = " << xb[2] << ", xb[3] = " << xb[3] << endl;
-            cout << "\tyb[0] = " << yb[0] << ", yb[1] = " << yb[1] << ", yb[2] = " << yb[2] << ", yb[3] = " << yb[3] << endl;
-        }
-    }
-
-  //Handle North Pole
-    for(num = 0; num < num_north_pole_cols; ++num)
-    {
-        n = north_pole_cols[num];
-
-        j = n * ncorners;
-
-        for(i = 0; i < ncorners; ++i)
-        {
-            m = element_corners[j+i];
-            xb[i] = _xFlat[m];
-            yb[i] = _yFlat[m];
-        }
-
-      //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-      //     << ", line: " << __LINE__ << endl;
-      //cout << "\txb[0] = " << xb[0] << ", xb[1] = " << xb[1] << ", xb[2] = " << xb[2] << ", xb[3] = " << xb[3] << endl;
-      //cout << "\tyb[0] = " << yb[0] << ", yb[1] = " << yb[1] << ", yb[2] = " << yb[2] << ", yb[3] = " << yb[3] << endl;
-
-        if(NEAR_NORTH_POLE < yb[0])
-        {
-          //Point 0 is at North Pole.
-          //Make 2 quads: 0, 1, 0, 2 and 0, 2, 0, 3.
-
-            if((NEAR_NEGATIVE_ZERO < xb[2]) && (NEAR_NEGATIVE_ZERO < xb[3]) && (NEAR_WEST_BOUNDARY > xb[1]))
-                xb[1] = 1.0;
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_LINE_STRIP);
-                glVertex3d(xb[1], yb[0], height);
-                glVertex3d(xb[1], yb[1], height);
-                glVertex3d(xb[2], yb[2], height);
-                glVertex3d(xb[2], yb[0], height);
-                glVertex3d(xb[1], yb[0], height);
-            glEnd();
-
-            glBegin(GL_LINE_STRIP);
-                glVertex3d(xb[2], yb[0], height);
-                glVertex3d(xb[2], yb[2], height);
-                glVertex3d(xb[3], yb[3], height);
-                glVertex3d(xb[3], yb[0], height);
-                glVertex3d(xb[2], yb[0], height);
-            glEnd();
-
-            continue;
-        }
-        else if(NEAR_NORTH_POLE < yb[1])
-        {
-          //Point 1 is at North Pole.
-          //Make 2 quads: 1, 0, 1, 2 and 1, 2, 1, 3.
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_LINE_STRIP);
-                glVertex3d(xb[2], yb[1], height);
-                glVertex3d(xb[2], yb[2], height);
-                glVertex3d(xb[3], yb[3], height);
-                glVertex3d(xb[3], yb[1], height);
-                glVertex3d(xb[2], yb[1], height);
-            glEnd();
-
-            glBegin(GL_LINE_STRIP);
-                glVertex3d(xb[3], yb[1], height);
-                glVertex3d(xb[3], yb[3], height);
-                glVertex3d(xb[0], yb[0], height);
-                glVertex3d(xb[0], yb[1], height);
-                glVertex3d(xb[3], yb[1], height);
-            glEnd();
-
-            continue;
-        }
-        else if(NEAR_NORTH_POLE < yb[2])
-        {
-          //Point 2 is at North Pole.
-          //Make 2 quads: 2, 0, 2, 1 and 2, 1, 2, 3. 
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_LINE_STRIP);
-                glVertex3d(xb[3], yb[2], height);
-                glVertex3d(xb[3], yb[3], height);
-                glVertex3d(xb[0], yb[0], height);
-                glVertex3d(xb[0], yb[2], height);
-                glVertex3d(xb[3], yb[2], height);
-            glEnd();
-
-            glBegin(GL_LINE_STRIP);
-                glVertex3d(xb[0], yb[2], height);
-                glVertex3d(xb[0], yb[0], height);
-                glVertex3d(xb[1], yb[1], height);
-                glVertex3d(xb[1], yb[2], height);
-                glVertex3d(xb[0], yb[2], height);
-            glEnd();
-
-            continue;
-        }
-        else if(NEAR_NORTH_POLE < yb[3])
-        {
-          //Point 3 is at North Pole.
-          //Make 2 quads: 3, 0, 3, 1 and 3, 1, 3, 2.
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_LINE_STRIP);
-                glVertex3d(xb[0], yb[3], height);
-                glVertex3d(xb[0], yb[0], height);
-                glVertex3d(xb[1], yb[1], height);
-                glVertex3d(xb[1], yb[3], height);
-                glVertex3d(xb[0], yb[3], height);
-            glEnd();
-
-            glBegin(GL_LINE_STRIP);
-                glVertex3d(xb[1], yb[3], height);
-                glVertex3d(xb[1], yb[1], height);
-                glVertex3d(xb[2], yb[2], height);
-                glVertex3d(xb[2], yb[3], height);
-                glVertex3d(xb[1], yb[3], height);
-            glEnd();
-
-            continue;
-        }
-        else
-        {
-            cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-                 << ", line: " << __LINE__ << endl;
-            cout << "\txb[0] = " << xb[0] << ", xb[1] = " << xb[1] << ", xb[2] = " << xb[2] << ", xb[3] = " << xb[3] << endl;
-            cout << "\tyb[0] = " << yb[0] << ", yb[1] = " << yb[1] << ", yb[2] = " << yb[2] << ", yb[3] = " << yb[3] << endl;
-        }
-    }
-
-  //The middle boundary
-    for(num = 0; num < num_boundary_cols; ++num)
-    {
-        n = boundary_cols[num];
-
-        j = n * ncorners;
-
-        for(i = 0; i < ncorners; ++i)
-        {
-            m = element_corners[j+i];
-            xb[i] = _xFlat[m];
-            yb[i] = _yFlat[m];
-        }
-
-        if((NEAR_POSITIVE_ZERO > xb[0]) && (NEAR_POSITIVE_ZERO > xb[1]))
-        {
-            if((NEAR_EAST_BOUNDARY < xb[2]) && (NEAR_EAST_BOUNDARY < xb[3]))
-            {
-                xb[2] = -1.0;
-                xb[3] = -1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_LINE_STRIP);
-                    glVertex3d(xb[0], yb[0], height);
-                    glVertex3d(xb[1], yb[1], height);
-                    glVertex3d(xb[2], yb[2], height);
-                    glVertex3d(xb[3], yb[3], height);
-                    glVertex3d(xb[0], yb[0], height);
-                glEnd();
-
-                continue;
-            }
-
-            if((NEAR_EAST_BOUNDARY < xb[2]) && (NEAR_WEST_BOUNDARY > xb[3])) 
-            {
-                xb[2] = -1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_LINE_STRIP);
-                    glVertex3d(xb[0], yb[0], height);
-                    glVertex3d(xb[1], yb[1], height);
-                    glVertex3d(xb[2], yb[2], height);
-                    glVertex3d(xb[3], yb[3], height);
-                    glVertex3d(xb[0], yb[0], height);
-                glEnd();
-
-                continue;
-            }
-
-            if((NEAR_WEST_BOUNDARY > xb[2]) && (NEAR_EAST_BOUNDARY < xb[3]))
-            {
-                xb[3] = -1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_LINE_STRIP);
-                    glVertex3d(xb[0], yb[0], height);
-                    glVertex3d(xb[1], yb[1], height);
-                    glVertex3d(xb[2], yb[2], height);
-                    glVertex3d(xb[3], yb[3], height);
-                    glVertex3d(xb[0], yb[0], height);
-                glEnd();
-
-                continue;
-            }
-        }
-
-        if((NEAR_POSITIVE_ZERO > xb[2]) && (NEAR_POSITIVE_ZERO > xb[3]))
-        {
-            if((NEAR_EAST_BOUNDARY < xb[0]) && (NEAR_EAST_BOUNDARY < xb[1])) 
-            {
-                xb[0] = -1.0;
-                xb[1] = -1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_LINE_STRIP);
-                    glVertex3d(xb[0], yb[0], height);
-                    glVertex3d(xb[1], yb[1], height);
-                    glVertex3d(xb[2], yb[2], height);
-                    glVertex3d(xb[3], yb[3], height);
-                    glVertex3d(xb[0], yb[0], height);
-                glEnd();
-
-                continue;
-            }
-
-            if((NEAR_WEST_BOUNDARY > xb[0]) && (NEAR_EAST_BOUNDARY < xb[1])) 
-            {
-                xb[1] = -1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_LINE_STRIP);
-                    glVertex3d(xb[0], yb[0], height);
-                    glVertex3d(xb[1], yb[1], height);
-                    glVertex3d(xb[2], yb[2], height);
-                    glVertex3d(xb[3], yb[3], height);
-                    glVertex3d(xb[0], yb[0], height);
-                glEnd();
-
-                continue;
-            }
-
-            if((NEAR_EAST_BOUNDARY < xb[0]) && (NEAR_WEST_BOUNDARY > xb[1]))
-            {
-                xb[0] = -1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_LINE_STRIP);
-                    glVertex3d(xb[0], yb[0], height);
-                    glVertex3d(xb[1], yb[1], height);
-                    glVertex3d(xb[2], yb[2], height);
-                    glVertex3d(xb[3], yb[3], height);
-                    glVertex3d(xb[0], yb[0], height);
-                glEnd();
-
-                continue;
-            }
-        }
-
-        if((NEAR_NEGATIVE_ZERO < xb[2]) && (NEAR_NEGATIVE_ZERO < xb[3]))
-        {
-            if((NEAR_WEST_BOUNDARY > xb[0]) && (NEAR_WEST_BOUNDARY > xb[1]))
-            {
-                xb[0] = 1.0;
-                xb[1] = 1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_LINE_STRIP);
-                    glVertex3d(xb[0], yb[0], height);
-                    glVertex3d(xb[1], yb[1], height);
-                    glVertex3d(xb[2], yb[2], height);
-                    glVertex3d(xb[3], yb[3], height);
-                    glVertex3d(xb[0], yb[0], height);
-                glEnd();
-
-                continue;
-            }
-
-            if((NEAR_WEST_BOUNDARY > xb[0]) && (NEAR_EAST_BOUNDARY < xb[1]))
-            {
-                xb[0] = 1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_LINE_STRIP);
-                    glVertex3d(xb[0], yb[0], height);
-                    glVertex3d(xb[1], yb[1], height);
-                    glVertex3d(xb[2], yb[2], height);
-                    glVertex3d(xb[3], yb[3], height);
-                    glVertex3d(xb[0], yb[0], height);
-                glEnd();
-
-                continue;
-            }
-
-            if((NEAR_EAST_BOUNDARY < xb[0]) && (NEAR_WEST_BOUNDARY > xb[1]))
-            {
-                xb[1] = 1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_LINE_STRIP);
-                    glVertex3d(xb[0], yb[0], height);
-                    glVertex3d(xb[1], yb[1], height);
-                    glVertex3d(xb[2], yb[2], height);
-                    glVertex3d(xb[3], yb[3], height);
-                    glVertex3d(xb[0], yb[0], height);
-                glEnd();
-
-                continue;
-            }
-        }
-
-        cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-             << ", line: " << __LINE__ << endl;
-        cout << "\tnum = " << num << endl;
-        cout << "\tyb[1] = " << yb[1] << ", yb[2] = " << yb[2] << endl;
-        cout << "\txb[1] = " << xb[1] << ", xb[2] = " << xb[2] << endl;
-        cout << "\tyb[0] = " << yb[0] << ", yb[3] = " << yb[3] << endl;
-        cout << "\txb[0] = " << xb[0] << ", xb[3] = " << xb[3] << endl;
-    }
-
-    if(numProcessedBoundaryPoints != _nBoundaryPoints)
-    {
-        cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-        cout << "\tnumProcessedBoundaryPoints = " << numProcessedBoundaryPoints
-             << ", _nBoundaryPoints = " << _nBoundaryPoints << endl;
+        glEnd();
     }
 
     glPopMatrix();
@@ -1706,29 +589,22 @@ void UFS2dViewer::draw_plane_grids()
 
 void UFS2dViewer::_display_Yflat_plane(int ys)
 {
-    int i, j, k, m, n;
-
-    double latc = (double) ys;
-    double yc = latc / 180.0;
+    int k;
+    double yc, ycl;
     double sv = 1.0;
-    double height[lev];
-
-    bool all_above;
-    bool all_below;
+    double height[_nlev];
+    int jlatc = (int) ((double) ys/_deltlat);
 
     GLfloat line_width = 1.0;
 
-    int numBoundaryPoints = 0;
-    int numProcessedPoints = 0;
-
-    if((-80.0 > latc) || (80.0 < latc))
+    if((-80.0 > _lat[jlatc]) || (80.0 < _lat[jlatc]))
        return;
 
   //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\t_varname: <" << _varname << ">" << endl;
 
-    for(k = 0; k < lev; ++k)
-        height[k] = 0.8 * (0.5 - ((float) k + 1.0) / lev);
+    for(k = 0; k < _nlev; ++k)
+        height[k] = 0.8 * (0.5 - ((double) k + 1.0) / _nlev);
 
     sv = 1.0 / (_valmax - _valmin);
 
@@ -1740,7 +616,6 @@ void UFS2dViewer::_display_Yflat_plane(int ys)
   //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << ", sv = " << sv << endl;
   //cout << "\tycl = " << ycl << endl;
-  //cout << "\tys = " << ys << ", latc = " << latc << ", yc = " << yc << endl;
 
     glPushMatrix();
 
@@ -1750,29 +625,7 @@ void UFS2dViewer::_display_Yflat_plane(int ys)
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
-    for(n = 0; n < ncenters; ++n)
-    {
-        all_above = true;
-        all_below = true;
-
-        j = n * ncorners;
-
-        for(i = 0; i < ncorners; ++i)
-        {
-            m = element_corners[j+i];
-            if(latc > lat[m])
-                all_below = false;
-            if(latc < lat[m])
-                all_above = false;
-        }
-
-        if(all_above || all_below)
-            continue;
-
-        ++numBoundaryPoints;
-
-        handle_selectedYflat_quad(latc, j, sv, height, numProcessedPoints);
-    }
+    handle_selectedYflat_quad(jlatc, sv, height);
 
     glDisable(GL_TEXTURE_1D);
 
@@ -1781,1307 +634,74 @@ void UFS2dViewer::_display_Yflat_plane(int ys)
 
     glColor3f(1.0, 1.0, 0.0);
 
+    yc = 1.0;
     glBegin(GL_LINE_STRIP);
         glVertex3d(-1.0, yc, height[0]);
         glVertex3d( 1.0, yc, height[0]);
-        glVertex3d( 1.0, yc, height[lev-1]);
-        glVertex3d(-1.0, yc, height[lev-1]);
+        glVertex3d( 1.0, yc, height[_nlev-1]);
+        glVertex3d(-1.0, yc, height[_nlev-1]);
         glVertex3d(-1.0, yc, height[0]);
     glEnd();
 
     glPopMatrix();
 
     glEndList();
-
-    if(numProcessedPoints != numBoundaryPoints)
-    {
-        cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-             << ", line: " << __LINE__ << endl;
-        cout << "\nProcessed " << numProcessedPoints << " of " << numBoundaryPoints << endl;
-    }
 }
 
-double UFS2dViewer::linInterp(double xc, double x0, double x1,
-                                double y0, double y1, double &dx)
+void UFS2dViewer::handle_selectedXsphere_quad(int ilonc, double sv, double* radius)
 {
-    double xv, dv, y;
-
-    dv = x1 - x0;
-    xv = xc - x0;
-
-    if(1.0e-10 < fabs(dv))
-        dx = xv/dv;
-    else
-        dx = 0.5;
-
-    y = (1.0 - dx) * y0 + dx * y1;
-
-    return y;
-}
-
-void UFS2dViewer::handle_selectedXsphere_quad(double clon, double* ylon,
-                                                int nc, double sv,
-                                                double* radius,
-                                                int& numProcessedPoints)
-{
-    int i, m;
-
-    double xlon[ncorners];
-    double ylat[ncorners];
-
-    int mc[ncorners];
-
-    bool isAtPole = false;
-
-    for(i = 0; i < ncorners; ++i)
-    {
-        m = element_corners[nc+i];
-        mc[i] = element_corners[nc+i];
-        ylat[i] = lat[m];
-        xlon[i] = ylon[i];
-
-        if((ylat[i] < -89.99) || (ylat[i] > 89.99))
-            isAtPole = true;
-
-        if(clon < 180.0)
-        {
-            if(xlon[i] > 359.9)
-               xlon[i] -= 360.0;
-        }
-
-        if(clon > 180.0)
-        {
-            if(xlon[i] < 70.0)
-               xlon[i] += 360.0;
-        }
-    }
-
-    if(isAtPole)
-    {
-        if((ylat[0] < -89.99) || (ylat[0] > 89.99))
-        {
-            if(xlon[1] > 359.99) 
-            {
-                if((xlon[2] > 360.0) && (xlon[3] < 181.0))
-                    xlon[2] -= 360.0;
-
-                if((xlon[2] < 60.0) || (xlon[3] < 60.0))
-                    xlon[1] = 0.0;
-            }
-
-            if((xlon[1] < clon) && (xlon[2] < clon) && (xlon[3] < clon))
-            {
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[1] > clon) && (xlon[2] > clon) && (xlon[3] > clon))
-            {
-                ++numProcessedPoints;
-                return;
-            }
-               
-            if((xlon[1] <= clon) && (xlon[2] >= clon))
-            {
-                process_selectedXsphere_quad(clon, sv,
-                                             0, 0, 1, 2,
-                                             xlon, ylat, radius, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[1] >= clon) && (xlon[2] <= clon))
-            {
-                process_selectedXsphere_quad(clon, sv,
-                                             0, 0, 2, 1,
-                                             xlon, ylat, radius, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[2] <= clon) && (xlon[3] >= clon))
-            {
-                process_selectedXsphere_quad(clon, sv,
-                                             0, 0, 2, 3,
-                                             xlon, ylat, radius, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[3] <= clon) && (xlon[2] >= clon))
-            {
-                process_selectedXsphere_quad(clon, sv,
-                                             0, 0, 3, 2,
-                                             xlon, ylat, radius, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-        }
-
-        if((ylat[1] < -89.99) || (ylat[1] > 89.99))
-        {
-            if(xlon[0] > 359.99)
-            {
-                if((xlon[3] > 360.0) && (xlon[2] < 181.0))
-                    xlon[3] -= 360.0;
-
-                if((xlon[2] < 60.0) || (xlon[3] < 60.0))
-                    xlon[0] = 0.0;
-            }
-
-            if((xlon[0] < clon) && (xlon[2] < clon) && (xlon[3] < clon))
-            {
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[0] > clon) && (xlon[2] > clon) && (xlon[3] > clon))
-            {
-                ++numProcessedPoints;
-                return;
-            }
-               
-            if((xlon[0] <= clon) && (xlon[3] >= clon))
-            {
-                process_selectedXsphere_quad(clon, sv,
-                                             1, 1, 0, 3,
-                                             xlon, ylat, radius, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-               
-            if((xlon[0] >= clon) && (xlon[3] <= clon))
-            {
-                process_selectedXsphere_quad(clon, sv,
-                                             1, 1, 3, 0,
-                                             xlon, ylat, radius, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[2] >= clon) && (xlon[3] <= clon))
-            {
-                process_selectedXsphere_quad(clon, sv,
-                                             1, 1, 3, 2,
-                                             xlon, ylat, radius, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[2] <= clon) && (xlon[3] >= clon))
-            {
-                process_selectedXsphere_quad(clon, sv,
-                                             1, 1, 2, 3,
-                                             xlon, ylat, radius, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-        }
-
-        if((ylat[2] < -89.99) || (ylat[2] > 89.99))
-        {
-            if((xlon[0] < clon) && (xlon[1] < clon) && (xlon[3] < clon))
-            {
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[0] > clon) && (xlon[1] > clon) && (xlon[3] > clon))
-            {
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[0] <= clon) && (xlon[1] >= clon))
-            {
-                process_selectedXsphere_quad(clon, sv,
-                                             2, 2, 0, 1,
-                                             xlon, ylat, radius, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[0] >= clon) && (xlon[1] <= clon))
-            {
-                process_selectedXsphere_quad(clon, sv,
-                                             2, 2, 1, 0,
-                                             xlon, ylat, radius, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[0] <= clon) && (xlon[3] >= clon))
-            {
-                process_selectedXsphere_quad(clon, sv,
-                                             2, 2, 0, 3,
-                                             xlon, ylat, radius, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[0] >= clon) && (xlon[3] <= clon))
-            {
-                process_selectedXsphere_quad(clon, sv,
-                                             2, 2, 3, 0,
-                                             xlon, ylat, radius, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-        }
-
-        if((ylat[3] < -89.99) || (ylat[3] > 89.99))
-        {
-            if((xlon[0] < clon) && (xlon[1] < clon) && (xlon[2] < clon))
-            {
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[0] > clon) && (xlon[1] > clon) && (xlon[2] > clon))
-            {
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[0] <= clon) && (xlon[1] >= clon))
-            {
-                process_selectedXsphere_quad(clon, sv,
-                                             3, 3, 0, 1,
-                                             xlon, ylat, radius, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[0] >= clon) && (xlon[1] <= clon))
-            {
-                process_selectedXsphere_quad(clon, sv,
-                                             3, 3, 1, 0,
-                                             xlon, ylat, radius, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[1] <= clon) && (xlon[2] >= clon))
-            {
-                process_selectedXsphere_quad(clon, sv,
-                                             3, 3, 1, 2,
-                                             xlon, ylat, radius, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[1] >= clon) && (xlon[2] <= clon))
-            {
-                process_selectedXsphere_quad(clon, sv,
-                                             3, 3, 2, 1,
-                                             xlon, ylat, radius, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-        }
-
-        cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-        cout << "\tclon = " << clon << endl;
-        cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-        cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl << endl;
-        cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-        cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-    }
-
-#if 0
-    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tclon = " << clon << endl;
-    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl << endl;
-    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-#endif
-
-    if(xlon[0] <= clon)
-    {
-        if(xlon[1] <= clon)
-        {
-            if(xlon[2] <= clon)
-            {
-                if(xlon[3] <= clon)
-                {
-                    if(xlon[3] == clon)
-                    {
-                        if(xlon[2] == clon)
-                        {
-                            process_selectedXsphere_quad(clon, sv,
-                                                         1, 2, 0, 3,
-                                                         xlon, ylat, radius, mc);
-                        }
-                        else
-                        {
-                            process_selectedXsphere_quad(clon, sv,
-                                                         0, 3, 2, 3,
-                                                         xlon, ylat, radius, mc);
-                        }
-
-                        ++numProcessedPoints;
-                        return;
-                    }
-
-                    if(xlon[2] == clon)
-                    {
-                        if(xlon[1] == clon)
-                        {
-                            process_selectedXsphere_quad(clon, sv,
-                                                         0, 1, 3, 2,
-                                                         xlon, ylat, radius, mc);
-                        }
-                        else
-                        {
-                            process_selectedXsphere_quad(clon, sv,
-                                                         1, 2, 3, 2,
-                                                         xlon, ylat, radius, mc);
-                        }
-
-                        ++numProcessedPoints;
-                        return;
-                    }
-
-                    if(xlon[1] == clon)
-                    {
-                        if(xlon[0] == clon)
-                        {
-                            process_selectedXsphere_quad(clon, sv,
-                                                         3, 0, 2, 1,
-                                                         xlon, ylat, radius, mc);
-                        }
-                        else
-                        {
-                            process_selectedXsphere_quad(clon, sv,
-                                                         0, 1, 2, 1,
-                                                         xlon, ylat, radius, mc);
-                        }
-                        ++numProcessedPoints;
-                        return;
-                    }
-
-                    if(xlon[0] == clon)
-                    {
-                        if(xlon[3] == clon)
-                        {
-                            process_selectedXsphere_quad(clon, sv,
-                                                         1, 0, 2, 3,
-                                                         xlon, ylat, radius, mc);
-                        }
-                        else
-                        {
-                            process_selectedXsphere_quad(clon, sv,
-                                                         1, 0, 3, 0,
-                                                         xlon, ylat, radius, mc);
-                        }
-
-                        ++numProcessedPoints;
-                        return;
-                    }
-
-                  //If it reaches here, just ignore it.
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    process_selectedXsphere_quad(clon, sv,
-                                                 0, 3, 2, 3,
-                                                 xlon, ylat, radius, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-            else
-            {
-                if(xlon[3] <= clon)
-                {
-                    process_selectedXsphere_quad(clon, sv,
-                                                 1, 2, 3, 2,
-                                                 xlon, ylat, radius, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    process_selectedXsphere_quad(clon, sv,
-                                                 0, 3, 1, 2,
-                                                 xlon, ylat, radius, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-        }
-        else
-        {
-            if(xlon[2] <= clon)
-            {
-                if(xlon[3] <= clon)
-                {
-                    if(xlon[1] > clon)
-                    {
-                        if((xlon[0] < 0.001) && (xlon[2] < 0.001) && (xlon[3] < 0.001))
-                        {
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    if(xlon[1] > 360.0)
-                    {
-                        if((xlon[0] <= clon) && (xlon[2] <= clon) && (xlon[3] <= clon))
-                        {
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    process_selectedXsphere_quad(clon, sv,
-                                                 0, 1, 2, 1,
-                                                 xlon, ylat, radius, mc);
-    
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-            else
-            {
-                if(xlon[3] <= clon)
-                {
-                    if((xlon[0] < -1.0) && (xlon[1] > 300.0) &&
-                       (xlon[3] < -1.0) && (xlon[2] > 300.0))
-                    {
-                        if(clon < 300.0)
-                        {
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    process_selectedXsphere_quad(clon, sv,
-                                                 0, 1, 3, 2,
-                                                 xlon, ylat, radius, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    process_selectedXsphere_quad(clon, sv,
-                                                 0, 1, 0, 3,
-                                                 xlon, ylat, radius, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-        }
-    }
-    else
-    {
-        if(xlon[1] <= clon)
-        {
-            if(xlon[2] <= clon)
-            {
-                if(xlon[3] <= clon)
-                {
-                    if(xlon[0] > clon)
-                    {
-                        if((xlon[1] < 0.001) && (xlon[2] < 0.001) && (xlon[3] < 0.001))
-                        {
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    process_selectedXsphere_quad(clon, sv,
-                                                 1, 0, 3, 0,
-                                                 xlon, ylat, radius, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    process_selectedXsphere_quad(clon, sv, 
-                                                 1, 0, 2, 3,
-                                                 xlon, ylat, radius, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-            else
-            {
-                if(xlon[3] <= clon) 
-                {
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    process_selectedXsphere_quad(clon, sv,
-                                                 1, 0, 1, 2,
-                                                 xlon, ylat, radius, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-        }
-        else
-        {
-            if(xlon[2] <= clon)
-            {
-                if(xlon[3] <= clon)
-                {
-                    if((xlon[0] > 359.99) && (xlon[1] > 359.99))
-                    {
-                        if((xlon[2] <= clon) && (xlon[3] <= clon))
-                        {
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    if((xlon[2] < 0.001) && (xlon[3] < 0.001))
-                    {
-                        if((xlon[0] > clon) && (xlon[1] > clon))
-                        {
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    process_selectedXsphere_quad(clon, sv,
-                                                 2, 1, 3, 0,
-                                                 xlon, ylat, radius, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    if(xlon[2] < 0.001)
-                    {
-                        if((xlon[0] > clon) && (xlon[1] > clon) && (xlon[3] > clon))
-                        {
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    if(xlon[2] <  clon)
-                    {
-                        if((xlon[0] > 359.99) && (xlon[1] > 359.99) && (xlon[3] > 359.99))
-                        {
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    process_selectedXsphere_quad(clon, sv,
-                                                 2, 1, 2, 3,
-                                                 xlon, ylat, radius, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-            else
-            {
-                if(xlon[3] <= clon) 
-                {
-                    if(xlon[3] < 0.001)
-                    {
-                        if((xlon[0] > clon) && (xlon[1] > clon) && (xlon[2] > clon))
-                        {
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    if((xlon[0] > 359.99) && (xlon[1] > 359.99) && (xlon[2] > 359.99))
-                    {
-                        ++numProcessedPoints;
-                        return;
-                    }
-
-
-                    process_selectedXsphere_quad(clon, sv,
-                                                 3, 0, 3, 2,
-                                                 xlon, ylat, radius, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                  //Do not think we need to do anything if it reaches here.
-                  //They are more likely bogus.
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-        }
-    }
-}
-
-void UFS2dViewer::process_selectedXsphere_quad(double clon, double sv,
-                                                 int il0, int ih0, 
-                                                 int il1, int ih1,
-                                                 double* xlon, double* ylat, double* radius,
-                                                 int* mc)
-{
-    int k;
+    int j, k;
+    size_t mpos, npos;
     double fact;
 
-    double val;
-    double clat[2];
-    double alon[2];
-
-    if(il0 == ih0)
-    {
-        alon[0] = 0.5;
-        clat[0] = ylat[il0];
-    }
-    else
-        clat[0] = linInterp(clon, xlon[il0], xlon[ih0], ylat[il0], ylat[ih0], alon[0]);
-
-    clat[1] = linInterp(clon, xlon[il1], xlon[ih1], ylat[il1], ylat[ih1], alon[1]);
-
-#if 0
-    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tclon = " << clon << ", clat[0] = " << clat[0] << ", clat[1] = " << clat[1] << endl;
-    cout << "\tylat[il0] = " << ylat[il0] << ", ylat[ih0] = " << ylat[ih0] << endl;
-    cout << "\txlon[il0] = " << xlon[il0] << ", xlon[ih0] = " << xlon[ih0] << endl;
-    cout << "\tylat[il1] = " << ylat[il1] << ", ylat[ih1] = " << ylat[ih1] << endl;
-    cout << "\txlon[il1] = " << xlon[il1] << ", xlon[ih1] = " << xlon[ih1] << endl;
-#endif
-
     glBegin(GL_QUAD_STRIP);
-        for(k = 0; k < lev; ++k)
-        {
-            val = (1.0 - alon[0]) * pltvar[mc[il0]+k*ncol]
-                       + alon[0]  * pltvar[mc[ih0]+k*ncol]; 
-            fact = sv * (val - _valmin);
-            _lonlat2xyz(clon, clat[0], radius[k], fact);
+    for(k = 1; k < _nlev; ++k)
+    {
+	for(j = 0; j < _nlon; ++j)
+	{
+	    mpos = (k-1)*_nlat*_nlon + j*_nlon + ilonc;
+	    npos = k*_nlat*_nlon + j*_nlon + ilonc;
 
-            val = (1.0 - alon[1]) * pltvar[mc[il1]+k*ncol]
-                       + alon[1]  * pltvar[mc[ih1]+k*ncol]; 
-            fact = sv * (val - _valmin);
-            _lonlat2xyz(clon, clat[1], radius[k], fact);
+            fact = sv * (pltvar[mpos] - _valmin);
+            _lonlat2xyz(_lon[ilonc], _lat[j], radius[k-1], fact);
+
+            fact = sv * (pltvar[npos] - _valmin);
+            _lonlat2xyz(_lon[ilonc], _lat[j], radius[k], fact);
         }
+    }
     glEnd();
 }
 
-void UFS2dViewer::handle_selectedYsphere_quad(double clat, double* ylat,
-                                                int nc, double sv,
-                                                double* radius,
-                                                int& numProcessedPoints)
+void UFS2dViewer::handle_selectedYsphere_quad(int jlatc, double sv, double* radius)
 {
-    int i, m;
-    int mc[ncorners];
-
-    bool up = false;
-    bool down = false;
-
-    double xlon[ncorners];
-
-    for(i = 0; i < ncorners; ++i)
-    {
-        m = element_corners[nc+i];
-        mc[i] = element_corners[nc+i];
-        xlon[i] = lon[m];
-
-        if(xlon[i] > 300.0)
-            up = true;
-        if(xlon[i] < 60.0)
-            down = true;
-    }
-
-#if 0
-    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tclat = " << clat << endl;
-    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl << endl;
-    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-#endif
-
-    if(up && down)
-    {
-        for(i = 0; i < ncorners; ++i)
-        {
-            if(xlon[i] < 60.0)
-               xlon[i] += 360.0;
-        }
-    }
-
-    if(ylat[0] >= clat)
-    {
-        if(ylat[1] >= clat)
-        {
-            if(ylat[2] >= clat)
-            {
-                if(ylat[3] >= clat)
-                {
-                    if(ylat[0] == clat)
-                    {
-                        if((ylat[1] >= clat) && (ylat[3] >= clat))
-                        {
-                            process_selectedYsphere_quad(clat, sv,
-                                                         0, 1, 0, 3,
-                                                         xlon, ylat, radius, mc);
-
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    if(ylat[1] == clat)
-                    {
-                        if((ylat[0] >= clat) && (ylat[2] >= clat))
-                        {
-                            process_selectedYsphere_quad(clat, sv,
-                                                         1, 0, 2, 1,
-                                                         xlon, ylat, radius, mc);
-
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    if(ylat[2] == clat)
-                    {
-                        if((ylat[1] >= clat) && (ylat[3] >= clat))
-                        {
-                            process_selectedYsphere_quad(clat, sv,
-                                                         2, 1, 2, 3,
-                                                         xlon, ylat, radius, mc);
-
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    if(ylat[3] == clat)
-                    {
-                        if((ylat[0] >= clat) && (ylat[2] >= clat))
-                        {
-                            process_selectedYsphere_quad(clat, sv,
-                                                         3, 0, 3, 2,
-                                                         xlon, ylat, radius, mc);
-
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                  //if((xlon[0] >= clon) && (xlon[2] >= clon))
-                  //{
-                        process_selectedYsphere_quad(clat, sv,
-                                                     3, 0, 3, 2,
-                                                     xlon, ylat, radius, mc);
-
-                        ++numProcessedPoints;
-                        return;
-                  //}
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-            else
-            {
-                if(ylat[3] >= clat)
-                {
-                  //if((xlon[0] >= clon) && (xlon[2] >= clon))
-                  //{
-                        process_selectedYsphere_quad(clat, sv,
-                                                     2, 1, 2, 3,
-                                                     xlon, ylat, radius, mc);
-
-                        ++numProcessedPoints;
-                        return;
-                  //}
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                  //if((xlon[0] >= clon) && (xlon[2] >= clon))
-                  //{
-                        process_selectedYsphere_quad(clat, sv,
-                                                     3, 0, 2, 1,
-                                                     xlon, ylat, radius, mc);
-
-                        ++numProcessedPoints;
-                        return;
-                  //}
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-        }
-        else
-        {
-            if(ylat[2] >= clat)
-            {
-                if(ylat[3] >= clat)
-                {
-                  //if((xlon[0] >= clon) && (xlon[2] >= clon))
-                  //{
-                        process_selectedYsphere_quad(clat, sv,
-                                                     1, 0, 1, 2,
-                                                     xlon, ylat, radius, mc);
-
-                        ++numProcessedPoints;
-                        return;
-                  //}
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-            else
-            {
-                if(ylat[3] >= clat)
-                {
-                  //if((xlon[0] >= clon) && (xlon[2] >= clon))
-                  //{
-                        process_selectedYsphere_quad(clat, sv,
-                                                     1, 0, 2, 3,
-                                                     xlon, ylat, radius, mc);
-
-                        ++numProcessedPoints;
-                        return;
-                  //}
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                  //if((xlon[0] >= clon) && (xlon[2] >= clon))
-                  //{
-                        process_selectedYsphere_quad(clat, sv,
-                                                     1, 0, 3, 0,
-                                                     xlon, ylat, radius, mc);
-
-                        ++numProcessedPoints;
-                        return;
-                  //}
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-        }
-    }
-    else
-    {
-        if(ylat[1] >= clat)
-        {
-            if(ylat[2] >= clat)
-            {
-                if(ylat[3] >= clat)
-                {
-                  //if((xlon[0] >= clon) && (xlon[2] >= clon))
-                  //{
-                        process_selectedYsphere_quad(clat, sv,
-                                                     0, 1, 0, 3,
-                                                     xlon, ylat, radius, mc);
-
-                        ++numProcessedPoints;
-                        return;
-                  //}
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                  //if((xlon[0] >= clon) && (xlon[2] >= clon))
-                  //{
-                        process_selectedYsphere_quad(clat, sv,
-                                                     0, 1, 3, 2,
-                                                     xlon, ylat, radius, mc);
-
-                        ++numProcessedPoints;
-                        return;
-                  //}
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-            else
-            {
-                if(ylat[3] >= clat)
-                {
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                  //if((xlon[0] >= clon) && (xlon[2] >= clon))
-                  //{
-                        process_selectedYsphere_quad(clat, sv,
-                                                     0, 1, 2, 1,
-                                                     xlon, ylat, radius, mc);
-
-                        ++numProcessedPoints;
-                        return;
-                  //}
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-        }
-        else
-        {
-            if(ylat[2] >= clat)
-            {
-                if(ylat[3] >= clat)
-                {
-                  //if((xlon[0] >= clon) && (xlon[2] >= clon))
-                  //{
-                        process_selectedYsphere_quad(clat, sv,
-                                                     0, 3, 1, 2,
-                                                     xlon, ylat, radius, mc);
-
-                        ++numProcessedPoints;
-                        return;
-                  //}
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                  //if((xlon[0] >= clon) && (xlon[2] >= clon))
-                  //{
-                        process_selectedYsphere_quad(clat, sv,
-                                                     1, 2, 3, 2,
-                                                     xlon, ylat, radius, mc);
-
-                        ++numProcessedPoints;
-                        return;
-                  //}
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-            else
-            {
-                if(ylat[3] >= clat)
-                {
-                  //if((xlon[0] >= clon) && (xlon[2] >= clon))
-                  //{
-                        process_selectedYsphere_quad(clat, sv,
-                                                     0, 3, 2, 3,
-                                                     xlon, ylat, radius, mc);
-
-                        ++numProcessedPoints;
-                        return;
-                  //}
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-        }
-    }
-}
-
-void UFS2dViewer::process_selectedYsphere_quad(double clat, double sv,
-                                                 int il0, int ih0, 
-                                                 int il1, int ih1,
-                                                 double* xlon, double* ylat, double* radius,
-                                                 int* mc)
-{
-    int k;
+    int i, k;
+    size_t mpos, npos;
     double fact;
 
-    double val;
-    double alat[2];
-    double clon[2];
-
-    if(il0 == ih0)
-    {
-        alat[0] = 0.5;
-        clon[0] = xlon[il0];
-    }
-    else
-        clon[0] = linInterp(clat, ylat[il0], ylat[ih0], xlon[il0], xlon[ih0], alat[0]);
-
-    clon[1] = linInterp(clat, ylat[il1], ylat[ih1], xlon[il1], xlon[ih1], alat[1]);
-
-#if 0
-    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tclat = " << clat << ", clon[0] = " << clon[0] << ", clon[1] = " << clon[1] << endl;
-    cout << "\txlon[il0] = " << xlon[il0] << ", xlon[ih0] = " << xlon[ih0] << endl;
-    cout << "\txlon[il1] = " << xlon[il1] << ", xlon[ih1] = " << xlon[ih1] << endl << endl;
-    cout << "\tylat[il0] = " << ylat[il0] << ", ylat[ih0] = " << ylat[ih0] << endl;
-    cout << "\tylat[il1] = " << ylat[il1] << ", ylat[ih1] = " << ylat[ih1] << endl;
-#endif
-
     glBegin(GL_QUAD_STRIP);
-        for(k = 0; k < lev; ++k)
+        for(k = 1; k < _nlev; ++k)
         {
-            val = (1.0 - alat[0]) * pltvar[mc[il0]+k*ncol]
-                       + alat[0]  * pltvar[mc[ih0]+k*ncol]; 
-            fact = sv * (val - _valmin);
-            _lonlat2xyz(clon[0], clat, radius[k], fact);
+	    mpos = ((k-1)*_nlat + jlatc)*_nlon;
+	    npos = (k*_nlat + jlatc)*_nlon;
+	    for(i=0; i<_nlon; ++i)
+            {
+                fact = sv * (pltvar[mpos+i] - _valmin);
+                _lonlat2xyz(_lon[i], _lat[jlatc], radius[k-1], fact);
 
-            val = (1.0 - alat[1]) * pltvar[mc[il1]+k*ncol]
-                       + alat[1]  * pltvar[mc[ih1]+k*ncol]; 
-            fact = sv * (val - _valmin);
-            _lonlat2xyz(clon[1], clat, radius[k], fact);
+                fact = sv * (pltvar[npos+i] - _valmin);
+                _lonlat2xyz(_lon[i], _lat[jlatc], radius[k], fact);
+	    }
         }
     glEnd();
 }
 
 void UFS2dViewer::_sphereXplane(int xs)
 {
-    int i, j, m, n;
-
+    double xcl;
     double sv = 1.0;
+    double radius[_nlev];
 
-    double xlon[ncorners];
-    double clon = (double) xs;
-
-    bool shift_low = false;
-    bool shift_high = false;
-    bool all_left, all_rite;
-
-    int numProcessedPoints = 0;
-    int numBoundaryPoints = 0;
-
-    double radius[lev];
-
-    if(xs < 30)
-        shift_low = true;
-    if(xs > 330)
-        shift_high = true;
-
-    for(n = 0; n < lev; ++n)
-        radius[n] = 0.725 + 0.5 * ( 1.0 - (n + 1.0) / lev);
+    int ilonc = (int) ((double) xs/_deltlon);
 
     sv = 1.0 / (_valmax - _valmin);
 
@@ -3103,56 +723,7 @@ void UFS2dViewer::_sphereXplane(int xs)
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
-    numBoundaryPoints = 0;
-    numProcessedPoints = 0;
-
-  //#pragma omp parallel for
-    for(n = 0; n < ncenters; ++n)
-    {
-        all_left = true;
-        all_rite = true;
-
-        j = n * ncorners;
-        for(i = 0; i < ncorners; ++i)
-        {
-            m = element_corners[j+i];
-
-            xlon[i] = lon[m];
-
-            if(shift_high)
-            {
-                if(xlon[i] < 30.0)
-                   xlon[i] += 360.0;
-            }
-
-            if(shift_low)
-            {
-                if(xlon[i] > 330.0)
-                   xlon[i] -= 360.0;
-            }
-
-            if(xlon[i] >= clon)
-                all_left = false;
-            if(xlon[i] <= clon)
-                all_rite = false;
-        }
-
-        if(all_left || all_rite)
-            continue;
-
-        ++numBoundaryPoints;
-
-        handle_selectedXsphere_quad(clon, xlon, j, sv,
-                                    radius, numProcessedPoints);
-    }
-
-    if(numProcessedPoints != numBoundaryPoints)
-    {
-        cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-             << ", line: " << __LINE__ << endl;
-        cout << "\nProcessed " << numProcessedPoints << " of " << numBoundaryPoints << endl;
-        cout << "\tclon = " << clon << endl;
-    }
+    handle_selectedXsphere_quad(ilonc, sv, radius);
 
     glDisable(GL_TEXTURE_1D);
 
@@ -3163,26 +734,17 @@ void UFS2dViewer::_sphereXplane(int xs)
 
 void UFS2dViewer::_sphereYplane(int ys)
 {
-    int i, j, m, n;
-
+    double xcl;
     double sv = 1.0;
+    double radius[_nlev];
+    int n;
+    int jlatc = (int) ((double) ys/_deltlat);
 
-    double clat = (double) ys;
-    double ylat[ncorners];
-
-    bool all_below, all_above;
-
-    int numProcessedPoints = 0;
-    int numBoundaryPoints = 0;
-
-    double radius[lev];
-
-    for(n = 0; n < lev; ++n)
-        radius[n] = 0.725 + 0.5 * ( 1.0 - (n + 1.0) / lev);
+    for(n = 0; n < _nlev; ++n)
+        radius[n] = 0.725 + 0.5 * ( 1.0 - (n + 1.0) / _nlev);
 
   //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\t_varname: <" << _varname << ">, lev = " << lev << endl;
-  //cout << "\tncenters = " << ncenters << ", nvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
 
     sv = 1.0 / (_valmax - _valmin);
 
@@ -3203,515 +765,52 @@ void UFS2dViewer::_sphereYplane(int ys)
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
-    numBoundaryPoints = 0;
-    numProcessedPoints = 0;
-
-  //#pragma omp parallel for
-    for(n = 0; n < ncenters; ++n)
-    {
-        all_below = true;
-        all_above = true;
-
-        j = n * ncorners;
-        for(i = 0; i < ncorners; ++i)
-        {
-            m = element_corners[j+i];
-
-            ylat[i] = lat[m];
-
-            if(ylat[i] < clat)
-                all_below = false;
-            if(ylat[i] > clat)
-                all_above = false;
-        }
-
-        if(all_below || all_above)
-            continue;
-
-        ++numBoundaryPoints;
-
-        handle_selectedYsphere_quad(clat, ylat, j, sv,
-                                    radius, numProcessedPoints);
-    }
+    handle_selectedYsphere_quad(jlatc, sv, radius);
 
     glDisable(GL_TEXTURE_1D);
 
     glPopMatrix();
 
     glEndList();
-
-    if(numProcessedPoints != numBoundaryPoints)
-    {
-        cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-             << ", line: " << __LINE__ << endl;
-        cout << "\nProcessed " << numProcessedPoints << " of " << numBoundaryPoints << endl;
-        cout << "\tclat = " << clat << endl;
-    }
 }
 
-void UFS2dViewer::process_selectedYflat_quad(double yc, double sv,
-                                               int il0, int ih0, int il1, int ih1,
-                                               double* x, double* y, double* height,
-                                               int* mc)
+void UFS2dViewer::handle_selectedYflat_quad(int jlatc, double sv, double* height)
 {
-    int k;
+    int i, k;
+    size_t np, nm1;
     double fact;
 
-    double val;
-    double dy[2];
-    double xc[2];
-
-    if((x[0] == 1.0) && (x[3] < -0.75) &&
-       (x[1] == 1.0) && (x[2] < -0.75))
-    {
-        x[0] = -1.0;
-        x[1] = -1.0;
-    }
-
-    if((x[2] == 1.0) && (x[1] < -0.75) &&
-       (x[3] == 1.0) && (x[0] < -0.75))
-    {
-        x[2] = -1.0;
-        x[3] = -1.0;
-    }
-
-    if(il0 == ih0)
-    {
-        dy[0] = 0.5;
-        xc[0] = x[il0];
-    }
-    else
-        xc[0] = linInterp(yc, y[il0], y[ih0], x[il0], x[ih0], dy[0]);
-
-    xc[1] = linInterp(yc, y[il1], y[ih1], x[il1], x[ih1], dy[1]);
-
-#if 0
-    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tyc = " << yc << ", xc[0] = " << xc[0] << ", xc[1] = " << xc[1] << endl;
-    cout << "\tx[il0] = " << x[il0] << ", x[ih0] = " << x[ih0] << endl;
-    cout << "\tx[il1] = " << x[il1] << ", x[ih1] = " << x[ih1] << endl << endl;
-    cout << "\ty[il0] = " << y[il0] << ", y[ih0] = " << y[ih0] << endl;
-    cout << "\ty[il1] = " << y[il1] << ", y[ih1] = " << y[ih1] << endl;
-#endif
-
     glBegin(GL_QUAD_STRIP);
-        for(k = 0; k < lev; ++k)
-        {
-            val = (1.0 - dy[0]) * pltvar[mc[il0]+k*ncol]
-                       + dy[0]  * pltvar[mc[ih0]+k*ncol]; 
-            fact = sv * (val - _valmin);
+    for(k = 1; k < _nlev; ++k)
+    {
+        nm1 = _nlon*_nlat*(k-1) + jlatc*_nlon;
+        np = _nlon*_nlat*k + jlatc*_nlon;
+	for(i=0; i<_nlon; ++i)
+	{
+            fact = sv * (pltvar[nm1+i] - _valmin);
             glTexCoord1d(fact);
-            glVertex3d(xc[0], yc, height[k]);
+            glVertex3d(_xFlat[i], _yFlat[jlatc], height[k-1]);
 
-            val = (1.0 - dy[1]) * pltvar[mc[il1]+k*ncol]
-                       + dy[1]  * pltvar[mc[ih1]+k*ncol]; 
-            fact = sv * (val - _valmin);
+            fact = sv * (pltvar[np+i] - _valmin);
             glTexCoord1d(fact);
-            glVertex3d(xc[1], yc, height[k]);
-        }
+            glVertex3d(_xFlat[i], _yFlat[jlatc], height[k]);
+	}
+    }
     glEnd();
-}
 
-void UFS2dViewer::handle_selectedYflat_quad(double clat,
-                                              int nc, double sv,
-                                              double* height,
-                                              int& numProcessedPoints)
-{
-    int i, m;
-    int mc[ncorners];
-
-    bool up = false;
-    bool down = false;
-
-    double xlon[ncorners];
-    double ylat[ncorners];
-    double x[ncorners];
-    double y[ncorners];
-    double yc = clat / 180.0;
-
-    for(i = 0; i < ncorners; ++i)
-    {
-        m = element_corners[nc+i];
-        mc[i] = element_corners[nc+i];
-        xlon[i] = lon[m];
-        ylat[i] = lat[m];
-
-        x[i] = _xFlat[m];
-        y[i] = _yFlat[m];
-
-        if(xlon[i] > 300.0)
-            up = true;
-        if(xlon[i] < 60.0)
-            down = true;
-    }
-
-#if 0
-    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tclat = " << clat << endl;
-    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl << endl;
-    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-#endif
-
-    if(up && down)
-    {
-        for(i = 0; i < ncorners; ++i)
-        {
-            if(xlon[i] < 60.0)
-               xlon[i] += 360.0;
-        }
-    }
-
-    if(ylat[0] >= clat)
-    {
-        if(ylat[1] >= clat)
-        {
-            if(ylat[2] >= clat)
-            {
-                if(ylat[3] >= clat)
-                {
-                    if(ylat[0] == clat)
-                    {
-                        if((ylat[1] >= clat) && (ylat[3] >= clat))
-                        {
-                            process_selectedYflat_quad(yc, sv,
-                                                       0, 1, 0, 3,
-                                                       x, y, height, mc);
-
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    if(ylat[1] == clat)
-                    {
-                        if((ylat[0] >= clat) && (ylat[2] >= clat))
-                        {
-                            process_selectedYflat_quad(yc, sv,
-                                                       1, 0, 2, 1,
-                                                       x, y, height, mc);
-
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    if(ylat[2] == clat)
-                    {
-                        if((ylat[1] >= clat) && (ylat[3] >= clat))
-                        {
-                            process_selectedYflat_quad(yc, sv,
-                                                       2, 1, 2, 3,
-                                                       x, y, height, mc);
-
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    if(ylat[3] == clat)
-                    {
-                        if((ylat[0] >= clat) && (ylat[2] >= clat))
-                        {
-                            process_selectedYflat_quad(yc, sv,
-                                                       3, 0, 3, 2,
-                                                       x, y, height, mc);
-
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    process_selectedYflat_quad(yc, sv,
-                                               3, 0, 3, 2,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-            else
-            {
-                if(ylat[3] >= clat)
-                {
-                    process_selectedYflat_quad(yc, sv,
-                                               2, 1, 2, 3,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    process_selectedYflat_quad(yc, sv,
-                                               3, 0, 2, 1,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-        }
-        else
-        {
-            if(ylat[2] >= clat)
-            {
-                if(ylat[3] >= clat)
-                {
-                    process_selectedYflat_quad(yc, sv,
-                                               1, 0, 1, 2,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-            else
-            {
-                if(ylat[3] >= clat)
-                {
-                    process_selectedYflat_quad(yc, sv,
-                                               1, 0, 2, 3,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    process_selectedYflat_quad(yc, sv,
-                                               1, 0, 3, 0,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-        }
-    }
-    else
-    {
-        if(ylat[1] >= clat)
-        {
-            if(ylat[2] >= clat)
-            {
-                if(ylat[3] >= clat)
-                {
-                    process_selectedYflat_quad(yc, sv,
-                                               0, 1, 0, 3,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    process_selectedYflat_quad(yc, sv,
-                                               0, 1, 3, 2,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-            else
-            {
-                if(ylat[3] >= clat)
-                {
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    process_selectedYflat_quad(yc, sv,
-                                               0, 1, 2, 1,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-        }
-        else
-        {
-            if(ylat[2] >= clat)
-            {
-                if(ylat[3] >= clat)
-                {
-                    process_selectedYflat_quad(yc, sv,
-                                               0, 3, 1, 2,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    process_selectedYflat_quad(yc, sv,
-                                               1, 2, 3, 2,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-            else
-            {
-                if(ylat[3] >= clat)
-                {
-                    process_selectedYflat_quad(yc, sv,
-                                               0, 3, 2, 3,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclat = " << clat << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-        }
-    }
 }
 
 void UFS2dViewer::_display_Xflat_plane(int xs)
 {
-    int i, j, m, n;
-
+    int j, k;
+    size_t mpos, npos;
+    double fact;
     double sv = 1.0;
+    double height[_nlev];
+    int ilonc = (int) ((double) xs/_deltlon);
 
-    double xlon[ncorners];
-    double clon = (double) xs;
-
-    bool shift_low = false;
-    bool shift_high = false;
-    bool all_left, all_rite;
-
-    int numProcessedPoints = 0;
-    int numBoundaryPoints = 0;
-
-    double height[lev];
-
-    if(xs < 30)
-        shift_low = true;
-    if(xs > 330)
-        shift_high = true;
-
-    for(n = 0; n < lev; ++n)
-        height[n] = 0.8 * ( 0.5 - (n + 1.0) / lev);
+    for(k = 0; k < _nlev; ++k)
+        height[k] = 0.8 * ( 0.5 - (k + 1.0) / _nlev);
 
     sv = 1.0 / (_valmax - _valmin);
 
@@ -3732,862 +831,32 @@ void UFS2dViewer::_display_Xflat_plane(int xs)
 
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
-    numBoundaryPoints = 0;
-    numProcessedPoints = 0;
-
-  //#pragma omp parallel for
-    for(n = 0; n < ncenters; ++n)
-    {
-        all_left = true;
-        all_rite = true;
-
-        j = n * ncorners;
-        for(i = 0; i < ncorners; ++i)
-        {
-            m = element_corners[j+i];
-
-            xlon[i] = lon[m];
-
-            if(shift_high)
-            {
-                if(xlon[i] < 30.0)
-                   xlon[i] += 360.0;
-            }
-
-            if(shift_low)
-            {
-                if(xlon[i] > 330.0)
-                   xlon[i] -= 360.0;
-            }
-
-            if(xlon[i] >= clon)
-                all_left = false;
-            if(xlon[i] <= clon)
-                all_rite = false;
-        }
-
-        if(all_left || all_rite)
-            continue;
-
-        ++numBoundaryPoints;
-
-        handle_selectedXflat_quad(clon, xlon, j, sv,
-                                  height, numProcessedPoints);
-    }
-
-    if(numProcessedPoints != numBoundaryPoints)
-    {
-        cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-             << ", line: " << __LINE__ << endl;
-        cout << "\nProcessed " << numProcessedPoints << " of " << numBoundaryPoints << endl;
-        cout << "\tclon = " << clon << endl;
-    }
-
-    glDisable(GL_TEXTURE_1D);
-
-    glPopMatrix();
-
-    glEndList();
-}
-
-void UFS2dViewer::handle_selectedXflat_quad(double clon, double* xlon,
-                                              int nc, double sv,
-                                              double* height,
-                                              int& numProcessedPoints)
-{
-    int i, m;
-    int mc[ncorners];
-    bool isAtPole = false;
-    double x[ncorners];
-    double y[ncorners];
-    double ylat[ncorners];
-    double xc = clon / 180.0;
-
-    if(xc > 1.0)
-       xc -= 2.0;
-
-    for(i = 0; i < ncorners; ++i)
-    {
-        m = element_corners[nc+i];
-        mc[i] = element_corners[nc+i];
-        ylat[i] = lat[m];
-        x[i] = _xFlat[m];
-        y[i] = _yFlat[m];
-
-        if((ylat[i] < -89.99) || (ylat[i] > 89.99))
-            isAtPole = true;
-
-        if(clon < 180.0)
-        {
-            if(xlon[i] > 359.9)
-               xlon[i] -= 360.0;
-        }
-
-        if(clon > 180.0)
-        {
-            if(xlon[i] < 70.0)
-               xlon[i] += 360.0;
-        }
-    }
-
-    if(isAtPole)
-    {
-        if((ylat[0] < -89.99) || (ylat[0] > 89.99))
-        {
-            if(xlon[1] > 359.99) 
-            {
-                if((xlon[2] > 360.0) && (xlon[3] < 181.0))
-                    xlon[2] -= 360.0;
-
-                if((xlon[2] < 60.0) || (xlon[3] < 60.0))
-                    xlon[1] = 0.0;
-            }
-
-            if((xlon[1] < clon) && (xlon[2] < clon) && (xlon[3] < clon))
-            {
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[1] > clon) && (xlon[2] > clon) && (xlon[3] > clon))
-            {
-                ++numProcessedPoints;
-                return;
-            }
-               
-            if((xlon[1] <= clon) && (xlon[2] >= clon))
-            {
-                process_selectedXflat_quad(xc, sv,
-                                           0, 0, 1, 2,
-                                           x, y, height, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[1] >= clon) && (xlon[2] <= clon))
-            {
-                process_selectedXflat_quad(xc, sv,
-                                           0, 0, 2, 1,
-                                           x, y, height, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[2] <= clon) && (xlon[3] >= clon))
-            {
-                process_selectedXflat_quad(xc, sv,
-                                           0, 0, 2, 3,
-                                           x, y, height, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[3] <= clon) && (xlon[2] >= clon))
-            {
-                process_selectedXflat_quad(xc, sv,
-                                           0, 0, 3, 2,
-                                           x, y, height, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-        }
-
-        if((ylat[1] < -89.99) || (ylat[1] > 89.99))
-        {
-            if(xlon[0] > 359.99)
-            {
-                if((xlon[3] > 360.0) && (xlon[2] < 181.0))
-                    xlon[3] -= 360.0;
-
-                if((xlon[2] < 60.0) || (xlon[3] < 60.0))
-                    xlon[0] = 0.0;
-            }
-
-            if((xlon[0] < clon) && (xlon[2] < clon) && (xlon[3] < clon))
-            {
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[0] > clon) && (xlon[2] > clon) && (xlon[3] > clon))
-            {
-                ++numProcessedPoints;
-                return;
-            }
-               
-            if((xlon[0] <= clon) && (xlon[3] >= clon))
-            {
-                process_selectedXflat_quad(xc, sv,
-                                           1, 1, 0, 3,
-                                           x, y, height, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-               
-            if((xlon[0] >= clon) && (xlon[3] <= clon))
-            {
-                process_selectedXflat_quad(xc, sv,
-                                           1, 1, 3, 0,
-                                           x, y, height, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[2] >= clon) && (xlon[3] <= clon))
-            {
-                process_selectedXflat_quad(xc, sv,
-                                           1, 1, 3, 2,
-                                           x, y, height, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[2] <= clon) && (xlon[3] >= clon))
-            {
-                process_selectedXflat_quad(xc, sv,
-                                           1, 1, 2, 3,
-                                           x, y, height, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-        }
-
-        if((ylat[2] < -89.99) || (ylat[2] > 89.99))
-        {
-            if((xlon[0] < clon) && (xlon[1] < clon) && (xlon[3] < clon))
-            {
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[0] > clon) && (xlon[1] > clon) && (xlon[3] > clon))
-            {
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[0] <= clon) && (xlon[1] >= clon))
-            {
-                process_selectedXflat_quad(xc, sv,
-                                           2, 2, 0, 1,
-                                           x, y, height, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[0] >= clon) && (xlon[1] <= clon))
-            {
-                process_selectedXflat_quad(xc, sv,
-                                           2, 2, 1, 0,
-                                           x, y, height, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[0] <= clon) && (xlon[3] >= clon))
-            {
-                process_selectedXflat_quad(xc, sv,
-                                           2, 2, 0, 3,
-                                           x, y, height, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[0] >= clon) && (xlon[3] <= clon))
-            {
-                process_selectedXflat_quad(xc, sv,
-                                           2, 2, 3, 0,
-                                           x, y, height, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-        }
-
-        if((ylat[3] < -89.99) || (ylat[3] > 89.99))
-        {
-            if((xlon[0] < clon) && (xlon[1] < clon) && (xlon[2] < clon))
-            {
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[0] > clon) && (xlon[1] > clon) && (xlon[2] > clon))
-            {
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[0] <= clon) && (xlon[1] >= clon))
-            {
-                process_selectedXflat_quad(xc, sv,
-                                           3, 3, 0, 1,
-                                           x, y, height, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[0] >= clon) && (xlon[1] <= clon))
-            {
-                process_selectedXflat_quad(xc, sv,
-                                           3, 3, 1, 0,
-                                           x, y, height, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[1] <= clon) && (xlon[2] >= clon))
-            {
-                process_selectedXflat_quad(xc, sv,
-                                           3, 3, 1, 2,
-                                           x, y, height, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-
-            if((xlon[1] >= clon) && (xlon[2] <= clon))
-            {
-                process_selectedXflat_quad(xc, sv,
-                                           3, 3, 2, 1,
-                                           x, y, height, mc);
-
-                ++numProcessedPoints;
-                return;
-            }
-        }
-
-        cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-        cout << "\tclon = " << clon << endl;
-        cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-        cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl << endl;
-        cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-        cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-    }
-
-#if 0
-    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tclon = " << clon << endl;
-    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl << endl;
-    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-#endif
-
-    if(xlon[0] <= clon)
-    {
-        if(xlon[1] <= clon)
-        {
-            if(xlon[2] <= clon)
-            {
-                if(xlon[3] <= clon)
-                {
-                    if(xlon[3] == clon)
-                    {
-                        if(xlon[2] == clon)
-                        {
-                            process_selectedXflat_quad(xc, sv,
-                                                       1, 2, 0, 3,
-                                                       x, y, height, mc);
-                        }
-                        else
-                        {
-                            process_selectedXflat_quad(xc, sv,
-                                                       0, 3, 2, 3,
-                                                       x, y, height, mc);
-                        }
-
-                        ++numProcessedPoints;
-                        return;
-                    }
-
-                    if(xlon[2] == clon)
-                    {
-                        if(xlon[1] == clon)
-                        {
-                            process_selectedXflat_quad(xc, sv,
-                                                       0, 1, 3, 2,
-                                                       x, y, height, mc);
-                        }
-                        else
-                        {
-                            process_selectedXflat_quad(xc, sv,
-                                                       1, 2, 3, 2,
-                                                       x, y, height, mc);
-                        }
-
-                        ++numProcessedPoints;
-                        return;
-                    }
-
-                    if(xlon[1] == clon)
-                    {
-                        if(xlon[0] == clon)
-                        {
-                            process_selectedXflat_quad(xc, sv,
-                                                       3, 0, 2, 1,
-                                                       x, y, height, mc);
-                        }
-                        else
-                        {
-                            process_selectedXflat_quad(xc, sv,
-                                                       0, 1, 2, 1,
-                                                       x, y, height, mc);
-                        }
-                        ++numProcessedPoints;
-                        return;
-                    }
-
-                    if(xlon[0] == clon)
-                    {
-                        if(xlon[3] == clon)
-                        {
-                            process_selectedXflat_quad(xc, sv,
-                                                       1, 0, 2, 3,
-                                                       x, y, height, mc);
-                        }
-                        else
-                        {
-                            process_selectedXflat_quad(xc, sv,
-                                                       1, 0, 3, 0,
-                                                       x, y, height, mc);
-                        }
-
-                        ++numProcessedPoints;
-                        return;
-                    }
-
-                  //If it reaches here, just ignore it.
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    process_selectedXflat_quad(xc, sv,
-                                               0, 3, 2, 3,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-            else
-            {
-                if(xlon[3] <= clon)
-                {
-                    process_selectedXflat_quad(xc, sv,
-                                               1, 2, 3, 2,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    process_selectedXflat_quad(xc, sv,
-                                               0, 3, 1, 2,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-        }
-        else
-        {
-            if(xlon[2] <= clon)
-            {
-                if(xlon[3] <= clon)
-                {
-                    if(xlon[1] > clon)
-                    {
-                        if((xlon[0] < 0.001) && (xlon[2] < 0.001) && (xlon[3] < 0.001))
-                        {
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    if(xlon[1] > 360.0)
-                    {
-                        if((xlon[0] <= clon) && (xlon[2] <= clon) && (xlon[3] <= clon))
-                        {
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    process_selectedXflat_quad(xc, sv,
-                                               0, 1, 2, 1,
-                                               x, y, height, mc);
-    
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-            else
-            {
-                if(xlon[3] <= clon)
-                {
-                    if((xlon[0] < -1.0) && (xlon[1] > 300.0) &&
-                       (xlon[3] < -1.0) && (xlon[2] > 300.0))
-                    {
-                        if(clon < 300.0)
-                        {
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    process_selectedXflat_quad(xc, sv,
-                                               0, 1, 3, 2,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    process_selectedXflat_quad(xc, sv,
-                                               0, 1, 0, 3,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-        }
-    }
-    else
-    {
-        if(xlon[1] <= clon)
-        {
-            if(xlon[2] <= clon)
-            {
-                if(xlon[3] <= clon)
-                {
-                    if(xlon[0] > clon)
-                    {
-                        if((xlon[1] < 0.001) && (xlon[2] < 0.001) && (xlon[3] < 0.001))
-                        {
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    process_selectedXflat_quad(xc, sv,
-                                               1, 0, 3, 0,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    process_selectedXflat_quad(xc, sv, 
-                                               1, 0, 2, 3,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-            else
-            {
-                if(xlon[3] <= clon) 
-                {
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    process_selectedXflat_quad(xc, sv,
-                                               1, 0, 1, 2,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-        }
-        else
-        {
-            if(xlon[2] <= clon)
-            {
-                if(xlon[3] <= clon)
-                {
-                    if((xlon[0] > 359.99) && (xlon[1] > 359.99))
-                    {
-                        if((xlon[2] <= clon) && (xlon[3] <= clon))
-                        {
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    if((xlon[2] < 0.001) && (xlon[3] < 0.001))
-                    {
-                        if((xlon[0] > clon) && (xlon[1] > clon))
-                        {
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    process_selectedXflat_quad(xc, sv,
-                                               2, 1, 3, 0,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                    if(xlon[2] < 0.001)
-                    {
-                        if((xlon[0] > clon) && (xlon[1] > clon) && (xlon[3] > clon))
-                        {
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    if(xlon[2] <  clon)
-                    {
-                        if((xlon[0] > 359.99) && (xlon[1] > 359.99) && (xlon[3] > 359.99))
-                        {
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    process_selectedXflat_quad(xc, sv,
-                                               2, 1, 2, 3,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-            else
-            {
-                if(xlon[3] <= clon) 
-                {
-                    if(xlon[3] < 0.001)
-                    {
-                        if((xlon[0] > clon) && (xlon[1] > clon) && (xlon[2] > clon))
-                        {
-                            ++numProcessedPoints;
-                            return;
-                        }
-                    }
-
-                    if((xlon[0] > 359.99) && (xlon[1] > 359.99) && (xlon[2] > 359.99))
-                    {
-                        ++numProcessedPoints;
-                        return;
-                    }
-
-
-                    process_selectedXflat_quad(xc, sv,
-                                               3, 0, 3, 2,
-                                               x, y, height, mc);
-
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-                else
-                {
-                  //Do not think we need to do anything if it reaches here.
-                  //They are more likely bogus.
-                    ++numProcessedPoints;
-                    return;
-
-                    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-                    cout << "\tclon = " << clon << endl;
-                    cout << "\tylat[1] = " << ylat[1] << ", ylat[2] = " << ylat[2] << endl;
-                    cout << "\tylat[0] = " << ylat[0] << ", ylat[3] = " << ylat[3] << endl;
-                    cout << "\txlon[1] = " << xlon[1] << ", xlon[2] = " << xlon[2] << endl;
-                    cout << "\txlon[0] = " << xlon[0] << ", xlon[3] = " << xlon[3] << endl;
-                }
-            }
-        }
-    }
-}
-
-void UFS2dViewer::process_selectedXflat_quad(double xc, double sv,
-                                               int il0, int ih0, 
-                                               int il1, int ih1,
-                                               double* x, double* y, double* height,
-                                               int* mc)
-{
-    int k;
-    double fact;
-
-    double val;
-    double yc[2];
-    double xa[2];
-
-    if(il0 == ih0)
-    {
-        xa[0] = 0.5;
-        yc[0] = y[il0];
-    }
-    else
-        yc[0] = linInterp(xc, x[il0], x[ih0], y[il0], y[ih0], xa[0]);
-
-    yc[1] = linInterp(xc, x[il1], x[ih1], y[il1], y[ih1], xa[1]);
-
-#if 0
-    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\txc = " << xc << ", height[0] = " << height[0] << ", height[" << lev-1 << "] = " << height[lev-1] << endl;
-    cout << "\tyc[0] = " << yc[0] << endl;
-    cout << "\tyc[1] = " << yc[1] << endl;
-  //cout << "\ty[" << il0 << "] = " << y[il0] << ", y[" << ih0 << "] = " << y[ih0] << endl;
-  //cout << "\ty[" << il1 << "] = " << y[il1] << ", y[" << ih1 << "] = " << y[ih1] << endl;
-  //cout << "\tx[" << il0 << "] = " << x[il0] << ", x[" << ih0 << "] = " << x[ih0] << endl;
-  //cout << "\tx[" << il1 << "] = " << x[il1] << ", x[" << ih1 << "] = " << x[ih1] << endl;
-#endif
-
     glBegin(GL_QUAD_STRIP);
-        for(k = 0; k < lev; ++k)
+        for(k = 1; k < _nlev; ++k)
         {
-            val = (1.0 - xa[0]) * pltvar[mc[il0]+k*ncol]
-                       + xa[0]  * pltvar[mc[ih0]+k*ncol]; 
-            fact = sv * (val - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(xc, yc[0], height[k]);
+	    for(j = 0; j < _nlat; ++j)
+	    {
+	        mpos = ((k-1)*_nlat + j)*_nlon + ilonc;
+                fact = sv * (pltvar[mpos] - _valmin);
+                glTexCoord1d(fact);
+                glVertex3d(_xFlat[ilonc], _yFlat[j], height[k-1]);
 
-            val = (1.0 - xa[1]) * pltvar[mc[il1]+k*ncol]
-                       + xa[1]  * pltvar[mc[ih1]+k*ncol]; 
-            fact = sv * (val - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(xc, yc[1], height[k]);
+	        npos = (k*_nlat + j)*_nlon + ilonc;
+                fact = sv * (pltvar[npos] - _valmin);
+                glTexCoord1d(fact);
+                glVertex3d(_xFlat[ilonc], _yFlat[j], height[k]);
+	    }
         }
     glEnd();
+    glDisable(GL_TEXTURE_1D);
+    glPopMatrix();
+    glEndList();
 }
 
 void UFS2dViewer::_sphereBump()
 {
-    int i, j, k, m, n;
+    int i, j, k;
+    size_t npos;
 
     double sv = 1.0;
     double fact;
@@ -4603,9 +872,9 @@ void UFS2dViewer::_sphereBump()
   //cout << "\tncenters = " << ncenters << ", nvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
 
 
-    if(1 < lev)
+    if(k < _nlev)
     {
-        radius = 0.725 + 0.5 * ( 1.0 - (k + 1.0) / lev);
+        radius = 0.725 + 0.5 * ( 1.0 - (k + 1.0) / _nlev);
     }
     else
     {
@@ -4650,14 +919,13 @@ void UFS2dViewer::_sphereBump()
 
     glBegin(GL_QUADS);
   //#pragma omp parallel for
-    for(n = 0; n < ncenters; ++n)
+    for(j = 0; j < _nlat; ++j)
     {
-        j = n * ncorners;
-        for(i = 0; i < ncorners; ++i)
+        npos = j*_nlon;
+        for(i = 0; i < _nlon; ++i)
         {
-            m = element_corners[j+i];
-            fact = sv * (pltvar[m+k*ncol] - _valmin);
-            _lonlat2xyz(lon[m], lat[m], radius + amp * (fact - offset), fact);
+            fact = sv * (pltvar[npos+i] - _valmin);
+            _lonlat2xyz(_lon[i], _lat[j], radius + amp * (fact - offset), fact);
         }
     }
     glEnd();
@@ -4671,26 +939,18 @@ void UFS2dViewer::_sphereBump()
 
 void UFS2dViewer::_flatBump()
 {
-    int i, j, k, m, n, num;
-
-    int numProcessedBoundaryPoints = 0;
-
+    int i, j, k;
+    size_t npos;
     double sv = 1.0;
     double alpha, fact;
     double height = 0.00;
-
-    double xb[ncorners];
-    double yb[ncorners];
-    double vb[ncorners];
-    double fb[ncorners];
-
     double amp = 0.2;
     double offset = 0.5;
 
     k = nvoptions->get_zsec();
 
-    if(1 < lev)
-        height = 0.8 * (0.5 - (k + 1.0) / lev);
+    if(1 < _nlev)
+        height = 0.8 * (0.5 - (k + 1.0) / _nlev);
     else
         height = 0.001;
 
@@ -4733,633 +993,32 @@ void UFS2dViewer::_flatBump()
 
     glNormal3f(0.0, 0.0, -1.0);
     glBegin(GL_QUADS);
-    for(n = 0; n < ncenters; ++n)
+    if(nvoptions->get_cb(NV_BUMPON))
     {
-        if(_innerPoints[n])
+        for(j = 0; j < _nlat; ++j)
         {
-            j = n * ncorners;
-
-            for(i = 0; i < ncorners; ++i)
+            npos = j*_nlon;
+            for(i = 0; i < _nlon; ++i)
             {
-                m = element_corners[j+i];
-                fact = sv * (pltvar[m+k*ncol] - _valmin);
+                fact = sv * (pltvar[npos+i] - _valmin);
 
-                if(nvoptions->get_cb(NV_BUMPON))
-                {
-                    alpha = 1.125 * fact;
-                    if(alpha < 0.1)
-                        alpha = 0.0;
-                    if(alpha > 1.0)
-                        alpha = 1.0;
+                alpha = 1.125 * fact;
+                if(alpha < 0.1)
+                    alpha = 0.0;
+		else if(alpha > 1.0)
+		{
+                    alpha = 1.0;
                     glColor4d(1.5*fact, 1.5*fact, 1.5*fact, alpha);
                 }
                 else
                     glTexCoord1d(fact);
 
-                glVertex3d(_xFlat[m], _yFlat[m], height + amp * (fact - offset));
+                glVertex3d(_xFlat[i], _yFlat[j], height + amp * (fact - offset));
             }
         }
-      //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << ", n = " << n << endl;
     }
     glEnd();
-
-  //handle South Pole
-    for(num = 0; num < num_south_pole_cols; ++num)
-    {
-        n = south_pole_cols[num];
-
-        j = n * ncorners;
-
-        for(i = 0; i < ncorners; ++i)
-        {
-            m = element_corners[j+i];
-            vb[i] = pltvar[m+k*ncol];
-          //fb[i] = sv * (vb[i] - _valmin);
-            fb[i] = 1.0 - sv * (vb[i] - _valmin);
-
-            xb[i] = _xFlat[m];
-            yb[i] = _yFlat[m];
-        }
-
-      //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << ", num = " << num << endl;
-
-      //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-      //     << ", line: " << __LINE__ << endl;
-      //cout << "\txb[0] = " << xb[0] << ", xb[1] = " << xb[1] << ", xb[2] = " << xb[2] << ", xb[3] = " << xb[3] << endl;
-      //cout << "\tyb[0] = " << yb[0] << ", yb[1] = " << yb[1] << ", yb[2] = " << yb[2] << ", yb[3] = " << yb[3] << endl;
-
-        if(NEAR_SOUTH_POLE > yb[0])
-        {
-          //Point 0 at South pole
-          //Make 2 quads: 0, 1, 0, 2 and 0, 2, 0, 3.
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_QUAD_STRIP);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[1], yb[0], height);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[1], yb[1], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[2], yb[0], height);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[2], yb[2], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[3], yb[0], height);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[3], yb[3], height);
-
-            glEnd();
-
-            continue;
-        }
-        else if(NEAR_SOUTH_POLE > yb[1])
-        {
-          //Point 1 at South pole
-          //Make 2 quads: 1, 0, 1, 2 and 1, 2, 1, 3.
-
-            if((NEAR_NEGATIVE_ZERO < xb[2]) && (NEAR_NEGATIVE_ZERO < xb[3]) && (NEAR_WEST_BOUNDARY > xb[0]))
-                xb[0] = 1.0;
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_QUAD_STRIP);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[0], yb[1], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[0], yb[0], height);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[3], yb[1], height);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[3], yb[3], height);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[2], yb[1], height);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[2], yb[2], height);
-
-            glEnd();
-
-            continue;
-        }
-        else if(NEAR_SOUTH_POLE > yb[2])
-        {
-          //Point 2 at South pole
-          //Make 2 quads: 2, 0, 2, 1 and 2, 1, 2, 3.
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_QUAD_STRIP);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[1], yb[2], height);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[1], yb[1], height);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[0], yb[2], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[0], yb[0], height);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[3], yb[2], height);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[3], yb[3], height);
-
-            glEnd();
-
-            continue;
-        }
-        else if(NEAR_SOUTH_POLE > yb[3])
-        {
-          //Point 3 at South pole
-          //Make 2 quads: 3, 0, 3, 1 and 3, 1, 3, 2.
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_QUAD_STRIP);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[2], yb[3], height);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[2], yb[2], height);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[1], yb[3], height);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[1], yb[1], height);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[0], yb[3], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[0], yb[0], height);
-
-            glEnd();
-
-            continue;
-        }
-        else
-        {
-            cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-                 << ", line: " << __LINE__ << endl;
-            cout << "\txb[0] = " << xb[0] << ", xb[1] = " << xb[1] << ", xb[2] = " << xb[2] << ", xb[3] = " << xb[3] << endl;
-            cout << "\tyb[0] = " << yb[0] << ", yb[1] = " << yb[1] << ", yb[2] = " << yb[2] << ", yb[3] = " << yb[3] << endl;
-        }
-    }
-
-  //Handle North Pole
-    for(num = 0; num < num_north_pole_cols; ++num)
-    {
-        n = north_pole_cols[num];
-
-        j = n * ncorners;
-
-        for(i = 0; i < ncorners; ++i)
-        {
-            m = element_corners[j+i];
-            vb[i] = pltvar[m+k*ncol];
-          //fb[i] = sv * (vb[i] - _valmin);
-            fb[i] = 1.0 - sv * (vb[i] - _valmin);
-
-            xb[i] = _xFlat[m];
-            yb[i] = _yFlat[m];
-        }
-
-      //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << ", num = " << num << endl;
-
-      //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-      //     << ", line: " << __LINE__ << endl;
-      //cout << "\txb[0] = " << xb[0] << ", xb[1] = " << xb[1] << ", xb[2] = " << xb[2] << ", xb[3] = " << xb[3] << endl;
-      //cout << "\tyb[0] = " << yb[0] << ", yb[1] = " << yb[1] << ", yb[2] = " << yb[2] << ", yb[3] = " << yb[3] << endl;
-
-        if(NEAR_NORTH_POLE < yb[0])
-        {
-          //Point 0 is at North Pole.
-          //Make 2 quads: 0, 1, 0, 2 and 0, 2, 0, 3.
-
-            if((NEAR_NEGATIVE_ZERO < xb[2]) && (NEAR_NEGATIVE_ZERO < xb[3]) && (NEAR_WEST_BOUNDARY > xb[1]))
-                xb[1] = 1.0;
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_QUAD_STRIP);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[1], yb[0], height);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[1], yb[1], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[2], yb[0], height);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[2], yb[2], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[3], yb[0], height);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[3], yb[3], height);
-
-            glEnd();
-
-            continue;
-        }
-        else if(NEAR_NORTH_POLE < yb[1])
-        {
-          //Point 1 is at North Pole.
-          //Make 2 quads: 1, 0, 1, 2 and 1, 2, 1, 3.
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_QUAD_STRIP);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[0], yb[1], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[0], yb[0], height);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[3], yb[1], height);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[3], yb[3], height);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[2], yb[1], height);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[2], yb[2], height);
-
-            glEnd();
-
-            continue;
-        }
-        else if(NEAR_NORTH_POLE < yb[2])
-        {
-          //Point 2 is at North Pole.
-          //Make 2 quads: 2, 0, 2, 1 and 2, 1, 2, 3. 
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_QUAD_STRIP);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[1], yb[2], height); 
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[1], yb[1], height); 
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[0], yb[2], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[0], yb[0], height);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[3], yb[2], height); 
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[3], yb[3], height);
-
-            glEnd();
-
-            continue;
-        }
-        else if(NEAR_NORTH_POLE < yb[3])
-        {
-          //Point 3 is at North Pole.
-          //Make 2 quads: 3, 0, 3, 1 and 3, 1, 3, 2.
-
-            ++numProcessedBoundaryPoints;
-
-            glBegin(GL_QUAD_STRIP);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[2], yb[3], height);
-
-            glTexCoord1d(fb[2]);
-            glVertex3d(xb[2], yb[2], height);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[1], yb[3], height);
-
-            glTexCoord1d(fb[1]);
-            glVertex3d(xb[1], yb[1], height);
-
-            glTexCoord1d(fb[3]);
-            glVertex3d(xb[0], yb[3], height);
-
-            glTexCoord1d(fb[0]);
-            glVertex3d(xb[0], yb[0], height);
-
-            glEnd();
-
-            continue;
-        }
-        else
-        {
-            cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-                 << ", line: " << __LINE__ << endl;
-            cout << "\txb[0] = " << xb[0] << ", xb[1] = " << xb[1] << ", xb[2] = " << xb[2] << ", xb[3] = " << xb[3] << endl;
-            cout << "\tyb[0] = " << yb[0] << ", yb[1] = " << yb[1] << ", yb[2] = " << yb[2] << ", yb[3] = " << yb[3] << endl;
-        }
-    }
-
-  //The middle boundary
-    for(num = 0; num < num_boundary_cols; ++num)
-    {
-        n = boundary_cols[num];
-
-        j = n * ncorners;
-
-        for(i = 0; i < ncorners; ++i)
-        {
-            m = element_corners[j+i];
-            vb[i] = pltvar[m+k*ncol];
-          //fb[i] = sv * (vb[i] - _valmin);
-            fb[i] = 1.0 - sv * (vb[i] - _valmin);
-
-            xb[i] = _xFlat[m];
-            yb[i] = _yFlat[m];
-        }
-
-      //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << ", num = " << num << endl;
-
-        if((NEAR_POSITIVE_ZERO > xb[0]) && (NEAR_POSITIVE_ZERO > xb[1]))
-        {
-            if((NEAR_EAST_BOUNDARY < xb[2]) && (NEAR_EAST_BOUNDARY < xb[3]))
-            {
-                xb[2] = -1.0;
-                xb[3] = -1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_QUADS);
-
-                glTexCoord1d(fb[0]);
-                glVertex3d(xb[0], yb[0], height);
-
-                glTexCoord1d(fb[1]);
-                glVertex3d(xb[1], yb[1], height);
-
-                glTexCoord1d(fb[2]);
-                glVertex3d(xb[2], yb[2], height);
-
-                glTexCoord1d(fb[3]);
-                glVertex3d(xb[3], yb[3], height);
-
-                glEnd();
-
-                continue;
-            }
-
-            if((NEAR_EAST_BOUNDARY < xb[2]) && (NEAR_WEST_BOUNDARY > xb[3])) 
-            {
-                xb[2] = -1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_QUADS);
-
-                glTexCoord1d(fb[0]);
-                glVertex3d(xb[0], yb[0], height);
-
-                glTexCoord1d(fb[1]);
-                glVertex3d(xb[1], yb[1], height);
-
-                glTexCoord1d(fb[2]);
-                glVertex3d(xb[2], yb[2], height);
-
-                glTexCoord1d(fb[3]);
-                glVertex3d(xb[3], yb[3], height);
-
-                glEnd();
-
-                continue;
-            }
-
-            if((NEAR_WEST_BOUNDARY > xb[2]) && (NEAR_EAST_BOUNDARY < xb[3]))
-            {
-                xb[3] = -1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_QUADS);
-
-                glTexCoord1d(fb[0]);
-                glVertex3d(xb[0], yb[0], height);
-
-                glTexCoord1d(fb[1]);
-                glVertex3d(xb[1], yb[1], height);
-
-                glTexCoord1d(fb[2]);
-                glVertex3d(xb[2], yb[2], height);
-
-                glTexCoord1d(fb[3]);
-                glVertex3d(xb[3], yb[3], height);
-
-                glEnd();
-
-                continue;
-            }
-        }
-
-        if((NEAR_POSITIVE_ZERO > xb[2]) && (NEAR_POSITIVE_ZERO > xb[3]))
-        {
-            if((NEAR_EAST_BOUNDARY < xb[0]) && (NEAR_EAST_BOUNDARY < xb[1])) 
-            {
-                xb[0] = -1.0;
-                xb[1] = -1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_QUADS);
-
-                glTexCoord1d(fb[0]);
-                glVertex3d(xb[0], yb[0], height);
-
-                glTexCoord1d(fb[1]);
-                glVertex3d(xb[1], yb[1], height);
-
-                glTexCoord1d(fb[2]);
-                glVertex3d(xb[2], yb[2], height);
-
-                glTexCoord1d(fb[3]);
-                glVertex3d(xb[3], yb[3], height);
-
-                glEnd();
-
-                continue;
-            }
-
-            if((NEAR_WEST_BOUNDARY > xb[0]) && (NEAR_EAST_BOUNDARY < xb[1])) 
-            {
-                xb[1] = -1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_QUADS);
-
-                glTexCoord1d(fb[0]);
-                glVertex3d(xb[0], yb[0], height);
-
-                glTexCoord1d(fb[1]);
-                glVertex3d(xb[1], yb[1], height);
-
-                glTexCoord1d(fb[2]);
-                glVertex3d(xb[2], yb[2], height);
-
-                glTexCoord1d(fb[3]);
-                glVertex3d(xb[3], yb[3], height);
-
-                glEnd();
-
-                continue;
-            }
-
-            if((NEAR_EAST_BOUNDARY < xb[0]) && (NEAR_WEST_BOUNDARY > xb[1]))
-            {
-                xb[0] = -1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_QUADS);
-
-                glTexCoord1d(fb[0]);
-                glVertex3d(xb[0], yb[0], height);
-
-                glTexCoord1d(fb[1]);
-                glVertex3d(xb[1], yb[1], height);
-
-                glTexCoord1d(fb[2]);
-                glVertex3d(xb[2], yb[2], height);
-
-                glTexCoord1d(fb[3]);
-                glVertex3d(xb[3], yb[3], height);
-
-                glEnd();
-
-                continue;
-            }
-        }
-
-        if((NEAR_NEGATIVE_ZERO < xb[2]) && (NEAR_NEGATIVE_ZERO < xb[3]))
-        {
-            if((NEAR_WEST_BOUNDARY > xb[0]) && (NEAR_WEST_BOUNDARY > xb[1]))
-            {
-                xb[0] = 1.0;
-                xb[1] = 1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_QUADS);
-
-                glTexCoord1d(fb[0]);
-                glVertex3d(xb[0], yb[0], height);
-
-                glTexCoord1d(fb[1]);
-                glVertex3d(xb[1], yb[1], height);
-
-                glTexCoord1d(fb[2]);
-                glVertex3d(xb[2], yb[2], height);
-
-                glTexCoord1d(fb[3]);
-                glVertex3d(xb[3], yb[3], height);
-
-                glEnd();
-
-                continue;
-            }
-
-            if((NEAR_WEST_BOUNDARY > xb[0]) && (NEAR_EAST_BOUNDARY < xb[1]))
-            {
-                xb[0] = 1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_QUADS);
-
-                glTexCoord1d(fb[0]);
-                glVertex3d(xb[0], yb[0], height);
-
-                glTexCoord1d(fb[1]);
-                glVertex3d(xb[1], yb[1], height);
-
-                glTexCoord1d(fb[2]);
-                glVertex3d(xb[2], yb[2], height);
-
-                glTexCoord1d(fb[3]);
-                glVertex3d(xb[3], yb[3], height);
-
-                glEnd();
-
-                continue;
-            }
-
-            if((NEAR_EAST_BOUNDARY < xb[0]) && (NEAR_WEST_BOUNDARY > xb[1]))
-            {
-                xb[1] = 1.0;
-
-                ++numProcessedBoundaryPoints;
-
-                glBegin(GL_QUADS);
-
-                glTexCoord1d(fb[0]);
-                glVertex3d(xb[0], yb[0], height);
-
-                glTexCoord1d(fb[1]);
-                glVertex3d(xb[1], yb[1], height);
-
-                glTexCoord1d(fb[2]);
-                glVertex3d(xb[2], yb[2], height);
-
-                glTexCoord1d(fb[3]);
-                glVertex3d(xb[3], yb[3], height);
-
-                glEnd();
-
-                continue;
-            }
-        }
-
-        cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__
-             << ", line: " << __LINE__ << endl;
-        cout << "\tnum = " << num << endl;
-        cout << "\tyb[1] = " << yb[1] << ", yb[2] = " << yb[2] << endl;
-        cout << "\txb[1] = " << xb[1] << ", xb[2] = " << xb[2] << endl;
-        cout << "\tyb[0] = " << yb[0] << ", yb[3] = " << yb[3] << endl;
-        cout << "\txb[0] = " << xb[0] << ", xb[3] = " << xb[3] << endl;
-    }
-
-    if(numProcessedBoundaryPoints != _nBoundaryPoints)
-    {
-        cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-        cout << "\tnumProcessedBoundaryPoints = " << numProcessedBoundaryPoints
-             << ", _nBoundaryPoints = " << _nBoundaryPoints << endl;
-    }
-
     glDisable(GL_TEXTURE_1D);
-
     glPopMatrix();
 
   //glEndList();

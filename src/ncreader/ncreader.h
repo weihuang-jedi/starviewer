@@ -37,7 +37,9 @@ class ncReader {
     vector<string> v2d_names;
     vector<string> v3d_names;
 
-    double* time;
+    double* _time;
+    char* _time_iso;
+    string _timestring;
 
     vector<size_t> dim_length;
 
@@ -68,6 +70,7 @@ class ncReader {
     int _ntim;
     int _nfull;
     int _nhalf;
+    int _nchars;
  
   public:
     // declare constructor and deconstructor methods
@@ -95,6 +98,7 @@ class ncReader {
     // float* getFloat(const string var_name);
     // double* getDouble(const string var_name);
 
+    char* getChar(const char* var_name);
     float* getFloat(const char* var_name);
     double* getDouble(const char* var_name);
 
@@ -112,7 +116,8 @@ class ncReader {
     vector<string> getV2dNames() { return v2d_names; };
     vector<string> getV3dNames() { return v3d_names; };
 
-    double* getTim() { return time; };
+    double* getTim() { return _time; };
+    string  getTimeString() { return _timestring; };
 
     double* getGridXt() { return grid_xt; };
     double* getGridYt() { return grid_yt; };

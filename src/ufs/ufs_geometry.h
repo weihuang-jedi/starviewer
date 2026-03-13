@@ -9,18 +9,15 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include <geometry.h>
+
 using namespace std;
 
-class UFSGeometry : public Geometry
-{
+class UFSGeometry : public Geometry {
     public:
         UFSGeometry();
        ~UFSGeometry();
 
-        int  get_nlon() { return _nlon; };
-        int  get_nlat() { return _nlat; };
-        int  get_nlev() { return _nlev; };
-        int  get_ntim() { return _ntim; };
 
         string get_name() { return name; };
 
@@ -30,38 +27,36 @@ class UFSGeometry : public Geometry
         void reset();
         void reset_dimension();
 
-        float* get_xSphere() { return _xSphere; };
-        float* get_ySphere() { return _ySphere; };
-        float* get_zSphere() { return _zSphere; };
+        double* get_xSphere() { return _xSphere; };
+        double* get_ySphere() { return _ySphere; };
+        double* get_zSphere() { return _zSphere; };
 
-        float* get_xFlat() { return _xFlat; };
-        float* get_yFlat() { return _yFlat; };
+        double* get_xFlat() { return _xFlat; };
+        double* get_yFlat() { return _yFlat; };
 
       //UFS
         void setup();
 
-        void set_lon(float* v) { _lon = v; };
-        void set_lat(float* v) { _lat = v; };
-        void set_lev(float* v) { _lev = v; };
-
-        void set_lon(double* v);
-        void set_lat(double* v);
+	void set_ntim(int v) { _ntim = v; };
+	int get_ntim() { return _ntim; };
 
     protected:
         string name;
 
-        float* _xSphere;
-        float* _ySphere;
-        float* _zSphere;
+        double* _xSphere;
+        double* _ySphere;
+        double* _zSphere;
 
         float _hmax;
         float _hmin;
 
-        float* _xFlat;
-        float* _yFlat;
+        double* _xFlat;
+        double* _yFlat;
 
     private:
         void _set_default();
+
+	int _ntim;
 };
 #endif
 

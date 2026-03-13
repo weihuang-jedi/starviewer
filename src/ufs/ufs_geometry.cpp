@@ -67,7 +67,6 @@ void UFSGeometry::reset_dimension()
     _nlon = 1;
     _nlat = 1;
     _nlev = 1;
-    _ntim = 1;
 }
 
 void UFSGeometry::reset()
@@ -83,34 +82,41 @@ void UFSGeometry::print()
 
 void UFSGeometry::setup()
 {
-    float pi = 3.1415926535897932;
-    float arc = pi / 180.0;
-    float delt;
-    int i, j, n;
-    size_t nsqure;
+    double pi = 3.1415926535897932;
+    double arc = pi / 180.0;
+    double delt;
+    int i, j;
+    size_t n;
+    size_t nsquare;
 
     nsquare = _nlon * _nlat;
-    _xSphere = new float[nsquare];
-    _ySphere = new float[nsquare];
-    _zSphere = new float[nsquare];
+    _xSphere = new double[nsquare];
+    _ySphere = new double[nsquare];
+    _zSphere = new double[nsquare];
 
-    _xFlat = new float[nsquare];
-    _yFlat = new float[nsquare];
+    _xFlat = new double[_nlon];
+    _yFlat = new double[_nlat];
 
     _hmax = 0.0;
     _hmin = 10000.0;
-    for(n = 0; n < _ufs__ncol; ++n)
-    {
-        delt = cos(_ufs__lat[n] * arc);
-        _xSphere[n] = delt * sin(_lon[n] * arc);
-        _ySphere[n] =        sin(_lat[n] * arc);
-        _zSphere[n] = delt * cos(_lon[n] * arc);
+    for(j = 0; n < _nlat; ++j) {
+        _yFlat[j] = _lat[j]/180.0;
+	n = j*_nlon;
+        delt = cos(_lat[j] * arc);
+        for(i = 0; i < _nlon; ++i)
+        {
+            _xSphere[n+i] = delt * sin(_lon[i] * arc);
+            _ySphere[n+i] =        sin(_lat[j] * arc);
+            _zSphere[n+i] = delt * cos(_lon[i] * arc);
+        }
+    }
 
-        if(_ufs__lon[n] > 180)
-            _xFlat[n] = _lon[n]/180.0 - 2.0;
+    for(i = 0; i < _nlon; ++i)
+    {
+        if(_lon[i] > 180.0)
+            _xFlat[i] = _lon[i]/180.0 - 2.0;
         else
-            _xFlat[n] = _lon[n]/180.0;
-        _yFlat[n] = _lat[n]/180.0;
+            _xFlat[i] = _lon[i]/180.0;
     }
 }
 

@@ -42,7 +42,7 @@ class UFS2dViewer
         void draw_plane_grids();
 
         void reset();
-        void setup(string vn, double* var);
+        void setup(string vn, float* var);
         void set_geometry(UFSGeometry* gm);
         void reset_texture1d(ColorTable *ct);
 
@@ -52,8 +52,8 @@ class UFS2dViewer
 
         void set_locator(Locator* l) { locator = l; };
 
-        double get_minval() { return _valmin; };
-        double get_maxval() { return _valmax; };
+        float get_minval() { return _valmin; };
+        float get_maxval() { return _valmax; };
 
     protected:
         ColorTable* colorTable;
@@ -70,17 +70,16 @@ class UFS2dViewer
         int previoustimelevel;
         int current_timelevel;
 
-        int ncenters;
-        int ncorners;
-        int ncol;
-        int lev;
-        int* element_corners;
+        double _deltlon;
+        double _deltlat;
 
-        double* lon;
-        double* lat;
+        double* _lon;
+        double* _lat;
+        float* _lev;
 
         int _nlon;
         int _nlat;
+        int _nlev;
 
         GLuint zcl;
         GLuint ycl;
@@ -96,11 +95,11 @@ class UFS2dViewer
         double* _xFlat;
         double* _yFlat;
 
-        double* _var;
-        double* pltvar;
+        float* _var;
+        float* pltvar;
 
-        double _valmin;
-        double _valmax;
+        float _valmin;
+        float _valmax;
 
         double oneover;
         double deg2rad;
@@ -114,7 +113,7 @@ class UFS2dViewer
         vector<int> boundary_cols;
 
         void _initialize();
-        void _evaluate(double* var);
+        void _evaluate(float* var);
 
         void _lonlat2xyz(double lon, double lat, double radius,
                          double fact);
@@ -123,44 +122,16 @@ class UFS2dViewer
         void _display_Xflat_plane(int xs);
         void _display_Yflat_plane(int ys);
 
-        void handle_selectedXflat_quad(double clon, double* xlon, int nc, double sv,
-                                       double* height, int& numProcessedPoints);
-        void process_selectedXflat_quad(double xc, double sv,
-                                        int il0, int ih0, int il1, int ih1,
-                                        double* x, double* y, double* height,
-                                        int* mc);
-
-        void handle_selectedYflat_quad(double clat, int nc, double sv,
-                                       double* height, int& numProcessedPoints);
-        void process_selectedYflat_quad(double yc, double sv,
-                                        int il0, int ih0, int il1, int ih1,
-                                        double* x, double* y, double* height,
-                                        int* mc);
-
         void _sphereDisplay();
         void _sphereXplane(int xs);
         void _sphereYplane(int ys);
 
-        double linInterp(double xc, double x0, double x1,
-                         double y0, double y1, double &dx);
-        void handle_selectedXsphere_quad(double clon, double* xlon,
-                                         int nc, double sv,
-                                         double* radius,
-                                         int& numProcessedPoints);
-        void process_selectedXsphere_quad(double clon, double sv,
-                                          int il0, int ih0,
-                                          int il1, int ih1,
-                                          double* xlon, double* ylat, double* radius,
-                                          int* mc);
-        void handle_selectedYsphere_quad(double clat, double* xlat,
-                                         int nc, double sv,
-                                         double* radius,
-                                         int& numProcessedPoints);
-        void process_selectedYsphere_quad(double clat, double sv,
-                                          int il0, int ih0,
-                                          int il1, int ih1,
-                                          double* xlon, double* ylat, double* radius,
-                                          int* mc);
+        void handle_selectedXsphere_quad(int nlonc, double sv, double* radius);
+        void handle_selectedYsphere_quad(int jlatc, double sv, double* radius);
+
+        void handle_selectedXflat_quad(int ilonc, double sv, double* height);
+        void handle_selectedYflat_quad(int jlatc, double sv, double* height);
+
         void _flatBump();
         void _sphereBump();
         void _draw_cross(double radius);

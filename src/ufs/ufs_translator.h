@@ -77,8 +77,6 @@ class UFSTranslator : public BaseTranslator
         void make_timeNpositionString();
 
         vector<int> frameList;
-        bool _hasMappingFile;
-        string _mappingFilename;
 };
 #endif
 

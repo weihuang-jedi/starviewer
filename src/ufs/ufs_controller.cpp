@@ -9,8 +9,6 @@ UFSController::UFSController(ColorTable *ct, NVOptions* opt,
     nvoptions = opt;
     strcpy(_flnm, fn);
 
-    _hasMappingFile = false;
-
     cout << "\tEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     cout << "\tOpen file: <" << fn << ">" << endl;
 
@@ -19,6 +17,9 @@ UFSController::UFSController(ColorTable *ct, NVOptions* opt,
 
   //cout << "\t\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //coastline = new CoastLine();
+  
+    _maxFile = 1;
+    _ntim = 1;
 
     cout << "\t\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     cout << "\t\tsfn = " << sfn << endl;
@@ -26,7 +27,6 @@ UFSController::UFSController(ColorTable *ct, NVOptions* opt,
     ncfile = new ncReader(fn);
 
     ufs_viewer = NULL;
-    mappingfile = NULL;
 
   //cout << "\tLeave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
@@ -41,17 +41,12 @@ UFSController::~UFSController()
         delete ufs_viewer;
     ufs_viewer = NULL;
     
-    if(NULL != mappingfile)
-        delete mappingfile;
-    mappingfile = NULL;
-
     delete geometry;
 } 
 
 void UFSController::setup()
 {
     int n;
-    int _maxFile = 1;
 
     cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
@@ -70,8 +65,8 @@ void UFSController::setup()
 
     geometry->set_nlon(ncfile->getNlon());
     geometry->set_nlat(ncfile->getNlat());
-    geometry->set_nlev(ncfile->getNlev());
-    geometry->set_ntim(_maxTime);
+    geometry->set_nlat(ncfile->getNlat());
+    geometry->set_ntim(_ntimes[0]);
 
     geometry->set_lon(ncfile->getLon());
     geometry->set_lat(ncfile->getLat());
@@ -108,20 +103,8 @@ void UFSController::setup()
 
   //ufs_viewer->set_lister(&lister[0]);
 
-    _value = nvfile->get_dv(_varname);
-    _title = nvfile->get_title();
-
-    geometry->set_ufs__ncol(nvfile->get_dim_size("ncol"));
-    geometry->set_ufs__lev(1);
-    geometry->set_nz(1);
-    geometry->set_nt(nvfile->get_dim_size("time"));
-
-  //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tUFSController ncenters : " << geometry->get_ufs__ncenters() << endl;
-  //cout << "\tUFSController ncorners : " << geometry->get_ufs__ncorners() << endl;
-  //cout << "\tUFSController ncol     : " << geometry->get_ufs__ncol() << endl;
-  //cout << "\tUFSController lev      : " << geometry->get_ufs__lev() << endl;
-  //cout << "\tUFSController nt       : " << geometry->get_nt() << endl;
+    _value = ncfile->get_fv(_varname.c_str());
+    _title = _varname;
 
   //cout << "\n_setup, file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //geometry->print();
@@ -166,15 +149,12 @@ void UFSController::set1dvarname(string vn)
     if(_initialized)
         free(_value);
 
-    _value = nvfile->get_dv(vn);
-    _title = nvfile->get_title();
+    _value = ncfile->get_fv(vn.c_str());
+    _title = vn;
 
     _initialized = true;
 
-    geometry->set_ufs__ncol(nvfile->get_dim_size("ncol"));
-    geometry->set_ufs__lev(1);
-    geometry->set_nz(1);
-    geometry->set_nt(nvfile->get_dim_size("time"));
+    geometry->set_nlev(1);
 
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "setup for <" << vn << ">" << endl;
@@ -198,17 +178,12 @@ void UFSController::set2dvarname(string vn)
     if(_initialized)
         free(_value);
 
-    _value = nvfile->get_dv(vn);
-    _title = nvfile->get_title();
+    _value = ncfile->get_fv(vn.c_str());
+    _title = vn;
 
     _initialized = true;
 
-    geometry->set_ufs__ncol(nvfile->get_dim_size("ncol"));
-    geometry->set_ufs__lev(1);
-    geometry->set_nz(1);
-  //geometry->set_ufs__lev(nvfile->get_dim_size("lev"));
-  //geometry->set_nz(nvfile->get_dim_size("lev"));
-    geometry->set_nt(nvfile->get_dim_size("time"));
+    geometry->set_nlev(1);
 
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "setup for <" << vn << ">" << endl;
@@ -232,15 +207,14 @@ void UFSController::set3dvarname(string vn)
     if(_initialized)
         free(_value);
 
-    _value = nvfile->get_dv(vn);
-    _title = nvfile->get_title();
+    _value = ncfile->get_fv(vn.c_str());
+    _title = vn;
 
     _initialized = true;
 
-    geometry->set_ufs__ncol(nvfile->get_dim_size("ncol"));
-    geometry->set_ufs__lev(nvfile->get_dim_size("lev"));
-    geometry->set_nz(nvfile->get_dim_size("lev"));
-    geometry->set_nt(nvfile->get_dim_size("time"));
+    geometry->set_nlon(ncfile->getNlon());
+    geometry->set_nlat(ncfile->getNlat());
+    geometry->set_nlev(ncfile->getNlev());
 
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "setup for <" << vn << ">" << endl;
@@ -277,18 +251,29 @@ void UFSController::update_file(const char* fn)
 
 int UFSController::get_ndv(int n)
 {
-    return nvfile->get_ndv(n);
+    int ndv = 0;
+    if (1 == n)
+        ndv = 4;
+    else if (2 == n)
+        ndv = ncfile->getNumV2ds();
+    else if (3 == n)
+        ndv = ncfile->getNumV3ds();
+    return ndv;
 }
 
-string* UFSController::get_ndvNames(int n)
+vector<string> UFSController::get_ndvNames(int n)
 {
-    string* varnames = nvfile->get_ndvNames(n);
+    vector<string> varnames;
+    if (2 == n)
+        varnames = ncfile->getV2dNames();
+    else if (3 == n)
+        varnames = ncfile->getV3dNames();
     return varnames;
 }
 
-string* UFSController::get_timestring()
+string UFSController::get_timestring()
 {
-    return nvfile->get_timestr();
+    return ncfile->getTimeString();
 }
 
 void UFSController::set_fileNtime(int nf, int nt)
@@ -307,12 +292,12 @@ void UFSController::set_fileNtime(int nf, int nt)
         if(_initialized)
             free(_value);
 
-        nvfile->select_file(nf);
+      //nvfile->select_file(nf);
 
-        _value = nvfile->get_dv(_varname);
-        _title = nvfile->get_title();
+        _value = ncfile->get_fv(_varname.c_str());
+        _title = _varname;
 
-        geometry->set_nt(_ntimes[_curFile]);
+        geometry->set_ntim(_ntimes[_curFile]);
 
         _minval = ufs_viewer->get_minval();
         _maxval = ufs_viewer->get_maxval();
@@ -322,7 +307,7 @@ void UFSController::set_fileNtime(int nf, int nt)
 
     _preFile = _curFile;
 
-    gridsize = _curTime * geometry->get_ufs__ncol() *  geometry->get_ufs__lev();
+    gridsize = _curTime * geometry->get_nlon() * geometry->get_nlat() * geometry->get_nlev();
 
     _set_glbTime();
   //ufs_viewer->set_lister(&lister[_glbTime]);
@@ -336,80 +321,6 @@ void UFSController::_set_glbTime()
     _glbTime = _curTime;
     for(n = 0; n < _curFile; ++n)
         _glbTime += _ntimes[n];
-}
-
-void UFSController::set_mappingFile(string mfnm)
-{
-    size_t inputfile_ncol = 0;
-    size_t mappingfile_ncol = -1;
-    ifstream f(mfnm.c_str());
-
-    inputfile_ncol = nvfile->get_dim_size("ncol");
-
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\t\tmapping file = " << mfnm << endl;
-  //cout << "\t\tinputfile_ncol = " << inputfile_ncol << endl;
-
-    if(f.good())
-    {
-        f.close();
-        _hasMappingFile = true;
-        _mappingFilename = mfnm;
-      //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-      //cout << "\tfind matching mapping file:" << _mappingFilename << endl;
-
-        mappingfile = new NVFile(_mappingFilename.c_str(), false);
-        mappingfile_ncol = mappingfile->get_dim_size("ncenters");
-
-      //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-      //cout << "\t\tmappingfile_ncol = " << mappingfile_ncol << endl;
-    }
-    else
-    {
-        char mappingfile_str[512];
-        f.close();
-
-        _hasMappingFile = false;
-
-        strcpy(mappingfile_str, getenv("NV_DATA"));
-        strcat(mappingfile_str, "/ufs__1degree_mapping.nc");
-        _mappingFilename = mappingfile_str;
-
-      //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-      //cout << "\tfind matching mapping file:" << _mappingFilename << endl;
-
-        mappingfile = new NVFile(mappingfile_str, false);
-        mappingfile_ncol = mappingfile->get_dim_size("ncenters");
-
-      //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-      //cout << "\t\tmappingfile_ncol = " << mappingfile_ncol << endl;
-
-        if((inputfile_ncol - 2) != mappingfile_ncol)
-        {
-            delete mappingfile;
-            strcpy(mappingfile_str, getenv("NV_DATA"));
-            strcat(mappingfile_str, "/ufs__0.25degree_mapping.nc");
-            _mappingFilename = mappingfile_str;
-            mappingfile = new NVFile(mappingfile_str, false);
-            mappingfile_ncol = mappingfile->get_dim_size("ncenters");
-        }   
-    }
-
-    if((inputfile_ncol - 2) != mappingfile_ncol)
-    {
-        cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-        cout << "\tinputfile_ncol = " << inputfile_ncol << ", mappingfile_ncol = " << mappingfile_ncol << endl;
-        cout << "\tCan not find matching mapping file." << endl;
-        cout << "\tplease run as: '[vglrun] nv -mappingfile se-mapping-file -ufs_ se-filename'" << endl;
-
-      //delete mappingfile;
-
-        exit (-1);
-    }
-
-    geometry->set_ufs__ncenters(mappingfile->get_dim_size("ncenters"));
-    geometry->set_ufs__ncorners(mappingfile->get_dim_size("ncorners"));
-    geometry->set_ufs__element_corners(mappingfile->get_iv("element_corners"));
 }
 
 void UFSController::set_locator(Locator* l)

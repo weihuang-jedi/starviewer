@@ -67,19 +67,27 @@ void MPAS2dViewer::set_geometry(MPASGeometry *gm)
 
 void MPAS2dViewer::setup(string vn, double *var)
 {
+    int n = 0;
     size_t gridsize;
+    int nVertLevels    = geometry->get_nVertLevels();
+    int nVertices      = geometry->get_nVertices();
+    size_t ns = nVertLevels*nVertices;
+    float fltvar[ns];
 
     reset();
 
     _varname  = vn;
     _var = var;
 
+    for(n=0; n<ns; ++n)
+        fltvar[n] = (float) var[n];
+
   //gridsize = geometry->get_nt() * geometry->get_nCells() * geometry->get_nVertLevels();
   //evaluator->set_value(gridsize, _var);
 
     gridsize = geometry->get_nCells() * geometry->get_nVertLevels();
   //evaluator->set_value(gridsize, &_var[3*gridsize]);
-    evaluator->set_value(gridsize, _var);
+    evaluator->set_value(gridsize, fltvar);
 
     _minval = evaluator->get_min();
     _maxval = evaluator->get_max();

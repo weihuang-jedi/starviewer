@@ -35,14 +35,14 @@ UFSTranslator::UFSTranslator(ColorTable* ct, NVOptions* opt,
     _filename = flnm;
     _hasFileList = isList;
 
-    _mappingFilename = mfnm;
-
     nvoptions->set_xsec(-1);
     nvoptions->set_ysec(-91);
     nvoptions->set_zsec(0);
     nvoptions->set_tsec(0);
 
     ufs_controller = NULL;
+
+    _timestr = new string[2];
 
   //cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
@@ -51,6 +51,8 @@ UFSTranslator::~UFSTranslator()
 {
     if(NULL != ufs_controller)
         delete ufs_controller;
+    if(NULL != _timestr)
+        delete[] _timestr;
     ufs_controller = NULL;
 }
 
@@ -95,13 +97,13 @@ void UFSTranslator::setup()
     _maxval = ufs_controller->get_maxval();
 
     _title   = ufs_controller->get_title();
-    _timestr = ufs_controller->get_timestring();
-    _maxFile = ufs_controller->get_nfils();
-    _nTimes  = ufs_controller->get_ntimes();
+    _timestr[0] = ufs_controller->get_timestring();
+    _maxFile = ufs_controller->get_nfiles();
 
-    _maxTime = 0;
-    for(n = 0; n < _maxFile; ++n)
-        _maxTime += _nTimes[n];
+  //_nTimes  = ufs_controller->get_ntimes();
+    _maxTime = 1;
+  //for(n = 0; n < _maxFile; ++n)
+  //    _maxTime += _nTimes[n];
 
     if(_maxTime > 12)
         _maxTime = 12;
@@ -147,8 +149,9 @@ void UFSTranslator::show()
 
 void UFSTranslator::createVarInfo()
 {
-    _varinfo = "Dim ncol="+QString::number(geometry->get_ufs__ncol())
-             + ", nlev=" + QString::number(geometry->get_ufs__lev())
+    _varinfo = "Dim nlon="+QString::number(geometry->get_nlon())
+             + ", nlat=" + QString::number(geometry->get_nlat())
+             + ", nlev=" + QString::number(geometry->get_nlev())
              + "\nVar min=" + QString::number(ufs_controller->get_minval())
              + ", max=" + QString::number(ufs_controller->get_maxval());
 }
@@ -272,9 +275,10 @@ void UFSTranslator::select3dVar(const QString& str)
     sliderNspinX->setValue(0);
     sliderNspinY->set_max(90);
     sliderNspinY->set_min(-90);
-    sliderNspinZ->set_max(geometry->get_ufs__lev());
+    sliderNspinZ->set_max(geometry->get_nlev());
     sliderNspinZ->setValue(0);
-    sliderNspinT->set_max(geometry->get_nt());
+  //sliderNspinT->set_max(_ntim);
+    sliderNspinT->set_max(1);
     sliderNspinT->setValue(0);
 
     _minval = ufs_controller->get_minval();
@@ -306,7 +310,11 @@ int UFSTranslator::get_ndv(int n)
 
 string* UFSTranslator::get_ndvNames(int n)
 {
-    string* varnames = ufs_controller->get_ndvNames(n-1);
+    vector<string> vecnames = ufs_controller->get_ndvNames(n-1);
+    int numbvars = get_ndv(n);
+    string* varnames = new string[numbvars];
+    for (int i=0; i<numbvars; ++i)
+	varnames[i] = vecnames[i];
     return varnames;
 }
 
@@ -318,7 +326,7 @@ void UFSTranslator::update_frame()
 
     _set_current_time();
     ufs_controller->set_fileNtime(_curFile, _curTime);
-    _timestr = ufs_controller->get_timestring();
+    _timestr[0] = ufs_controller->get_timestring();
 
     if(nvoptions->get_cb(NV_ANIMATIONON))
     {
@@ -370,7 +378,7 @@ void UFSTranslator::nextFrame()
 
     _set_current_time();
     ufs_controller->set_fileNtime(_curFile, _curTime);
-    _timestr = ufs_controller->get_timestring();
+    _timestr[0] = ufs_controller->get_timestring();
 
     updateGL();
 }
@@ -383,7 +391,7 @@ void UFSTranslator::backFrame()
 
     _set_current_time();
     ufs_controller->set_fileNtime(_curFile, _curTime);
-    _timestr = ufs_controller->get_timestring();
+    _timestr[0] = ufs_controller->get_timestring();
 
     updateGL();
 }
