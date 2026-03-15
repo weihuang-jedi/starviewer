@@ -132,5 +132,50 @@ void Geometry::_set_default()
     strcpy(yllabels[4], "30N");
     strcpy(yllabels[5], "60N");
     strcpy(yllabels[6], "90N");
+}
+
+void Geometry::set_lon(double *v)
+{
+    int i;
+
+    cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "_nlon=" << _nlon << endl;
+    _lon = new double[_nlon];
+    for(i = 0; i < _nlon; ++i)
+    {
+	_lon[i] = v[i];
+        cout << "_lon[" << i << "] = " << _lon[i] << endl;
+    }
+    cout << "leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 } 
+
+void Geometry::set_lat(double *v)
+{
+    int j;
+
+    cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "_nlat=" << _nlat << endl;
+    _lat = new double[_nlat];
+    for(j = 0; j < _nlat; ++j)
+    {
+	_lat[j] = v[j];
+        cout << "_lat[" << j << "] = " << _lat[j] << endl;
+    }
+    cout << "leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+}
+
+void Geometry::set_lev(float *v)
+{
+    int k;
+
+    cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "_nlev=" << _nlev << endl;
+    _lev = new float[_nlev];
+    for(k = 0; k < _nlev; ++k)
+    {
+	_lev[k] = v[k];
+        cout << "_lev[" << k << "] = " << _lev[k] << endl;
+    }
+    cout << "leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+}
 

@@ -106,6 +106,8 @@ class UFSController
         float _maxval;
 
         void _set_glbTime();
+        template<typename T>
+        void _print1d(T* var, int nl);
 };
 #endif
 

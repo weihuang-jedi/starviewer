@@ -27,9 +27,13 @@ class Geometry : public BaseGeometry
         void set_nlev(int v) { _nlev = v; };
         void set_ntim(int v) { _ntim = v; };
 
-        void set_lon(double* v) { _lon = v; };
-        void set_lat(double* v) { _lat = v; };
-        void set_lev(float* v) { _lev = v; };
+        void set_lon(double* v);
+        void set_lat(double* v);
+        void set_lev(float* v);
+
+      //void set_lon(double* v) { _lon = v; };
+      //void set_lat(double* v) { _lat = v; };
+      //void set_lev(float* v) { _lev = v; };
 
         double* get_lon() { return _lon; };
         double* get_lat() { return _lat; };

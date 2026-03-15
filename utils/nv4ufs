@@ -1,5 +1,8 @@
 #!/bin/bash
 
+ set -x
+
+ cd /work2/noaa/epic/weihuang/nv/starviewer
 #module purge
 #module use moduledir
 #module load hercules.gnu 
@@ -9,6 +12,6 @@
 #/work2/noaa/epic/weihuang/nv/starviewer/build/main/starviewer \
 #	 -ufs /work2/noaa/epic/weihuang/nv/data/ufs-atm-history/gfs.t12z.atm.f000.nc
 
- gdb --args \
+#gdb --args \
  /work2/noaa/epic/weihuang/nv/starviewer/build/main/starviewer\
  	-ufs /work2/noaa/epic/weihuang/nv/data/ufs-atm-history/gfs.t12z.atm.f000.nc

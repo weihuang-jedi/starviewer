@@ -43,15 +43,15 @@ class ncReader {
 
     vector<size_t> dim_length;
 
-    double* grid_xt;
-    double* grid_yt;
-    double* lon;
-    double* lat;
-    double* lon2d;
-    double* lat2d;
+    double* _grid_xt;
+    double* _grid_yt;
+    double* _lon;
+    double* _lat;
+    double* _lon2d;
+    double* _lat2d;
 
-    float* pfull;
-    float* phalf;
+    float* _pfull;
+    float* _phalf;
     float* _ak;
     float* _bk;
 
@@ -61,8 +61,8 @@ class ncReader {
     bool _isMPAS = false;
     bool _isUFS = true;
 
-    int* _dimsize;
-    int* _ntimes;
+    int* _dimsize = NULL;
+    int* _ntimes = NULL;
 
     int _nlon;
     int _nlat;
@@ -119,15 +119,16 @@ class ncReader {
     double* getTim() { return _time; };
     string  getTimeString() { return _timestring; };
 
-    double* getGridXt() { return grid_xt; };
-    double* getGridYt() { return grid_yt; };
-    double* getLon2d() { return lon2d; };
-    double* getLat2d() { return lat2d; };
-    float* getPfull() { return pfull; };
-    float* getPhalf() { return phalf; };
-    double* getLon() { return lon; };
-    double* getLat() { return lat; };
-    float* getLev() { return pfull; };
+    double* getGridXt() { return _grid_xt; };
+    double* getGridYt() { return _grid_yt; };
+    double* getLon2d() { return _lon2d; };
+    double* getLat2d() { return _lat2d; };
+    double* getLon() { return _lon; };
+    double* getLat() { return _lat; };
+
+    float* getPfull() { return _pfull; };
+    float* getPhalf() { return _phalf; };
+    float* getLev() { return _pfull; };
 
     // simulate ncl functions.
     double* get_dv( const char* vn ) { return getDouble(vn); };

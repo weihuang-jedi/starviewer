@@ -9,26 +9,26 @@ UFSController::UFSController(ColorTable *ct, NVOptions* opt,
     nvoptions = opt;
     strcpy(_flnm, fn);
 
-    cout << "\tEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     cout << "\tOpen file: <" << fn << ">" << endl;
 
     geometry = new UFSGeometry();
     geometry->set_name(sfn);
 
-  //cout << "\t\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //coastline = new CoastLine();
   
     _maxFile = 1;
     _ntim = 1;
 
-    cout << "\t\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\t\tsfn = " << sfn << endl;
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tsfn = " << sfn << endl;
   //nvfile = new NVFile(sfn, isList);
     ncfile = new ncReader(fn);
 
     ufs_viewer = NULL;
 
-  //cout << "\tLeave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 UFSController::~UFSController()
@@ -44,29 +44,64 @@ UFSController::~UFSController()
     delete geometry;
 } 
 
+template<typename T>
+void UFSController::_print1d(T* var, int nl)
+{
+    int i;
+
+    cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "nl=" << nl << endl;
+    for(i = 0; i < nl; ++i)
+    {
+        cout << "var[" << i << "] = " << var[i] << endl;
+    }
+    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+} 
+
 void UFSController::setup()
 {
     int n;
 
     cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
-    _ntimes = ncfile->get_ntimes();
+  //_ntimes = ncfile->get_ntimes();
 
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\t_ntim = " << _ntim << endl;
+  //cout << "\t_ntimes = " << _ntimes << endl;
 
-  //_maxFile = get_nfils();
+  //_maxFile = get_nfiles();
+    _maxFile = 1;
 
-    _maxTime = 0;
-    for(n = 0; n < _maxFile; ++n)
-        _maxTime += _ntimes[n];
+  //for(n = 0; n < _maxFile; ++n)
+  //    _maxTime += _ntimes[n];
+    _maxTime = 1;
 
   //lister = new Lister[_maxTime];
 
     geometry->set_nlon(ncfile->getNlon());
     geometry->set_nlat(ncfile->getNlat());
-    geometry->set_nlat(ncfile->getNlat());
-    geometry->set_ntim(_ntimes[0]);
+    geometry->set_nlev(ncfile->getNlev());
+  //geometry->set_ntim(_ntimes[0]);
+    geometry->set_ntim(_maxTime);
+
+  /*
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    int nlon = ncfile->getNlon();
+    double* lon = ncfile->getLon();
+    _print1d(lon, nlon);
+
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    int nlat = ncfile->getNlat();
+    double* lat = ncfile->getLat();
+    _print1d(lat, nlat);
+
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    int nlev = ncfile->getNlev();
+    float* lev = ncfile->getLev();
+    _print1d(lev, nlev);
+
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+   */
 
     geometry->set_lon(ncfile->getLon());
     geometry->set_lat(ncfile->getLat());
@@ -75,7 +110,11 @@ void UFSController::setup()
   //geometry->set_lon2d(ncfile->get_lon2d());
   //geometry->set_lat2d(ncfile->get_lat2d());
 
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
     geometry->setup();
+
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     geometry->set_has1dLon(true);
     geometry->set_has1dLat(true);
@@ -92,27 +131,38 @@ void UFSController::setup()
     _ball = false;
     _initialized = false;
 
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
     _tvalue = 0;
     _time_interval = 128;
+
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     _curFile = 0;
     _curTime = 0;
     _preFile = _curFile;
 
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
     ufs_viewer = new UFS2dViewer(colorTable, nvoptions);
 
   //ufs_viewer->set_lister(&lister[0]);
+  //
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tvarname:" << _varname << endl;
 
     _value = ncfile->get_fv(_varname.c_str());
     _title = _varname;
 
-  //cout << "\n_setup, file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //geometry->print();
 
   //ufs_viewer->set_coastline(coastline);
 
     ufs_viewer->set_geometry(geometry);
   //ufs_3dviewer->set_geoufs_(geoufs_);
+
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     ufs_viewer->setup(_varname, _value);
     _minval = ufs_viewer->get_minval();

@@ -89,18 +89,34 @@ void UFSGeometry::setup()
     size_t n;
     size_t nsquare;
 
+    cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "_nlon = " << _nlon << endl;
+    cout << "_nlat = " << _nlat << endl;
+    cout << "_nlev = " << _nlev << endl;
     nsquare = _nlon * _nlat;
     _xSphere = new double[nsquare];
     _ySphere = new double[nsquare];
     _zSphere = new double[nsquare];
+    cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     _xFlat = new double[_nlon];
     _yFlat = new double[_nlat];
 
+    cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    if(NULL == _lat) {
+	cout << "_lat in NULL. Stop" << endl;
+	exit (-1);
+    }
+    if(NULL == _lon) {
+	cout << "_lon in NULL. Stop" << endl;
+	exit (-1);
+    }
     _hmax = 0.0;
-    _hmin = 10000.0;
+    _hmin = 1000000.0;
     for(j = 0; n < _nlat; ++j) {
+        cout << "_lat[" << j << "] = " << _lat[j] << endl;
         _yFlat[j] = _lat[j]/180.0;
+        cout << "_yFlat[" << j << "] = " << _yFlat[j] << ", lat " << _lat[j] << endl;
 	n = j*_nlon;
         delt = cos(_lat[j] * arc);
         for(i = 0; i < _nlon; ++i)
@@ -113,10 +129,13 @@ void UFSGeometry::setup()
 
     for(i = 0; i < _nlon; ++i)
     {
+        cout << "_lon[" << i << "] = " << _lon[i] << endl;
         if(_lon[i] > 180.0)
             _xFlat[i] = _lon[i]/180.0 - 2.0;
         else
             _xFlat[i] = _lon[i]/180.0;
+        cout << "_xFlat[" << i << "] = " << _xFlat[i] << ", lon " << _lon[i] << endl;
     }
+    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
