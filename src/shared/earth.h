@@ -15,14 +15,19 @@
 #include <QOpenGLFunctions>
 #include <QtOpenGL/QGLWidget>
 #include <QString>
+#include <QImage>
+#include <QDebug>
+
+#include "ncreader.h"
 
 using namespace std;
 
 class Earth : public QGLWidget, protected QOpenGLFunctions
 {
     public:
-        Earth(const char *flnm);         //  Constructor
         Earth();         //  Constructor
+        Earth(const char *flnm);         //  Constructor
+        Earth(const char *flnm, ncReader* nchandler);         //  Constructor
         ~Earth();        //  Destructor
 
         void draw();

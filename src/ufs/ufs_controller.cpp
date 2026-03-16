@@ -9,26 +9,26 @@ UFSController::UFSController(ColorTable *ct, NVOptions* opt,
     nvoptions = opt;
     strcpy(_flnm, fn);
 
-    cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     cout << "\tOpen file: <" << fn << ">" << endl;
 
     geometry = new UFSGeometry();
     geometry->set_name(sfn);
 
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //coastline = new CoastLine();
   
     _maxFile = 1;
     _ntim = 1;
 
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\tsfn = " << sfn << endl;
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\tsfn = " << sfn << endl;
   //nvfile = new NVFile(sfn, isList);
     ncfile = new ncReader(fn);
 
     ufs_viewer = NULL;
 
-    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 UFSController::~UFSController()
@@ -144,7 +144,7 @@ void UFSController::setup()
 
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
-    ufs_viewer = new UFS2dViewer(colorTable, nvoptions);
+    ufs_viewer = new UFS2dViewer(colorTable, nvoptions, "/work2/noaa/epic/weihuang/nv/starviewer/data/earth.bmp", ncfile);
 
   //ufs_viewer->set_lister(&lister[0]);
   //

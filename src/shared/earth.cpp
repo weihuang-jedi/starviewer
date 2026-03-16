@@ -1,5 +1,3 @@
-// #include <QOpenGLWidget>
-// #include <QOpenGLFunctions>
 #include <earth.h>
 
 #define Cos(th) cos(3.1416*(th)/180.0)
@@ -10,7 +8,11 @@
 //
 Earth::Earth()
 {
-    strcpy(_bmpflnm, getenv("NV_DATA"));
+    if(getenv("StarViewerHome")) {
+        strcpy(_bmpflnm, getenv("StarViewerHome"));
+    } else {
+        strcpy(_bmpflnm, "/work2/noaa/epic/weihuang/nv/starviewer"); //On MSU hercules
+    }
     strcat(_bmpflnm, "/data/earth.bmp");
 
     _loadTexBMP();
@@ -29,6 +31,56 @@ Earth::Earth(const char *flnm)
 {
     strcpy(_bmpflnm, flnm);
     _loadTexBMP();
+}
+
+Earth::Earth(const char *flnm, ncReader* nchandler)
+{
+    int i, j, n;
+    size_t nter;
+    float hgt;
+
+  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    initializeGL();
+
+    strcpy(_bmpflnm, flnm);
+    _loadTexBMP();
+
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    nlon = nchandler->getNlon();
+    nlat = nchandler->getNlat();
+    nter = nlon * nlat;
+
+    lon = new float[nlon];
+    lat = new float[nlat];
+    ter = new float[nter];
+
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    double* dbl_lon = nchandler->getLon();
+    double* dbl_lat = nchandler->getLat();
+    ter = nchandler->getFloat("hgtsfc");
+
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    maxhgt = 0.0;
+    minhgt = 0.0;
+
+    n = 0;
+    for(j = 0; j < nlat; ++j)
+    {
+      //fprintf(stderr, "\tlat[%d] = %f\n", j, lat[j]);
+        lat[j] = (float) dbl_lat[j];
+        for(i = 0; i < nlon; ++i)
+        {
+            lon[i] = (float) dbl_lon[i];
+            hgt = ter[n];
+            if(maxhgt < hgt)
+               maxhgt = hgt;
+            if(minhgt > hgt)
+               minhgt = hgt;
+
+            ++n;
+        }
+    }
+  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 Earth::~Earth()
@@ -75,47 +127,37 @@ void Earth::_errCheck(const char *where, const char *fl, int ln)
  */
 void Earth::_loadTexBMP()
 {
-    QImage t;
-    QImage b;
     GLuint textureID = 0;
 
-  //int    rv = -1;
-  //rv = b.load(_bmpflnm);
+  //cout << "enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\tfunctions: _bmpflnm: <" << _bmpflnm << ">" << endl;
 
-    b.load(_bmpflnm);
+    // Load the image
+    QImage b(_bmpflnm);
 
-  /*
-   *fprintf(stderr, "\nfile: %s, line: %d\n", __FILE__, __LINE__);
-   *fprintf(stderr, "\trv = %d\n", rv);
-   */
+    if (b.isNull()) {
+        qDebug() << "Failed to load image";
+    }
+  //else {
+  //    qDebug() << "Image loaded successfully" << b.size();
+  //}
 
-  /*
-   *if(! rv)
-   *{
-   *    b = QImage( 16, 16, 32 );
-   *    b.fill( Qt::green.rgb() );
-   *}
-   */
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     glEnable(GL_TEXTURE_2D);
-    
-    t = QGLWidget::convertToGLFormat( b );
 
-  /*
-   *fprintf(stderr, "\nfile: %s, line: %d\n", __FILE__, __LINE__);
-   *fprintf(stderr, "\tt.width()  = %d\n", t.width());
-   *fprintf(stderr, "\tt.height() = %d\n", t.height());
-   */
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    
+    QImage t = QGLWidget::convertToGLFormat( b );
+
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     glGenTextures(1, &textureID);
 
-  /*
-   *fprintf(stderr, "\nfile: %s, line: %d\n", __FILE__, __LINE__);
-   *fprintf(stderr, "\ttextureID = %d\n", textureID);
-   */
-
     // set texture name
     set_texture_id(textureID);
+
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     glBindTexture(GL_TEXTURE_2D, textureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -125,6 +167,7 @@ void Earth::_loadTexBMP()
     glTexImage2D(GL_TEXTURE_2D, 0, 3, t.width(), t.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, t.bits());
     glGenerateMipmap(GL_TEXTURE_2D);  //Generate mipmaps now!!!
     glDisable(GL_TEXTURE_2D);
+  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 /*

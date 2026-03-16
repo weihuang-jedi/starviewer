@@ -134,6 +134,7 @@ void Geometry::_set_default()
     strcpy(yllabels[6], "90N");
 }
 
+/*
 void Geometry::set_lon(double *v)
 {
     int i;
@@ -178,4 +179,4 @@ void Geometry::set_lev(float *v)
     }
     cout << "leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
-
+*/

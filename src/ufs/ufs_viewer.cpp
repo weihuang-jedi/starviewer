@@ -9,20 +9,20 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt)
     colorTable = ct;
     nvoptions = opt;
 
+    cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     texture1d = new Texture1d();
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     texture1d->set_colors(ct->get_clen(), ct->get_cmap());
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     texture1d->set_name(ct->get_name());
 
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     _var = NULL;
  
-    _innerPoints = NULL;
-    _nBoundaryPoints = 0;
-    num_south_pole_cols = 0;
-    num_north_pole_cols = 0;
-    num_boundary_cols = 0;
-
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     earth = new Earth();
 
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     nvoptions->set_xsec(360);
     nvoptions->set_ysec(90);
     nvoptions->set_zsec(0);
@@ -30,25 +30,67 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt)
     _nlon = 360;
     _nlat = 180;
 
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     oneover = 1.0 / 180.0;
     deg2rad = 3.1415926535897932 * oneover;
 
     lister = new Lister();
     lister->setup(361, 181, 121);
 
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     locator = NULL;
 
     previoustimelevel = -1;
     current_timelevel = 0;
+    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+}
+
+UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler)
+{
+    colorTable = ct;
+    nvoptions = opt;
+
+  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    texture1d = new Texture1d();
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    texture1d->set_colors(ct->get_clen(), ct->get_cmap());
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    texture1d->set_name(ct->get_name());
+
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    _var = NULL;
+
+    ncfile = nchandler;
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\tbmpflnm: " << bmpflnm << endl;
+    earth = new Earth(bmpflnm, ncfile);
+
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    nvoptions->set_xsec(360);
+    nvoptions->set_ysec(90);
+    nvoptions->set_zsec(0);
+
+    _nlon = 360;
+    _nlat = 180;
+
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    oneover = 1.0 / 180.0;
+    deg2rad = 3.1415926535897932 * oneover;
+
+    lister = new Lister();
+    lister->setup(361, 181, 121);
+
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    locator = NULL;
+
+    previoustimelevel = -1;
+    current_timelevel = 0;
+  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 UFS2dViewer::~UFS2dViewer()
 {
     locator->turnOff();
-
-    if(NULL !=  _innerPoints)
-        delete []_innerPoints;
-    _innerPoints = NULL;
 
     delete earth;
     delete lister;
@@ -102,7 +144,7 @@ void UFS2dViewer::_initialize()
     _yFlat = geometry->get_yFlat();
 
     _deltlon = _lon[1] - _lon[0];
-    _deltlat = _lat[1] - _lat[0];
+    _deltlat = abs(_lat[1] - _lat[0]);
 
     geometry->set_ntim(1);
 
@@ -466,9 +508,15 @@ void UFS2dViewer::_evaluate(float *var)
     size_t n = 0;
     char vn[128];
 
+  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\t _varname: " << _varname << endl;
     strcpy(vn, _varname.c_str());
 
-    size = geometry->get_nlon() * geometry->get_nlat() * geometry->get_nlev();
+  //size = geometry->get_nlon() * geometry->get_nlat() * geometry->get_nlev();
+    size = geometry->get_nlon() * geometry->get_nlat();
+
+  //cout << "\tin <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\tsize =" << size << endl;
 
     _valmax = var[0];
     _valmin = var[0];
@@ -488,10 +536,13 @@ void UFS2dViewer::_evaluate(float *var)
     if(1.0e-10 > (_valmax - _valmin))
        _valmax += 1.0e-10;
 
+  //cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << endl;
+
 #if 0
     nvoptions->set_trueminimum(_valmin);
     nvoptions->set_truemaximum(_valmax);
 #endif
+  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void UFS2dViewer::reset_texture1d(ColorTable *ct)

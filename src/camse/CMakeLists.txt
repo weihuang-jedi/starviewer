@@ -32,6 +32,7 @@ target_include_directories(camse PUBLIC
     ${GLU_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/geometry
     ${CMAKE_SOURCE_DIR}/shared
+    ${CMAKE_SOURCE_DIR}/ncreader
     ${CMAKE_SOURCE_DIR}/coastline
     ${CMAKE_SOURCE_DIR}/topography
     ${CMAKE_SOURCE_DIR}/nclapp

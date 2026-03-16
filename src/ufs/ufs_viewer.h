@@ -19,6 +19,7 @@
 #include "lister.h"
 #include "locator.h"
 #include "nvoptions.h"
+#include "ncreader.h"
 
 using namespace std;
 
@@ -35,6 +36,7 @@ class UFS2dViewer
 {
     public:
         UFS2dViewer(ColorTable* ct, NVOptions* opt);
+        UFS2dViewer(ColorTable* ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler);
        ~UFS2dViewer();
 
         void draw();
@@ -60,6 +62,7 @@ class UFS2dViewer
         UFSGeometry* geometry;
         CoastLine* coastline;
         Texture1d* texture1d;
+        ncReader* ncfile;
         Earth* earth;
         Lister* lister;
         Locator* locator;
@@ -85,9 +88,6 @@ class UFS2dViewer
         GLuint ycl;
         GLuint xcl;
 
-        bool* _innerPoints;
-        int   _nBoundaryPoints;
-
         double* _xSphere;
         double* _ySphere;
         double* _zSphere;
@@ -103,14 +103,6 @@ class UFS2dViewer
 
         double oneover;
         double deg2rad;
-
-        int num_south_pole_cols;
-        int num_north_pole_cols;
-        int num_boundary_cols;
-
-        vector<int> south_pole_cols;
-        vector<int> north_pole_cols;
-        vector<int> boundary_cols;
 
         void _initialize();
         void _evaluate(float* var);
