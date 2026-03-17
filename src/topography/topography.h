@@ -1,19 +1,15 @@
 #ifndef _Topography_H
 #define _Topography_H
 
-//$Id: topography.h 4875 2014-01-05 19:48:41Z starviewer $
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
 #include <string.h>
 
-#ifdef LINUX
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glext.h>
-#endif
+//#include <GL/gl.h>
+//#include <GL/glu.h>
+//#include <GL/glext.h>
 
 #include <QOpenGLFunctions>
 #include <QtOpenGL/QGLWidget>

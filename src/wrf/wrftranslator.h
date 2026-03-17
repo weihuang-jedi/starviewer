@@ -9,11 +9,9 @@
 #include <math.h>
 #include <assert.h>
 
-#ifdef LINUX
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glext.h>
-#endif
 
 #include <QtGui/QKeyEvent>
 #include <QtOpenGL/QGLWidget>

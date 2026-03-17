@@ -148,18 +148,18 @@ void UFS2dViewer::_initialize()
 
     geometry->set_ntim(1);
 
-    cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\n" << _deltlon << " _lon: " <<  _lon << endl;
-    cout << "\n" << _deltlat << " _lat: " <<  _lat << endl;
-    cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\n" << _deltlon << " _lon: " <<  _lon << endl;
+  //cout << "\n" << _deltlat << " _lat: " <<  _lat << endl;
+  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFS2dViewer::draw()
 {
     size_t nsquare = _nlon * _nlat;
 
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tnvoptions->get_tsec() = " << nvoptions->get_tsec() << ", previoustimelevel = " << previoustimelevel << endl;
+    cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tnvoptions->get_tsec() = " << nvoptions->get_tsec() << ", previoustimelevel = " << previoustimelevel << endl;
 
     if(nvoptions->get_cb(NV_RESET))
     {
@@ -174,6 +174,7 @@ void UFS2dViewer::draw()
     if(nvoptions->get_cb(NV_STATUS_CHANGED))
         reset();
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     current_timelevel = nvoptions->get_tsec();
     if(current_timelevel != previoustimelevel)
         reset();
@@ -181,6 +182,7 @@ void UFS2dViewer::draw()
     if(current_timelevel >= geometry->get_nt())
         return;
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if((geometry->get_nlev() <= nvoptions->get_zsec()) && (0 > nvoptions->get_zsec()))
         return;
 
@@ -196,9 +198,12 @@ void UFS2dViewer::draw()
         _valmax = nvoptions->get_truemaximum();
     }
 #endif
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t" <<"current_timelevel: " << current_timelevel << endl;
 
     pltvar = &_var[current_timelevel * _nlon * _nlat];
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     zcl = lister->get_zid(nvoptions->get_zsec());
     ycl = lister->get_yid(nvoptions->get_ysec());
     xcl = lister->get_xid(nvoptions->get_xsec());
@@ -210,6 +215,7 @@ void UFS2dViewer::draw()
 
     if(nvoptions->get_cb(NV_BUMPON))
     {
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
         if(nvoptions->get_cb(NV_FLATON))
         {
             if(zcl)
@@ -227,10 +233,21 @@ void UFS2dViewer::draw()
     }
     else
     {
-        if(nvoptions->get_cb(NV_FLATON))
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tnvoptions->get_cb(NV_FLATON): " << nvoptions->get_cb(NV_FLATON) << endl;
+        if(! nvoptions->get_cb(NV_FLATON))
         {
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tnvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
+    cout << "\tnvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
+    cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
+    cout << "\txcl = " << xcl << endl;
+    cout << "\tycl = " << ycl << endl;
+    cout << "\tzcl = " << zcl << endl;
+    cout << "\t_nlev = " << _nlev << endl;
             if(nvoptions->get_zsec() < _nlev)
             {
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
                 if(zcl)
                     glCallList(zcl);
                 else
@@ -239,24 +256,27 @@ void UFS2dViewer::draw()
 
           //draw_plane_grids();
 
-            if(360 > nvoptions->get_xsec())
-            {
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+          //if(360 > nvoptions->get_xsec())
+          //{
                 if(xcl)
                     glCallList(xcl);
                 else
                     _display_Xflat_plane(nvoptions->get_xsec());
-            }
+          //}
 
-            if((-80 < nvoptions->get_ysec()) && (80 > nvoptions->get_ysec()))
-            {
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+          //if((-80 < nvoptions->get_ysec()) && (80 > nvoptions->get_ysec()))
+          //{
                 if(ycl)
                     glCallList(ycl);
                 else
                     _display_Yflat_plane(nvoptions->get_ysec());
-            }
+          //}
         }
         else
         {
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
             if(nvoptions->get_zsec() < _nlev)
             {
                 if(zcl)
@@ -284,6 +304,7 @@ void UFS2dViewer::draw()
           //draw_sphere_grids();
         }
     }
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFS2dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact)
@@ -391,27 +412,23 @@ void UFS2dViewer::_sphereDisplay()
 
 void UFS2dViewer::_flatDisplay()
 {
-    int i, i1, j, j1, k;
-    size_t npos;
+    int i, j, k;
+    size_t mpos, npos;
 
     double sv = 1.0;
     double fact;
     double height = 0.00;
 
-    double xb[4];
-    double yb[4];
-    double vb[4];
-    double fb[4];
-
+    cout << "Enter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     GLfloat line_width = 1.0;
 
     current_timelevel = nvoptions->get_tsec();
     if(current_timelevel >= geometry->get_nt())
         return;
 
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t_varname: <" << _varname << ">, lev = " << lev << endl;
-  //cout << "\tcurrent_timelevel = " << current_timelevel << endl;
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t_varname: <" << _varname << ">, _nlev = " << _nlev << endl;
+    cout << "\tcurrent_timelevel = " << current_timelevel << endl;
 
     k = nvoptions->get_zsec();
 
@@ -420,15 +437,22 @@ void UFS2dViewer::_flatDisplay()
     if(1 == _nlev)
         height = 0.001;
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     locator->set_height(height);
 
     sv = 1.0 / (_valmax - _valmin);
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     zcl = glGenLists(1);
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tzcl: " << zcl << endl;
+    cout << "\tk: " << k << endl;
   //glNewList(zcl, GL_COMPILE);
     glNewList(zcl, GL_COMPILE_AND_EXECUTE);
     lister->set_zid(k, zcl);
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    makeCurrent();
     glPushMatrix();
 
   //if(nvoptions->get_cb(NV_COASTLINEON))
@@ -438,9 +462,11 @@ void UFS2dViewer::_flatDisplay()
 
     glColor3f(1.0, 1.0, 0.0);
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     line_width = 2.0;
     glLineWidth(line_width);
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glBegin(GL_LINE_STRIP);
         glVertex3d(-1.0, -0.5, height);
         glVertex3d( 1.0, -0.5, height);
@@ -449,12 +475,14 @@ void UFS2dViewer::_flatDisplay()
         glVertex3d(-1.0, -0.5, height);
     glEnd();
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if(1 == _nlev)
     {
         glEnable(GL_POLYGON_OFFSET_FILL);
         glPolygonOffset(1, 1);
     }
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glColor4f(1.0, 1.0, 1.0, 1.0);
   //glColor4f(0.0, 0.0, 0.0, 0.0);
     glNormal3f(0.0, 0.0, -1.0);
@@ -462,31 +490,29 @@ void UFS2dViewer::_flatDisplay()
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
-    glBegin(GL_QUADS);
-    for(j = 1; j < _nlat; ++j)
-    {
-        for(i = 1; i < _nlon; ++i)
-        {
-	    for(j1=j-1; j1<j+1; ++j1)
-            {
-	        for(i1=i-1; i1<i+1; ++i1)
-                {
-		    npos = j1*_nlon + i1;
-                    fact = sv * (pltvar[npos] - _valmin);
-                    glTexCoord1d(fact);
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    glBegin(GL_QUAD_STRIP);
+    for(j = 1; j < _nlat; ++j) {
+        mpos = (j-1)*_nlon;
+        npos = j*_nlon;
+        for(i = 0; i < _nlon; ++i) {
+            fact = sv * (pltvar[mpos+i] - _valmin);
+            glTexCoord1d(fact);
+            glVertex3d(_xFlat[i], _yFlat[j-1], height);
 
-                    glVertex3d(_xFlat[npos], _yFlat[npos], height);
-                }
-            }
+            fact = sv * (pltvar[npos+i] - _valmin);
+            glTexCoord1d(fact);
+            glVertex3d(_xFlat[i], _yFlat[j], height);
         }
     }
     glEnd();
 
-
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if(1 == _nlev)
         glDisable(GL_POLYGON_OFFSET_FILL);
     glDisable(GL_TEXTURE_1D);
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if(locator->on())
     {
         cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -500,6 +526,7 @@ void UFS2dViewer::_flatDisplay()
     glPopMatrix();
 
     glEndList();
+    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFS2dViewer::_evaluate(float *var)
@@ -640,22 +667,147 @@ void UFS2dViewer::draw_plane_grids()
 
 void UFS2dViewer::_display_Yflat_plane(int ys)
 {
-    int k;
-    double yc, ycl;
+    int i, k;
+    size_t mpos, npos;
+    double ycl;
+    double fact;
     double sv = 1.0;
-    double height[_nlev];
+    vector<double> height(_nlev);
     int jlatc = (int) ((double) ys/_deltlat);
 
     GLfloat line_width = 1.0;
 
+    cout << "Enter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    jlatc = jlatc/2;
+
     if((-80.0 > _lat[jlatc]) || (80.0 < _lat[jlatc]))
        return;
 
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t_varname: <" << _varname << ">" << endl;
+    cout << "\t_varname: <" << _varname << ">" << endl;
+    cout << "\tjlatc: <" << jlatc << ">" << endl;
 
     for(k = 0; k < _nlev; ++k)
         height[k] = 0.8 * (0.5 - ((double) k + 1.0) / _nlev);
+
+    sv = 1.0 / (_valmax - _valmin);
+
+    ycl = glGenLists(1);
+  //glNewList(ycl, GL_COMPILE);
+    glNewList(ycl, GL_COMPILE_AND_EXECUTE);
+    lister->set_yid(ys+90, ycl);
+
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << ", sv = " << sv << endl;
+    cout << "\tycl = " << ycl << endl;
+
+    makeCurrent();
+    glPushMatrix();
+
+  //glColor4f(1.0, 1.0, 1.0, 1.0);
+  //glColor4f(0.0, 0.0, 0.0, 0.0);
+
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    glEnable(GL_TEXTURE_1D);
+    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
+
+    glBegin(GL_QUAD_STRIP);
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+        for(k = 1; k < _nlev; ++k)
+        {
+	    mpos = ((k-1)*_nlat + jlatc)*_nlon;
+	    npos = (k*_nlat + jlatc)*_nlon;
+	    for(i = 0; i < _nlon; ++i)
+	    {
+                fact = sv * (pltvar[mpos+i] - _valmin);
+                glTexCoord1d(fact);
+                glVertex3d(_xFlat[i], _yFlat[jlatc], height[k-1]);
+
+                fact = sv * (pltvar[npos+i] - _valmin);
+                glTexCoord1d(fact);
+                glVertex3d(_xFlat[i], _yFlat[jlatc], height[k]);
+	    }
+        }
+    glEnd();
+
+    glDisable(GL_TEXTURE_1D);
+
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    glPopMatrix();
+    glEndList();
+    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+}
+
+void UFS2dViewer::_sphereXplane(int xs)
+{
+    int j, k;
+    size_t mpos, npos;
+    double fact;
+    double xcl;
+    double sv = 1.0;
+    double radius[_nlev];
+
+    int ilonc = (int) ((double) xs/_deltlon);
+
+    sv = 1.0 / (_valmax - _valmin);
+
+    xcl = glGenLists(1);
+
+  //glNewList(xcl, GL_COMPILE);
+    glNewList(xcl, GL_COMPILE_AND_EXECUTE);
+    lister->set_xid(xs, xcl);
+
+  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << ", sv = " << sv << endl;
+  //cout << "\txcl = " << xcl << endl;
+
+    glPushMatrix();
+
+    glColor4f(1.0, 1.0, 1.0, 1.0);
+  //glColor4f(0.0, 0.0, 0.0, 0.0);
+
+    glEnable(GL_TEXTURE_1D);
+    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
+
+    glBegin(GL_QUAD_STRIP);
+    for(k = 1; k < _nlev; ++k)
+    {
+	for(j = 0; j < _nlat; ++j)
+	{
+	    mpos = (k-1)*_nlat*_nlon + j*_nlon + ilonc;
+	    npos = k*_nlat*_nlon + j*_nlon + ilonc;
+
+            fact = sv * (pltvar[mpos] - _valmin);
+            _lonlat2xyz(_lon[ilonc], _lat[j], radius[k-1], fact);
+
+            fact = sv * (pltvar[npos] - _valmin);
+            _lonlat2xyz(_lon[ilonc], _lat[j], radius[k], fact);
+        }
+    }
+    glEnd();
+
+    glDisable(GL_TEXTURE_1D);
+
+    glPopMatrix();
+
+    glEndList();
+}
+
+void UFS2dViewer::_sphereYplane(int ys)
+{
+    int i, k;
+    size_t mpos, npos;
+    double fact;
+    double xcl;
+    double sv = 1.0;
+    double radius[_nlev];
+    int jlatc = (int) ((double) ys/_deltlat);
+
+    cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t_varname: <" << _varname << ">, ys = " << ys << endl;
+
+    jlatc = jlatc/2;
+    for(k = 0; k < _nlev; ++k)
+        radius[k] = 0.725 + 0.5 * ( 1.0 - (k + 1.0) / _nlev);
 
     sv = 1.0 / (_valmax - _valmin);
 
@@ -675,59 +827,6 @@ void UFS2dViewer::_display_Yflat_plane(int ys)
 
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
-    handle_selectedYflat_quad(jlatc, sv, height);
-
-    glDisable(GL_TEXTURE_1D);
-
-    line_width = 2.0;
-    glLineWidth(line_width);
-
-    glColor3f(1.0, 1.0, 0.0);
-
-    yc = 1.0;
-    glBegin(GL_LINE_STRIP);
-        glVertex3d(-1.0, yc, height[0]);
-        glVertex3d( 1.0, yc, height[0]);
-        glVertex3d( 1.0, yc, height[_nlev-1]);
-        glVertex3d(-1.0, yc, height[_nlev-1]);
-        glVertex3d(-1.0, yc, height[0]);
-    glEnd();
-
-    glPopMatrix();
-
-    glEndList();
-}
-
-void UFS2dViewer::handle_selectedXsphere_quad(int ilonc, double sv, double* radius)
-{
-    int j, k;
-    size_t mpos, npos;
-    double fact;
-
-    glBegin(GL_QUAD_STRIP);
-    for(k = 1; k < _nlev; ++k)
-    {
-	for(j = 0; j < _nlon; ++j)
-	{
-	    mpos = (k-1)*_nlat*_nlon + j*_nlon + ilonc;
-	    npos = k*_nlat*_nlon + j*_nlon + ilonc;
-
-            fact = sv * (pltvar[mpos] - _valmin);
-            _lonlat2xyz(_lon[ilonc], _lat[j], radius[k-1], fact);
-
-            fact = sv * (pltvar[npos] - _valmin);
-            _lonlat2xyz(_lon[ilonc], _lat[j], radius[k], fact);
-        }
-    }
-    glEnd();
-}
-
-void UFS2dViewer::handle_selectedYsphere_quad(int jlatc, double sv, double* radius)
-{
-    int i, k;
-    size_t mpos, npos;
-    double fact;
 
     glBegin(GL_QUAD_STRIP);
         for(k = 1; k < _nlev; ++k)
@@ -744,37 +843,6 @@ void UFS2dViewer::handle_selectedYsphere_quad(int jlatc, double sv, double* radi
 	    }
         }
     glEnd();
-}
-
-void UFS2dViewer::_sphereXplane(int xs)
-{
-    double xcl;
-    double sv = 1.0;
-    double radius[_nlev];
-
-    int ilonc = (int) ((double) xs/_deltlon);
-
-    sv = 1.0 / (_valmax - _valmin);
-
-    xcl = glGenLists(1);
-
-  //glNewList(xcl, GL_COMPILE);
-    glNewList(xcl, GL_COMPILE_AND_EXECUTE);
-    lister->set_xid(xs, xcl);
-
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << ", sv = " << sv << endl;
-  //cout << "\txcl = " << xcl << endl;
-
-    glPushMatrix();
-
-    glColor4f(1.0, 1.0, 1.0, 1.0);
-  //glColor4f(0.0, 0.0, 0.0, 0.0);
-
-    glEnable(GL_TEXTURE_1D);
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
-    handle_selectedXsphere_quad(ilonc, sv, radius);
 
     glDisable(GL_TEXTURE_1D);
 
@@ -783,73 +851,6 @@ void UFS2dViewer::_sphereXplane(int xs)
     glEndList();
 }
 
-void UFS2dViewer::_sphereYplane(int ys)
-{
-    double xcl;
-    double sv = 1.0;
-    double radius[_nlev];
-    int n;
-    int jlatc = (int) ((double) ys/_deltlat);
-
-    for(n = 0; n < _nlev; ++n)
-        radius[n] = 0.725 + 0.5 * ( 1.0 - (n + 1.0) / _nlev);
-
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t_varname: <" << _varname << ">, lev = " << lev << endl;
-
-    sv = 1.0 / (_valmax - _valmin);
-
-    ycl = glGenLists(1);
-  //glNewList(ycl, GL_COMPILE);
-    glNewList(ycl, GL_COMPILE_AND_EXECUTE);
-    lister->set_yid(ys+90, ycl);
-
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << ", sv = " << sv << endl;
-  //cout << "\tycl = " << ycl << endl;
-
-    glPushMatrix();
-
-    glColor4f(1.0, 1.0, 1.0, 1.0);
-  //glColor4f(0.0, 0.0, 0.0, 0.0);
-
-    glEnable(GL_TEXTURE_1D);
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
-    handle_selectedYsphere_quad(jlatc, sv, radius);
-
-    glDisable(GL_TEXTURE_1D);
-
-    glPopMatrix();
-
-    glEndList();
-}
-
-void UFS2dViewer::handle_selectedYflat_quad(int jlatc, double sv, double* height)
-{
-    int i, k;
-    size_t np, nm1;
-    double fact;
-
-    glBegin(GL_QUAD_STRIP);
-    for(k = 1; k < _nlev; ++k)
-    {
-        nm1 = _nlon*_nlat*(k-1) + jlatc*_nlon;
-        np = _nlon*_nlat*k + jlatc*_nlon;
-	for(i=0; i<_nlon; ++i)
-	{
-            fact = sv * (pltvar[nm1+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[jlatc], height[k-1]);
-
-            fact = sv * (pltvar[np+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[jlatc], height[k]);
-	}
-    }
-    glEnd();
-
-}
 
 void UFS2dViewer::_display_Xflat_plane(int xs)
 {
@@ -857,9 +858,14 @@ void UFS2dViewer::_display_Xflat_plane(int xs)
     size_t mpos, npos;
     double fact;
     double sv = 1.0;
-    double height[_nlev];
+    vector<double> height(_nlev);
     int ilonc = (int) ((double) xs/_deltlon);
 
+    cout << "Enter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\txs: " << xs << ", __deltlon=" << _deltlon << endl;
+    cout << "\tilonc: " << ilonc << ", _nlon=" << _nlon << endl;
+    ilonc = _nlon/2;
+    cout << "\tilonc: " << ilonc << ", _nlon=" << _nlon << endl;
     for(k = 0; k < _nlev; ++k)
         height[k] = 0.8 * ( 0.5 - (k + 1.0) / _nlev);
 
@@ -870,19 +876,30 @@ void UFS2dViewer::_display_Xflat_plane(int xs)
     glNewList(xcl, GL_COMPILE_AND_EXECUTE);
     lister->set_xid(xs, xcl);
 
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t_varname: <" << _varname << ">, xs = " << xs << endl;
-  //cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << ", sv = " << sv << endl;
-  //cout << "\txcl = " << xcl << endl;
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t_varname: <" << _varname << ">, xs = " << xs << endl;
+    cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << ", sv = " << sv << endl;
+    cout << "\txcl = " << xcl << endl;
 
+    makeCurrent();
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glPushMatrix();
 
-    glColor4f(1.0, 1.0, 1.0, 1.0);
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tilonc: " << ilonc << ", _nlon=" << _nlon << endl;
+
+  //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  //glClear(GL_COLOR_BUFFER_BIT);
+  //glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+  //glColor4f(1.0, 1.0, 1.0, 1.0);
   //glColor4f(0.0, 0.0, 0.0, 0.0);
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
     glBegin(GL_QUAD_STRIP);
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
         for(k = 1; k < _nlev; ++k)
         {
 	    for(j = 0; j < _nlat; ++j)
@@ -899,9 +916,11 @@ void UFS2dViewer::_display_Xflat_plane(int xs)
 	    }
         }
     glEnd();
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glDisable(GL_TEXTURE_1D);
     glPopMatrix();
     glEndList();
+    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFS2dViewer::_sphereBump()

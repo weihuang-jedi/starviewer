@@ -10,6 +10,9 @@
 #include <ctype.h>
 #include <assert.h>
 
+#include <QGLWidget>
+// #include <QOpenGLWidget>
+
 #include "ufs_geometry.h"
 #include "coastline.h"
 #include "colorTable.h"
@@ -32,8 +35,9 @@ using namespace std;
 #define NEAR_EAST_BOUNDARY	0.9999
 #define NEAR_WEST_BOUNDARY	-NEAR_EAST_BOUNDARY
 
-class UFS2dViewer
+class UFS2dViewer : public QGLWidget
 {
+
     public:
         UFS2dViewer(ColorTable* ct, NVOptions* opt);
         UFS2dViewer(ColorTable* ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler);
@@ -117,12 +121,6 @@ class UFS2dViewer
         void _sphereDisplay();
         void _sphereXplane(int xs);
         void _sphereYplane(int ys);
-
-        void handle_selectedXsphere_quad(int nlonc, double sv, double* radius);
-        void handle_selectedYsphere_quad(int jlatc, double sv, double* radius);
-
-        void handle_selectedXflat_quad(int ilonc, double sv, double* height);
-        void handle_selectedYflat_quad(int jlatc, double sv, double* height);
 
         void _flatBump();
         void _sphereBump();

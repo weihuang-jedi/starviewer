@@ -13,6 +13,7 @@
 #	 -ufs /work2/noaa/epic/weihuang/nv/data/ufs-atm-history/gfs.t12z.atm.f000.nc
 
  export StarViewerHome=/work2/noaa/epic/weihuang/nv/starviewer
+ export LIBGL_ALWAYS_SOFTWARE=1
 
 #gdb --args \
  /work2/noaa/epic/weihuang/nv/starviewer/build/main/starviewer\

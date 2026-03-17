@@ -60,7 +60,7 @@ void UFSTranslator::setup()
 {
     int n;
 
-  //cout << "\tEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if(NULL != ufs_controller)
         delete ufs_controller;
 
@@ -76,9 +76,7 @@ void UFSTranslator::setup()
   //    ufs_controller = new UFSController(colorTable, nvoptions, _filename.c_str());
   //}
 
-  //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //ufs_controller->set_mappingFile(_mappingFilename);
-  //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufs_controller->setup();
 
     _jpgNotSaved = true;
@@ -86,10 +84,10 @@ void UFSTranslator::setup()
 
     makeCurrent();
 
-  //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     geometry = ufs_controller->get_geometry();
 
-    _varname = string("PSL");
+    _varname = string("pressfc");
 
     ufs_controller->set2dvarname(_varname);
 
@@ -108,9 +106,9 @@ void UFSTranslator::setup()
     if(_maxTime > 12)
         _maxTime = 12;
 
-  //cout << "\t_maxFile = " << _maxFile << endl;
-  //cout << "\t_maxTime = " << _maxTime << endl;
-  //cout << "\tLeave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t_maxFile = " << _maxFile << endl;
+    cout << "\t_maxTime = " << _maxTime << endl;
+    cout << "\tLeave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 /*******************************************************************/
@@ -305,16 +303,22 @@ void UFSTranslator::selectColorMap(const QString& str)
 
 int UFSTranslator::get_ndv(int n)
 {
-    return ufs_controller->get_ndv(n-1);
+    return ufs_controller->get_ndv(n);
 }
 
 string* UFSTranslator::get_ndvNames(int n)
 {
-    vector<string> vecnames = ufs_controller->get_ndvNames(n-1);
+    vector<string> vecnames = ufs_controller->get_ndvNames(n);
     int numbvars = get_ndv(n);
     string* varnames = new string[numbvars];
-    for (int i=0; i<numbvars; ++i)
+    cout << "n = " << n << endl;
+    cout << "numbvars = " << numbvars << endl;
+    cout << "vecnames.size() = " << vecnames.size() << endl;
+    for (int i=0; i<numbvars; ++i) {
+        cout << "vecnames[" << i << "] = " << vecnames[i] << endl;
 	varnames[i] = vecnames[i];
+        cout << "varnames[" << i << "] = " << varnames[i] << endl;
+    }
     return varnames;
 }
 
