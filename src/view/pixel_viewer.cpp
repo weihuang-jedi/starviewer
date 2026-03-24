@@ -10,6 +10,7 @@
 //Constructor
 Pixel_Viewer::Pixel_Viewer(NVOptions* opt)
 {
+    cout << "Enter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     nvoptions = opt;
 
     evaluator = new Evaluator();
@@ -32,6 +33,7 @@ Pixel_Viewer::Pixel_Viewer(NVOptions* opt)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 Pixel_Viewer::~Pixel_Viewer()
@@ -54,11 +56,14 @@ void Pixel_Viewer::_setup_shader(NV_FRAG_Type type, const char* name)
 {
     char fragname[1024];
 
+    cout << "Enter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     strcpy(fragname, getenv("NV_HOME"));
     strcat(fragname, "/pixel/");
     strcat(fragname, name);
 
+    cout << "\t fragname: " << fragname << endl;
     shader[type]  = createShaderProg(NULL, fragname);
+    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void Pixel_Viewer::_initialize()
@@ -135,6 +140,8 @@ void Pixel_Viewer::createShader(int prog,const GLenum type,const char *srcFile)
         exit (-1);
     }
 
+    cout << "Enter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+
   //Seek to end to determine size, then rewind
     fseek(f,0,SEEK_END);
     n = ftell(f);
@@ -166,6 +173,7 @@ void Pixel_Viewer::createShader(int prog,const GLenum type,const char *srcFile)
   //Close and return
     fclose(f);
 
+    cout << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glShaderSource(shaderID,1,(const char**)&source,NULL);
     free(source);
 
@@ -203,6 +211,8 @@ void Pixel_Viewer::createShader(int prog,const GLenum type,const char *srcFile)
 
   //Attach to shader program
     glAttachShader(prog,shaderID);
+
+    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 //create Shader Program

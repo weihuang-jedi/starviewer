@@ -9,20 +9,20 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt)
     colorTable = ct;
     nvoptions = opt;
 
-    cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     texture1d = new Texture1d();
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     texture1d->set_colors(ct->get_clen(), ct->get_cmap());
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     texture1d->set_name(ct->get_name());
 
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     _var = NULL;
  
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     earth = new Earth();
 
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     nvoptions->set_xsec(360);
     nvoptions->set_ysec(90);
     nvoptions->set_zsec(0);
@@ -30,19 +30,19 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt)
     _nlon = 360;
     _nlat = 180;
 
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     oneover = 1.0 / 180.0;
     deg2rad = 3.1415926535897932 * oneover;
 
     lister = new Lister();
     lister->setup(361, 181, 121);
 
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     locator = NULL;
 
     previoustimelevel = -1;
     current_timelevel = 0;
-    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler)
@@ -515,8 +515,8 @@ void UFS2dViewer::_flatDisplay()
     cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if(locator->on())
     {
-        cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-        cout << "\tlocation = (" << locator->x() << ", " << locator->y() << ")" << endl;
+      //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+      //cout << "\tlocation = (" << locator->x() << ", " << locator->y() << ")" << endl;
 
       //_draw_cross(radius+ 0.01);
         if((NULL != nvoptions) && nvoptions->get_cb(NV_GRIDON))
@@ -677,14 +677,14 @@ void UFS2dViewer::_display_Yflat_plane(int ys)
 
     GLfloat line_width = 1.0;
 
-    cout << "Enter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "Enter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     jlatc = jlatc/2;
 
     if((-80.0 > _lat[jlatc]) || (80.0 < _lat[jlatc]))
        return;
 
-    cout << "\t_varname: <" << _varname << ">" << endl;
-    cout << "\tjlatc: <" << jlatc << ">" << endl;
+  //cout << "\t_varname: <" << _varname << ">" << endl;
+  //cout << "\tjlatc: <" << jlatc << ">" << endl;
 
     for(k = 0; k < _nlev; ++k)
         height[k] = 0.8 * (0.5 - ((double) k + 1.0) / _nlev);
@@ -696,9 +696,9 @@ void UFS2dViewer::_display_Yflat_plane(int ys)
     glNewList(ycl, GL_COMPILE_AND_EXECUTE);
     lister->set_yid(ys+90, ycl);
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << ", sv = " << sv << endl;
-    cout << "\tycl = " << ycl << endl;
+  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << ", sv = " << sv << endl;
+  //cout << "\tycl = " << ycl << endl;
 
     makeCurrent();
     glPushMatrix();
@@ -706,12 +706,12 @@ void UFS2dViewer::_display_Yflat_plane(int ys)
   //glColor4f(1.0, 1.0, 1.0, 1.0);
   //glColor4f(0.0, 0.0, 0.0, 0.0);
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
     glBegin(GL_QUAD_STRIP);
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
         for(k = 1; k < _nlev; ++k)
         {
 	    mpos = ((k-1)*_nlat + jlatc)*_nlon;
@@ -731,10 +731,10 @@ void UFS2dViewer::_display_Yflat_plane(int ys)
 
     glDisable(GL_TEXTURE_1D);
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glPopMatrix();
     glEndList();
-    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFS2dViewer::_sphereXplane(int xs)
@@ -861,11 +861,11 @@ void UFS2dViewer::_display_Xflat_plane(int xs)
     vector<double> height(_nlev);
     int ilonc = (int) ((double) xs/_deltlon);
 
-    cout << "Enter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\txs: " << xs << ", __deltlon=" << _deltlon << endl;
-    cout << "\tilonc: " << ilonc << ", _nlon=" << _nlon << endl;
+  //cout << "Enter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\txs: " << xs << ", __deltlon=" << _deltlon << endl;
+  //cout << "\tilonc: " << ilonc << ", _nlon=" << _nlon << endl;
     ilonc = _nlon/2;
-    cout << "\tilonc: " << ilonc << ", _nlon=" << _nlon << endl;
+  //cout << "\tilonc: " << ilonc << ", _nlon=" << _nlon << endl;
     for(k = 0; k < _nlev; ++k)
         height[k] = 0.8 * ( 0.5 - (k + 1.0) / _nlev);
 
@@ -876,17 +876,17 @@ void UFS2dViewer::_display_Xflat_plane(int xs)
     glNewList(xcl, GL_COMPILE_AND_EXECUTE);
     lister->set_xid(xs, xcl);
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\t_varname: <" << _varname << ">, xs = " << xs << endl;
-    cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << ", sv = " << sv << endl;
-    cout << "\txcl = " << xcl << endl;
+  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\t_varname: <" << _varname << ">, xs = " << xs << endl;
+  //cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << ", sv = " << sv << endl;
+  //cout << "\txcl = " << xcl << endl;
 
     makeCurrent();
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glPushMatrix();
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tilonc: " << ilonc << ", _nlon=" << _nlon << endl;
+  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\tilonc: " << ilonc << ", _nlon=" << _nlon << endl;
 
   //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   //glClear(GL_COLOR_BUFFER_BIT);
@@ -895,11 +895,11 @@ void UFS2dViewer::_display_Xflat_plane(int xs)
   //glColor4f(1.0, 1.0, 1.0, 1.0);
   //glColor4f(0.0, 0.0, 0.0, 0.0);
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
     glBegin(GL_QUAD_STRIP);
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
         for(k = 1; k < _nlev; ++k)
         {
 	    for(j = 0; j < _nlat; ++j)
@@ -916,11 +916,11 @@ void UFS2dViewer::_display_Xflat_plane(int xs)
 	    }
         }
     glEnd();
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glDisable(GL_TEXTURE_1D);
     glPopMatrix();
     glEndList();
-    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFS2dViewer::_sphereBump()
