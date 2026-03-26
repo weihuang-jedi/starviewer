@@ -117,6 +117,7 @@ void UFSTranslator::setup()
 //Show the image
 void UFSTranslator::show()
 {
+    cout << "Enter Function: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glShadeModel(GL_SMOOTH);
 
     if(nvoptions->get_tsec() != _glbTime)
@@ -128,21 +129,29 @@ void UFSTranslator::show()
         ufs_controller->set_fileNtime(_curFile, _curTime);
     }
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufs_controller->draw();
 
   //_varname = ufs_controller->get_varname();
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     setLabelColor();
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     make_timeNpositionString();
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     writeHeader();
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     writeVarInfo();
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     writeFrameInfo();
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if(locator->on())
         writeLocatorMsg();
+    cout << "Leave Function: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFSTranslator::createVarInfo()

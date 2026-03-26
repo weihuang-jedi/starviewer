@@ -24,6 +24,6 @@
  export LIBGL_ALWAYS_SOFTWARE=1
  export QT_QPA_PLATFORM=xcb
 
-#gdb --args \
+ gdb --args \
  /work2/noaa/epic/weihuang/nv/starviewer/build/main/starviewer\
  	-ufs /work2/noaa/epic/weihuang/nv/data/ufs-atm-history/gfs.t12z.atm.f000.nc
