@@ -30,4 +30,5 @@ target_link_libraries(shared
         Qt5::Gui
 )
 
-include_directories(/apps/spack-managed/gcc-11.3.1/mesa-glu-9.0.2-jt4lynuhi3xlsnsm6v77irx4g2dxujui/include)
+# include_directories(/apps/spack-managed/gcc-11.3.1/mesa-glu-9.0.2-jt4lynuhi3xlsnsm6v77irx4g2dxujui/include)
+include_directories(/scratch4/NAGAPE/epic/Wei.Huang/conda-env/weienv/include)

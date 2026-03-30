@@ -6,6 +6,9 @@ set(NetCDF_LIBRARIES $ENV{NETCDF_C_ROOT}/lib/libnetcdf.so)
 find_path(NetCDF_INCLUDE_DIRS NAMES netcdf.h)
 find_library(NetCDF_LIBRARIES NAMES netcdf)
 
+set(HDF5_HL_LIB $ENV{HDF5_ROOT})
+set(HDF5_LIB $ENV{HDF5_ROOT})
+
 # --- NCL and Dependencies Setup ---
 
 # 1. Try to find NCARG_ROOT from environment
