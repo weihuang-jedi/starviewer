@@ -53,11 +53,11 @@ void CoastLine::_setup()
   //cout << "\tEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
   //NclAddFileFormats();
-    initializeNcl();
+  //initializeNcl();
 
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
-    nclvar = NULL;
+  //nclvar = NULL;
 
   //flnm[0] = "$NV_DATA/coastline/WDBII_shp/l/WDBII_border_l_L1.shp";
   //flnm[1] = "$NV_DATA/coastline/WDBII_shp/l/WDBII_border_l_L2.shp";
@@ -105,8 +105,8 @@ void CoastLine::_setup()
       //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
       //cout << "\tfile name " << n << ": <" << flnm[n] << ">" << endl;
 
-        strcpy(shpflnm, flnm[n].c_str());
-        nclfile = NclCreateFile(shpflnm);
+     // strcpy(shpflnm, flnm[n].c_str());
+     // nclfile = NclCreateFile(shpflnm);
 
         natts[n] = 0;
         ndims[n] = 0;
@@ -123,7 +123,7 @@ void CoastLine::_setup()
         _check_dims(n);
         _check_vars(n);
 
-        delete nclfile;
+      //delete nclfile;
     }
 
   //cout << "\tLeave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
@@ -136,11 +136,12 @@ void CoastLine::_check_atts(int i)
 
     char** attnames = NULL;
     char*  cptr;
-
-    NclMultiDValData attMV = NULL;
  
     natts[i] = 0;
 
+    /*
+
+    NclMultiDValData attMV = NULL;
     attnames = guiGetNclFileAttNames(nclfile, &natts[i]);
 
   //cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
@@ -202,6 +203,7 @@ void CoastLine::_check_atts(int i)
 
       //guiDestroyObj((NclObj) attMV);
     }
+    */
 }
 
 void CoastLine::_check_dims(int i)
@@ -212,6 +214,7 @@ void CoastLine::_check_dims(int i)
     ndims[i] = 0;
   //cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
 
+    /*
     if(nclfile->file.advanced_file_structure)
     {
       //Advanced file strucuture
@@ -260,6 +263,7 @@ void CoastLine::_check_dims(int i)
           //     << ">, size: " << nclfile->file.file_dim_info[n]->dim_size << endl;
         }
     }
+    */
 }
 
 void CoastLine::_check_vars(int i)
@@ -270,6 +274,7 @@ void CoastLine::_check_vars(int i)
   //cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
 
     nvars[i] = 0;
+    /*
     if(nclfile->file.advanced_file_structure)
     {
       //Advanced file strucuture
@@ -287,13 +292,14 @@ void CoastLine::_check_vars(int i)
     {
         nvars[i] = nclfile->file.n_vars;
     }
+    */
 
   //cout << "\tnvars[" << i << "] = " << nvars[i] << "." << endl;
 
     if(0 == nvars[i])
         return;
 
-
+/*
     if(nclfile->file.advanced_file_structure)
     {
       //Advanced file strucuture
@@ -303,7 +309,7 @@ void CoastLine::_check_vars(int i)
       //cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
         for(n = 0; n < nvars[i]; ++n)
         {
-            cptr = guiQuarkToString(nclfile->file.var_info[n]->var_name_quark);
+          //cptr = guiQuarkToString(nclfile->file.var_info[n]->var_name_quark);
           //cout << "\tVar " << n << ": <" << cptr << ">" << endl;
 
             if(0 == strcmp("x", cptr))
@@ -338,6 +344,7 @@ void CoastLine::_check_vars(int i)
 #endif
         }
     }
+*/
 }
 
 void CoastLine::print()
@@ -384,9 +391,9 @@ float* CoastLine::get_value(char* vn)
   //     << ">, line: " << __LINE__ << endl;
   //cout << "\tvar name: <" << vn << ">" << endl;
 
-    nclvar = readNclFileVar(nclfile, vn, NULL);
+  //nclvar = readNclFileVar(nclfile, vn, NULL);
 
-    value = guiGetValue(nclvar);
+  //value = guiGetValue(nclvar);
 
     return value;
 }
@@ -399,9 +406,9 @@ int* CoastLine::get_iv(char* vn)
   //     << ">, line: " << __LINE__ << endl;
   //cout << "\tvar name: <" << vn << ">" << endl;
 
-    nclvar = readNclFileVar(nclfile, vn, NULL);
+  //nclvar = readNclFileVar(nclfile, vn, NULL);
 
-    value = guiGetIntArray(nclvar);
+  //value = guiGetIntArray(nclvar);
 
     return value;
 }
@@ -414,9 +421,9 @@ double* CoastLine::get_dv(char* vn)
   //     << ">, line: " << __LINE__ << endl;
   //cout << "\tvar name: <" << vn << ">" << endl;
 
-    nclvar = readNclFileVar(nclfile, vn, NULL);
+  //nclvar = readNclFileVar(nclfile, vn, NULL);
 
-    value = guiGetDoubleArray(nclvar);
+  //value = guiGetDoubleArray(nclvar);
 
     return value;
 }

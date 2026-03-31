@@ -84,24 +84,24 @@ int main(int argc, char *argv[])
             nvoptions->set_model(CAMFV);
         else if(0 == tmpstr.compare("-camse"))
             nvoptions->set_model(CAMSE);
-        else if(0 == tmpstr.compare("-wrf"))
-            nvoptions->set_model(WRF);
+      //else if(0 == tmpstr.compare("-wrf"))
+      //    nvoptions->set_model(WRF);
         else if(0 == tmpstr.compare("-ufs"))
             nvoptions->set_model(UFS);
-        else if(0 == tmpstr.compare("-mpas"))
-            nvoptions->set_model(MPAS);
-        else if(0 == tmpstr.compare("-pop"))
-            nvoptions->set_model(POP);
-        else if(0 == tmpstr.compare("-radx"))
-            nvoptions->set_model(RADX);
+      //else if(0 == tmpstr.compare("-mpas"))
+      //    nvoptions->set_model(MPAS);
+      //else if(0 == tmpstr.compare("-pop"))
+      //    nvoptions->set_model(POP);
+      //else if(0 == tmpstr.compare("-radx"))
+      //    nvoptions->set_model(RADX);
       //else if(0 == tmpstr.compare("-vtk"))
       //    nvoptions->set_model(VTK);
         else if(0 == tmpstr.compare("-test"))
             nvoptions->set_model(TEST);
         else if(0 == tmpstr.compare("-mpi"))
             nvoptions->set_model(MPIDEMO);
-        else if(0 == tmpstr.compare("-hdf"))
-            nvoptions->set_model(HDF);
+      //else if(0 == tmpstr.compare("-hdf"))
+      //    nvoptions->set_model(HDF);
         else if(0 == tmpstr.compare("-subset"))
             nvoptions->set_cb(NV_MPAS_SUBSET, true);
         else if(0 == tmpstr.compare("-mappingfile"))
@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
         filename = default_filename;
     }
 
-    initializeNcl();
+  //initializeNcl();
 
     isList = isTextFile(filename.c_str());
 

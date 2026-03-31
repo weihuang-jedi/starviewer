@@ -38,14 +38,14 @@ TestTranslator::TestTranslator(ColorTable* ct, NVOptions* opt,
     topography = new Topography();
     topography->set_nvoptions(opt);
 
-    coastline2 = new CoastLine2();
-    coastline2->set_nvoptions(opt);
+  //coastline2 = new CoastLine2();
+  //coastline2->set_nvoptions(opt);
 }
 
 TestTranslator::~TestTranslator()
 {
     delete topography;
-    delete coastline2;
+  //delete coastline2;
 }
 
 void TestTranslator::setup()
@@ -270,7 +270,7 @@ void TestTranslator::update_sliderNspin()
 
 void TestTranslator::draw()
 {
-#if 1
+#if 0
   //draw coastline2
   //coastline2->draw_ball(0.99);
   //coastline2->draw();

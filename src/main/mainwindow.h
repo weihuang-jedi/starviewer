@@ -26,18 +26,18 @@
 #include "minmaxWidget.h"
 
 #include "generaltranslator.h"
-#include "wrftranslator.h"
+//#include "wrftranslator.h"
 #include "ufs_translator.h"
-#include "mpastranslator.h"
-#include "camsetranslator.h"
-#include "poptranslator.h"
+//#include "mpastranslator.h"
+//#include "camsetranslator.h"
+//#include "poptranslator.h"
 #ifdef UseRADX
 #include "radxtranslator.h"
 #endif
 //#include "vtktranslator.h"
 #include "testtranslator.h"
 #include "mpitranslator.h"
-#include "hdftranslator.h"
+//#include "hdftranslator.h"
 
 #include <QMainWindow>
 QT_BEGIN_NAMESPACE
@@ -67,16 +67,16 @@ class MainWindow : public QMainWindow
 
       //Applications
         void general();
-        void wrf();
+      //void wrf();
         void ufs();
-        void mpas();
-        void camse();
-        void pop();
+      //void mpas();
+      //void camse();
+      //void pop();
       //void radx();
       //void vtk();
         void test();
         void mpidemo();
-        void hdf();
+      //void hdf();
 
         void animation_func();
         void inspector_func();
@@ -99,16 +99,16 @@ class MainWindow : public QMainWindow
 
         BaseTranslator* translator;
         GeneralTranslator* general_translator;
-        WRFTranslator* wrf_translator;
+      //WRFTranslator* wrf_translator;
         UFSTranslator* ufs_translator;
-        POPTranslator* pop_translator;
-        MPASTranslator* mpas_translator;
-        CAMseTranslator* camse_translator;
+      //POPTranslator* pop_translator;
+      //MPASTranslator* mpas_translator;
+      //CAMseTranslator* camse_translator;
       //RadxTranslator* radx_translator;
       //VTKTranslator* vtk_translator;
         TestTranslator* test_translator;
         MPITranslator* mpidemo_translator;
-        HDFTranslator* hdf_translator;
+      //HDFTranslator* hdf_translator;
 
         ControlWidget* controlPanel;
         DisplayWidget* display;
@@ -155,16 +155,16 @@ class MainWindow : public QMainWindow
         QAction *aboutAct;
 
         QAction *generalAct;
-        QAction *wrfAct;
+      //QAction *wrfAct;
         QAction *ufsAct;
-        QAction *mpasAct;
-        QAction *camseAct;
-        QAction *popAct;
+      //QAction *mpasAct;
+      //QAction *camseAct;
+      //QAction *popAct;
         QAction *radxAct;
       //QAction *vtkAct;
         QAction *testAct;
         QAction *mpidemoAct;
-        QAction *hdfAct;
+      //QAction *hdfAct;
 
         QAction *animationAct;
         QAction *inspectorAct;

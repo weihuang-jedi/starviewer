@@ -13,7 +13,7 @@
 
 #include <netcdf.h>
 
-#include "nclInterface.h"
+// #include "nclInterface.h"
 // #include "ncreader.h"
 
 using namespace std;
@@ -43,8 +43,8 @@ class CoastLine
         void set_min_plot_points(int n) { minPlotPoints = n; };
 
     protected:
-        NclFile nclfile;
-        NclVar  nclvar;
+      //NclFile nclfile;
+      //NclVar  nclvar;
 
       //ncReader ncfile;
 

@@ -15,7 +15,7 @@ add_library(coastline STATIC ${COASTLINE_SOURCES})
 # 3. Tell the compiler where to find netcdf.h
 target_include_directories(coastline PRIVATE
     ${NetCDF_INCLUDE_DIRS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/../nclapp  # Path to nclapp headers
+  # ${CMAKE_CURRENT_SOURCE_DIR}/../nclapp  # Path to nclapp headers
 )
 # ------------------------
 

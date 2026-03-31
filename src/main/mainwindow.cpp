@@ -67,19 +67,19 @@ void MainWindow::_setup()
 
     switch(nvoptions->get_model())
     {
-        case CAMSE:
-            camse();
-            break;
-        case POP:
-            pop();
-            break;
-        case MPAS:
-            mpas();
-            break;
-        case WRF:
+      //case CAMSE:
+      //    camse();
+      //    break;
+      //case POP:
+      //    pop();
+      //    break;
+      //case MPAS:
+      //    mpas();
+      //    break;
+      //case WRF:
           //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
-            wrf();
-            break;
+      //    wrf();
+      //    break;
         case UFS:
           //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
             ufs();
@@ -96,9 +96,9 @@ void MainWindow::_setup()
         case MPIDEMO:
             mpidemo();
             break;
-        case HDF:
-            hdf();
-            break;
+      //case HDF:
+      //    hdf();
+      //    break;
         default:
             general();
             break;
@@ -111,12 +111,12 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
     QMenu menu(this);
 
     menu.addAction(generalAct);
-    menu.addAction(wrfAct);
+  //menu.addAction(wrfAct);
     menu.addAction(ufsAct);
-    menu.addAction(mpasAct);
-    menu.addAction(camseAct);
-    menu.addAction(popAct);
-    menu.addAction(hdfAct);
+  //menu.addAction(mpasAct);
+  //menu.addAction(camseAct);
+  //menu.addAction(popAct);
+  //menu.addAction(hdfAct);
   //menu.addAction(radxAct);
   //menu.addAction(vtkAct);
     menu.addAction(testAct);
@@ -263,6 +263,7 @@ void MainWindow::general()
     _setup_display();
 }
 
+/*
 void MainWindow::wrf()
 {
     wrf_translator = new WRFTranslator(colorTable, nvoptions,
@@ -276,6 +277,7 @@ void MainWindow::wrf()
 
     _setup_display();
 }
+*/
 
 void MainWindow::ufs()
 {
@@ -291,6 +293,7 @@ void MainWindow::ufs()
     _setup_display();
 }
 
+/*
 void MainWindow::mpas()
 {
     mpas_translator = new MPASTranslator(colorTable, nvoptions,
@@ -337,6 +340,7 @@ void MainWindow::pop()
     _setup_controlPanel();
     _setup_display();
 }
+*/
 
 #ifdef UseRADX
 void MainWindow::radx()
@@ -401,6 +405,7 @@ void MainWindow::mpidemo()
     _setup_display();
 }
 
+/*
 void MainWindow::hdf()
 {
     hdf_translator = new HDFTranslator(colorTable, nvoptions,
@@ -413,6 +418,7 @@ void MainWindow::hdf()
     _setup_controlPanel();
     _setup_display();
 }
+*/
 
 void MainWindow::about()
 {
@@ -462,30 +468,30 @@ void MainWindow::createActions()
     generalAct->setStatusTip(tr("Try to activate 'general' application"));
     connect(generalAct, SIGNAL(triggered()), this, SLOT(general()));
 
-    wrfAct = new QAction(tr("&WRF"), this);
+  //wrfAct = new QAction(tr("&WRF"), this);
   //wrfAct->setShortcut(QKeySequence::Global);
-    wrfAct->setStatusTip(tr("Try to activate 'wrf' application"));
-    connect(wrfAct, SIGNAL(triggered()), this, SLOT(wrf()));
+  //wrfAct->setStatusTip(tr("Try to activate 'wrf' application"));
+  //connect(wrfAct, SIGNAL(triggered()), this, SLOT(wrf()));
 
     ufsAct = new QAction(tr("&UFS"), this);
   //ufsAct->setShortcut(QKeySequence::Global);
     ufsAct->setStatusTip(tr("Try to activate 'ufs' application"));
     connect(ufsAct, SIGNAL(triggered()), this, SLOT(ufs()));
 
-    mpasAct = new QAction(tr("&MPAS"), this);
+  //mpasAct = new QAction(tr("&MPAS"), this);
   //mpasAct->setShortcut(QKeySequence::Global);
-    mpasAct->setStatusTip(tr("Try to activate 'mpas' application"));
-    connect(mpasAct, SIGNAL(triggered()), this, SLOT(mpas()));
+  //mpasAct->setStatusTip(tr("Try to activate 'mpas' application"));
+  //connect(mpasAct, SIGNAL(triggered()), this, SLOT(mpas()));
 
-    camseAct = new QAction(tr("&CAMse"), this);
+  //camseAct = new QAction(tr("&CAMse"), this);
   //camseAct->setShortcut(QKeySequence::Global);
-    camseAct->setStatusTip(tr("Try to activate 'camse' application"));
-    connect(camseAct, SIGNAL(triggered()), this, SLOT(camse()));
+  //camseAct->setStatusTip(tr("Try to activate 'camse' application"));
+  //connect(camseAct, SIGNAL(triggered()), this, SLOT(camse()));
 
-    popAct = new QAction(tr("&POP"), this);
+  //popAct = new QAction(tr("&POP"), this);
   //popAct->setShortcut(QKeySequence::Global);
-    popAct->setStatusTip(tr("Try to activate 'pop' application"));
-    connect(popAct, SIGNAL(triggered()), this, SLOT(pop()));
+  //popAct->setStatusTip(tr("Try to activate 'pop' application"));
+  //connect(popAct, SIGNAL(triggered()), this, SLOT(pop()));
 
 #ifdef UseRADX
     radxAct = new QAction(tr("&RADX"), this);
@@ -511,10 +517,10 @@ void MainWindow::createActions()
     mpidemoAct->setStatusTip(tr("Try to activate 'mpidemo' application"));
     connect(mpidemoAct, SIGNAL(triggered()), this, SLOT(mpidemo()));
 
-    hdfAct = new QAction(tr("&HDF"), this);
+  //hdfAct = new QAction(tr("&HDF"), this);
   //hdfAct->setShortcut(QKeySequence::Global);
-    hdfAct->setStatusTip(tr("Try to activate 'hdf' application"));
-    connect(hdfAct, SIGNAL(triggered()), this, SLOT(hdf()));
+  //hdfAct->setStatusTip(tr("Try to activate 'hdf' application"));
+  //connect(hdfAct, SIGNAL(triggered()), this, SLOT(hdf()));
 
     animationAct = new QAction(tr("&Animation"), this);
   //animationAct->setShortcut(QKeySequence::Global);
@@ -594,12 +600,12 @@ void MainWindow::createMenus()
 
     appsMenu = menuBar()->addMenu(tr("&PlotTypes"));
     appsMenu->addAction(generalAct);
-    appsMenu->addAction(wrfAct);
+  //appsMenu->addAction(wrfAct);
     appsMenu->addAction(ufsAct);
-    appsMenu->addAction(mpasAct);
-    appsMenu->addAction(camseAct);
-    appsMenu->addAction(popAct);
-    appsMenu->addAction(hdfAct);
+  //appsMenu->addAction(mpasAct);
+  //appsMenu->addAction(camseAct);
+  //appsMenu->addAction(popAct);
+  //appsMenu->addAction(hdfAct);
   //appsMenu->addAction(radxAct);
   //appsMenu->addAction(vtkAct);
     appsMenu->addAction(testAct);

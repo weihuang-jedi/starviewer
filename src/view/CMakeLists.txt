@@ -18,7 +18,7 @@ target_include_directories(view PUBLIC
     ${CMAKE_SOURCE_DIR}/shared
     ${CMAKE_SOURCE_DIR}/spreadsheet
     ${CMAKE_SOURCE_DIR}/leveler
-    ${CMAKE_SOURCE_DIR}/nclapp
+  # ${CMAKE_SOURCE_DIR}/nclapp
     ${CMAKE_SOURCE_DIR}/coastline
     ${CMAKE_SOURCE_DIR}/contour
     ${CMAKE_SOURCE_DIR}/marchingCube

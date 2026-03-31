@@ -17,7 +17,7 @@
 #include "sliderNspin.h"
 #include "basetranslator.h"
 #include "topography.h"
-#include "coastline2.h"
+// #include "coastline2.h"
 
 class TestTranslator : public BaseTranslator
 {
@@ -53,7 +53,7 @@ class TestTranslator : public BaseTranslator
 
     private:
         Topography* topography;
-        CoastLine2* coastline2;
+      //CoastLine2* coastline2;
 
         bool _flat;
 

@@ -2,21 +2,23 @@
 
 set -x
 
-# Clean the failed cache
+# 1. Clean the failed build
 rm -rf CMakeCache.txt CMakeFiles/
 
-# Run CMake with high-priority include paths
+# 2. Run CMake with the "Kitchen Sink" Linker Flags
 cmake ../src \
   -DCMAKE_PREFIX_PATH="/scratch4/NAGAPE/epic/Wei.Huang/src/nv/mesa-install;/scratch4/NAGAPE/epic/Wei.Huang/conda-env/weienv" \
   -DQt5_DIR=/scratch4/NAGAPE/epic/Wei.Huang/conda-env/weienv/lib/cmake/Qt5 \
-  -DGLU_LIBRARY=/usr/lib64/libGLU.so.1 \
+  -DGLU_LIBRARY=/scratch4/NAGAPE/epic/Wei.Huang/conda-env/weienv/lib/libGLU.so.1 \
   -DGLU_INCLUDE_DIR=/scratch4/NAGAPE/epic/Wei.Huang/src/nv/mesa-install/include \
-  -DCMAKE_CXX_FLAGS="-I/scratch4/NAGAPE/epic/Wei.Huang/src/nv/mesa-install/include"
+  -DCMAKE_CXX_FLAGS="-I/scratch4/NAGAPE/epic/Wei.Huang/src/nv/mesa-install/include -I/scratch4/NAGAPE/epic/Wei.Huang/conda-env/weienv/include" \
+  -DCMAKE_EXE_LINKER_FLAGS="-L/scratch4/NAGAPE/epic/Wei.Huang/src/nv/mesa-install/lib64 -L/scratch4/NAGAPE/epic/Wei.Huang/conda-env/weienv/lib -L/usr/lib64 -lGL -Wl,--copy-dt-needed-entries -Wl,--allow-shlib-undefined -L/apps/spack-2024-12/linux-rocky9-x86_64/gcc-11.4.1/netcdf-c-4.9.2-dzmdg3ly7avioysvapk37klgegbsq3js/lib"
 
-# Try to build again
-make -j 8
+# Try the build again
+# make -j 8
 
 exit 0
+
 # 1. Create the target directory in your custom Mesa install
 #mkdir -p /scratch4/NAGAPE/epic/Wei.Huang/src/nv/mesa-install/include/GL
 

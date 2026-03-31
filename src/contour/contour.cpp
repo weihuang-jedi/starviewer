@@ -4,8 +4,8 @@
 #undef debug
 #endif
 
-#include <ncarg/hlu/MapPlot.h>
-#include "nclInterface.h"
+// #include <ncarg/hlu/MapPlot.h>
+// #include "nclInterface.h"
 
 
 //Constructor
@@ -81,6 +81,7 @@ void Contour::initialize()
     clen[0] = colorTable->get_clen();;
     clen[1] = 3;
 
+    /*
 #ifdef USENCL
   //Initialize the high level utility library
     guiNhlInitialize();
@@ -109,6 +110,7 @@ void Contour::initialize()
     guiNhlSetColor(wksid, 0, 1.0, 1.0, 1.0);
     guiNhlSetColor(wksid, 1, 0.0, 0.0, 1.0);
 #endif
+    */
 }
 
 void Contour::update_colormap()
@@ -118,6 +120,7 @@ void Contour::update_colormap()
     clen[0] = colorTable->get_clen();;
     clen[1] = 3;
 
+    /*
 #ifdef USENCL
     guiNhlRLClear(srlist);
     guiNhlRLSetMDFloatArray(srlist,NhlNwkColorMap,cmap,2,clen);
@@ -125,10 +128,12 @@ void Contour::update_colormap()
 
     reinitialize();
 #endif
+    */
 }
 
 void Contour::finalize()
 {
+    /*
 #ifdef USENCL
   //Destroy the objects created, close the HLU library and exit.
     guiNhlDestroy(wksid);
@@ -139,6 +144,7 @@ void Contour::finalize()
 
     guiNhlClose();
 #endif
+    */
 }
 
 void Contour::reinitialize()
@@ -194,6 +200,7 @@ void Contour::_general_setup()
 {
     float opacity = 0.01 * _opacity;
 
+   /*
     guiNhlRLClear(srlist);
     guiNhlRLSetFloat(srlist,NhlNcnLineThicknessF,2.0);
     guiNhlRLSetFloat(srlist,NhlNcnFillOpacityF,opacity);
@@ -256,19 +263,23 @@ void Contour::_general_setup()
     guiNhlRLSetFloat(srlist,NhlNcnMaxLevelValF,cnMaxLevelValF);
     guiNhlRLSetFloat(srlist,NhlNcnLevelSpacingF,cnLevelSpacingF);
     guiNhlSetValues(cnid,srlist);
+   */
 }
 
 void Contour::_viewport_setup()
 {
+   /*
     guiNhlRLSetFloat(srlist,NhlNvpXF,vpx);
     guiNhlRLSetFloat(srlist,NhlNvpYF,vpy);
     guiNhlRLSetFloat(srlist,NhlNvpWidthF,vpw);
     guiNhlRLSetFloat(srlist,NhlNvpHeightF,vph);
     guiNhlSetValues(cnid,srlist);
+   */
 }   
 
 void Contour::_get_viewportXinfo()
 {
+   /*
     grlist = guiNhlRLCreate(NhlGETRL);
     guiNhlRLClear(grlist);
     guiNhlRLGetFloat(grlist,NhlNvpXF,&vpxX);
@@ -276,6 +287,7 @@ void Contour::_get_viewportXinfo()
     guiNhlRLGetFloat(grlist,NhlNvpWidthF,&vpwX);
     guiNhlRLGetFloat(grlist,NhlNvpHeightF,&vphX);
     guiNhlGetValues(cnid,grlist);
+   */
 
     _yStartX = vpxX;
     _zStartX = vpyX - vphX;
@@ -293,15 +305,18 @@ void Contour::_get_viewportXinfo()
 
 void Contour::_viewportXsetup()
 {
+   /*
     guiNhlRLSetFloat(srlist,NhlNvpXF,vpxX);
     guiNhlRLSetFloat(srlist,NhlNvpYF,vpyX);
     guiNhlRLSetFloat(srlist,NhlNvpWidthF,vpwX);
     guiNhlRLSetFloat(srlist,NhlNvpHeightF,vphX);
     guiNhlSetValues(cnid,srlist);
+   */
 }  
 
 void Contour::_get_viewportYinfo()
 {
+   /*
     grlist = guiNhlRLCreate(NhlGETRL);
     guiNhlRLClear(grlist);
     guiNhlRLGetFloat(grlist,NhlNvpXF,&vpxY);
@@ -309,6 +324,7 @@ void Contour::_get_viewportYinfo()
     guiNhlRLGetFloat(grlist,NhlNvpWidthF,&vpwY);
     guiNhlRLGetFloat(grlist,NhlNvpHeightF,&vphY);
     guiNhlGetValues(cnid,grlist);
+   */
 
     _xStartY = vpxY;
     _zStartY = vpyY - vphY;
@@ -326,15 +342,18 @@ void Contour::_get_viewportYinfo()
 
 void Contour::_viewportYsetup()
 {
+   /*
     guiNhlRLSetFloat(srlist,NhlNvpXF,vpxY);
     guiNhlRLSetFloat(srlist,NhlNvpYF,vpyY);
     guiNhlRLSetFloat(srlist,NhlNvpWidthF,vpwY);
     guiNhlRLSetFloat(srlist,NhlNvpHeightF,vphY);
     guiNhlSetValues(cnid,srlist);
+   */
 }
 
 void Contour::initialize_context()
 {
+   /*
 #ifdef USENCL
   //Set surface to translucent color (r, g, b, a) without disturbing graphics state.
     context = getCairoQtContext();
@@ -346,10 +365,12 @@ void Contour::initialize_context()
     cairo_paint(context);
     cairo_restore(context);
 #endif
+    */
 }
 
 unsigned int Contour::get_textureID(unsigned int textureID)
 {
+   /*
 #ifdef USENCL
     unsigned char *pixels;
     unsigned int   width;
@@ -390,6 +411,8 @@ unsigned int Contour::get_textureID(unsigned int textureID)
 #else
     return 0;
 #endif
+    */
+    return 0;
 }
 
 void Contour::setup(string vn, float *var)
@@ -419,10 +442,11 @@ void Contour::setup(string vn, float *var)
     _minval = evaluator->get_min();
     _maxval = evaluator->get_max();
 
+  /*
     guiGetEndpointsAndStepSize((float)_minval, (float)_maxval, cnMaxLev, 1,
                                &cnMinLevelValF, &cnMaxLevelValF,
                                &cnLevelSpacingF);
-
+   */
     vpx = 0.2;
     vpy = 0.8;
     vpw = 0.6;
@@ -548,6 +572,7 @@ unsigned int Contour::get_xid(int n)
     if(0 < _x_id[n])
         return _x_id[n];
 
+    /*
 #ifdef USENCL
     initialize_context();
 
@@ -638,6 +663,7 @@ unsigned int Contour::get_xid(int n)
 #else
     _y_id[n] = 0;
 #endif
+    */
 
     return _x_id[n];
 }
@@ -651,6 +677,7 @@ unsigned int Contour::get_yid(int n)
     if(0 < _y_id[n])
         return _y_id[n];
 
+    /*
 #ifdef USENCL
     initialize_context();
 
@@ -739,6 +766,7 @@ unsigned int Contour::get_yid(int n)
 #else
     _y_id[n] = 0;
 #endif
+    */
 
     return _y_id[n];
 }
@@ -752,6 +780,7 @@ unsigned int Contour::get_zid(int n)
     if(0 < _z_id[n])
         return _z_id[n];
 
+    /*
 #ifdef USENCL
   //cout << "\tAt Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
   //     << ", file: <" << __FILE__ << ">" << endl << endl;
@@ -860,12 +889,13 @@ unsigned int Contour::get_zid(int n)
 #else
     _z_id[n] = 0;
 #endif
-
+    */
     return _z_id[n];
 }
 
 void Contour::_tick_setup()
 {
+   /*
     if(hasGeoInfo)
         guiNhlRLSetString(srlist,NhlNtiXAxisString,"Longitude");
     else
@@ -900,12 +930,13 @@ void Contour::_tick_setup()
         guiNhlRLSetFloatArray(srlist,NhlNtmYLValues,geometry->get_ylvalues(),geometry->get_nlabels());
         guiNhlRLSetStringArray(srlist,NhlNtmYLLabels,geometry->get_yllabels(),geometry->get_nlabels());
     }
+    */
 }
 
 void Contour::_map_setup()
 {
     mapid = -1;
-
+    /*
     guiNhlRLClear(srlist);
 
     guiNhlRLSetFloat(srlist,NhlNvpXF,vpx);
@@ -933,10 +964,12 @@ void Contour::_map_setup()
   //guiNhlRLSetString(srlist,NhlNmpDataResolution, "MediumRes");
 
     guiNhlCreate(&mapid,"map",NhlmapPlotClass,wksid,srlist);
+    */
 }
 
 void Contour::_get_viewport_info()
 {
+   /*
     guiNhlRLClear(grlist);
     grlist = guiNhlRLCreate(NhlGETRL);
     guiNhlRLGetFloat(grlist,NhlNvpXF,&vpw);
@@ -944,7 +977,7 @@ void Contour::_get_viewport_info()
     guiNhlRLGetFloat(grlist,NhlNvpWidthF,&vpw);
     guiNhlRLGetFloat(grlist,NhlNvpHeightF,&vph);
     guiNhlGetValues(mapid,grlist);
-
+    */
     _xStart = vpx;
     _yStart = vpy - vph;
 
