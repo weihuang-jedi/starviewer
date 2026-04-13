@@ -42,6 +42,9 @@ case $(hostname -f) in
         # 3. Tell the system where the EGL/Vulkan JSON manifests are
         export EGL_DRIVERS_PATH=$MESA_ROOT/lib64/dri
         export VK_ICD_FILENAMES=$MESA_ROOT/share/vulkan/icd.d/nouveau_icd.x86_64.json
+        installdir=/scratch4/NAGAPE/epic/Wei.Huang/src/nv/starviewer/install
+      # qt5dir=/scratch4/NAGAPE/epic/Wei.Huang/conda-env/weienv/lib
+        qt5dir=/scratch4/NAGAPE/epic/Wei.Huang/conda-env/weienv/lib
 
         # 4. Optional: Force a specific renderer for testing
         # export GALLIUM_DRIVER=nouveau  # Force NVIDIA
@@ -58,8 +61,6 @@ case $(hostname -f) in
             module load hercules.gnu 
         fi
 	GLU_LIBRARY=/usr/lib64/libGLU.so.1
-        installdir=/scratch4/NAGAPE/epic/Wei.Huang/src/nv/starviewer/install
-        qt5dir=/scratch4/NAGAPE/epic/Wei.Huang/conda-env/weienv/lib
         ;;
     *) MACHINE_ID=UNKNOWN ;;                        # Unknown platform
 esac
@@ -70,7 +71,7 @@ esac
  cmake ../src \
   -DCMAKE_PREFIX_PATH=${installdir} \
   -DQt5_DIR=${qt5dir} \
-  -DGLU_LIBRARY=/lib64/libGL.so.1 \
+  -DGLU_LIBRARY=${GLU_LIBRARY} \
   -DGLU_INCLUDE_DIR=/scratch4/NAGAPE/epic/Wei.Huang/src/nv/mesa-install/include
  make -j 4
 

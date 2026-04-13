@@ -1,7 +1,0 @@
-Create a (low-resolution) icathehedra to display wind-field.
-
-The idea is to get an averaged wind on each vertex,
-and then drow an arrow there.
-
-For equal-cylender, we can certainly create a lat-lon square
-to achive the similar result.

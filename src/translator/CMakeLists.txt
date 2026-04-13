@@ -4,10 +4,6 @@ file(GLOB_RECURSE SOURCES *.cpp *.h *.ui *.qrc)
 set(OpenGL_GL_PREFERENCE GLVND)
 #find_package(OpenGL REQUIRED)
 
-# NetCDF settings
-set(NetCDF_INCLUDE_DIRS $ENV{NETCDF_C_ROOT}/include)
-set(NetCDF_LIBRARIES $ENV{NETCDF_C_ROOT}/lib/libnetcdf.so)
-
 # Qt5 settings
 find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
 

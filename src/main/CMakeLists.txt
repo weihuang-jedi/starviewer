@@ -1,36 +1,6 @@
 file(GLOB_RECURSE SOURCES *.cpp *.h *.ui *.qrc)
 
 set(OpenGL_GL_PREFERENCE GLVND)
-set(NetCDF_INCLUDE_DIRS $ENV{NETCDF_C_ROOT}/include)
-set(NetCDF_LIBRARIES $ENV{NETCDF_C_ROOT}/lib/libnetcdf.so)
-find_path(NetCDF_INCLUDE_DIRS NAMES netcdf.h)
-find_library(NetCDF_LIBRARIES NAMES netcdf)
-
-set(HDF5_HL_LIB $ENV{HDF5_ROOT})
-set(HDF5_LIB $ENV{HDF5_ROOT})
-
-# --- NCL and Dependencies Setup ---
-
-# 1. Try to find NCARG_ROOT from environment
-#if(NOT DEFINED ENV{NCARG_ROOT})
-#    message(FATAL_ERROR "NCARG_ROOT environment variable not set. Please load the ncl module.")
-#endif()
-#set(NCL_LIB_DIR $ENV{NCARG_ROOT}/lib)
-#set(NCL_INC_DIR $ENV{NCARG_ROOT}/include)
-
-# 2. Find HDF5 (Required by NCL)
-# We use the path identified in your previous error
-set(HDF5_ROOT "/apps/spack-managed/gcc-11.3.1/hdf5-1.12.2-w7j5cujjvt45evmlqi6yyff4q4qqjees")
-find_library(HDF5_LIB NAMES hdf5 PATHS ${HDF5_ROOT}/lib NO_DEFAULT_PATH)
-find_library(HDF5_HL_LIB NAMES hdf5_hl PATHS ${HDF5_ROOT}/lib NO_DEFAULT_PATH)
-
-# Replace these with the actual paths you found from the 'spack find' command
-#set(UDUNITS_LIB "/apps/spack-managed/gcc-11.3.1/udunits-2.2.28-yejcsju74d43ulira4kz7flaghyd5cmf/lib/libudunits2.a")
-#set(HDFEOS_LIB  "/path/from/spack/lib/libhdfeos.a")
-
-# --- Find NCL-specific helper libraries ---
-# udunits2 fixes: cdRel2Comp, calendar_type
-#find_library(UDUNITS_LIB NAMES udunits2 PATHS /apps/spack-managed/gcc-11.3.1/*/lib)
 
 # hdfeos fixes: cuErrorOccurred
 #find_library(HDFEOS_LIB NAMES hdfeos PATHS /apps/spack-managed/gcc-11.3.1/*/lib)

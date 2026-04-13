@@ -1,10 +1,5 @@
 file(GLOB_RECURSE SOURCES *.cpp *.h *.f *.ui *.qrc)
 
-set(NetCDF_INCLUDE_DIRS $ENV{NETCDF_C_ROOT}/include)
-set(NetCDF_LIBRARIES $ENV{NETCDF_C_ROOT}/lib/libnetcdf.so)
-find_path(NetCDF_INCLUDE_DIRS NAMES netcdf.h)
-find_library(NetCDF_LIBRARIES NAMES netcdf)
-
 # 1. Remove "OpenGL" from the find_package list
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 

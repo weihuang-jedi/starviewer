@@ -1,10 +1,6 @@
 file(GLOB_RECURSE SOURCES *.cpp *.h *.ui *.qrc)
 
 set(OpenGL_GL_PREFERENCE GLVND)
-set(NetCDF_INCLUDE_DIRS $ENV{NETCDF_C_ROOT}/include)
-set(NetCDF_LIBRARIES $ENV{NETCDF_C_ROOT}/lib/libnetcdf.so)
-find_path(NetCDF_INCLUDE_DIRS NAMES netcdf.h)
-find_library(NetCDF_LIBRARIES NAMES netcdf)
 
 # 1. Find Core Qt5
 find_package(Qt5Core REQUIRED)

@@ -1,7 +1,7 @@
 #! /bin/sh
 
-#salloc --x11 --nodes=1 --exclusive --time=03:30:00 --account=epic --partition=u1-h100 --qos=gpuwf
-salloc --nodes=1 --exclusive --time=03:30:00 --account=epic --partition=u1-h100 --qos=gpuwf --x11
+#salloc --nodes=1 --exclusive --time=03:30:00 --account=epic --partition=u1-h100 --qos=gpuwf --x11
+salloc --nodes=1 --exclusive --time=03:30:00 --account=epic --partition=u1-mi300x --qos=gpuwf --x11
 
 exit 0
 

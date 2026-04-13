@@ -1,4 +1,0 @@
-#!/bin/csh -f
-
- ./nclapp.app/Contents/MacOS/nclapp ../uvt.nc
-

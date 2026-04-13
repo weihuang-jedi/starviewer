@@ -1,9 +1,5 @@
 file(GLOB_RECURSE SOURCES *.cpp *.h *.ui *.qrc)
 
-# 0. Find NetCDF using environment hints
-find_path(NetCDF_INCLUDE_DIRS NAMES netcdf.h HINTS $ENV{NETCDF_C_ROOT}/include)
-find_library(NetCDF_LIBRARIES NAMES netcdf HINTS $ENV{NETCDF_C_ROOT}/lib)
-
 # 1. Find the OpenGL component of Qt5
 find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
 
