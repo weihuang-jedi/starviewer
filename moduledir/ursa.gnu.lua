@@ -22,8 +22,9 @@ local modules = {
   {["netcdf-c"]        = "4.9.2"},
   {["gftl-shared"]     = "1.9.0"},
   {["zlib"]            = "1.2.13"},
-  {["ncl"]             = "6.6.2"},
+-- {["ncl"]             = "6.6.2"},
   {["cmake"]           = "3.30.2"},
+  {["cuda"]            = "13.1.0"},
 }
 
 for i = 1, #modules do

@@ -1,30 +1,55 @@
 #!/bin/bash
-
 set -x
 
-# 1. Broaden the Preload to include the GL Dispatcher and GLX
-# This covers almost every standard OpenGL/GLX symbol Qt might look for.
-MESA_LIB="/scratch4/NAGAPE/epic/Wei.Huang/src/nv/mesa-install/lib64"
-CONDA_LIB="/scratch4/NAGAPE/epic/Wei.Huang/conda-env/weienv/lib"
+#MODULE_NAME="rdhpcs-conda"
+#if lsmod | awk '{print $1}' | grep -qx "$MODULE_NAME"; then
+#    echo "Module '$MODULE_NAME' is loaded."
+#else
+#    # conda create -p weienv python=3.13
+#    # module load rdhpcs-conda
+#    # conda activate /scratch4/NAGAPE/epic/Wei.Huang/conda-env/weienv
+#    # conda deactivate
+#    # pip install PyQt5
+#    # pip install mesa
+#    # pip install PyOpenGL PyOpenGL_accelerate
+#    module purge
+#    module use moduledir
+#    module load ursa.gnu
+#fi
 
-export LD_PRELOAD="$MESA_LIB/libGLdispatch.so.0:$MESA_LIB/libGLX_mesa.so:$MESA_LIB/libGL.so.1:$CONDA_LIB/libstdc++.so.6"
+export STARVIWERHOME=/scratch4/NAGAPE/epic/Wei.Huang/src/nv/starviewer
 
-# 2. Clean up and set Library Paths
-export LD_LIBRARY_PATH="$MESA_LIB:$CONDA_LIB:$LD_LIBRARY_PATH"
+# 1. Setup paths
+export CONDA_PREFIX="/scratch4/NAGAPE/epic/Wei.Huang/conda-env/weienv"
+export CONDA_LIB="$CONDA_PREFIX/lib"
+export XDG_RUNTIME_DIR="/scratch4/NAGAPE/epic/Wei.Huang/tmp/runtime-Wei.Huang"
+mkdir -p $XDG_RUNTIME_DIR
+chmod 700 $XDG_RUNTIME_DIR
 
-# 3. Force Software Rendering
-export LIBGL_ALWAYS_SOFTWARE=1
-export GALLIUM_DRIVER=llvmpipe
+# 2. Prioritize Conda and add NVIDIA system paths
+# Note: We add the system nvidia paths to find the hardware drivers
+export LD_LIBRARY_PATH="$CONDA_LIB:$LD_LIBRARY_PATH"
 
-# 4. Tell Qt to stop trying to use GLX-integration plugins
-# This forces it to use the basic X11 surface without the buggy GLX bridge
-export QT_XCB_GL_INTEGRATION=none 
+# 3. ABI Fix (Essential for the CXXABI error we saw earlier)
+export LD_PRELOAD="$CONDA_LIB/libstdc++.so.6"
+
+# 4. FIXING THE BLANK WINDOW (The "Hardware" approach)
+# We UNSET the software override to let the GPU work
+unset LIBGL_ALWAYS_SOFTWARE
+export QT_X11_NO_MITSHM=1
 export QT_QPA_PLATFORM=xcb
 
-# 5. MobaXterm/X11 Compatibility
-export QT_X11_NO_MITSHM=1
-export XLIB_SKIP_ARGB_VISUALS=1
+# Tell Qt to use the Desktop OpenGL implementation instead of EGL
+export QT_OPENGL_BACKEND=desktop
 
-# 6. Launch
+# 5. Tell the system to use the NVIDIA vendor for GLX
+export __GLX_VENDOR_LIBRARY_NAME=nvidia
+
+# Replace section 4 and 5 in the script above with this if it fails:
+#export LIBGL_ALWAYS_SOFTWARE=1
+#export GALLIUM_DRIVER=llvmpipe
+#export QT_XCB_GL_INTEGRATION=none
+
+echo "Starting Starviewer on H100 Node..."
+gdb -batch -ex "run" -ex "bt" --args \
 /scratch4/NAGAPE/epic/Wei.Huang/src/nv/starviewer/build/main/starviewer -mpi mpi
-

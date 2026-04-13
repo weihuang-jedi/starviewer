@@ -20,11 +20,12 @@ case $(hostname -f) in
 	    # pip install PyQt5
 	    # pip install mesa
 	    # pip install PyOpenGL PyOpenGL_accelerate
-            module purge
+          # module purge
             module use moduledir
             module load ursa.gnu 
 	fi
-	GLU_LIBRARY=/lib64/libGL.so.1
+      # GLU_LIBRARY=/lib64/libGL.so.1
+	GLU_LIBRARY=$CONDA_PREFIX/lib/libGL.so.1
       # export PKG_CONFIG_PATH=$CONDA_PREFIX/lib/pkgconfig:$CONDA_PREFIX/share/pkgconfig:$PKG_CONFIG_PATH
       # Define your install path
         export MESA_ROOT=/scratch4/NAGAPE/epic/Wei.Huang/src/nv/mesa-install

@@ -54,6 +54,8 @@ void GeneralTranslator::setup()
     int n;
 
     cout << "\tEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    cout << "\t_filename: <" << _filename << endl;
+    cout << "\t_hasFileList: <" << _hasFileList << endl;
 
     controller = new Controller(colorTable, nvoptions, _filename, _hasFileList);
     controller->setup();
