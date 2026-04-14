@@ -89,26 +89,28 @@ void UFSGeometry::setup()
     size_t n;
     size_t nsquare;
 
-  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "_nlon = " << _nlon << endl;
-  //cout << "_nlat = " << _nlat << endl;
-  //cout << "_nlev = " << _nlev << endl;
+    cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "_nlon = " << _nlon << endl;
+    cout << "_nlat = " << _nlat << endl;
+    cout << "_nlev = " << _nlev << endl;
     nsquare = _nlon * _nlat;
     _xSphere = new double[nsquare];
     _ySphere = new double[nsquare];
     _zSphere = new double[nsquare];
-  //cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     _xFlat = new double[_nlon];
     _yFlat = new double[_nlat];
 
-  //cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     if(NULL == _lat) {
 	cout << "_lat in NULL. Stop" << endl;
+	throw(errno);
 	exit (-1);
     }
     if(NULL == _lon) {
 	cout << "_lon in NULL. Stop" << endl;
+	throw(errno);
 	exit (-1);
     }
     _hmax = 0.0;
@@ -131,11 +133,11 @@ void UFSGeometry::setup()
     {
       //cout << "_lon[" << i << "] = " << _lon[i] << endl;
         if(_lon[i] > 180.0)
-            _xFlat[i] = _lon[i]/180.0 - 2.0;
+            _xFlat[i] = (_lon[i]-360.0)/180.0;
         else
             _xFlat[i] = _lon[i]/180.0;
       //cout << "_xFlat[" << i << "] = " << _xFlat[i] << ", lon " << _lon[i] << endl;
     }
-  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 

@@ -81,11 +81,11 @@ void ColorTable::_setup()
     }
     strcpy(root, path);
   //strcpy(root, "/contrib/Wei.Huang/src/nv/starviewer");
-    cout << "root: " << root << endl;
+  //cout << "root: " << root << endl;
     strcat(root, "/colormaps/");
-    cout << "root: " << root << endl;
+  //cout << "root: " << root << endl;
 
-    cout << "\troot: <" << root << ">" << endl;
+  //cout << "\troot: <" << root << ">" << endl;
   //cout << "\tUse default color map: gui_default" << endl;
 
     _opacity = NULL;
@@ -105,7 +105,7 @@ void ColorTable::_setup()
     if(NULL == (dp = opendir(root)))
     {
         cout << "Error(" << errno << ") opening " << root << endl;
-        return;
+        throw(errno);
     }
 
     while((dirp = readdir(dp)))
@@ -162,17 +162,17 @@ void ColorTable::get_file_contents(const char *cn)
         throw(errno);
     }
     strcpy(root, path);
-    cout << "root: " << root << endl;
+  //cout << "root: " << root << endl;
     strcat(root, "/colormaps/");
-    cout << "root: " << root << endl;
+  //cout << "root: " << root << endl;
 
     strcat(root, cn);
 
     strcpy(fullname, root);
     strcat(fullname, ".rgb");
 
-    cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tfullname: " << fullname << endl;
+  //cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\tfullname: " << fullname << endl;
 
     in.open(fullname, ios::in | ios::binary);
 
