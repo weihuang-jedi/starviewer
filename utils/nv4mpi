@@ -1,41 +1,37 @@
 #!/bin/bash
-set -x
+ set -x
 
-export STARVIWERHOME=/scratch4/NAGAPE/epic/Wei.Huang/src/nv/starviewer
+#export STARVIEWERHOME=/contrib/Wei.Huang/src/nv/starviewer
+#for derecho
+#export STARVIEWERHOME=/gpfs/csfs1/work/huangwei/nv/starviewer
+#export CONTAINER_DIR=/gpfs/csfs1/work/huangwei/nv
+#export CONTAINER_BINDINGS="-B /glade -B /gpfs -B /lustre"
+#export RUNTIME_DIR=/gpfs/csfs1/work/huangwei/tmp/runtime-dir
+#for ursa
+#export STARVIEWERHOME=/scratch4/NAGAPE/epic/Wei.Huang/src/nv/starviewer
+ export STARVIEWERHOME=/scratch5/purged/Wei.Huang/src/nv/starviewer
+ export CONTAINER_DIR=${STARVIEWERHOME}
+ export CONTAINER_BINDINGS="-B /scratch3 -B /scratch4 -B /scratch5"
+ export CONTAINER_SIF=${CONTAINER_DIR}/starviewer.sif
+ export RUNTIME_DIR=/scratch5/purged/Wei.Huang/tmp/runtime-dir
 
-# 1. Setup paths
-export CONDA_PREFIX="/scratch4/NAGAPE/epic/Wei.Huang/conda-env/weienv"
-export CONDA_LIB="$CONDA_PREFIX/lib"
-export XDG_RUNTIME_DIR="/scratch4/NAGAPE/epic/Wei.Huang/tmp/runtime-Wei.Huang"
-mkdir -p $XDG_RUNTIME_DIR
-chmod 700 $XDG_RUNTIME_DIR
+ if [ ! -d $RUNTIME_DIR ]; then
+     mkdir -p $RUNTIME_DIR
+     chmod 700 $RUNTIME_DIR
+ fi
 
-# 2. Prioritize Conda and add NVIDIA system paths
-# Note: We add the system nvidia paths to find the hardware drivers
-export LD_LIBRARY_PATH="$CONDA_LIB:$LD_LIBRARY_PATH"
+#Run with --cleanenv to prevent host garbage from leaking in
+ singularity exec --nv --cleanenv \
+    --bind $HOME/.Xauthority:/root/.Xauthority \
+    ${CONTAINER_BINDINGS} \
+    --env STARVIEWERHOME=${STARVIEWERHOME} \
+    --env XAUTHORITY=/root/.Xauthority \
+    --env DISPLAY=$DISPLAY \
+    --env XDG_RUNTIME_DIR=$RUNTIME_DIR \
+    --env QT_X11_NO_MITSHM=1 \
+    "${CONTAINER_SIF}" \
+    ${STARVIEWERHOME}/build/main/starviewer -mpi mpi
 
-# 3. ABI Fix (Essential for the CXXABI error we saw earlier)
-export LD_PRELOAD="$CONDA_LIB/libstdc++.so.6"
+#   gdb --args \
+#   ${STARVIEWERHOME}/build/main/starviewer -mpi mpi
 
-# 4. FIXING THE BLANK WINDOW (The "Hardware" approach)
-# We UNSET the software override to let the GPU work
-unset LIBGL_ALWAYS_SOFTWARE
-export QT_X11_NO_MITSHM=1
-export QT_QPA_PLATFORM=xcb
-
-# Tell Qt to use the Desktop OpenGL implementation instead of EGL
-#export QT_OPENGL_BACKEND=desktop
-
-# 5. Tell the system to use the NVIDIA vendor for GLX
-#export __GLX_VENDOR_LIBRARY_NAME=nvidia
-
-# Replace section 4 and 5 in the script above with this if it fails:
-#export LIBGL_ALWAYS_SOFTWARE=1
-#export GALLIUM_DRIVER=llvmpipe
-#export QT_XCB_GL_INTEGRATION=none
-
-echo "Starting Starviewer on AMD mi300x Node..."
-#gdb -batch -ex "run" -ex "bt" --args \
-#/scratch4/NAGAPE/epic/Wei.Huang/src/nv/starviewer/build/main/starviewer -mpi mpi
-
-/scratch4/NAGAPE/epic/Wei.Huang/src/nv/starviewer/build/main/starviewer -mpi mpi

@@ -237,14 +237,14 @@ void UFS2dViewer::draw()
   //cout << "\tnvoptions->get_cb(NV_FLATON): " << nvoptions->get_cb(NV_FLATON) << endl;
         if(! nvoptions->get_cb(NV_FLATON))
         {
-  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tnvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
-  //cout << "\tnvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
-  //cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
-  //cout << "\txcl = " << xcl << endl;
-  //cout << "\tycl = " << ycl << endl;
-  //cout << "\tzcl = " << zcl << endl;
-  //cout << "\t_nlev = " << _nlev << endl;
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tnvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
+    cout << "\tnvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
+    cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
+    cout << "\txcl = " << xcl << endl;
+    cout << "\tycl = " << ycl << endl;
+    cout << "\tzcl = " << zcl << endl;
+    cout << "\t_nlev = " << _nlev << endl;
             if(nvoptions->get_zsec() < _nlev)
             {
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -336,7 +336,6 @@ void UFS2dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact
 void UFS2dViewer::_sphereDisplay()
 {
     int i, j, k, m, n;
-    size_t npos;
     double sv = 1.0;
     double fact;
     double radius = 1.001;
@@ -347,8 +346,8 @@ void UFS2dViewer::_sphereDisplay()
 
     k = nvoptions->get_zsec();
 
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t_varname: <" << _varname << ">, lev = " << lev << endl;
+    cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t_varname: <" << _varname << ">, k = " << k << endl;
 
     radius = 0.725 + 0.5 * ( 1.0 - (k + 1.0) / _nlev);
 
@@ -379,18 +378,15 @@ void UFS2dViewer::_sphereDisplay()
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
-    glBegin(GL_QUADS);
   //#pragma omp parallel for
-    for(j = 0; j < _nlat; ++j) {
-        n = j * _nlon;
-        for(i = 0; i < _nlon; ++i)
-        {
-	    npos = n + i;
-            fact = sv * (pltvar[npos] - _valmin);
-            _lonlat2xyz(_lon[npos], _lat[npos], radius, fact);
+    for(j = 1; j < _nlat; ++j) {
+        glBegin(GL_QUAD_STRIP);
+        for(i = 0; i < _nlon; ++i) {
+            _lonlat2xyz(_lon[i], _lat[j], radius, fact);
+            _lonlat2xyz(_lon[i], _lat[j-1], radius, fact);
         }
+        glEnd();
     }
-    glEnd();
 
     glDisable(GL_POLYGON_OFFSET_FILL);
     glDisable(GL_TEXTURE_1D);
@@ -419,23 +415,23 @@ void UFS2dViewer::_flatDisplay()
     double fact;
     double height = 0.00;
 
-  //cout << "Enter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "Enter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     GLfloat line_width = 1.0;
 
     current_timelevel = nvoptions->get_tsec();
     if(current_timelevel >= geometry->get_nt())
         return;
 
-  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t_varname: <" << _varname << ">, _nlev = " << _nlev << endl;
-  //cout << "\tcurrent_timelevel = " << current_timelevel << endl;
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t_varname: <" << _varname << ">, _nlev = " << _nlev << endl;
+    cout << "\tcurrent_timelevel = " << current_timelevel << endl;
 
     k = nvoptions->get_zsec();
 
-    height = 0.8 * (0.5 - (k + 1.0) / _nlev);
-
     if(1 == _nlev)
         height = 0.001;
+    else
+        height = 0.8 * (0.5 - (k + 1.0) / _nlev);
 
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     locator->set_height(height);
@@ -444,9 +440,10 @@ void UFS2dViewer::_flatDisplay()
 
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     zcl = glGenLists(1);
-  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tzcl: " << zcl << endl;
-  //cout << "\tk: " << k << endl;
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\theight: " << height << endl;
+    cout << "\tzcl: " << zcl << endl;
+    cout << "\tk: " << k << endl;
   //glNewList(zcl, GL_COMPILE);
     glNewList(zcl, GL_COMPILE_AND_EXECUTE);
     lister->set_zid(k, zcl);
@@ -484,28 +481,32 @@ void UFS2dViewer::_flatDisplay()
 
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glColor4f(1.0, 1.0, 1.0, 1.0);
-  //glColor4f(0.0, 0.0, 0.0, 0.0);
+    glColor4f(0.0, 0.0, 0.0, 0.0);
     glNormal3f(0.0, 0.0, -1.0);
 
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    glBegin(GL_QUAD_STRIP);
     for(j = 1; j < _nlat; ++j) {
         mpos = (j-1)*_nlon;
         npos = j*_nlon;
+        glBegin(GL_QUAD_STRIP);
         for(i = 0; i < _nlon; ++i) {
+            fact = sv * (pltvar[npos+i] - _valmin);
+            glTexCoord1d(fact);
+            glVertex3d(_xFlat[i], _yFlat[j], height);
+
             fact = sv * (pltvar[mpos+i] - _valmin);
             glTexCoord1d(fact);
             glVertex3d(_xFlat[i], _yFlat[j-1], height);
 
-            fact = sv * (pltvar[npos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height);
+	    cout << "\t_xFlat[" << i << "]: " << _xFlat[i] << ", _yFlat[" << j << "]: " <<  _yFlat[j]
+	         << ", height: " << height << ", fact = " << fact << ", pltvar[" << npos+i << "]="
+	         << pltvar[npos+i] << ", _valmin=" << _valmin << endl;
         }
+        glEnd();
     }
-    glEnd();
 
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if(1 == _nlev)
@@ -526,7 +527,7 @@ void UFS2dViewer::_flatDisplay()
     glPopMatrix();
 
     glEndList();
-  //cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFS2dViewer::_evaluate(float *var)

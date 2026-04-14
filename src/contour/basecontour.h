@@ -17,7 +17,7 @@
 
 #include <QtOpenGL>
 
-#include <cairo/cairo.h>
+// #include <cairo/cairo.h>
 
 using namespace std;
 
@@ -94,8 +94,8 @@ class BaseContour
         Evaluator  *evaluator;
         Geometry   *geometry;
 
-        cairo_surface_t *surface;
-        cairo_t         *context;
+      //cairo_surface_t *surface;
+      //cairo_t         *context;
 
         unsigned int *_z_id;
         unsigned int *_y_id;
