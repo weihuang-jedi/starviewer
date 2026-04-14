@@ -13,23 +13,10 @@ find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui)
 #find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
 #target_link_libraries(geometry PRIVATE Qt5::Widgets Qt5::OpenGL)
 
-# Setup NCL Paths from Environment
-if(DEFINED ENV{NCL_ROOT})
-    set(NCL_INSTALL_DIR $ENV{NCL_ROOT})
-else()
-    # Fallback to your specific path if module isn't loaded
-   #set(NCL_INSTALL_DIR "/apps/spack-managed/gcc-11.3.1/ncl-6.6.2-zlkxvxdkwsncu7cj2v5m2nnnwoma4sx6")
-    set(NCL_INSTALL_DIR "/apps/spack-2024-12/linux-rocky9-x86_64/gcc-11.4.1/ncl-6.6.2-uq4jey5bnminpqoithv7hsx4svmmu4mn")
-endif()
-
-message(STATUS "Using NCL from: ${NCL_INSTALL_DIR}")
-
-# Global Includes for NCL
-include_directories(${NCL_INSTALL_DIR}/include)
-
 # Setup Paths
 #set(CMAKE_INSTALL_PREFIX "/work2/noaa/epic/weihuang/nv/starviewer/install")
-set(CMAKE_INSTALL_PREFIX "/scratch4/NAGAPE/epic/Wei.Huang/src/nv/starviewer/install")
+#set(CMAKE_INSTALL_PREFIX "/scratch4/NAGAPE/epic/Wei.Huang/src/nv/starviewer/install")
+set(CMAKE_INSTALL_PREFIX "/contrib/Wei.Huang/src/nv/starviewer/install")
 
 # Subdirectories
 add_subdirectory(geometry)

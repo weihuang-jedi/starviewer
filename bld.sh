@@ -8,18 +8,23 @@ mkdir -p build
 cd build
 rm -rf *
 
-NetCDF_INCLUDE_DIRS=/scratch4/NAGAPE/epic/Wei.Huang/conda-env/weienv/include
-NetCDF_LIBRARIES=/scratch4/NAGAPE/epic/Wei.Huang/conda-env/weienv/lib/libnetcdf.so
+# Set these so CMake's find_package can work automatically
+export CXX=/usr/bin/g++
+export CC=/usr/bin/gcc
+# Add the Fortran compiler export
+export FC=/usr/bin/gfortran
 
 cmake ../src \
-  -DCMAKE_PREFIX_PATH=$CONDA_PREFIX \
-  -DCMAKE_FIND_ROOT_PATH=$CONDA_PREFIX \
-  -DOPENGL_gl_LIBRARY="$CONDA_PREFIX/lib/libGL.so" \
-  -DOPENGL_glu_LIBRARY="$CONDA_PREFIX/lib/libGLU.so" \
-  -DCMAKE_EXE_LINKER_FLAGS="-L$CONDA_PREFIX/lib -Wl,-rpath,$CONDA_PREFIX/lib -lnetcdf -lhdf5 -lGL -lGLU -lX11 -lXext"
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt5 \
+  "-DCMAKE_EXE_LINKER_FLAGS=-Wl,-rpath,/usr/lib/x86_64-linux-gnu -lGL -lGLU -lX11 -lXrender" \
+  -DCMAKE_CXX_COMPILER_WORKS=1 \
+  -DCMAKE_C_COMPILER_WORKS=1 \
+  -DCMAKE_Fortran_COMPILER_WORKS=1 \
+  -DNetCDF_INCLUDE_DIR=/usr/include \
+  -DNetCDF_LIBRARY=/usr/lib/x86_64-linux-gnu/libnetcdf.so \
+  -DCMAKE_INSTALL_RPATH="/usr/lib/x86_64-linux-gnu"
 
-# Build again
- make -j${nproc}
+make -j${nproc}
 
-#make LDLIBS="-lGLU -lGL" -j $(nproc)
 

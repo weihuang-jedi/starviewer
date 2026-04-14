@@ -1,0 +1,76 @@
+Switching from Docker/Conda to Singularity (now often called Apptainer) is the right move for HPC environments. Singularity is designed to run with the same permissions as your user, and it handles GPU/OpenGL much more gracefully than Docker.
+
+To run a GUI application with OpenGL, you need two things: Hardware Acceleration (the --nv or --rocm flag) and X11 Socket Binding.
+
+1. The Singularity Definition File (starviewer.def)
+Since you need Qt, NetCDF, and C++, use this definition file. It bootstraps from Ubuntu but installs all the dependencies you need.
+
+Bash
+Bootstrap: docker
+From: ubuntu:22.04
+
+%post
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update && apt-get install -y \
+        build-essential cmake git \
+        qtbase5-dev qt5-qmake libqt5gui5 libqt5widgets5 \
+        libnetcdf-dev libnetcdf-c++4-dev \
+        libgl1-mesa-dri libgl1-mesa-glx libglu1-mesa \
+        libxcb-xinerama0 x11-apps
+
+%environment
+    # Crucial for finding libraries inside the container
+    export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+    # Force software rendering if hardware fails, or comment out for GPU
+    # export LIBGL_ALWAYS_SOFTWARE=1
+
+%runscript
+    exec ./starviewer "$@"
+2. Build the Image
+You usually need sudo or --fakeroot to build a Singularity image:
+
+Bash
+singularity build starviewer.sif starviewer.def
+3. How to Run with OpenGL Hardware Acceleration
+This is where the magic happens. Singularity has a built-in flag that pulls the host's NVIDIA drivers into the container automatically.
+
+For NVIDIA GPUs:
+
+Bash
+singularity exec --nv starviewer.sif ./starviewer
+For AMD GPUs:
+
+Bash
+singularity exec --rocm starviewer.sif ./starviewer
+Why this is better than Conda: The --nv flag ensures the libGL.so inside the container matches the kernel driver on the host node (u22g03).
+
+4. Running it in your tst.sh
+Update your script to use the container. Singularity automatically mounts your home directory and /scratch, so your paths should still work.
+
+Bash
+#!/bin/bash
+# tst.sh inside/with Singularity
+
+# 1. Set your display (if not already set by SSH)
+export DISPLAY=$DISPLAY
+
+# 2. Run the app through Singularity
+# --nv: Links host NVIDIA drivers
+# --bind: Manually map specific scratch paths if they aren't auto-mounted
+singularity exec --nv \
+    --bind /scratch4/NAGAPE/epic/Wei.Huang \
+    starviewer.sif \
+    /scratch4/NAGAPE/epic/Wei.Huang/src/nv/starviewer/build/main/starviewer -mpi mpi
+Troubleshooting OpenGL in Singularity
+If you still get the QXcbIntegration or GLX errors:
+
+The "No-Shared-Memory" Fix: export QT_X11_NO_MITSHM=1 (Add this to your %environment section in the .def file).
+
+Verify Drivers:
+Run singularity exec --nv starviewer.sif nvidia-smi. If this fails, the --nv flag isn't finding your host drivers.
+
+Check Display:
+Run singularity exec starviewer.sif xclock. If a clock doesn't appear on your screen, your X11 forwarding is broken, regardless of OpenGL.
+
+Are you running this on a node that definitely has a physical GPU, or are you trying to get hardware acceleration over a standard CPU-only login node?
+
