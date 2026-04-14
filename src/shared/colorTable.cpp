@@ -74,12 +74,18 @@ void ColorTable::_setup()
 
   //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
 
-    strcpy(root, getenv("STARVIWERHOME"));
-  //cout << "root: " << root << endl;
+    const char* path = getenv("STARVIEWERHOME");
+    if (path == nullptr) {
+        fprintf(stderr, "ERROR: STARVIEWERHOME not set!\n");
+        return; // or handle error
+    }
+  //strcpy(root, path);
+    strcpy(root, "/contrib/Wei.Huang/src/nv/starviewer");
+    cout << "root: " << root << endl;
     strcat(root, "/colormaps/");
-  //cout << "root: " << root << endl;
+    cout << "root: " << root << endl;
 
-  //cout << "\troot: <" << root << ">" << endl;
+    cout << "\troot: <" << root << ">" << endl;
   //cout << "\tUse default color map: gui_default" << endl;
 
     _opacity = NULL;
