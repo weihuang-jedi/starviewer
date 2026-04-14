@@ -76,11 +76,11 @@ void ColorTable::_setup()
 
     const char* path = getenv("STARVIEWERHOME");
     if (path == nullptr) {
-        fprintf(stderr, "ERROR: STARVIEWERHOME not set!\n");
-        return; // or handle error
+        cout << "ERROR: STARVIEWERHOME not set!" << endl;
+        throw(errno);
     }
-  //strcpy(root, path);
-    strcpy(root, "/contrib/Wei.Huang/src/nv/starviewer");
+    strcpy(root, path);
+  //strcpy(root, "/contrib/Wei.Huang/src/nv/starviewer");
     cout << "root: " << root << endl;
     strcat(root, "/colormaps/");
     cout << "root: " << root << endl;
@@ -156,8 +156,16 @@ void ColorTable::get_file_contents(const char *cn)
 
     float maxval = 1.0;
 
-  //strcpy(root, getenv("NCARG_ROOT"));
-    strcat(root, "/scratch4/NAGAPE/epic/Wei.Huang/src/nv/starviewer/colormaps/");
+    const char* path = getenv("STARVIEWERHOME");
+    if (path == nullptr) {
+        cout << "ERROR: STARVIEWERHOME not set!" << endl;
+        throw(errno);
+    }
+    strcpy(root, path);
+    cout << "root: " << root << endl;
+    strcat(root, "/colormaps/");
+    cout << "root: " << root << endl;
+
     strcat(root, cn);
 
     strcpy(fullname, root);

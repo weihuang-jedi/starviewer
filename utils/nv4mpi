@@ -1,24 +1,32 @@
 #!/bin/bash
-set -x
+ set -x
 
-export STARVIEWERHOME=/contrib/Wei.Huang/src/nv/starviewer
+#export STARVIEWERHOME=/contrib/Wei.Huang/src/nv/starviewer
+ export STARVIEWERHOME=/gpfs/csfs1/work/huangwei/nv/starviewer
+#export CONTAINER_BINDINGS="-B /glade -B /gpfs -B /lustre -B /opt/cray -B /run -B /var --bind ${TMPDIR}:/tmp"
+ export CONTAINER_DIR=/gpfs/csfs1/work/huangwei/nv
+ export CONTAINER_BINDINGS="-B /glade -B /gpfs -B /lustre"
+ export CONTAINER_SIF=${CONTAINER_DIR}/starviewer.sif
 
-# 1. Create a clean, writable runtime dir
-export RUNTIME_DIR=/contrib/Wei.Huang/tmp/runtime-dir
-#mkdir -p $RUNTIME_DIR
-#chmod 700 $RUNTIME_DIR
+ export RUNTIME_DIR=/gpfs/csfs1/work/huangwei/tmp/runtime-dir
+ if [ ! -d $RUNTIME_DIR ]; then
+     mkdir -p $RUNTIME_DIR
+     chmod 700 $RUNTIME_DIR
+ fi
 
-# 2. Run with --cleanenv to prevent host garbage from leaking in
-singularity exec --nv --cleanenv \
+#Run with --cleanenv to prevent host garbage from leaking in
+ singularity exec --nv --cleanenv \
     --bind $HOME/.Xauthority:/root/.Xauthority \
-    --bind /contrib:/contrib \
+    ${CONTAINER_BINDINGS} \
+    --env STARVIEWERHOME=${STARVIEWERHOME} \
     --env XAUTHORITY=/root/.Xauthority \
     --env DISPLAY=$DISPLAY \
     --env XDG_RUNTIME_DIR=$RUNTIME_DIR \
     --env QT_X11_NO_MITSHM=1 \
-    /contrib/Wei.Huang/src/nv/starviewer.sandbox \
-    /contrib/Wei.Huang/src/nv/starviewer/build/main/starviewer -mpi mpi
+    "${CONTAINER_SIF}" \
+    ${STARVIEWERHOME}/build/main/starviewer -mpi mpi
 
 #   gdb --args \
-#   /contrib/Wei.Huang/src/nv/starviewer/build/main/starviewer -mpi mpi
-exit 0
+#   ${STARVIEWERHOME}/build/main/starviewer -mpi mpi
+
+ exit 0

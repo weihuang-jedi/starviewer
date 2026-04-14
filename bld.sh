@@ -14,7 +14,6 @@ export NetCDF_LIBRARIES=/usr/lib/x86_64-linux-gnu/libnetcdf.so
 # Set these so CMake's find_package can work automatically
 export CXX=/usr/bin/g++
 export CC=/usr/bin/gcc
-# Add the Fortran compiler export
 export FC=/usr/bin/gfortran
 
 cmake ../src \
@@ -28,20 +27,4 @@ cmake ../src \
   -DCMAKE_INSTALL_RPATH="/usr/lib/x86_64-linux-gnu"
 
 make -j${nproc}
-
-exit 0
-
-cmake ../src \
-  -DCMAKE_BUILD_TYPE=Release \
-  "-DCMAKE_EXE_LINKER_FLAGS=-Wl,-rpath,/usr/lib/x86_64-linux-gnu -lOpenGL -lGL -lGLU -lX11 -lXrender -Wl,--copy-dt-needed-entries" \
-  -DCMAKE_CXX_COMPILER_WORKS=1 \
-  -DCMAKE_C_COMPILER_WORKS=1 \
-  -DCMAKE_Fortran_COMPILER_WORKS=1 \
-  -DNetCDF_INCLUDE_DIR=/usr/include \
-  -DNetCDF_LIBRARY=/usr/lib/x86_64-linux-gnu/libnetcdf.so \
-  -DCMAKE_INSTALL_RPATH="/usr/lib/x86_64-linux-gnu"
-
-make -j${nproc}
-
-exit 0
 
