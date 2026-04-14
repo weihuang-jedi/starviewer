@@ -151,14 +151,14 @@ void ColorTable::get_file_contents(const char *cn)
     float maxval = 1.0;
 
   //strcpy(root, getenv("NCARG_ROOT"));
-    strcat(root, "/scratch4/NAGAPE/epic/Wei.Huang/src/nv/starviewer/colormaps/");
+    strcpy(root, "/scratch4/NAGAPE/epic/Wei.Huang/src/nv/starviewer/colormaps/");
     strcat(root, cn);
 
     strcpy(fullname, root);
     strcat(fullname, ".rgb");
 
-    cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tfullname: " << fullname << endl;
+  //cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\tfullname: " << fullname << endl;
 
     in.open(fullname, ios::in | ios::binary);
 

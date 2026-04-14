@@ -1,22 +1,6 @@
 #!/bin/bash
 set -x
 
-#MODULE_NAME="rdhpcs-conda"
-#if lsmod | awk '{print $1}' | grep -qx "$MODULE_NAME"; then
-#    echo "Module '$MODULE_NAME' is loaded."
-#else
-#    # conda create -p weienv python=3.13
-#    # module load rdhpcs-conda
-#    # conda activate /scratch4/NAGAPE/epic/Wei.Huang/conda-env/weienv
-#    # conda deactivate
-#    # pip install PyQt5
-#    # pip install mesa
-#    # pip install PyOpenGL PyOpenGL_accelerate
-#    module purge
-#    module use moduledir
-#    module load ursa.gnu
-#fi
-
 export STARVIWERHOME=/scratch4/NAGAPE/epic/Wei.Huang/src/nv/starviewer
 
 # 1. Setup paths
@@ -40,16 +24,18 @@ export QT_X11_NO_MITSHM=1
 export QT_QPA_PLATFORM=xcb
 
 # Tell Qt to use the Desktop OpenGL implementation instead of EGL
-export QT_OPENGL_BACKEND=desktop
+#export QT_OPENGL_BACKEND=desktop
 
 # 5. Tell the system to use the NVIDIA vendor for GLX
-export __GLX_VENDOR_LIBRARY_NAME=nvidia
+#export __GLX_VENDOR_LIBRARY_NAME=nvidia
 
 # Replace section 4 and 5 in the script above with this if it fails:
 #export LIBGL_ALWAYS_SOFTWARE=1
 #export GALLIUM_DRIVER=llvmpipe
 #export QT_XCB_GL_INTEGRATION=none
 
-echo "Starting Starviewer on H100 Node..."
-gdb -batch -ex "run" -ex "bt" --args \
+echo "Starting Starviewer on AMD mi300x Node..."
+#gdb -batch -ex "run" -ex "bt" --args \
+#/scratch4/NAGAPE/epic/Wei.Huang/src/nv/starviewer/build/main/starviewer -mpi mpi
+
 /scratch4/NAGAPE/epic/Wei.Huang/src/nv/starviewer/build/main/starviewer -mpi mpi
