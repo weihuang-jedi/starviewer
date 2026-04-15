@@ -226,19 +226,20 @@ void UFS2dViewer::draw()
     {
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\tnvoptions->get_cb(NV_FLATON): " << nvoptions->get_cb(NV_FLATON) << endl;
-        if(! nvoptions->get_cb(NV_FLATON))
+        if(nvoptions->get_cb(NV_FLATON))
         {
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tnvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
-    cout << "\tnvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
-    cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
-    cout << "\txcl = " << xcl << endl;
-    cout << "\tycl = " << ycl << endl;
-    cout << "\tzcl = " << zcl << endl;
-    cout << "\t_nlev = " << _nlev << endl;
+            cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+            cout << "\tnvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
+            cout << "\tnvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
+            cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
+            cout << "\txcl = " << xcl << endl;
+            cout << "\tycl = " << ycl << endl;
+            cout << "\tzcl = " << zcl << endl;
+            cout << "\t_nlev = " << _nlev << endl;
             if(nvoptions->get_zsec() < _nlev)
             {
-  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+                cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+                cout << "\t call  _flatDisplay()" << endl;
                 if(zcl)
                     glCallList(zcl);
                 else
@@ -248,26 +249,27 @@ void UFS2dViewer::draw()
           //draw_plane_grids();
 
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-          //if(360 > nvoptions->get_xsec())
-          //{
+            if(360 > nvoptions->get_xsec())
+            {
                 if(xcl)
                     glCallList(xcl);
                 else
                     _display_Xflat_plane(nvoptions->get_xsec());
-          //}
+            }
 
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-          //if((-80 < nvoptions->get_ysec()) && (80 > nvoptions->get_ysec()))
-          //{
+            if((-80 < nvoptions->get_ysec()) && (80 > nvoptions->get_ysec()))
+            {
                 if(ycl)
                     glCallList(ycl);
                 else
                     _display_Yflat_plane(nvoptions->get_ysec());
-          //}
+            }
         }
         else
         {
-  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+            cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+            cout << "\tcall _sphereDisplay()" << endl;
             if(nvoptions->get_zsec() < _nlev)
             {
                 if(zcl)
@@ -456,10 +458,19 @@ void UFS2dViewer::_flatDisplay()
 
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glBegin(GL_LINE_STRIP);
+        glNormal3f(-1.0, -0.5, height);
         glVertex3d(-1.0, -0.5, height);
+
+        glNormal3f( 1.0, -0.5, height);
         glVertex3d( 1.0, -0.5, height);
+
+        glNormal3f( 1.0,  0.5, height);
         glVertex3d( 1.0,  0.5, height);
+
+        glNormal3f(-1.0,  0.5, height);
         glVertex3d(-1.0,  0.5, height);
+
+        glNormal3f(-1.0, -0.5, height);
         glVertex3d(-1.0, -0.5, height);
     glEnd();
 
@@ -486,10 +497,12 @@ void UFS2dViewer::_flatDisplay()
         for(i = 0; i < _nlon; ++i) {
             fact = sv * (pltvar[npos+i] - _valmin);
             glTexCoord1d(fact);
+            glNormal3f(_xFlat[i], _yFlat[j], height);
             glVertex3d(_xFlat[i], _yFlat[j], height);
 
             fact = sv * (pltvar[mpos+i] - _valmin);
             glTexCoord1d(fact);
+            glNormal3f(_xFlat[i], _yFlat[j-1], height);
             glVertex3d(_xFlat[i], _yFlat[j-1], height);
 
 	  //cout << "\t_xFlat[" << i << "]: " << _xFlat[i] << ", _yFlat[" << j << "]: " <<  _yFlat[j]

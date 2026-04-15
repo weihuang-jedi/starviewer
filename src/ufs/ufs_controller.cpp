@@ -155,20 +155,20 @@ void UFSController::draw()
 {
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "_sphere: " << _sphere << endl;
-    if(_sphere)
-    {
-        cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-        cout << "need to draw a ball" << endl;
+  //if(_sphere)
+  //{
+  //    cout << "file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //    cout << "need to draw a ball" << endl;
 
       //ufs_3dviewer->draw(_tvalue);
-    }
-    else
-    {
-      //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-      //cout << "2d draw" << endl;
+  //}
+  //else
+  //{
+        cout << "file: " << __FILE__ << ", line: " << __LINE__ << endl;
+        cout << "2d draw" << endl;
         ufs_viewer->draw();
       //coastline->draw();
-    }
+  //}
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
