@@ -246,7 +246,7 @@ void UFS2dViewer::draw()
                     _flatDisplay();
             }
 
-          //draw_plane_grids();
+            draw_plane_grids();
 
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
             if(360 > nvoptions->get_xsec())
@@ -294,7 +294,7 @@ void UFS2dViewer::draw()
                     _sphereYplane(nvoptions->get_ysec());
             }
     
-          //draw_sphere_grids();
+            draw_sphere_grids();
         }
     }
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -773,9 +773,9 @@ void UFS2dViewer::_sphereXplane(int xs)
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
-    glBegin(GL_QUAD_STRIP);
     for(k = 1; k < _nlev; ++k)
     {
+        glBegin(GL_QUAD_STRIP);
 	for(j = 0; j < _nlat; ++j)
 	{
 	    mpos = (k-1)*_nlat*_nlon + j*_nlon + ilonc;
@@ -787,8 +787,8 @@ void UFS2dViewer::_sphereXplane(int xs)
             fact = sv * (pltvar[npos] - _valmin);
             _lonlat2xyz(_lon[ilonc], _lat[j], radius[k], fact);
         }
+        glEnd();
     }
-    glEnd();
 
     glDisable(GL_TEXTURE_1D);
 
@@ -833,21 +833,21 @@ void UFS2dViewer::_sphereYplane(int ys)
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
-    glBegin(GL_QUAD_STRIP);
-        for(k = 1; k < _nlev; ++k)
+    for(k = 1; k < _nlev; ++k)
+    {
+        mpos = ((k-1)*_nlat + jlatc)*_nlon;
+        npos = (k*_nlat + jlatc)*_nlon;
+        glBegin(GL_QUAD_STRIP);
+        for(i=0; i<_nlon; ++i)
         {
-	    mpos = ((k-1)*_nlat + jlatc)*_nlon;
-	    npos = (k*_nlat + jlatc)*_nlon;
-	    for(i=0; i<_nlon; ++i)
-            {
-                fact = sv * (pltvar[mpos+i] - _valmin);
-                _lonlat2xyz(_lon[i], _lat[jlatc], radius[k-1], fact);
+            fact = sv * (pltvar[mpos+i] - _valmin);
+            _lonlat2xyz(_lon[i], _lat[jlatc], radius[k-1], fact);
 
-                fact = sv * (pltvar[npos+i] - _valmin);
-                _lonlat2xyz(_lon[i], _lat[jlatc], radius[k], fact);
-	    }
+            fact = sv * (pltvar[npos+i] - _valmin);
+            _lonlat2xyz(_lon[i], _lat[jlatc], radius[k], fact);
         }
-    glEnd();
+        glEnd();
+    }
 
     glDisable(GL_TEXTURE_1D);
 
@@ -931,7 +931,7 @@ void UFS2dViewer::_display_Xflat_plane(int xs)
 void UFS2dViewer::_sphereBump()
 {
     int i, j, k;
-    size_t npos;
+    size_t mpos, npos;
 
     double sv = 1.0;
     double fact;
@@ -992,18 +992,22 @@ void UFS2dViewer::_sphereBump()
   //glEnable(GL_TEXTURE_1D);
   //glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
-    glBegin(GL_QUADS);
   //#pragma omp parallel for
-    for(j = 0; j < _nlat; ++j)
+    for(j = 1; j < _nlat; ++j)
     {
+        mpos = (j-1)*_nlon;
         npos = j*_nlon;
+        glBegin(GL_QUAD_STRIP);
         for(i = 0; i < _nlon; ++i)
         {
             fact = sv * (pltvar[npos+i] - _valmin);
             _lonlat2xyz(_lon[i], _lat[j], radius + amp * (fact - offset), fact);
+
+            fact = sv * (pltvar[mpos+i] - _valmin);
+            _lonlat2xyz(_lon[i], _lat[j-1], radius + amp * (fact - offset), fact);
         }
+        glEnd();
     }
-    glEnd();
 
     glDisable(GL_TEXTURE_1D);
 
