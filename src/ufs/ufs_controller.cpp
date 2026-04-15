@@ -153,8 +153,8 @@ void UFSController::setup()
 
 void UFSController::draw()
 {
-    cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "_sphere: " << _sphere << endl;
+  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "_sphere: " << _sphere << endl;
     if(_sphere)
     {
         cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -169,7 +169,7 @@ void UFSController::draw()
         ufs_viewer->draw();
       //coastline->draw();
     }
-    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void UFSController::set1dvarname(string vn)

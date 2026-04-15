@@ -2,14 +2,20 @@
 
  set -x
 
+#for derecho
 #export STARVIEWERHOME=/contrib/Wei.Huang/src/nv/starviewer
- export STARVIEWERHOME=/gpfs/csfs1/work/huangwei/nv/starviewer
-#export CONTAINER_BINDINGS="-B /glade -B /gpfs -B /lustre -B /opt/cray -B /run -B /var --bind ${TMPDIR}:/tmp"
- export CONTAINER_DIR=/gpfs/csfs1/work/huangwei/nv
- export CONTAINER_BINDINGS="-B /glade -B /gpfs -B /lustre"
+#export STARVIEWERHOME=/gpfs/csfs1/work/huangwei/nv/starviewer
+#export CONTAINER_DIR=/gpfs/csfs1/work/huangwei/nv
+#export CONTAINER_BINDINGS="-B /glade -B /gpfs -B /lustre"
+#export RUNTIME_DIR=/gpfs/csfs1/work/huangwei/tmp/runtime-dir
+#for ursa
+ export STARVIEWERHOME=/scratch5/purged/Wei.Huang/src/nv/starviewer
+ export CONTAINER_DIR=${STARVIEWERHOME}
+ export CONTAINER_BINDINGS="-B /scratch3 -B /scratch4 -B /scratch5"
+ export RUNTIME_DIR=/scratch5/purged/Wei.Huang/tmp/runtime-dir
+
  export CONTAINER_SIF=${CONTAINER_DIR}/starviewer.sif
 
- export RUNTIME_DIR=/gpfs/csfs1/work/huangwei/tmp/runtime-dir
  if [ ! -d $RUNTIME_DIR ]; then
      mkdir -p $RUNTIME_DIR
      chmod 700 $RUNTIME_DIR
@@ -26,7 +32,10 @@
     --env QT_X11_NO_MITSHM=1 \
     "${CONTAINER_SIF}" \
     ${STARVIEWERHOME}/build/main/starviewer \
-    -ufs /gpfs/csfs1/work/huangwei/data/gdas.t18z.atm.f006.nc
+    -ufs /scratch5/purged/Wei.Huang/src/nv/data/gdas.t00z.atm.f006.nc
+
+# for derecho
+#   -ufs /gpfs/csfs1/work/huangwei/data/gdas.t18z.atm.f006.nc
 
 #   gdb --args \
 #   ${STARVIEWERHOME}/build/main/starviewer -mpi mpi

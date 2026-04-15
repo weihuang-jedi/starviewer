@@ -14,6 +14,7 @@ export NetCDF_LIBRARIES=/usr/lib/x86_64-linux-gnu/libnetcdf.so
 # Set these so CMake's find_package can work automatically
 export CXX=/usr/bin/g++
 export CC=/usr/bin/gcc
+# Add the Fortran compiler export
 export FC=/usr/bin/gfortran
 
 cmake ../src \

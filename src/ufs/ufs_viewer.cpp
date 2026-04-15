@@ -9,20 +9,14 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt)
     colorTable = ct;
     nvoptions = opt;
 
-  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     texture1d = new Texture1d();
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     texture1d->set_colors(ct->get_clen(), ct->get_cmap());
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     texture1d->set_name(ct->get_name());
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     _var = NULL;
  
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     earth = new Earth();
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     nvoptions->set_xsec(360);
     nvoptions->set_ysec(90);
     nvoptions->set_zsec(0);
@@ -30,19 +24,16 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt)
     _nlon = 360;
     _nlat = 180;
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     oneover = 1.0 / 180.0;
     deg2rad = 3.1415926535897932 * oneover;
 
     lister = new Lister();
     lister->setup(361, 181, 121);
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     locator = NULL;
 
     previoustimelevel = -1;
     current_timelevel = 0;
-  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler)
@@ -501,9 +492,9 @@ void UFS2dViewer::_flatDisplay()
             glTexCoord1d(fact);
             glVertex3d(_xFlat[i], _yFlat[j-1], height);
 
-	    cout << "\t_xFlat[" << i << "]: " << _xFlat[i] << ", _yFlat[" << j << "]: " <<  _yFlat[j]
-	         << ", height: " << height << ", fact = " << fact << ", pltvar[" << npos+i << "]="
-	         << pltvar[npos+i] << ", _valmin=" << _valmin << endl;
+	  //cout << "\t_xFlat[" << i << "]: " << _xFlat[i] << ", _yFlat[" << j << "]: " <<  _yFlat[j]
+	  //     << ", height: " << height << ", fact = " << fact << ", pltvar[" << npos+i << "]="
+	  //     << pltvar[npos+i] << ", _valmin=" << _valmin << endl;
         }
         glEnd();
     }
@@ -899,24 +890,24 @@ void UFS2dViewer::_display_Xflat_plane(int xs)
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-    glBegin(GL_QUAD_STRIP);
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-        for(k = 1; k < _nlev; ++k)
-        {
-	    for(j = 0; j < _nlat; ++j)
-	    {
-	        mpos = ((k-1)*_nlat + j)*_nlon + ilonc;
-                fact = sv * (pltvar[mpos] - _valmin);
-                glTexCoord1d(fact);
-                glVertex3d(_xFlat[ilonc], _yFlat[j], height[k-1]);
+    for(k = 1; k < _nlev; ++k)
+    {
+        glBegin(GL_QUAD_STRIP);
+	for(j = 0; j < _nlat; ++j)
+	{
+	    mpos = ((k-1)*_nlat + j)*_nlon + ilonc;
+            fact = sv * (pltvar[mpos] - _valmin);
+            glTexCoord1d(fact);
+            glVertex3d(_xFlat[ilonc], _yFlat[j], height[k-1]);
 
-	        npos = (k*_nlat + j)*_nlon + ilonc;
-                fact = sv * (pltvar[npos] - _valmin);
-                glTexCoord1d(fact);
-                glVertex3d(_xFlat[ilonc], _yFlat[j], height[k]);
-	    }
-        }
-    glEnd();
+	    npos = (k*_nlat + j)*_nlon + ilonc;
+            fact = sv * (pltvar[npos] - _valmin);
+            glTexCoord1d(fact);
+            glVertex3d(_xFlat[ilonc], _yFlat[j], height[k]);
+	}
+        glEnd();
+    }
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glDisable(GL_TEXTURE_1D);
     glPopMatrix();
@@ -1011,7 +1002,7 @@ void UFS2dViewer::_sphereBump()
 void UFS2dViewer::_flatBump()
 {
     int i, j, k;
-    size_t npos;
+    size_t mpos, npos;
     double sv = 1.0;
     double alpha, fact;
     double height = 0.00;
@@ -1063,18 +1054,18 @@ void UFS2dViewer::_flatBump()
   //glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
     glNormal3f(0.0, 0.0, -1.0);
-    glBegin(GL_QUADS);
     if(nvoptions->get_cb(NV_BUMPON))
     {
-        for(j = 0; j < _nlat; ++j)
+        for(j = 1; j < _nlat; ++j)
         {
+            mpos = (j-1)*_nlon;
             npos = j*_nlon;
+            glBegin(GL_QUAD_STRIP);
             for(i = 0; i < _nlon; ++i)
             {
                 fact = sv * (pltvar[npos+i] - _valmin);
-
                 alpha = 1.125 * fact;
-                if(alpha < 0.1)
+                if(alpha < 0.01)
                     alpha = 0.0;
 		else if(alpha > 1.0)
 		{
@@ -1083,12 +1074,24 @@ void UFS2dViewer::_flatBump()
                 }
                 else
                     glTexCoord1d(fact);
-
                 glVertex3d(_xFlat[i], _yFlat[j], height + amp * (fact - offset));
+
+		fact = sv * (pltvar[mpos+i] - _valmin);
+                alpha = 1.125 * fact;
+                if(alpha < 0.01)
+                    alpha = 0.0;
+                else if(alpha > 1.0)
+                {
+                    alpha = 1.0;
+                    glColor4d(1.5*fact, 1.5*fact, 1.5*fact, alpha);
+                }
+                else
+                    glTexCoord1d(fact);
+                glVertex3d(_xFlat[i], _yFlat[j-1], height + amp * (fact - offset));
             }
+            glEnd();
         }
     }
-    glEnd();
     glDisable(GL_TEXTURE_1D);
     glPopMatrix();
 
