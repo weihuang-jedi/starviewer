@@ -25,4 +25,6 @@ install
 data/gshhg-gmt-2.3.7.tar.gz
 data/gshhg-gmt-2.3.7
 data/gshhg.info
+data/GMTED2010_15n060_0250deg.nc
+data/read-gshhg.cpp
 

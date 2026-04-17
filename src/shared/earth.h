@@ -5,7 +5,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <assert.h>
 
 #include <GL/gl.h>
@@ -17,6 +16,10 @@
 #include <QString>
 #include <QImage>
 #include <QDebug>
+
+#include <netcdf>
+#include <cmath>
+#include <vector>
 
 #include "ncreader.h"
 
@@ -51,9 +54,9 @@ class Earth : public QGLWidget, protected QOpenGLFunctions
         double radius;
 
         int nlon, nlat;
-        float* lon;
-        float* lat;
-        float* ter;
+        vector<float> lon;
+        vector<float> lat;
+        vector<float> ter;
         float  maxhgt;
         float  minhgt;
         void read_terrain();

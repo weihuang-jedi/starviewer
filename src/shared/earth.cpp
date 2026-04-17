@@ -20,9 +20,6 @@ Earth::Earth()
     _loadTexBMP();
 
     radius = 1.0;
-    lon = NULL;
-    lat = NULL;
-    ter = NULL;
 
     deg2arc = 3.1415926535897932 / 180.0;
 
@@ -52,14 +49,15 @@ Earth::Earth(const char *flnm, ncReader* nchandler)
     nlat = nchandler->getNlat();
     nter = nlon * nlat;
 
-    lon = new float[nlon];
-    lat = new float[nlat];
-    ter = new float[nter];
+    lon.resize(nlon);
+    lat.resize(nlat);
+    ter.resize(nter);
 
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     double* dbl_lon = nchandler->getLon();
     double* dbl_lat = nchandler->getLat();
-    ter = nchandler->getFloat("hgtsfc");
+    float* fter;
+    fter = nchandler->getFloat("hgtsfc");
 
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     maxhgt = 0.0;
@@ -73,26 +71,28 @@ Earth::Earth(const char *flnm, ncReader* nchandler)
         for(i = 0; i < nlon; ++i)
         {
             lon[i] = (float) dbl_lon[i];
-            hgt = ter[n];
+            hgt = fter[n];
             if(maxhgt < hgt)
                maxhgt = hgt;
             if(minhgt > hgt)
                minhgt = hgt;
+	    ter[n] = hgt;
 
             ++n;
         }
     }
+    free(fter);
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 Earth::~Earth()
 {
-    if(NULL != lon)
-       free(lon);
-    if(NULL != lat)
-       free(lat);
-    if(NULL != ter)
-       free(ter);
+   lon.clear();
+   lon.shrink_to_fit();
+   lat.clear();
+   lat.shrink_to_fit();
+   ter.clear();
+   ter.shrink_to_fit();
 }
 
 void Earth::initializeGL() {
@@ -180,7 +180,7 @@ void Earth::_Vertex(int th, int ph)
    double y =         radius*Sin(ph);
    double z = radius*Sin(th)*Cos(ph);
    glNormal3d(x,y,z);
-   glTexCoord2d(0.5*th/180.0, 0.5+ph/180.0);
+   glTexCoord2d(th/180.0, 0.5+ph/180.0);
    glVertex3d(x,y,z);
 }
 
@@ -238,7 +238,9 @@ void Earth::draw_plane(float z)
        glBegin(GL_QUAD_STRIP);
        for(i = 0; i < nlon; ++i)
        {
-           x = 0.5*lon[i] / 180.0;
+           x = lon[i] / 180.0;
+           if(x > 1.0)
+	      x -= 2.0;
            glNormal3d(0.0, 0.0, 1.0);
            glTexCoord2d(x, y0);
            glVertex3d(x, y0, z);
@@ -302,7 +304,9 @@ void Earth::bump_plane(float z)
 
            for(i = 0; i < nlon; ++i)
            {
-               x = 0.5*lon[i] / 180.0;
+               x = lon[i] / 180.0;
+	       if(x > 1.0)
+		  x -= 2.0;
                glNormal3d(0.0, 0.0, 1.0);
                glTexCoord2d(x, y0 + 0.5);
              //hgt = ter[j*nlon + i];
@@ -325,16 +329,16 @@ void Earth::bump_plane(float z)
            glNormal3d(0.0, 0.0, 1.0);
            glTexCoord2d(1.0 , y0 + 0.5);
            if(hgt > 0.0)
-               glVertex3d(1.0, y0, z + scl*hgt);
+               glVertex3d(0.0, y0, z + scl*hgt);
            else
-               glVertex3d(1.0, y0, z);
+               glVertex3d(0.0, y0, z);
 
            glNormal3d(0.0, 0.0, 1.0);
            glTexCoord2d(1.0 , y1 + 0.5);
            if(hgt > 0.0)
-               glVertex3d(1.0, y1, z + scl*hgt);
+               glVertex3d(0.0, y1, z + scl*hgt);
            else
-               glVertex3d(1.0, y1, z);
+               glVertex3d(0.0, y1, z);
        glEnd();
     }
 
@@ -343,45 +347,48 @@ void Earth::bump_plane(float z)
 
 void Earth::read_terrain()
 {
-    FILE* infl;
+    netCDF::NcFile* ncfl;
 
     float hgt = 0.0;
 
     int i = 0;
     int j = 0;
-    int n = 0;
-    int nter = 0;
+    size_t n = 0;
 
-    strcpy(_topoflnm, getenv("NV_DATA"));
-    strcat(_topoflnm, "/data/topo.bin");
+    const char* path = getenv("STARVIEWERHOME");
+    if (path == nullptr) {
+        cout << "ERROR: STARVIEWERHOME not set!" << endl;
+        throw(errno);
+    }
+    strcpy(_topoflnm, path);
+    strcat(_topoflnm, "/data/GMTED2010_15n060_0250deg.nc");
+    cout << "_topoflnm: " << _topoflnm << endl;
 
-  //cout << "File: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "_topoflnm: " << _topoflnm << endl;
+    try {
+        // Use the constructor to re-initialize the ncfl object
+        ncfl = new netCDF::NcFile(_topoflnm, netCDF::NcFile::read);
 
-    infl = fopen(_topoflnm, "r");
-    if(NULL == infl)
-    {
-        fprintf(stderr, "\nfile: %s, line: %d\n", __FILE__, __LINE__);
-        fprintf(stderr, "\nCan not open <%s> for reading\n", _topoflnm);
-        return;
+        cout << "Successfully opened: " << _topoflnm << endl;
+    } catch (netCDF::exceptions::NcException& e) {
+        cerr << "Error opening file: " << e.what() << endl;
     }
 
-    fread(&nlon, sizeof(int), 1, infl);
-    fread(&nlat, sizeof(int), 1, infl);
-    fread(&nter, sizeof(int), 1, infl);
+    // Load necessary variables
+    netCDF::NcVar lonVar = ncfl->getVar("longitude");
+    netCDF::NcVar latVar = ncfl->getVar("latitude");
+    netCDF::NcVar terVar = ncfl->getVar("elevation");
+    nlon = lonVar.getDim(0).getSize();
+    nlat = latVar.getDim(0).getSize();
+    size_t nter = nlon*nlat;
 
-  //fprintf(stderr, "\nfile: %s, line: %d\n", __FILE__, __LINE__);
-  //fprintf(stderr, "\tnlon = %d, nlat = %d, nter = %d\n", nlon, nlat, nter);
+    lon.resize(nlon);
+    lat.resize(nlat);
+    ter.resize(nter);
+    vector<short> ster(nter);
 
-    lon = (float *) calloc(nlon, sizeof(float));
-    lat = (float *) calloc(nlat, sizeof(float));
-    ter = (float *) calloc(nter, sizeof(float));
-
-    fread(lon, sizeof(float), nlon, infl);
-    fread(lat, sizeof(float), nlat, infl);
-    fread(ter, sizeof(float), nter, infl);
-
-    fclose(infl);
+    lonVar.getVar(lon.data());
+    latVar.getVar(lat.data());
+    terVar.getVar(ster.data());
 
     maxhgt = 0.0;
     minhgt = 0.0;
@@ -389,27 +396,26 @@ void Earth::read_terrain()
     n = 0;
     for(j = 0; j < nlat; ++j)
     {
-      //fprintf(stderr, "\tlat[%d] = %f\n", j, lat[j]);
         for(i = 0; i < nlon; ++i)
         {
-          //if(0 == j)
-          //   fprintf(stderr, "\tlon[%d] = %f\n", i, lon[i]);
-
-            hgt = ter[n];
+            hgt = ster[n];
             if(maxhgt < hgt)
                maxhgt = hgt;
             if(minhgt > hgt)
                minhgt = hgt;
+            ter[n] = hgt;
 
             ++n;
         }
     }
 
-  //cout << "\tmaxhgt = " << maxhgt << endl;
-  //cout << "\tminhgt = " << minhgt << endl;
+    ster.clear();
+    ster.shrink_to_fit();
 
-  //Maximum mountain height: 6244.
-  //Maximum ocean depth: 10651.
+    free(ncfl);
+
+    cout << "\tmaxhgt = " << maxhgt << endl;
+    cout << "\tminhgt = " << minhgt << endl;
 }
 
 void Earth::bump(float r)
