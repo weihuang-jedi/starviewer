@@ -264,8 +264,8 @@ void UFSTranslator::select2dVar(const QString& str)
 
 void UFSTranslator::select3dVar(const QString& str)
 {
-    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "2d var: <" << str.toStdString() << "> is selected." << endl;
+  //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "2d var: <" << str.toStdString() << "> is selected." << endl;
  
     _varname = str.toStdString();
 
