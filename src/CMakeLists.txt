@@ -13,11 +13,6 @@ find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui)
 #find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
 #target_link_libraries(geometry PRIVATE Qt5::Widgets Qt5::OpenGL)
 
-# Setup Paths
-#set(CMAKE_INSTALL_PREFIX "/work2/noaa/epic/weihuang/nv/starviewer/install")
-#set(CMAKE_INSTALL_PREFIX "/scratch4/NAGAPE/epic/Wei.Huang/src/nv/starviewer/install")
-set(CMAKE_INSTALL_PREFIX "/contrib/Wei.Huang/src/nv/starviewer/install")
-
 # Subdirectories
 add_subdirectory(geometry)
 add_subdirectory(shared)

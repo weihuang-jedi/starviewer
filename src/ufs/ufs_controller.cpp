@@ -61,6 +61,14 @@ void UFSController::_print1d(T* var, int nl)
 void UFSController::setup()
 {
     int n;
+    char bmpflnm[1024];
+    const char* path = getenv("STARVIEWERHOME");
+    if (path == nullptr) {
+        cout << "ERROR: STARVIEWERHOME not set!" << endl;
+        throw(errno);
+    }
+    strcpy(bmpflnm, path);
+    strcat(bmpflnm, "/data/earth.bmp");
 
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
@@ -125,7 +133,7 @@ void UFSController::setup()
 
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
-    ufs_viewer = new UFS2dViewer(colorTable, nvoptions, "/work2/noaa/epic/weihuang/nv/starviewer/data/earth.bmp", ncfile);
+    ufs_viewer = new UFS2dViewer(colorTable, nvoptions, bmpflnm, ncfile);
 
   //ufs_viewer->set_lister(&lister[0]);
   //
@@ -164,8 +172,8 @@ void UFSController::draw()
   //}
   //else
   //{
-        cout << "file: " << __FILE__ << ", line: " << __LINE__ << endl;
-        cout << "2d draw" << endl;
+      //cout << "file: " << __FILE__ << ", line: " << __LINE__ << endl;
+      //cout << "2d draw" << endl;
         ufs_viewer->draw();
       //coastline->draw();
   //}

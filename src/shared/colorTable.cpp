@@ -352,12 +352,12 @@ void ColorTable::set_colorMap(string cn)
 
     get_file_contents(cn.c_str());
 
-  //if(NULL != texture1d)
-  //    delete texture1d;
+    if(NULL != texture1d)
+        delete texture1d;
 
-  //texture1d = new Texture1d();
-  //texture1d->set_colors(_clen, _cmap);
-  //texture1d->set_name(cn);
+    texture1d = new Texture1d();
+    texture1d->set_colors(_clen, _cmap);
+    texture1d->set_name(cn);
 }
 
 void ColorTable::set_opacity(int opt)

@@ -294,7 +294,7 @@ void UFS2dViewer::draw()
                     _sphereYplane(nvoptions->get_ysec());
             }
     
-            draw_sphere_grids();
+          //draw_sphere_grids();
         }
     }
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -366,7 +366,7 @@ void UFS2dViewer::_sphereDisplay()
     glPolygonOffset(1, 1);
 
     glColor4f(1.0, 1.0, 1.0, 1.0);
-  //glColor4f(0.0, 0.0, 0.0, 0.0);
+    glColor4f(0.0, 0.0, 0.0, 0.0);
 
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
@@ -378,6 +378,8 @@ void UFS2dViewer::_sphereDisplay()
             _lonlat2xyz(_lon[i], _lat[j], radius, fact);
             _lonlat2xyz(_lon[i], _lat[j-1], radius, fact);
         }
+        _lonlat2xyz(_lon[0], _lat[j], radius, fact);
+        _lonlat2xyz(_lon[0], _lat[j-1], radius, fact);
         glEnd();
     }
 
@@ -509,6 +511,15 @@ void UFS2dViewer::_flatDisplay()
 	  //     << ", height: " << height << ", fact = " << fact << ", pltvar[" << npos+i << "]="
 	  //     << pltvar[npos+i] << ", _valmin=" << _valmin << endl;
         }
+	fact = sv * (pltvar[npos] - _valmin);
+        glTexCoord1d(fact);
+        glNormal3f(_xFlat[0], _yFlat[j], height);
+        glVertex3d(_xFlat[0], _yFlat[j], height);
+
+        fact = sv * (pltvar[mpos] - _valmin);
+        glTexCoord1d(fact);
+        glNormal3f(_xFlat[0], _yFlat[j-1], height);
+        glVertex3d(_xFlat[0], _yFlat[j-1], height);
         glEnd();
     }
 
@@ -980,17 +991,17 @@ void UFS2dViewer::_sphereBump()
 
     earth->bump(radius-0.15);
 
-  //glPopMatrix();
+    glPopMatrix();
 
-  //glPushMatrix();
+    glPushMatrix();
 
     glDisable(GL_LIGHTING);
 
     glColor4f(1.0, 1.0, 1.0, 1.0);
-  //glColor4f(0.0, 0.0, 0.0, 0.0);
+    glColor4f(0.0, 0.0, 0.0, 0.0);
 
-  //glEnable(GL_TEXTURE_1D);
-  //glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
+    glEnable(GL_TEXTURE_1D);
+    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
   //#pragma omp parallel for
     for(j = 1; j < _nlat; ++j)
@@ -1006,6 +1017,11 @@ void UFS2dViewer::_sphereBump()
             fact = sv * (pltvar[mpos+i] - _valmin);
             _lonlat2xyz(_lon[i], _lat[j-1], radius + amp * (fact - offset), fact);
         }
+        fact = sv * (pltvar[npos] - _valmin);
+        _lonlat2xyz(_lon[0], _lat[j], radius + amp * (fact - offset), fact);
+
+        fact = sv * (pltvar[mpos] - _valmin);
+        _lonlat2xyz(_lon[0], _lat[j-1], radius + amp * (fact - offset), fact);
         glEnd();
     }
 

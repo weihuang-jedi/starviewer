@@ -8,11 +8,13 @@
 //
 Earth::Earth()
 {
-    if(getenv("StarViewerHome")) {
-        strcpy(_bmpflnm, getenv("StarViewerHome"));
-    } else {
-        strcpy(_bmpflnm, "/work2/noaa/epic/weihuang/nv/starviewer"); //On MSU hercules
+    const char* path = getenv("STARVIEWERHOME");
+    if (path == nullptr) {
+        cout << "ERROR: STARVIEWERHOME not set!" << endl;
+        throw(errno);
     }
+    strcpy(_bmpflnm, path);
+
     strcat(_bmpflnm, "/data/earth.bmp");
 
     _loadTexBMP();
@@ -129,8 +131,8 @@ void Earth::_loadTexBMP()
 {
     GLuint textureID = 0;
 
-  //cout << "enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tfunctions: _bmpflnm: <" << _bmpflnm << ">" << endl;
+    cout << "enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tfunctions: _bmpflnm: <" << _bmpflnm << ">" << endl;
 
     // Load the image
     QImage b(_bmpflnm);
@@ -142,7 +144,7 @@ void Earth::_loadTexBMP()
   //    qDebug() << "Image loaded successfully" << b.size();
   //}
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     glEnable(GL_TEXTURE_2D);
 

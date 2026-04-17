@@ -43,8 +43,8 @@ class Earth : public QGLWidget, protected QOpenGLFunctions
         GLuint get_texture_id() {return _texture_id;};
 
     private:
-        char _bmpflnm[512];
-        char _topoflnm[512];
+        char _bmpflnm[1024];
+        char _topoflnm[1024];
         GLuint _texture_id;
 
         double deg2arc;
