@@ -10,20 +10,19 @@ UFSController::UFSController(ColorTable *ct, NVOptions* opt,
     strcpy(_flnm, fn);
 
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\tOpen file: <" << fn << ">" << endl;
+  //cout << "\tOpen file: <" << fn << ">" << endl;
 
     geometry = new UFSGeometry();
     geometry->set_name(sfn);
 
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //coastline = new CoastLine();
+    coastline = new CoastLine();
   
     _maxFile = 1;
     _ntim = 1;
 
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\tsfn = " << sfn << endl;
-  //nvfile = new NVFile(sfn, isList);
     ncfile = new ncReader(fn);
 
     ufs_viewer = NULL;
@@ -33,8 +32,7 @@ UFSController::UFSController(ColorTable *ct, NVOptions* opt,
 
 UFSController::~UFSController()
 {
-  //delete coastline;
-  //delete nvfile;
+    delete coastline;
     delete ncfile;
     
     if(NULL != ufs_viewer)
@@ -146,7 +144,7 @@ void UFSController::setup()
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //geometry->print();
 
-  //ufs_viewer->set_coastline(coastline);
+    ufs_viewer->set_coastline(coastline);
 
     ufs_viewer->set_geometry(geometry);
   //ufs_3dviewer->set_geoufs_(geoufs_);

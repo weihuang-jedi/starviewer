@@ -89,20 +89,20 @@ void UFSGeometry::setup()
     size_t n;
     size_t nsquare;
 
-    cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "_nlon = " << _nlon << endl;
-    cout << "_nlat = " << _nlat << endl;
-    cout << "_nlev = " << _nlev << endl;
+  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "_nlon = " << _nlon << endl;
+  //cout << "_nlat = " << _nlat << endl;
+  //cout << "_nlev = " << _nlev << endl;
     nsquare = _nlon * _nlat;
     _xSphere = new double[nsquare];
     _ySphere = new double[nsquare];
     _zSphere = new double[nsquare];
-    cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     _xFlat = new double[_nlon];
     _yFlat = new double[_nlat];
 
-    cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     if(NULL == _lat) {
 	cout << "_lat in NULL. Stop" << endl;
 	throw(errno);
@@ -138,6 +138,6 @@ void UFSGeometry::setup()
             _xFlat[i] = _lon[i]/180.0;
       //cout << "_xFlat[" << i << "] = " << _xFlat[i] << ", lon " << _lon[i] << endl;
     }
-    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 

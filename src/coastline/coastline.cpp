@@ -48,7 +48,11 @@ void CoastLine::_setup()
         throw(errno);
     }
     strcpy(ncflnm, path);
-    strcat(ncflnm, "/data/gshhg-gmt-2.3.7/binned_GSHHS_i.nc");
+  //strcat(ncflnm, "/data/gshhg-gmt-2.3.7/binned_GSHHS_f.nc");
+  //strcat(ncflnm, "/data/gshhg-gmt-2.3.7/binned_GSHHS_h.nc");
+  //strcat(ncflnm, "/data/gshhg-gmt-2.3.7/binned_GSHHS_i.nc");
+    strcat(ncflnm, "/data/gshhg-gmt-2.3.7/binned_GSHHS_l.nc");
+  //strcat(ncflnm, "/data/gshhg-gmt-2.3.7/binned_GSHHS_c.nc");
 
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     cout << "\tncflnm: " << ncflnm << endl;

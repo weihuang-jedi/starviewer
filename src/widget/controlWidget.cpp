@@ -80,7 +80,7 @@ void ControlWidget::_setup_buttons()
     onmap_cb->setChecked(false);
     onmap_cb->setCheckState(Qt::Unchecked);
     title_cb->setChecked(true);
-    coastline_cb->setChecked(true);
+    coastline_cb->setChecked(false);
 
   //title_cb->setChecked(false);
   //title_cb->setCheckState(Qt::Unchecked);
