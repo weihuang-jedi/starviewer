@@ -11,6 +11,9 @@ rm -rf *
 export NetCDF_INCLUDE_DIRS=/usr/include
 export NetCDF_LIBRARIES=/usr/lib/x86_64-linux-gnu/libnetcdf.so
 
+export NetCDF_CXX_INCLUDE_DIRS=/usr/include
+export NetCDF_CXX_LIBRARIES=/usr/lib/x86_64-linux-gnu/libnetcdf_c++4.so
+
 # Set these so CMake's find_package can work automatically
 export CXX=/usr/bin/g++
 export CC=/usr/bin/gcc

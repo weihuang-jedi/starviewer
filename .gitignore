@@ -21,3 +21,8 @@ install
 
 # generated images
 *.png
+
+data/gshhg-gmt-2.3.7.tar.gz
+data/gshhg-gmt-2.3.7
+data/gshhg.info
+
