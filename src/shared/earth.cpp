@@ -131,8 +131,8 @@ void Earth::_loadTexBMP()
 {
     GLuint textureID = 0;
 
-    cout << "enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\tfunctions: _bmpflnm: <" << _bmpflnm << ">" << endl;
+  //cout << "enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\tfunctions: _bmpflnm: <" << _bmpflnm << ">" << endl;
 
     // Load the image
     QImage b(_bmpflnm);
@@ -144,7 +144,7 @@ void Earth::_loadTexBMP()
   //    qDebug() << "Image loaded successfully" << b.size();
   //}
 
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     glEnable(GL_TEXTURE_2D);
 
@@ -159,7 +159,8 @@ void Earth::_loadTexBMP()
     // set texture name
     set_texture_id(textureID);
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tt.width(): " << t.width() << ", t.height(): <" << t.height() << endl;
 
     glBindTexture(GL_TEXTURE_2D, textureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -172,22 +173,18 @@ void Earth::_loadTexBMP()
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
-/*
- *  Draw vertex in polar coordinates
- */
+// Draw vertex in polar coordinates
 void Earth::_Vertex(int th, int ph)
 {
    double x = radius*Cos(th)*Cos(ph);
    double y =         radius*Sin(ph);
    double z = radius*Sin(th)*Cos(ph);
    glNormal3d(x,y,z);
-   glTexCoord2d(0.5*(1.0 - th/180.0), 0.5+ph/180.0);
+   glTexCoord2d(0.5*th/180.0, 0.5+ph/180.0);
    glVertex3d(x,y,z);
 }
 
-/*
- *  Draw earth
- */
+// Draw earth
 void Earth::draw(float r)
 {
     float sr = radius;
@@ -196,28 +193,24 @@ void Earth::draw(float r)
     radius = sr;
 }
 
-/*
- *  Draw earth
- */
+// Draw earth
 void Earth::draw()
 {
-    int th,ph;
+    int i,j;
 
-  /*
-   *  Draw surface of the planet
-   */
+    //  Draw surface of the planet
     //  Set texture
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, get_texture_id());
     //  Latitude bands
     glColor3f(1,1,1);
-    for(ph = -90; ph < 90; ph += 5)
+    for(j = -90; j < 90; j += 5)
     {
        glBegin(GL_QUAD_STRIP);
-           for(th = -180; th <= 180; th += 5)
+           for(i = 0; i <= 360; i += 5)
            {
-               _Vertex(th,ph);
-               _Vertex(th,ph+5);
+               _Vertex(i,j);
+               _Vertex(i,j+5);
            }
        glEnd();
     }
@@ -225,9 +218,7 @@ void Earth::draw()
     glDisable(GL_TEXTURE_2D);
 }
 
-/*
- *  Draw earth
- */
+// Draw earth
 void Earth::draw_plane(float z)
 {
     int i, j;
@@ -245,50 +236,27 @@ void Earth::draw_plane(float z)
        y1 = lat[j + 1] / 180.0;
 
        glBegin(GL_QUAD_STRIP);
-       for(i = 0; i < nlon/2; ++i)
+       for(i = 0; i < nlon; ++i)
        {
-           x = lon[i] / 180.0;
+           x = 0.5*lon[i] / 180.0;
            glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5*x + 1.0, y0);
+           glTexCoord2d(x, y0);
            glVertex3d(x, y0, z);
 
            glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5*x + 1.0, y1);
+           glTexCoord2d(x, y1);
            glVertex3d(x, y1, z);
        }
 
        x = 0.0;
        glNormal3d(0.0, 0.0, 1.0);
-       glTexCoord2d(0.5*x + 1.0, y0);
+       glTexCoord2d(x, y0);
        glVertex3d(x, y0, z);
 
        glNormal3d(0.0, 0.0, 1.0);
-       glTexCoord2d(0.5*x + 1.0, y1);
+       glTexCoord2d(x, y1);
        glVertex3d(x, y1, z);
 
-       glEnd();
-
-       glBegin(GL_QUAD_STRIP);
-       x = 0.0;
-       glNormal3d(0.0, 0.0, 1.0);
-       glTexCoord2d(0.5*x, y0);
-       glVertex3d(x, y0, z);
-
-       glNormal3d(0.0, 0.0, 1.0);
-       glTexCoord2d(0.5*x, y1);
-       glVertex3d(x, y1, z);
-
-       for(i = nlon/2; i < nlon; ++i)
-       {
-           x = lon[i] / 180.0;
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5*x, y0);
-           glVertex3d(x, y0, z);
-
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5*x, y1);
-           glVertex3d(x, y1, z);
-       }
        glEnd();
     }
 
@@ -310,42 +278,44 @@ void Earth::bump_plane(float z)
   //OpenGL should normalize normal vectors
   //glEnable(GL_NORMALIZE);
 
-#if 1
     for(j = 0; j < nlat - 1; ++j)
     {
        y0 = lat[j] / 180.0;
        y1 = lat[j + 1] / 180.0;
 
        glBegin(GL_QUAD_STRIP);
-           hgt = ter[j*nlon];
+         //hgt = ter[j*nlon];
+           hgt = 0.0;
            glNormal3d(0.0, 0.0, 1.0);
            glTexCoord2d(0.0, y0 + 0.5);
            if(hgt > 0.0)
-               glVertex3d(-1.0, y0, z + scl*hgt);
+               glVertex3d(0.0, y0, z + scl*hgt);
            else
-               glVertex3d(-1.0, y0, z);
+               glVertex3d(0.0, y0, z);
 
            glNormal3d(0.0, 0.0, 1.0);
            glTexCoord2d(0.0, y1 + 0.5);
            if(hgt > 0.0)
-               glVertex3d(-1.0, y1, z + scl*hgt);
+               glVertex3d(0.0, y1, z + scl*hgt);
            else
-               glVertex3d(-1.0, y1, z);
+               glVertex3d(0.0, y1, z);
 
            for(i = 0; i < nlon; ++i)
            {
-               x = lon[i] / 180.0;
+               x = 0.5*lon[i] / 180.0;
                glNormal3d(0.0, 0.0, 1.0);
-               glTexCoord2d(0.5*(x + 1.0), y0 + 0.5);
-               hgt = ter[j*nlon + i];
+               glTexCoord2d(x, y0 + 0.5);
+             //hgt = ter[j*nlon + i];
+               hgt = 0.0;
                if(hgt > 0.0)
                    glVertex3d(x, y0, z + scl*hgt);
                else
                    glVertex3d(x, y0, z);
 
                glNormal3d(0.0, 0.0, 1.0);
-               glTexCoord2d(0.5*(x + 1.0), y1 + 0.5);
-               hgt = ter[(j+1)*nlon + i]; 
+               glTexCoord2d(x, y1 + 0.5);
+             //hgt = ter[(j+1)*nlon + i]; 
+               hgt = 0.0;
                if(hgt > 0.0)
                    glVertex3d(x, y1, z + scl*hgt);
                else
@@ -367,92 +337,6 @@ void Earth::bump_plane(float z)
                glVertex3d(1.0, y1, z);
        glEnd();
     }
-#else
-    for(j = 0; j < nlat - 1; ++j)
-    {
-       y0 = lat[j] / 180.0;
-       y1 = lat[j + 1] / 180.0;
-
-       glBegin(GL_QUAD_STRIP);
-           hgt = ter[j*nlon];
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5, y0 + 0.5);
-           if(hgt > 0.0)
-               glVertex3d(0.0, y0, z + scl*hgt);
-           else
-               glVertex3d(0.0, y0, z);
-
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5, y1 + 0.5);
-           if(hgt > 0.0)
-               glVertex3d(0.0, y1, z + scl*hgt);
-           else
-               glVertex3d(0.0, y1, z);
-
-       for(i = 0; i < nlon/2; ++i)
-       {
-           x = 2.0 + lon[i] / 180.0;
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5*x - 0.5, y0 + 0.5);
-           hgt = ter[j*nlon + i];
-           if(hgt > 0.0)
-               glVertex3d(x - 1.0, y0, z + scl*hgt);
-           else
-               glVertex3d(x - 1.0, y0, z);
-
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5*x - 0.5, y1 + 0.5);
-           hgt = ter[(j+1)*nlon + i]; 
-           if(hgt > 0.0)
-               glVertex3d(x - 1.0, y1, z + scl*hgt);
-           else
-               glVertex3d(x - 1.0, y1, z);
-
-         //if(0 == j)
-         //   fprintf(stderr, "\tlon[%d] = %f, x = %f\n", i, lon[i], x);
-       }
-       glEnd();
-
-       glBegin(GL_QUAD_STRIP);
-       for(i = nlon/2; i < nlon; ++i)
-       {
-           x = lon[i] / 180.0;
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5*x + 0.5 , y0 + 0.5);
-           hgt = ter[j*nlon + i]; 
-           if(hgt > 0.0)
-               glVertex3d(x - 1.0, y0, z + scl*hgt);
-           else
-               glVertex3d(x - 1.0, y0, z);
-
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5*x + 0.5 , y1 + 0.5);
-           hgt = ter[(j+1)*nlon + i];
-           if(hgt > 0.0)
-               glVertex3d(x - 1.0, y1, z + scl*hgt);
-           else
-               glVertex3d(x - 1.0, y1, z);
-
-         //if(0 == j)
-         //   fprintf(stderr, "\tlon[%d] = %f, x = %f\n", i, lon[i], x);
-       }
-
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(1.0 , y0 + 0.5);
-           if(hgt > 0.0)
-               glVertex3d(0.0, y0, z + scl*hgt);
-           else
-               glVertex3d(0.0, y0, z);
-
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(1.0 , y1 + 0.5);
-           if(hgt > 0.0)
-               glVertex3d(0.0, y1, z + scl*hgt);
-           else
-               glVertex3d(0.0, y1, z);
-       glEnd();
-    }
-#endif
 
     glDisable(GL_TEXTURE_2D);
 }

@@ -36,7 +36,7 @@ UFSTranslator::UFSTranslator(ColorTable* ct, NVOptions* opt,
     _hasFileList = isList;
 
     nvoptions->set_xsec(-1);
-    nvoptions->set_ysec(-91);
+    nvoptions->set_ysec(-1);
     nvoptions->set_zsec(0);
     nvoptions->set_tsec(0);
 
@@ -242,10 +242,10 @@ void UFSTranslator::select2dVar(const QString& str)
 
     ufs_controller->set1dvarname(_varname);
 
-    sliderNspinX->set_max(360);
+    sliderNspinX->set_max(geometry->get_nlon());
     sliderNspinX->setValue(0);
-    sliderNspinY->set_max(90);
-    sliderNspinY->set_min(-90);
+    sliderNspinY->set_max(geometry->get_nlat());
+    sliderNspinY->set_min(0);
     sliderNspinY->setValue(0);
     sliderNspinZ->set_max(1);
     sliderNspinZ->setValue(0);
@@ -271,10 +271,10 @@ void UFSTranslator::select3dVar(const QString& str)
 
     ufs_controller->set3dvarname(_varname);
 
-    sliderNspinX->set_max(360);
+    sliderNspinX->set_max(geometry->get_nlon());
     sliderNspinX->setValue(0);
-    sliderNspinY->set_max(90);
-    sliderNspinY->set_min(-90);
+    sliderNspinY->set_max(geometry->get_nlat());
+    sliderNspinY->set_min(0);
     sliderNspinZ->set_max(geometry->get_nlev());
     sliderNspinZ->setValue(0);
   //sliderNspinT->set_max(_ntim);
