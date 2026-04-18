@@ -84,6 +84,7 @@ class UFS2dViewer : public QGLWidget
         double* _lat;
         float* _lev;
 
+        int _hlon;
         int _nlon;
         int _nlat;
         int _nlev;
@@ -113,6 +114,8 @@ class UFS2dViewer : public QGLWidget
 
         void _lonlat2xyz(double lon, double lat, double radius,
                          double fact);
+        void _lonlat2xyz_texture(double lon, double lat,
+			         double radius, double fact);
 
         void _flatDisplay();
         void _display_Xflat_plane(int xs);

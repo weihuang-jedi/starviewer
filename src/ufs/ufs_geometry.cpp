@@ -2,6 +2,7 @@
 
 UFSGeometry::UFSGeometry()
 {
+    _hlon = 0;
     _set_default();
 }
 
@@ -116,9 +117,8 @@ void UFSGeometry::setup()
     _hmax = 0.0;
     _hmin = 1000000.0;
     for(j = 0; j < _nlat; ++j) {
-      //cout << "_lat[" << j << "] = " << _lat[j] << endl;
         _yFlat[j] = _lat[j]/180.0;
-      //cout << "_yFlat[" << j << "] = " << _yFlat[j] << ", lat " << _lat[j] << endl;
+      //cout << "j=" << j << ", lat[j]=" << _lat[j] <<", _yFlat[j]=" << _yFlat[j] << endl;
 	n = j*_nlon;
         delt = cos(_lat[j] * arc);
         for(i = 0; i < _nlon; ++i)
@@ -129,14 +129,16 @@ void UFSGeometry::setup()
         }
     }
 
+    _hlon = 0;
     for(i = 0; i < _nlon; ++i)
     {
-      //cout << "_lon[" << i << "] = " << _lon[i] << endl;
-        if(_lon[i] > 180.0)
-            _xFlat[i] = (_lon[i]-360.0)/180.0;
-        else
-            _xFlat[i] = _lon[i]/180.0;
-      //cout << "_xFlat[" << i << "] = " << _xFlat[i] << ", lon " << _lon[i] << endl;
+        _xFlat[i] = _lon[i]/180.0;
+        if(_xFlat[i] > 1.0) {
+           _xFlat[i] -= 2.0;
+	   if(0 == _hlon)
+	      _hlon = i;
+	}
+      //cout << "i=" << i << ", _lon=" << _lon[i] << ", _xFlat=" << _xFlat[i] << endl;
     }
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
