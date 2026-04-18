@@ -86,16 +86,14 @@ void UFSController::setup()
 
     geometry->set_nlon(ncfile->getNlon());
     geometry->set_nlat(ncfile->getNlat());
-    geometry->set_nlev(ncfile->getNlev());
+  //geometry->set_nlev(ncfile->getNlev());
+    geometry->set_nlev(1);
   //geometry->set_ntim(_ntimes[0]);
     geometry->set_ntim(_maxTime);
 
     geometry->set_lon(ncfile->getLon());
     geometry->set_lat(ncfile->getLat());
     geometry->set_lev(ncfile->getPfull());
-
-  //geometry->set_lon2d(ncfile->get_lon2d());
-  //geometry->set_lat2d(ncfile->get_lat2d());
 
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
@@ -332,11 +330,10 @@ void UFSController::set_fileNtime(int nf, int nt)
         if(_initialized)
             free(_value);
 
-      //nvfile->select_file(nf);
-
         _value = ncfile->get_fv(_varname.c_str());
         _title = _varname;
 
+        geometry->set_nlev(1);
         geometry->set_ntim(_ntimes[_curFile]);
 
         _minval = ufs_viewer->get_minval();

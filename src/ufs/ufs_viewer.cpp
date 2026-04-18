@@ -23,6 +23,7 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt)
 
     _nlon = 360;
     _nlat = 180;
+    _nlev = 1;
 
     oneover = 1.0 / 180.0;
     deg2rad = 3.1415926535897932 * oneover;
@@ -101,6 +102,7 @@ void UFS2dViewer::setup(string vn, float *var)
 
     _varname  = vn;
     _var = var;
+    _nlev = geometry->get_nlev();
 
     _evaluate(_var);
 
@@ -190,10 +192,12 @@ void UFS2dViewer::draw()
         _valmax = nvoptions->get_truemaximum();
     }
 #endif
-  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t" <<"current_timelevel: " << current_timelevel << endl;
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t" <<"current_timelevel: " << current_timelevel << endl;
+    cout << "\t" <<"_nlev: " << _nlev << endl;
 
     pltvar = &_var[current_timelevel * _nlon * _nlat];
+  //pltvar = &_var[current_timelevel * _nlon * _nlat * _nlev];
 
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     zcl = lister->get_zid(nvoptions->get_zsec());
@@ -364,7 +368,7 @@ void UFS2dViewer::_sphereDisplay()
 
     if(k < _nlev)
     {
-        radius = 0.725 + 0.5 * ( 1.0 - (k + 1.0) / _nlev);
+        radius = 1.0 + ((double) (_nlev-k) / _nlev);
     }
     else
     {
@@ -385,6 +389,7 @@ void UFS2dViewer::_sphereDisplay()
   //OpenGL should normalize normal vectors
     glEnable(GL_NORMALIZE);
 
+#if 0
     glEnable(GL_BLEND);
   //glBlendFunc(GL_SRC_ALPHA,GL_ONE);
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -396,13 +401,13 @@ void UFS2dViewer::_sphereDisplay()
     earth->bump(radius-0.15);
 
     glPopMatrix();
-
+#endif
     glPushMatrix();
 
     glDisable(GL_LIGHTING);
 
     glColor4f(1.0, 1.0, 1.0, 1.0);
-    glColor4f(0.0, 0.0, 0.0, 0.0);
+  //glColor4f(0.0, 0.0, 0.0, 0.0);
 
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
@@ -449,7 +454,7 @@ void UFS2dViewer::_flatDisplay()
     k = nvoptions->get_zsec();
 
     if(1 < _nlev)
-        height = 0.8 * (0.5 - (k + 1.0) / _nlev);
+        height = ((double) (_nlev-k) / _nlev);
     else
         height = 0.001;
 
@@ -526,7 +531,7 @@ void UFS2dViewer::_flatDisplay()
 
 void UFS2dViewer::_evaluate(float *var)
 {
-    size_t size;
+    size_t varsize;
     size_t n = 0;
     char vn[128];
 
@@ -534,16 +539,19 @@ void UFS2dViewer::_evaluate(float *var)
   //cout << "\t _varname: " << _varname << endl;
     strcpy(vn, _varname.c_str());
 
-  //size = geometry->get_nlon() * geometry->get_nlat() * geometry->get_nlev();
-    size = geometry->get_nlon() * geometry->get_nlat();
+    varsize = geometry->get_nlon() * geometry->get_nlat() * geometry->get_nlev();
+  //varsize = geometry->get_nlon() * geometry->get_nlat();
 
-  //cout << "\tin <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tsize =" << size << endl;
+    cout << "\tin <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\t_nlon =" << _nlon << endl;
+    cout << "\t_nlat =" << _nlat << endl;
+    cout << "\t_nlev =" << _nlev << endl;
+    cout << "\tvarsize =" << varsize << ", _nlon*_nlat=" << _nlon*_nlat << endl;
 
     _valmax = var[0];
     _valmin = var[0];
 
-    for(n = 1; n < size; ++n)
+    for(n = 1; n < varsize; ++n)
     {
         if(_valmax < var[n])
         {
@@ -879,7 +887,7 @@ void UFS2dViewer::_display_Xflat_plane(int xs)
   //cout << "\tilonc: " << ilonc << ", _nlon=" << _nlon << endl;
 
     for(k = 0; k < _nlev; ++k)
-        height[k] = 0.8 * ( 0.5 - (k + 1.0) / _nlev);
+        height[k] = ((double) (_nlev-k) / _nlev);
 
     sv = 1.0 / (_valmax - _valmin);
 
@@ -1041,7 +1049,7 @@ void UFS2dViewer::_flatBump()
     k = nvoptions->get_zsec();
 
     if(1 < _nlev)
-        height = 0.8 * (0.5 - (k + 1.0) / _nlev);
+        height = ((double) (_nlev-k) / _nlev);
     else
         height = 0.001;
 
