@@ -28,14 +28,11 @@ class CoastLine
         double* get_dv(char *vn);
         int*    get_iv(char *vn);
 
-        void draw();
-        void draw(int n);
-        void draw(double r, int n);
+        void drawOnSphere(double r);
+        void drawOnSphere(double r, int n);
 
-        void drawONplane();
-        void drawONplane(int n);
-        void drawONplane(double h, int n);
-        void drawONplane2(double h, int n);
+        void drawOnPlane(double h);
+        void drawOnPlane(double h, int n);
 
         void set_plot_level(int n);
         void set_min_plot_points(int n) { minPlotPoints = n; };
@@ -55,10 +52,11 @@ class CoastLine
         size_t _getDim(const char* dn);
         void _setup();
 
-        void _drawit();
-        void _lonlat2xy(double lon, double lat, double &x, double &y);
-        void _lonlat2xy2(double lon, double lat, double &x, double &y);
-        void _lonlat2xyz(double lon, double lat, double &x, double &y, double &z);
+        void _lonlat2xy(double lon, double lat, double hgt);
+        void _drawOnPlane(double height);
+
+        void _drawOnSphere(double radius);
+        void _lonlat2xyz(double lon, double lat, double radius);
 
 	// for file: gshhg-gmt-2.3.7/binned_GSHHS_i.nc
 	size_t n_of_scalar; // = 1 ;

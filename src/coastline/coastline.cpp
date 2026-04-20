@@ -51,8 +51,8 @@ void CoastLine::_setup()
   //strcat(ncflnm, "/data/gshhg-gmt-2.3.7/binned_GSHHS_f.nc");
   //strcat(ncflnm, "/data/gshhg-gmt-2.3.7/binned_GSHHS_h.nc");
   //strcat(ncflnm, "/data/gshhg-gmt-2.3.7/binned_GSHHS_i.nc");
-    strcat(ncflnm, "/data/gshhg-gmt-2.3.7/binned_GSHHS_l.nc");
-  //strcat(ncflnm, "/data/gshhg-gmt-2.3.7/binned_GSHHS_c.nc");
+  //strcat(ncflnm, "/data/gshhg-gmt-2.3.7/binned_GSHHS_l.nc");
+    strcat(ncflnm, "/data/gshhg-gmt-2.3.7/binned_GSHHS_c.nc");
 
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     cout << "\tncflnm: " << ncflnm << endl;
@@ -99,6 +99,9 @@ void CoastLine::_setup()
     cout << "\tN_segments_in_file = " << N_segments_in_file << endl;
     cout << "\tN_points_in_file = " << N_points_in_file << endl;
 
+    binSizeDeg = Bin_size_in_minutes / 60.0;
+    scale = binSizeDeg / 65535.0;
+
     // Read relative points
     NcVar relLonVar = ncfl->getVar("Relative_longitude_from_SW_corner_of_bin");
     NcVar relLatVar = ncfl->getVar("Relative_latitude_from_SW_corner_of_bin");
@@ -129,24 +132,19 @@ void CoastLine::print()
     int i, n;
 }
 
-void CoastLine::_lonlat2xy(double lon, double lat, double &x, double &y)
+void CoastLine::_lonlat2xy(double lon, double lat, double z)
 {
+    double x, y;
     x = lon * oneover;
+    if(x > 1.0)
+       x -= 2.0;
     y = lat * oneover;
+    glVertex3f(x, y, z);
 }
 
-void CoastLine::_lonlat2xy2(double lon, double lat, double &x, double &y)
+void CoastLine::_lonlat2xyz(double lon, double lat, double radius)
 {
-    if(lon <= 0.0)
-        x = (lon + 360.0) * oneover - 1.0;
-    else
-        x = lon * oneover - 1.0;
-
-    y = lat * oneover;
-}
-
-void CoastLine::_lonlat2xyz(double lon, double lat, double &x, double &y, double &z)
-{
+    double x, y, z;
     double phi = lat * deg2rad;
     double dist = radius * cos(phi);
     double lamda = lon * deg2rad;
@@ -154,6 +152,7 @@ void CoastLine::_lonlat2xyz(double lon, double lat, double &x, double &y, double
     x = dist * sin(lamda);
     z = dist * cos(lamda);
     y = radius * sin(phi);
+    glVertex3f(x, y, z);
 }
 
 void CoastLine::set_plot_level(int n)
@@ -164,20 +163,100 @@ void CoastLine::set_plot_level(int n)
         plotLevel = maxPlotLevel;
 }
 
-void CoastLine::draw(double r, int n)
+void CoastLine::drawOnSphere(double r)
 {
-    set_plot_level(n);
-    radius = r;
-    draw();
+    GLfloat line_width = 1.0;
+  //glColor3f(1.0, 1.0, 1.0);
+    glColor3f(0.0, 0.0, 0.0);
+
+    _drawOnSphere(r);
 }
 
-void CoastLine::_drawit()
+
+void CoastLine::drawOnSphere(double r, int n)
+{
+    set_plot_level(n);
+
+    GLfloat line_width = 1.0;
+  //glColor3f(1.0, 1.0, 1.0);
+    glColor3f(0.0, 0.0, 0.0);
+    _drawOnSphere(r);
+}
+
+void CoastLine::_drawOnSphere(double radius)
 {
     int i, j, k, n, ns, nb, ifseg;
     int startPT, endPT;
 
     double lon, lat;
-    double x, y, z;
+    double binSizeDeg = Bin_size_in_minutes/60.0;
+
+    ns = 0;
+  //for(j = 0; j < N_bins_in_180_degree_latitude_range; ++j)
+    for(j = 0; j < N_bins_in_180_degree_latitude_range; j+=10)
+    {
+      //for(i = 0; i < N_bins_in_360_longitude_range; ++i)
+        for(i = 0; i < N_bins_in_360_longitude_range; i+=10)
+        {
+            nb = j*N_bins_in_360_longitude_range + i;
+
+            cout << "\t\ti " << i << ", j = " << j << ", nseg = " << N_segments_in_a_bin[nb] << endl;
+
+          //for(n = 0; n < N_segments_in_a_bin[nb]; ++n)
+            for(n = 0; n < 1; ++n)
+            {
+                startPT = Id_of_first_point_in_a_segment[ns];
+                if(ns == (n_of_segment_arrays-1))
+                    endPT = n_of_point_arrays;
+		else
+                    endPT = Id_of_first_point_in_a_segment[ns+1];
+
+                cout << "\t\t\tsegments " << ns+n << ": startPT = " << startPT
+                     << ", endPT = " << endPT << endl;
+
+                glBegin(GL_LINE_STRIP);
+              //for(k = startPT; k < endPT; k+=2)
+                for(k = startPT; k < endPT; ++k)
+                {
+		    lon = i*binSizeDeg + (relLons[k] * scale);
+		    lat = j*binSizeDeg + (relLats[k] * scale) - 90.0;
+                    _lonlat2xyz(lon, lat, radius);
+                    cout << "\t\t\tk = " << k << ", lon = " << lon << ", lat = " << lat
+			 << ", relLon = " << (relLons[k] * scale) << ", relLat = " << (relLats[k] * scale) << endl;
+                }
+                glEnd();
+            }
+	    ns += N_segments_in_a_bin[nb];
+        }
+    }
+}
+
+void CoastLine::drawOnPlane(double hgt, int n)
+{
+    set_plot_level(n);
+    GLfloat line_width = 1.0;
+  //glColor3f(1.0, 1.0, 1.0);
+    glColor3f(0.0, 0.0, 0.0);
+
+    _drawOnPlane(hgt);
+}
+
+void CoastLine::drawOnPlane(double hgt)
+{
+    GLfloat line_width = 1.0;
+  //glColor3f(1.0, 1.0, 1.0);
+    glColor3f(0.0, 0.0, 0.0);
+
+
+    _drawOnPlane(hgt);
+}
+
+void CoastLine::_drawOnPlane(double z)
+{
+    int i, j, k, n, ns, nb, ifseg;
+    int startPT, endPT;
+
+    double lon, lat;
     double binSizeDeg = Bin_size_in_minutes/60.0;
 
     ns = 0;
@@ -195,7 +274,7 @@ void CoastLine::_drawit()
                 if(ns == (n_of_segment_arrays-1))
                     endPT = n_of_point_arrays;
 		else
-                    endPT = startPT + Id_of_first_point_in_a_segment[ns+1];
+                    endPT = Id_of_first_point_in_a_segment[ns+1];
 
               //cout << "\t\t\tsegments " << ns+n << ": startPT = " << startPT
               //     << ", endPT = " << endPT << endl;
@@ -203,117 +282,16 @@ void CoastLine::_drawit()
                 glBegin(GL_LINE_STRIP);
                 for(k = startPT; k < endPT; ++k)
                 {
-		    lon = i*binSizeDeg + (relLons[k] * scale);
-		    lat = j*binSizeDeg + (relLats[k] * scale) - 90.0;
-                    _lonlat2xyz(lon, lat, x, y, z);
-                    glVertex3f(x, y, z);
-                  //cout << "\t\t\tk = " << k << ", lon = " << lon << ", lat = " << lat << endl;
+		    lon = i*binSizeDeg + relLons[k] * scale;
+		    lat = j*binSizeDeg + relLats[k] * scale - 90.0;
+                    _lonlat2xy(lon, lat, z);
+                  //cout << "\t\t\tk = " << k << ", lon = " << lon << ", lat = " << lat
+		  //     << ", relLon = " << relLons[k] * scale << ", relLat = " << relLats[k] * scale << endl;
                 }
                 glEnd();
             }
 	    ns += N_segments_in_a_bin[nb];
         }
     }
-}
-
-void CoastLine::draw(int n)
-{
-    set_plot_level(n);
-
-    draw();
-}
-
-void CoastLine::draw()
-{
-    int i, j, k, n, ns, nb, ifseg;
-    int startPT, endPT;
-
-    double lon, lat;
-    double x, y, z;
-    double binSizeDeg = Bin_size_in_minutes/60.0;
-
-    GLfloat line_width = 1.0;
-
-  //cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__
-  //     << ">, line: " << __LINE__ << endl;
-
-    glPushMatrix();
-
-  //glColor3f(1.0, 1.0, 1.0);
-    glColor3f(0.0, 0.0, 0.0);
-
-    glLineWidth(line_width);
-
-    _drawit();
-
-    glPopMatrix();
-}
-
-void CoastLine::drawONplane(double hgt, int n)
-{
-    set_plot_level(n);
-    height = hgt;
-    drawONplane();
-}
-
-void CoastLine::drawONplane(int n)
-{
-    set_plot_level(n);
-
-    drawONplane();
-}
-
-void CoastLine::drawONplane()
-{
-    int i, k, n;
-    int startSegment, numSegments;
-    int seg, startPT, endPT;
-
-    double x, y;
-    double z = height + 0.001;
-
-    GLfloat line_width = 1.5;
-
-  //cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__
-  //     << ">, line: " << __LINE__ << endl;
-
-    glPushMatrix();
-
-  //glColor3f(1.0, 1.0, 1.0);
-    glColor3f(0.0, 0.0, 0.0);
-
-    glLineWidth(line_width);
-
-    _drawit();
-
-    glPopMatrix();
-}
-
-void CoastLine::drawONplane2(double hgt, int m)
-{
-    int i, k, n;
-    int startSegment, numSegments;
-    int seg, startPT, endPT;
-
-    double x, y, xb, yb;
-    double z = hgt + 0.001;
-
-    set_plot_level(m);
-
-    GLfloat line_width = 1.5;
-
-  //cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__
-  //     << ">, line: " << __LINE__ << endl;
-
-    glPushMatrix();
-
-  //glColor3f(1.0, 1.0, 1.0);
-    glColor3f(0.0, 0.0, 0.0);
-
-    glLineWidth(line_width);
-
-    _drawit();
-
-    glPopMatrix();
 }
 

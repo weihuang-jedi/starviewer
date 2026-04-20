@@ -9,25 +9,17 @@ UFSController::UFSController(ColorTable *ct, NVOptions* opt,
     nvoptions = opt;
     strcpy(_flnm, fn);
 
-  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tOpen file: <" << fn << ">" << endl;
-
     geometry = new UFSGeometry();
     geometry->set_name(sfn);
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     coastline = new CoastLine();
   
     _maxFile = 1;
     _ntim = 1;
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tsfn = " << sfn << endl;
     ncfile = new ncReader(fn);
 
     ufs_viewer = NULL;
-
-  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 UFSController::~UFSController()
@@ -68,8 +60,6 @@ void UFSController::setup()
     strcpy(bmpflnm, path);
     strcat(bmpflnm, "/data/earth.bmp");
 
-  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
   //_ntimes = ncfile->get_ntimes();
 
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
@@ -94,12 +84,7 @@ void UFSController::setup()
     geometry->set_lon(ncfile->getLon());
     geometry->set_lat(ncfile->getLat());
     geometry->set_lev(ncfile->getPfull());
-
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
     geometry->setup();
-
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     geometry->set_has1dLon(true);
     geometry->set_has1dLat(true);
@@ -107,32 +92,21 @@ void UFSController::setup()
     geometry->set_has2dLon(false);
     geometry->set_has2dLat(false);
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
   //_varname = string("sst");
     _varname = string("hgtsfc");
 
     _sphere = false;
     _ball = false;
     _initialized = false;
-
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
     _tvalue = 0;
     _time_interval = 128;
-
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
     _curFile = 0;
     _curTime = 0;
     _preFile = _curFile;
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
     ufs_viewer = new UFS2dViewer(colorTable, nvoptions, bmpflnm, ncfile);
 
   //ufs_viewer->set_lister(&lister[0]);
-  //
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\tvarname:" << _varname << endl;
 
@@ -143,37 +117,17 @@ void UFSController::setup()
   //geometry->print();
 
     ufs_viewer->set_coastline(coastline);
-
     ufs_viewer->set_geometry(geometry);
   //ufs_3dviewer->set_geoufs_(geoufs_);
-
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     ufs_viewer->setup(_varname, _value);
     _minval = ufs_viewer->get_minval();
     _maxval = ufs_viewer->get_maxval();
-  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void UFSController::draw()
 {
-  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "_sphere: " << _sphere << endl;
-  //if(_sphere)
-  //{
-  //    cout << "file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //    cout << "need to draw a ball" << endl;
-
-      //ufs_3dviewer->draw(_tvalue);
-  //}
-  //else
-  //{
-      //cout << "file: " << __FILE__ << ", line: " << __LINE__ << endl;
-      //cout << "2d draw" << endl;
-        ufs_viewer->draw();
-      //coastline->draw();
-  //}
-  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    ufs_viewer->draw();
 }
 
 void UFSController::set1dvarname(string vn)

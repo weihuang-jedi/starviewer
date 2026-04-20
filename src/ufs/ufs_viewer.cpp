@@ -399,6 +399,7 @@ void UFS2dViewer::_sphereDisplay()
         _lonlat2xyz_texture(_lon[0], _lat[j-1], radius, fact);
         glEnd();
     }
+    coastline->drawOnSphere(radius+0.01);
     }
 
     glDisable(GL_TEXTURE_1D);
@@ -462,6 +463,7 @@ void UFS2dViewer::_flatDisplay()
         }
         glEnd();
     }
+    coastline->drawOnPlane(height+0.01);
     }
 
     glDisable(GL_TEXTURE_1D);
