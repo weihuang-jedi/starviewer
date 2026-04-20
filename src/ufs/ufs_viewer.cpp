@@ -17,8 +17,8 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt)
  
     earth = new Earth();
 
-    nvoptions->set_xsec(360);
-    nvoptions->set_ysec(90);
+    nvoptions->set_xsec(0);
+    nvoptions->set_ysec(0);
     nvoptions->set_zsec(0);
 
     _nlon = 360;
@@ -42,42 +42,32 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, nc
     colorTable = ct;
     nvoptions = opt;
 
-  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     texture1d = new Texture1d();
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     texture1d->set_colors(ct->get_clen(), ct->get_cmap());
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     texture1d->set_name(ct->get_name());
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     _var = NULL;
 
     ncfile = nchandler;
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tbmpflnm: " << bmpflnm << endl;
     earth = new Earth(bmpflnm, ncfile);
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    nvoptions->set_xsec(360);
-    nvoptions->set_ysec(90);
+    nvoptions->set_xsec(0);
+    nvoptions->set_ysec(0);
     nvoptions->set_zsec(0);
 
     _nlon = 360;
     _nlat = 180;
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     oneover = 1.0 / 180.0;
     deg2rad = 3.1415926535897932 * oneover;
 
     lister = new Lister();
     lister->setup(361, 181, 121);
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     locator = NULL;
 
     previoustimelevel = -1;
     current_timelevel = 0;
-  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 UFS2dViewer::~UFS2dViewer()
@@ -104,9 +94,13 @@ void UFS2dViewer::setup(string vn, float *var)
     _var = var;
     _nlev = geometry->get_nlev();
 
-    nvoptions->set_xsec(_nlon);
-    nvoptions->set_ysec(_nlat);
-    nvoptions->set_zsec(_nlev);
+  //nvoptions->set_xsec(_nlon);
+  //nvoptions->set_ysec(_nlat);
+  //nvoptions->set_zsec(_nlev);
+
+    nvoptions->set_xsec(0);
+    nvoptions->set_ysec(0);
+    nvoptions->set_zsec(0);
 
     _evaluate(_var);
 
@@ -141,23 +135,12 @@ void UFS2dViewer::_initialize()
     _xFlat = geometry->get_xFlat();
     _yFlat = geometry->get_yFlat();
 
-    _deltlon = _lon[1] - _lon[0];
-    _deltlat = abs(_lat[1] - _lat[0]);
-
     geometry->set_ntim(1);
-
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\n" << _deltlon << " _lon: " <<  _lon << endl;
-  //cout << "\n" << _deltlat << " _lat: " <<  _lat << endl;
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFS2dViewer::draw()
 {
     size_t nsquare = _nlon * _nlat;
-
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tnvoptions->get_tsec() = " << nvoptions->get_tsec() << ", previoustimelevel = " << previoustimelevel << endl;
 
     if(nvoptions->get_cb(NV_RESET))
     {
@@ -172,7 +155,6 @@ void UFS2dViewer::draw()
     if(nvoptions->get_cb(NV_STATUS_CHANGED))
         reset();
 
-  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     current_timelevel = nvoptions->get_tsec();
     if(current_timelevel != previoustimelevel)
         reset();
@@ -180,7 +162,6 @@ void UFS2dViewer::draw()
     if(current_timelevel >= geometry->get_nt())
         return;
 
-  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if((geometry->get_nlev() <= nvoptions->get_zsec()) && (0 > nvoptions->get_zsec()))
         return;
 
@@ -208,6 +189,7 @@ void UFS2dViewer::draw()
     ycl = lister->get_yid(nvoptions->get_ysec());
     xcl = lister->get_xid(nvoptions->get_xsec());
 
+  //makeCurrent();
   //Clear screen and Z-buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -233,16 +215,6 @@ void UFS2dViewer::draw()
     }
     else
     {
-  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tnvoptions->get_cb(NV_FLATON): " << nvoptions->get_cb(NV_FLATON) << endl;
-      //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-      //cout << "\tnvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
-      //cout << "\tnvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
-      //cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
-      //cout << "\txcl = " << xcl << endl;
-      //cout << "\tycl = " << ycl << endl;
-      //cout << "\tzcl = " << zcl << endl;
-
         if(nvoptions->get_cb(NV_FLATON))
         {
             if(nvoptions->get_zsec() < _nlev)
@@ -257,7 +229,7 @@ void UFS2dViewer::draw()
 
           //draw_plane_grids();
 
-            if(nvoptions->get_xsec() > 0)
+            if(nvoptions->get_xsec() < _nlon && nvoptions->get_xsec() > 0)
             {
                 if(xcl)
                     glCallList(xcl);
@@ -283,7 +255,7 @@ void UFS2dViewer::draw()
                     _sphereDisplay();
             }
     
-            if(nvoptions->get_xsec() < _nlon)
+            if(nvoptions->get_xsec() < _nlon && nvoptions->get_xsec() > 0)
             {
                 if(xcl)
                     glCallList(xcl);
@@ -302,7 +274,6 @@ void UFS2dViewer::draw()
           //draw_sphere_grids();
         }
     }
-  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFS2dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact)
@@ -357,15 +328,15 @@ void UFS2dViewer::_sphereDisplay()
     double fact;
     double radius = 1.001;
 
-    k1 = nvoptions->get_zsec();
+    k1 = nvoptions->get_zsec()+1;
     k = _nlev-k1;
-    radius = 1.0 + ((double) (k1-1) / _nlev);
+    radius = _k2r(k);
     sv = 1.0 / (_valmax - _valmin);
 
     zcl = glGenLists(1);
   //glNewList(zcl, GL_COMPILE);
     glNewList(zcl, GL_COMPILE_AND_EXECUTE);
-    lister->set_zid(k1, zcl);
+    lister->set_zid(k, zcl);
 
   //OpenGL should normalize normal vectors
     glEnable(GL_NORMALIZE);
@@ -413,17 +384,17 @@ void UFS2dViewer::_flatDisplay()
     size_t mpos, npos;
     double sv = 1.0;
     double fact;
-    double height = 0.00;
+    double height = 0.0;
 
-    k1 = nvoptions->get_zsec();
+    k1 = nvoptions->get_zsec()+1;
     k = _nlev-k1;
-    height = (double) (k1-1) / _nlev;
+    height = _k2h(k);
     sv = 1.0 / (_valmax - _valmin);
 
     zcl = glGenLists(1);
   //glNewList(zcl, GL_COMPILE);
     glNewList(zcl, GL_COMPILE_AND_EXECUTE);
-    lister->set_zid(k1, zcl);
+    lister->set_zid(k, zcl);
 
     glPushMatrix();
     glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -530,7 +501,7 @@ void UFS2dViewer::reset_texture1d(ColorTable *ct)
 
 void UFS2dViewer::draw_sphere_grids()
 {
-    int i, j;
+    int i, j, k;
     size_t npos;
 
     double radius = 1.001;
@@ -544,7 +515,8 @@ void UFS2dViewer::draw_sphere_grids()
     _ySphere = geometry->get_ySphere();
     _zSphere = geometry->get_zSphere();
 
-    radius = 0.75 + 0.5 * ( 1.0 - (nvoptions->get_zsec() + 1.0) / _nlev);
+    k = nvoptions->get_zsec();
+    radius = _k2r(k);
 
     glPushMatrix();
 
@@ -581,10 +553,7 @@ void UFS2dViewer::draw_plane_grids()
 
     GLfloat line_width = 1.0;
 
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tncenters = " << ncenters << endl;
-
-    height = 0.8 * (0.5 - (nvoptions->get_zsec() + 1.0) / _nlev);
+    height = _k2h(nvoptions->get_zsec()) + 0.001;
 
     glPushMatrix();
 
@@ -623,7 +592,7 @@ void UFS2dViewer::_display_Yflat_plane(int ys)
        return;
 
     for(k = 0; k < _nlev; ++k)
-        height[k] = (double) (_nlev - 1 - k) / _nlev;
+        height[k] = _k2h(k);
 
     sv = 1.0 / (_valmax - _valmin);
 
@@ -686,7 +655,7 @@ void UFS2dViewer::_sphereXplane(int xs)
     int i = xs - 1;
 
     for(k = 0; k < _nlev; ++k)
-        radius[k] = 1.0 + (double) (_nlev-1-k) / _nlev;
+        radius[k] = _k2r(k);
 
     sv = 1.0 / (_valmax - _valmin);
 
@@ -738,7 +707,7 @@ void UFS2dViewer::_sphereYplane(int ys)
     int j = ys - 1;
 
     for(k = 0; k < _nlev; ++k)
-        radius[k] = 1.0 + (double) (_nlev-1-k) / _nlev;
+        radius[k] = _k2r(k);
 
     sv = 1.0 / (_valmax - _valmin);
 
@@ -854,14 +823,13 @@ void UFS2dViewer::_sphereBump()
   //cout << "\t_varname: <" << _varname << ">, lev = " << lev << endl;
   //cout << "\tncenters = " << ncenters << ", nvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
 
-
     if(k < _nlev)
     {
-        radius = 0.725 + 0.5 * ( 1.0 - (k + 1.0) / _nlev);
+        radius = _k2r(k);
     }
     else
     {
-        radius = 1.0;
+        radius = 1.001;
     }
 
     sv = 1.0 / (_valmax - _valmin);
@@ -942,7 +910,7 @@ void UFS2dViewer::_flatBump()
     k = nvoptions->get_zsec();
 
     if(1 < _nlev)
-        height = ((double) (_nlev-k) / _nlev);
+        height = _k2h(k);
     else
         height = 0.001;
 
@@ -1113,5 +1081,17 @@ void UFS2dViewer::_draw_cross(double radius)
             glVertex3f(x, y, z);
         }
     glEnd();
+}
+
+double UFS2dViewer::_k2h(int k)
+{
+    double height = 0.5 * ((double) (_nlev-k) / _nlev);
+    return height;
+}
+
+double UFS2dViewer::_k2r(int k)
+{
+    double radius = 1.0 + _k2h(k);
+    return radius;
 }
 

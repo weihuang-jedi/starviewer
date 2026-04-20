@@ -77,9 +77,6 @@ class UFS2dViewer : public QGLWidget
         int previoustimelevel;
         int current_timelevel;
 
-        double _deltlon;
-        double _deltlat;
-
         double* _lon;
         double* _lat;
         float* _lev;
@@ -128,6 +125,8 @@ class UFS2dViewer : public QGLWidget
         void _flatBump();
         void _sphereBump();
         void _draw_cross(double radius);
+        double _k2h(int k);
+        double _k2r(int k);
 };
 #endif
 

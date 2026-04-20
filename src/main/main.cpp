@@ -54,6 +54,8 @@ int main(int argc, char *argv[])
     NVOptions* nvoptions = new NVOptions();
 
     MainWindow *mainwindow;
+    QSurfaceFormat format;
+    format.setProfile(QSurfaceFormat::CoreProfile);
 
     n = 1;
     while(n < argc)

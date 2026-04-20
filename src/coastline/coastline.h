@@ -82,9 +82,12 @@ class CoastLine
         int N_bins_in_file;	// (Dimension_of_scalar) ;
         int N_segments_in_file;	// (Dimension_of_scalar) ;
         int N_points_in_file;	// (Dimension_of_scalar) ;
+        int N_polygons_in_file;	// (Dimension_of_scalar) ;
         vector<int> Id_of_first_segment_in_a_bin;	// (Dimension_of_bin_arrays) ;
         vector<short> N_segments_in_a_bin;	// (Dimension_of_bin_arrays) ;
         vector<int> Id_of_first_point_in_a_segment;	// (Dimension_of_segment_arrays) ;
+        vector<int> Id_of_parent_polygons;	// (Dimension_of_polygon_array) ;
+        vector<int> Id_of_node_polygons;	// (Dimension_of_polygon_array) ;
 
 /*
 	netcdf binned_GSHHS_i {

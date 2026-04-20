@@ -1091,6 +1091,28 @@ void BaseTranslator::selectCoastLine(int f)
     updateGL();
 }
 
+// Source - https://stackoverflow.com/a/34218115
+// Posted by Nils Schimmelmann
+// Retrieved 2026-04-20, License - CC BY-SA 3.0
+
+void BaseTranslator::_renderText(double x, double y, double z, const QString &str)
+{
+    //const QFont & font = QFont();
+    const QFont & font = QFont("Times", 24, QFont::Bold);
+
+    // Retrieve last OpenGL color to use as a font color
+    GLdouble glColor[4];
+    glGetDoublev(GL_CURRENT_COLOR, glColor);
+    QColor fontColor = QColor(glColor[0], glColor[1], glColor[2], glColor[3]);
+
+    // Render text
+    QPainter painter(this);
+    painter.setPen(fontColor);
+    painter.setFont(font);
+    painter.drawText(x, y, str);
+    painter.end();
+}
+
 void BaseTranslator::writeHeader()
 {
   //cout << "Enter Function: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -1101,10 +1123,38 @@ void BaseTranslator::writeHeader()
   //cout << "\t_position.c_str() = " << _position.c_str() << endl;
     if(nvoptions->get_cb(NV_TITLEON))
     {
+#if 1
+        const QFont & font = QFont("Times", 24, QFont::Bold);
+	QString namestr = _varname.c_str();
+	glDisable(GL_DEPTH_TEST);  // Prevents text from being "cut" by 3D objects
+        glDisable(GL_LIGHTING);    // Prevents text from being shaded grey/black
+	glDisable(GL_CLIP_PLANE0);
+        glEnable(GL_BLEND);        // Required for smooth font edges
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        renderText(30.0, 30.0, namestr, font);
+      //renderText(30.0, 30.0, _varname.c_str(), font);
+        renderText(30.0, 60.0, _timeinfo.c_str(), font);
+
+        glEnable(GL_DEPTH_TEST);
+#else
+#if 1
+	// In your header
+        QString namestring = _varname.c_str();
+        QString timestring = _timeinfo.c_str();
+
+	_renderText(30.0, 30.0, 0.0, namestring);
+	_renderText(30.0, 30.0, 0.0, timestring);
+#else
         renderText(30.0, 30.0, _varname.c_str(),  QFont("Times", 24, QFont::Bold));
       //renderText(30.0, 30.0, _title.c_str(),    QFont("Times", 24, QFont::Bold));
         renderText(30.0, 60.0, _timeinfo.c_str(), QFont("Times", 24, QFont::Bold));
       //renderText(30.0, 90.0, _position.c_str(), QFont("Times", 24, QFont::Bold));
+#endif
+#endif
     }
   //cout << "Leave Function: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
