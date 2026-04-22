@@ -1,17 +1,34 @@
 #!/bin/bash
 
- set -x
+set -x
 
- module purge
- module use moduledir
- module load hercules.gnu 
+nproc=8
 
- mkdir -p build
+mkdir -p build
+cd build
+rm -rf *
 
- cd build
- rm -rf *
- cmake ../src -DQt5_DIR=/apps/contrib/spack-stack-1.1/gcc-11.3.1/qt-5.15.14-mfeuvcidmyqoi2m5i2tfrk6yd7xtk6pt \
-	 -DGLU_LIBRARY=/usr/lib64/libGLU.so.1 \
-	 -DGLU_INCLUDE_DIR=/apps/spack-managed/gcc-11.3.1/mesa-glu-9.0.2-jt4lynuhi3xlsnsm6v77irx4g2dxujui/include
- make -j 4
+export NetCDF_INCLUDE_DIRS=/usr/include
+export NetCDF_LIBRARIES=/usr/lib/x86_64-linux-gnu/libnetcdf.so
+
+export NetCDF_CXX_INCLUDE_DIRS=/usr/include
+export NetCDF_CXX_LIBRARIES=/usr/lib/x86_64-linux-gnu/libnetcdf_c++4.so
+
+# Set these so CMake's find_package can work automatically
+export CXX=/usr/bin/g++
+export CC=/usr/bin/gcc
+# Add the Fortran compiler export
+export FC=/usr/bin/gfortran
+
+cmake ../src \
+  -DCMAKE_BUILD_TYPE=Release \
+  "-DCMAKE_EXE_LINKER_FLAGS=-Wl,-rpath,/usr/lib/x86_64-linux-gnu -lOpenGL -lGL -lGLU -lX11 -lXrender -Wl,--copy-dt-needed-entries" \
+  -DCMAKE_CXX_COMPILER_WORKS=1 \
+  -DCMAKE_C_COMPILER_WORKS=1 \
+  -DCMAKE_Fortran_COMPILER_WORKS=1 \
+  -DNetCDF_INCLUDE_DIRS=/usr/include \
+  -DNetCDF_LIBRARIES=/usr/lib/x86_64-linux-gnu/libnetcdf.so \
+  -DCMAKE_INSTALL_RPATH="/usr/lib/x86_64-linux-gnu"
+
+make -j${nproc}
 

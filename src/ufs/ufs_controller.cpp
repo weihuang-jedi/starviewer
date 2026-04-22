@@ -9,32 +9,22 @@ UFSController::UFSController(ColorTable *ct, NVOptions* opt,
     nvoptions = opt;
     strcpy(_flnm, fn);
 
-  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\tOpen file: <" << fn << ">" << endl;
-
     geometry = new UFSGeometry();
     geometry->set_name(sfn);
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //coastline = new CoastLine();
+    coastline = new CoastLine();
   
     _maxFile = 1;
     _ntim = 1;
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tsfn = " << sfn << endl;
-  //nvfile = new NVFile(sfn, isList);
     ncfile = new ncReader(fn);
 
     ufs_viewer = NULL;
-
-  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 UFSController::~UFSController()
 {
-  //delete coastline;
-  //delete nvfile;
+    delete coastline;
     delete ncfile;
     
     if(NULL != ufs_viewer)
@@ -61,8 +51,14 @@ void UFSController::_print1d(T* var, int nl)
 void UFSController::setup()
 {
     int n;
-
-  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    char bmpflnm[1024];
+    const char* path = getenv("STARVIEWERHOME");
+    if (path == nullptr) {
+        cout << "ERROR: STARVIEWERHOME not set!" << endl;
+        throw(errno);
+    }
+    strcpy(bmpflnm, path);
+    strcat(bmpflnm, "/data/earth.bmp");
 
   //_ntimes = ncfile->get_ntimes();
 
@@ -80,22 +76,15 @@ void UFSController::setup()
 
     geometry->set_nlon(ncfile->getNlon());
     geometry->set_nlat(ncfile->getNlat());
-    geometry->set_nlev(ncfile->getNlev());
+  //geometry->set_nlev(ncfile->getNlev());
+    geometry->set_nlev(1);
   //geometry->set_ntim(_ntimes[0]);
     geometry->set_ntim(_maxTime);
 
     geometry->set_lon(ncfile->getLon());
     geometry->set_lat(ncfile->getLat());
     geometry->set_lev(ncfile->getPfull());
-
-  //geometry->set_lon2d(ncfile->get_lon2d());
-  //geometry->set_lat2d(ncfile->get_lat2d());
-
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
     geometry->setup();
-
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     geometry->set_has1dLon(true);
     geometry->set_has1dLat(true);
@@ -103,32 +92,21 @@ void UFSController::setup()
     geometry->set_has2dLon(false);
     geometry->set_has2dLat(false);
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
   //_varname = string("sst");
     _varname = string("hgtsfc");
 
     _sphere = false;
     _ball = false;
     _initialized = false;
-
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
     _tvalue = 0;
     _time_interval = 128;
-
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
     _curFile = 0;
     _curTime = 0;
     _preFile = _curFile;
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
-    ufs_viewer = new UFS2dViewer(colorTable, nvoptions, "/work2/noaa/epic/weihuang/nv/starviewer/data/earth.bmp", ncfile);
+    ufs_viewer = new UFS2dViewer(colorTable, nvoptions, bmpflnm, ncfile);
 
   //ufs_viewer->set_lister(&lister[0]);
-  //
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\tvarname:" << _varname << endl;
 
@@ -138,39 +116,18 @@ void UFSController::setup()
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //geometry->print();
 
-  //ufs_viewer->set_coastline(coastline);
-
+    ufs_viewer->set_coastline(coastline);
     ufs_viewer->set_geometry(geometry);
   //ufs_3dviewer->set_geoufs_(geoufs_);
-
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     ufs_viewer->setup(_varname, _value);
     _minval = ufs_viewer->get_minval();
     _maxval = ufs_viewer->get_maxval();
-  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void UFSController::draw()
 {
-    cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "_sphere: " << _sphere << endl;
-    _sphere = true;
-    if(_sphere)
-    {
-        cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-        cout << "2d draw" << endl;
-
-        ufs_viewer->draw();
-      //coastline->draw();
-    }
-    else
-    {
-        cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-        cout << "need to draw a ball" << endl;
-      //ufs_3dviewer->draw(_tvalue);
-    }
-    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    ufs_viewer->draw();
 }
 
 void UFSController::set1dvarname(string vn)
@@ -327,11 +284,10 @@ void UFSController::set_fileNtime(int nf, int nt)
         if(_initialized)
             free(_value);
 
-      //nvfile->select_file(nf);
-
         _value = ncfile->get_fv(_varname.c_str());
         _title = _varname;
 
+        geometry->set_nlev(1);
         geometry->set_ntim(_ntimes[_curFile]);
 
         _minval = ufs_viewer->get_minval();

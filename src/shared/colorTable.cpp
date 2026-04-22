@@ -74,8 +74,16 @@ void ColorTable::_setup()
 
   //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
 
-    strcpy(root, getenv("NCARG_ROOT"));
-    strcat(root, "/lib/ncarg/colormaps/");
+    const char* path = getenv("STARVIEWERHOME");
+    if (path == nullptr) {
+        cout << "ERROR: STARVIEWERHOME not set!" << endl;
+        throw(errno);
+    }
+    strcpy(root, path);
+  //strcpy(root, "/contrib/Wei.Huang/src/nv/starviewer");
+  //cout << "root: " << root << endl;
+    strcat(root, "/colormaps/");
+  //cout << "root: " << root << endl;
 
   //cout << "\troot: <" << root << ">" << endl;
   //cout << "\tUse default color map: gui_default" << endl;
@@ -97,7 +105,7 @@ void ColorTable::_setup()
     if(NULL == (dp = opendir(root)))
     {
         cout << "Error(" << errno << ") opening " << root << endl;
-        return;
+        throw(errno);
     }
 
     while((dirp = readdir(dp)))
@@ -148,15 +156,18 @@ void ColorTable::get_file_contents(const char *cn)
 
     float maxval = 1.0;
 
-    strcpy(root, getenv("NCARG_ROOT"));
-    strcat(root, "/lib/ncarg/colormaps/");
+    const char* path = getenv("STARVIEWERHOME");
+    if (path == nullptr) {
+        cout << "ERROR: STARVIEWERHOME not set!" << endl;
+        throw(errno);
+    }
+    strcpy(root, path);
+    strcat(root, "/colormaps/");
+
     strcat(root, cn);
 
     strcpy(fullname, root);
     strcat(fullname, ".rgb");
-
-  //cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tfullname: " << fullname << endl;
 
     in.open(fullname, ios::in | ios::binary);
 
@@ -341,12 +352,12 @@ void ColorTable::set_colorMap(string cn)
 
     get_file_contents(cn.c_str());
 
-  //if(NULL != texture1d)
-  //    delete texture1d;
+    if(NULL != texture1d)
+        delete texture1d;
 
-  //texture1d = new Texture1d();
-  //texture1d->set_colors(_clen, _cmap);
-  //texture1d->set_name(cn);
+    texture1d = new Texture1d();
+    texture1d->set_colors(_clen, _cmap);
+    texture1d->set_name(cn);
 }
 
 void ColorTable::set_opacity(int opt)

@@ -47,13 +47,6 @@ void StateBoundary::_setup()
 
   //cout << "\tEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
-  //NclAddFileFormats();
-    initializeNcl();
-
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
-    nclvar = NULL;
-
     flnm[0] = "$NV_DATA/states_shapefile/statesp020.shp";
 
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
@@ -83,7 +76,6 @@ void StateBoundary::_setup()
       //cout << "\tfile name " << n << ": <" << flnm[n] << ">" << endl;
 
         strcpy(shpflnm, flnm[n].c_str());
-        nclfile = NclCreateFile(shpflnm);
 
         natts[n] = 0;
         ndims[n] = 0;
@@ -99,11 +91,7 @@ void StateBoundary::_setup()
         _check_atts(n);
         _check_dims(n);
         _check_vars(n);
-
-        delete nclfile;
     }
-
-    mapprojection = NULL;
 
   //cout << "\tLeave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
@@ -116,71 +104,7 @@ void StateBoundary::_check_atts(int i)
     char** attnames = NULL;
     char*  cptr;
 
-    NclMultiDValData attMV = NULL;
- 
     natts[i] = 0;
-
-    attnames = guiGetNclFileAttNames(nclfile, &natts[i]);
-
-  //cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
-  //cout << "\tnatts[" << i << "] = " << natts[i] << "." << endl;
-
-    for(n = 0; n < natts[i]; ++n)
-    {
-      //cout << "\tAtt " << n << ": <" << attnames[n] << ">" << endl;
-        attMV = guiGetFileAtt(nclfile, attnames[n]);
-
-        if(NCL_string == attMV->multidval.data_type)
-        {
-            if(0 == strcmp("layer_name", attnames[n]))
-            {
-                cptr = guiQuarkToString(*(NclQuark*)attMV->multidval.val);
-              //cout << "\t\tAtt " << n << ": <" << attnames[n] << "> = <" << cptr << ">" << endl;
-
-                layer_name[i] = cptr;
-            }
-            else if(0 == strcmp("geometry_type", attnames[n]))
-            {
-                cptr = guiQuarkToString(*(NclQuark*)attMV->multidval.val);
-              //cout << "\t\tAtt " << n << ": <" << attnames[n] << "> = <" << cptr << ">" << endl;
-
-                geometry_type[i] = cptr;
-            }
-        }
-        else if(NCL_int == attMV->multidval.data_type)
-        {
-            if(0 == strcmp("geom_segIndex", attnames[n]))
-            {
-                iptr = (int*)attMV->multidval.val;
-              //cout << "\t\tAtt " << n << ": <" << attnames[n] << "> = <" << *iptr << ">" << endl;
-
-                geom_segIndex[i] = *iptr;
-            }
-            else if(0 == strcmp("geom_numSegs", attnames[n]))
-            {
-                iptr = (int*)attMV->multidval.val;
-              //cout << "\t\tAtt " << n << ": <" << attnames[n] << "> = <" << *iptr << ">" << endl;
-
-                geom_numSegs[i] = *iptr;
-            }
-            else if(0 == strcmp("segs_xyzIndex", attnames[n]))
-            {
-                iptr = (int*)attMV->multidval.val;
-              //cout << "\t\tAtt " << n << ": <" << attnames[n] << "> = <" << *iptr << ">" << endl;
-
-                segs_xyzIndex[i] = *iptr;
-            }
-            else if(0 == strcmp("segs_numPnts", attnames[n]))
-            {
-                iptr = (int*)attMV->multidval.val;
-              //cout << "\t\tAtt " << n << ": <" << attnames[n] << "> = <" << *iptr << ">" << endl;
-
-                segs_numPnts[i] = *iptr;
-            }
-        }
-
-      //guiDestroyObj((NclObj) attMV);
-    }
 }
 
 void StateBoundary::_check_dims(int i)
@@ -190,55 +114,6 @@ void StateBoundary::_check_dims(int i)
  
     ndims[i] = 0;
   //cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
-
-    if(nclfile->file.advanced_file_structure)
-    {
-      //Advanced file strucuture
-        NclAdvancedFile theadvancedfile = NULL;
-        NclFileGrpNode* grpnode = NULL;
-
-        theadvancedfile = (NclAdvancedFile) nclfile;
-        grpnode = theadvancedfile->advancedfile.grpnode;
-        if(NULL != grpnode->dim_rec)
-            ndims[i] = grpnode->dim_rec->n_dims;
-    }
-    else
-    {
-        ndims[i] = nclfile->file.n_file_dims;
-    }
-
-  //cout << "\tndims[" << i << "] = " << ndims[i] << "." << endl;
-  
-    if(nclfile->file.advanced_file_structure)
-    {
-      //Advanced file strucuture
-      //cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
-      //for(n = 0; n < ndims[i]; ++n)
-      //{
-      //    cout << "\tDim " << n << ": <" << _dimnames[n] << ">, size: " << _dimsizes[n] << endl;
-      //}
-    }
-    else
-    {
-      //cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
-        for(n = 0; n < ndims[i]; ++n)
-        {
-            cptr = guiQuarkToString(nclfile->file.file_dim_info[n]->dim_name_quark);
-            if(0 == strcmp("geometry", cptr))
-                geometry[i] = (int) nclfile->file.file_dim_info[n]->dim_size;
-            else if(0 == strcmp("segments", cptr))
-                segments[i] = (int) nclfile->file.file_dim_info[n]->dim_size;
-            else if(0 == strcmp("num_features", cptr))
-                num_features[i] = (int) nclfile->file.file_dim_info[n]->dim_size;
-            else if(0 == strcmp("num_segments", cptr))
-                num_segments[i] = (int) nclfile->file.file_dim_info[n]->dim_size;
-            else if(0 == strcmp("num_points", cptr))
-                num_points[i] = (int) nclfile->file.file_dim_info[n]->dim_size;
-
-          //cout << "\tDim " << n << ": <" << cptr
-          //     << ">, size: " << nclfile->file.file_dim_info[n]->dim_size << endl;
-        }
-    }
 }
 
 void StateBoundary::_check_vars(int i)
@@ -249,70 +124,6 @@ void StateBoundary::_check_vars(int i)
   //cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
 
     nvars[i] = 0;
-    if(nclfile->file.advanced_file_structure)
-    {
-      //Advanced file strucuture
-        NclAdvancedFile theadvancedfile = NULL;
-        NclFileGrpNode* grpnode = NULL;
-      //NclFileVarNode* varnode = NULL;
-      //NclFileDimNode* dimnode = NULL;
- 
-        theadvancedfile = (NclAdvancedFile) nclfile;
-        grpnode = theadvancedfile->advancedfile.grpnode;
-        if(NULL != grpnode->var_rec)
-            nvars[i] = grpnode->var_rec->n_vars;
-    }
-    else
-    {
-        nvars[i] = nclfile->file.n_vars;
-    }
-
-  //cout << "\tnvars[" << i << "] = " << nvars[i] << "." << endl;
-
-    if(0 == nvars[i])
-        return;
-
-
-    if(nclfile->file.advanced_file_structure)
-    {
-      //Advanced file strucuture
-    }
-    else
-    {
-      //cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
-        for(n = 0; n < nvars[i]; ++n)
-        {
-            cptr = guiQuarkToString(nclfile->file.var_info[n]->var_name_quark);
-          //cout << "\tVar " << n << ": <" << cptr << ">" << endl;
-
-            if(0 == strcmp("x", cptr))
-            {
-                lon[i] = get_dv(cptr);
-            }
-            else if(0 == strcmp("y", cptr))
-            {
-                lat[i] = get_dv(cptr);
-            }
-            else if(0 == strcmp("geometry", cptr))
-            {
-                geometry_array[i] = get_iv(cptr);
-            }
-            else if(0 == strcmp("segments", cptr))
-            {
-                segments_array[i] = get_iv(cptr);
-            }
-#if 0
-            else if(0 == strcmp("id", cptr))
-            {
-                int*  iptr;
-                iptr = get_iv(cptr);
-
-              //cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
-              //cout << "\t\tiptr = " << iptr[0] << endl;
-            }
-#endif
-        }
-    }
 }
 
 void StateBoundary::print()
@@ -357,10 +168,6 @@ float* StateBoundary::get_value(char* vn)
   //     << ">, line: " << __LINE__ << endl;
   //cout << "\tvar name: <" << vn << ">" << endl;
 
-    nclvar = readNclFileVar(nclfile, vn, NULL);
-
-    value = guiGetValue(nclvar);
-
     return value;
 }
 
@@ -372,10 +179,6 @@ int* StateBoundary::get_iv(char* vn)
   //     << ">, line: " << __LINE__ << endl;
   //cout << "\tvar name: <" << vn << ">" << endl;
 
-    nclvar = readNclFileVar(nclfile, vn, NULL);
-
-    value = guiGetIntArray(nclvar);
-
     return value;
 }
 
@@ -386,10 +189,6 @@ double* StateBoundary::get_dv(char* vn)
   //cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__
   //     << ">, line: " << __LINE__ << endl;
   //cout << "\tvar name: <" << vn << ">" << endl;
-
-    nclvar = readNclFileVar(nclfile, vn, NULL);
-
-    value = guiGetDoubleArray(nclvar);
 
     return value;
 }
@@ -627,16 +426,12 @@ void StateBoundary::drawONplane2(double hgt, int m)
                     continue;
 
                 k = startPT;
-                mapprojection->lc_llxy(lon[n][k], lat[n][k], xb, yb);
 
               //cout << "\tlon = " << lon[n][k] << ", lat = " << lat[n][k] << ", xb = " << xb << ", yb = " << yb << endl;
               //_lonlat2xy2(lon[n][k], lat[n][k], xb, yb);
 
                 for(k = startPT + 1; k < endPT; ++k)
                 {
-                  //_lonlat2xy2(lon[n][k], lat[n][k], x, y);
-                    mapprojection->lc_llxy(lon[n][k], lat[n][k], x, y);
-#if 1
                     if( (x  >= 0.0) && (x  <= 1.0) &&
                         (xb >= 0.0) && (xb <= 1.0) &&
                         (y  >= 0.0) && (y  <= 1.0) &&
@@ -650,24 +445,6 @@ void StateBoundary::drawONplane2(double hgt, int m)
 
                     xb = x;
                     yb = y;
-#else
-                    if(((0.9 < xb) && (-0.9 > x)) ||
-                       ((0.9 < x) && (-0.9 > xb)))
-                    {
-                        xb = x;
-                        yb = y;
-                    }
-                    else
-                    {
-                        glBegin(GL_LINES);
-                            glVertex3f(xb, yb, z);
-                            glVertex3f(x , y , z);
-                        glEnd();
-
-                        xb = x;
-                        yb = y;
-                    }
-#endif
                 }
             }
         }

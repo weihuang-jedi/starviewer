@@ -13,9 +13,6 @@
 
 #include <netcdf.h>
 
-#include "nclInterface.h"
-#include "mapprojection.h"
-
 using namespace std;
 
 class StateBoundary
@@ -42,14 +39,7 @@ class StateBoundary
         void set_plot_level(int n);
         void set_min_plot_points(int n) { minPlotPoints = n; };
 
-        void set_mapprojection(MapProjection *mproj) { mapprojection = mproj; };
-
     protected:
-        NclFile nclfile;
-        NclVar  nclvar;
-
-        MapProjection *mapprojection;
-
         int plotLevel;
         int maxPlotLevel;
 

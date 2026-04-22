@@ -5,7 +5,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <assert.h>
 
 #include <GL/gl.h>
@@ -17,6 +16,10 @@
 #include <QString>
 #include <QImage>
 #include <QDebug>
+
+#include <netcdf>
+#include <cmath>
+#include <vector>
 
 #include "ncreader.h"
 
@@ -43,17 +46,17 @@ class Earth : public QGLWidget, protected QOpenGLFunctions
         GLuint get_texture_id() {return _texture_id;};
 
     private:
-        char _bmpflnm[512];
-        char _topoflnm[512];
+        char _bmpflnm[1024];
+        char _topoflnm[1024];
         GLuint _texture_id;
 
         double deg2arc;
         double radius;
 
         int nlon, nlat;
-        float* lon;
-        float* lat;
-        float* ter;
+        vector<float> lon;
+        vector<float> lat;
+        vector<float> ter;
         float  maxhgt;
         float  minhgt;
         void read_terrain();

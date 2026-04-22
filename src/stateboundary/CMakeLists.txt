@@ -1,9 +1,3 @@
-# 0. Find NetCDF using environment hints
-set(NetCDF_INCLUDE_DIRS $ENV{NETCDF_C_ROOT}/include)
-set(NetCDF_LIBRARIES $ENV{NETCDF_C_ROOT}/lib/libnetcdf.so)
-find_path(NetCDF_INCLUDE_DIRS NAMES netcdf.h HINTS $ENV{NETCDF_C_ROOT}/include)
-find_library(NetCDF_LIBRARIES NAMES netcdf HINTS $ENV{NETCDF_C_ROOT}/lib)
-
 # 1. Find the required Qt5 components
 find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
 

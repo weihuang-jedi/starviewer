@@ -36,7 +36,7 @@ UFSTranslator::UFSTranslator(ColorTable* ct, NVOptions* opt,
     _hasFileList = isList;
 
     nvoptions->set_xsec(-1);
-    nvoptions->set_ysec(-91);
+    nvoptions->set_ysec(-1);
     nvoptions->set_zsec(0);
     nvoptions->set_tsec(0);
 
@@ -66,14 +66,13 @@ void UFSTranslator::setup()
 
   //if(_hasFileList)
   //{
-      //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-        ufs_controller = new UFSController(colorTable, nvoptions,
-                                              _filename.c_str(), _hasFileList);
+  //  //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //    ufs_controller = new UFSController(colorTable, nvoptions, _filename.c_str(), _hasFileList);
   //}
   //else
   //{
-  //  //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //    ufs_controller = new UFSController(colorTable, nvoptions, _filename.c_str());
+      //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+        ufs_controller = new UFSController(colorTable, nvoptions, _filename.c_str());
   //}
 
   //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -117,7 +116,6 @@ void UFSTranslator::setup()
 //Show the image
 void UFSTranslator::show()
 {
-    cout << "Enter Function: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glShadeModel(GL_SMOOTH);
 
     if(nvoptions->get_tsec() != _glbTime)
@@ -129,29 +127,24 @@ void UFSTranslator::show()
         ufs_controller->set_fileNtime(_curFile, _curTime);
     }
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufs_controller->draw();
 
-  //_varname = ufs_controller->get_varname();
+    _varname = ufs_controller->get_varname();
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\t_varname : " << _varname << endl;
+  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     setLabelColor();
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     make_timeNpositionString();
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     writeHeader();
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     writeVarInfo();
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     writeFrameInfo();
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if(locator->on())
         writeLocatorMsg();
-    cout << "Leave Function: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFSTranslator::createVarInfo()
@@ -242,17 +235,17 @@ void UFSTranslator::select1dVar(const QString& str)
 
 void UFSTranslator::select2dVar(const QString& str)
 {
-  //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "1d var: <" << str.toStdString() << "> is selected." << endl;
+    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "1d var: <" << str.toStdString() << "> is selected." << endl;
  
     _varname = str.toStdString();
 
     ufs_controller->set1dvarname(_varname);
 
-    sliderNspinX->set_max(360);
+    sliderNspinX->set_max(geometry->get_nlon());
     sliderNspinX->setValue(0);
-    sliderNspinY->set_max(90);
-    sliderNspinY->set_min(-90);
+    sliderNspinY->set_max(geometry->get_nlat());
+    sliderNspinY->set_min(0);
     sliderNspinY->setValue(0);
     sliderNspinZ->set_max(1);
     sliderNspinZ->setValue(0);
@@ -278,10 +271,10 @@ void UFSTranslator::select3dVar(const QString& str)
 
     ufs_controller->set3dvarname(_varname);
 
-    sliderNspinX->set_max(360);
+    sliderNspinX->set_max(geometry->get_nlon());
     sliderNspinX->setValue(0);
-    sliderNspinY->set_max(90);
-    sliderNspinY->set_min(-90);
+    sliderNspinY->set_max(geometry->get_nlat());
+    sliderNspinY->set_min(0);
     sliderNspinZ->set_max(geometry->get_nlev());
     sliderNspinZ->setValue(0);
   //sliderNspinT->set_max(_ntim);

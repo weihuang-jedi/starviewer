@@ -39,6 +39,7 @@ class UFSGeometry : public Geometry {
 
 	void set_ntim(int v) { _ntim = v; };
 	int get_ntim() { return _ntim; };
+	int get_hlon() { return _hlon; };
 
     protected:
         string name;
@@ -47,11 +48,13 @@ class UFSGeometry : public Geometry {
         double* _ySphere;
         double* _zSphere;
 
+        double* _xFlat;
+        double* _yFlat;
+
         float _hmax;
         float _hmin;
 
-        double* _xFlat;
-        double* _yFlat;
+	int _hlon;
 
     private:
         void _set_default();

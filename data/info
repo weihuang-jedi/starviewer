@@ -1,1 +1,4 @@
 1. earth.bmp: https://web.engr.oregonstate.edu/~mjb/cs550/Projects/Planets/earth.bmp
+2. GSHHG coastlines, rivers, and borders for GMT in shapefile 4 format (gzipped tar archive).
+	wget http://www.soest.hawaii.edu/pwessel/gshhg/gshhg-shp-2.3.7.zip
+3. elevation data: https://www.temis.nl/data/gmted2010/

@@ -1,21 +1,5 @@
-# Prerequisites
-*.d
-
 # Compiled Object files
-*.slo
-*.lo
 *.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
 
 # Compiled Dynamic libraries
 *.so
@@ -27,18 +11,7 @@
 *.smod
 
 # Compiled Static libraries
-*.lai
-*.la
 *.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-# debug information files
-*.dwo
 
 # build directory
 build
@@ -46,3 +19,12 @@ build
 # install directory
 install
 
+# generated images
+*.png
+
+data/gshhg-gmt-2.3.7.tar.gz
+data/gshhg-gmt-2.3.7
+data/gshhg.info
+data/GMTED2010_15n060_0250deg.nc
+data/read-gshhg.cpp
+removed.colormaps

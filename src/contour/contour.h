@@ -17,9 +17,9 @@
 
 #include <QtOpenGL>
 
-#include <cairo/cairo.h>
+// #include <cairo/cairo.h>
 
-#include <ncarg/hlu/CairoWorkstation.h>
+// #include <ncarg/hlu/CairoWorkstation.h>
 
 #include "evaluator.h"
 #include "colorTable.h"
@@ -94,8 +94,8 @@ class Contour
         ColorTable* colorTable;
         Geometry* geometry;
 
-        cairo_surface_t* surface;
-        cairo_t*         context;
+      //cairo_surface_t* surface;
+      //cairo_t*         context;
 
         unsigned int* _z_id;
         unsigned int* _y_id;

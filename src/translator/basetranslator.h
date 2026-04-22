@@ -286,6 +286,8 @@ class BaseTranslator : public QGLWidget
 
         void SaveJpg();
         void SaveJpg(int n);
+
+	void _renderText(double x, double y, double z, const QString &str);
 };
 #endif
 

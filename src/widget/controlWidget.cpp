@@ -46,7 +46,7 @@ void ControlWidget::_setup_buttons()
 {
     proj_cb    = new QCheckBox("Perspective");
     axis_cb    = new QCheckBox("Axis");
-    ncl_cb     = new QCheckBox("NCL");
+  //ncl_cb     = new QCheckBox("NCL");
 
     bump_cb    = new QCheckBox("Bump");
     colorbar_cb= new QCheckBox("ColorBar");
@@ -54,7 +54,7 @@ void ControlWidget::_setup_buttons()
     flat_cb    = new QCheckBox("Flat");
     bgBW_cb    = new QCheckBox("BG-BW");
     onmap_cb   = new QCheckBox("OnMap");
-    title_cb   = new QCheckBox("Title");
+  //title_cb   = new QCheckBox("Title");
     coastline_cb = new QCheckBox("CoastLine");
 
     x2_cb  = new QCheckBox("X2");
@@ -68,8 +68,8 @@ void ControlWidget::_setup_buttons()
     proj_cb->setChecked(true);
     axis_cb->setChecked(false);
     axis_cb->setCheckState(Qt::Unchecked);
-    ncl_cb->setChecked(false);
-    ncl_cb->setCheckState(Qt::Unchecked);
+  //ncl_cb->setChecked(false);
+  //ncl_cb->setCheckState(Qt::Unchecked);
     bump_cb->setChecked(false);
     bump_cb->setCheckState(Qt::Unchecked);
     colorbar_cb->setChecked(false);
@@ -79,8 +79,8 @@ void ControlWidget::_setup_buttons()
     bgBW_cb->setCheckState(Qt::Unchecked);
     onmap_cb->setChecked(false);
     onmap_cb->setCheckState(Qt::Unchecked);
-    title_cb->setChecked(true);
-    coastline_cb->setChecked(true);
+  //title_cb->setChecked(true);
+    coastline_cb->setChecked(false);
 
   //title_cb->setChecked(false);
   //title_cb->setCheckState(Qt::Unchecked);
@@ -101,15 +101,15 @@ void ControlWidget::_setup_buttons()
 
     connect(proj_cb,    SIGNAL(stateChanged(int)), translator, SLOT(selectProjection(int)));
     connect(axis_cb,    SIGNAL(stateChanged(int)), translator, SLOT(selectAxis(int)));
-    connect(ncl_cb,     SIGNAL(stateChanged(int)), translator, SLOT(selectNCL(int)));
+    connect(coastline_cb,   SIGNAL(stateChanged(int)), translator, SLOT(selectCoastLine(int)));
     connect(bump_cb,    SIGNAL(stateChanged(int)), translator, SLOT(selectBump(int)));
     connect(colorbar_cb,SIGNAL(stateChanged(int)), translator, SLOT(selectColorBar(int)));
     connect(flat_cb,    SIGNAL(stateChanged(int)), translator, SLOT(selectFlat(int)));
     connect(bgBW_cb,    SIGNAL(stateChanged(int)), translator, SLOT(selectBackground(int)));
     connect(onmap_cb,   SIGNAL(stateChanged(int)), translator, SLOT(selectOnMap(int)));
     connect(sphere_cb,  SIGNAL(stateChanged(int)), translator, SLOT(selectSphere(int)));
-    connect(title_cb,   SIGNAL(stateChanged(int)), translator, SLOT(selectTitle(int)));
-    connect(coastline_cb,   SIGNAL(stateChanged(int)), translator, SLOT(selectCoastLine(int)));
+  //connect(title_cb,   SIGNAL(stateChanged(int)), translator, SLOT(selectTitle(int)));
+  //connect(ncl_cb,     SIGNAL(stateChanged(int)), translator, SLOT(selectNCL(int)));
   //connect(surface_cb, SIGNAL(stateChanged(int)), translator, SLOT(selectSurface(int)));
   //connect(shader_cb,  SIGNAL(stateChanged(int)), translator, SLOT(selectShader(int)));
   //connect(volume_cb,  SIGNAL(stateChanged(int)), translator, SLOT(selectVolume(int)));
@@ -125,7 +125,7 @@ void ControlWidget::_setup_buttons()
 
     button_lay->addWidget(proj_cb,    0, 0);
     button_lay->addWidget(axis_cb,    0, 1);
-    button_lay->addWidget(ncl_cb,     0, 2);
+    button_lay->addWidget(coastline_cb,0,2);
 
     button_lay->addWidget(bump_cb,    1, 0);
     button_lay->addWidget(colorbar_cb,1, 1);
@@ -135,8 +135,8 @@ void ControlWidget::_setup_buttons()
     button_lay->addWidget(onmap_cb,   2, 1);
     button_lay->addWidget(sphere_cb,  2, 2);
 
-    button_lay->addWidget(title_cb,   3, 0);
-    button_lay->addWidget(coastline_cb,3,1);
+  //button_lay->addWidget(title_cb,   3, 0);
+  //button_lay->addWidget(ncl_cb,     3, 1);
 
     button_box->setLayout(button_lay);
     layout->addWidget(button_box,0,0);
@@ -345,10 +345,12 @@ void ControlWidget::_setup_message()
     setLayout(layout);
 }
 
+#if 0
 void ControlWidget::selectNCL()
 {
     ncl_cb->setChecked(true);
     translator->selectNCL(2);
 }
+#endif
 
 #include "controlWidget.moc"

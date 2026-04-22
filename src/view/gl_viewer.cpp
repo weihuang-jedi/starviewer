@@ -19,7 +19,7 @@ GL_Viewer::GL_Viewer(ColorTable* ct, NVOptions* opt)
     texture1d->set_colors(ct->get_clen(), ct->get_cmap());
     texture1d->set_name(ct->get_name());
 
-    coastline = new CoastLine();
+  //coastline = new CoastLine();
 
     deg2rad = 3.14159265359/180.0;
     oneover = 1.0/180.0;
@@ -59,7 +59,7 @@ GL_Viewer::~GL_Viewer()
     delete [] xb;
     delete [] ya;
 
-    delete coastline;
+  //delete coastline;
   //delete earth;
     delete evaluator;
     delete leveler;
@@ -1371,7 +1371,7 @@ void GL_Viewer::_display_Zplane_on_sphere(int zs)
 
     glDisable(GL_TEXTURE_1D);
 
-    coastline->draw(height+0.01, 2);
+  //coastline->draw(height+0.01, 2);
 
     glEndList();
 }
@@ -1458,7 +1458,7 @@ void GL_Viewer::_display_on_map()
     }
 
     height = nvoptions->get_zsec() * zDelt;
-    coastline->drawONplane2(height+0.01, 2);
+  //coastline->drawONplane2(height+0.01, 2);
 }
 
 //Draw vertex in xyz coordinates
@@ -1523,7 +1523,7 @@ void GL_Viewer::_display_Zplane_on_map_1d(int zs)
 
     glDisable(GL_TEXTURE_1D);
 
-    coastline->drawONplane2(height+0.01, 2);
+  //coastline->drawONplane2(height+0.01, 2);
 
     glEndList();
 }
@@ -1573,7 +1573,7 @@ void GL_Viewer::_display_Zplane_on_map_2d(int zs)
 
     glDisable(GL_TEXTURE_1D);
 
-    coastline->drawONplane2(height+0.01, 2);
+  //coastline->drawONplane2(height+0.01, 2);
 
     glEndList();
 }
@@ -1669,7 +1669,7 @@ void GL_Viewer::_display_on_sphere_map()
   //height = 0.501 + (nz - 1 - nvoptions->get_zsec()) * zDelt;
     height = 0.501 + nvoptions->get_zsec() * zDelt;
 
-    coastline->draw(height+0.01, 2);
+  //coastline->draw(height+0.01, 2);
 }
 
 void GL_Viewer::_display_Zplane_on_sphere_map_1d(int zs)

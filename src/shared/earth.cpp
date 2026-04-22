@@ -8,19 +8,18 @@
 //
 Earth::Earth()
 {
-    if(getenv("StarViewerHome")) {
-        strcpy(_bmpflnm, getenv("StarViewerHome"));
-    } else {
-        strcpy(_bmpflnm, "/work2/noaa/epic/weihuang/nv/starviewer"); //On MSU hercules
+    const char* path = getenv("STARVIEWERHOME");
+    if (path == nullptr) {
+        cout << "ERROR: STARVIEWERHOME not set!" << endl;
+        throw(errno);
     }
+    strcpy(_bmpflnm, path);
+
     strcat(_bmpflnm, "/data/earth.bmp");
 
     _loadTexBMP();
 
     radius = 1.0;
-    lon = NULL;
-    lat = NULL;
-    ter = NULL;
 
     deg2arc = 3.1415926535897932 / 180.0;
 
@@ -50,14 +49,15 @@ Earth::Earth(const char *flnm, ncReader* nchandler)
     nlat = nchandler->getNlat();
     nter = nlon * nlat;
 
-    lon = new float[nlon];
-    lat = new float[nlat];
-    ter = new float[nter];
+    lon.resize(nlon);
+    lat.resize(nlat);
+    ter.resize(nter);
 
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     double* dbl_lon = nchandler->getLon();
     double* dbl_lat = nchandler->getLat();
-    ter = nchandler->getFloat("hgtsfc");
+    float* fter;
+    fter = nchandler->getFloat("hgtsfc");
 
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     maxhgt = 0.0;
@@ -71,26 +71,28 @@ Earth::Earth(const char *flnm, ncReader* nchandler)
         for(i = 0; i < nlon; ++i)
         {
             lon[i] = (float) dbl_lon[i];
-            hgt = ter[n];
+            hgt = fter[n];
             if(maxhgt < hgt)
                maxhgt = hgt;
             if(minhgt > hgt)
                minhgt = hgt;
+	    ter[n] = hgt;
 
             ++n;
         }
     }
+    free(fter);
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 Earth::~Earth()
 {
-    if(NULL != lon)
-       free(lon);
-    if(NULL != lat)
-       free(lat);
-    if(NULL != ter)
-       free(ter);
+   lon.clear();
+   lon.shrink_to_fit();
+   lat.clear();
+   lat.shrink_to_fit();
+   ter.clear();
+   ter.shrink_to_fit();
 }
 
 void Earth::initializeGL() {
@@ -158,6 +160,7 @@ void Earth::_loadTexBMP()
     set_texture_id(textureID);
 
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\tt.width(): " << t.width() << ", t.height(): " << t.height() << endl;
 
     glBindTexture(GL_TEXTURE_2D, textureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -170,22 +173,18 @@ void Earth::_loadTexBMP()
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
-/*
- *  Draw vertex in polar coordinates
- */
+// Draw vertex in polar coordinates
 void Earth::_Vertex(int th, int ph)
 {
    double x = radius*Cos(th)*Cos(ph);
    double y =         radius*Sin(ph);
    double z = radius*Sin(th)*Cos(ph);
    glNormal3d(x,y,z);
-   glTexCoord2d(0.5*(1.0 - th/180.0), 0.5+ph/180.0);
+   glTexCoord2d(th/180.0, 0.5+ph/180.0);
    glVertex3d(x,y,z);
 }
 
-/*
- *  Draw earth
- */
+// Draw earth
 void Earth::draw(float r)
 {
     float sr = radius;
@@ -194,28 +193,24 @@ void Earth::draw(float r)
     radius = sr;
 }
 
-/*
- *  Draw earth
- */
+// Draw earth
 void Earth::draw()
 {
-    int th,ph;
+    int i,j;
 
-  /*
-   *  Draw surface of the planet
-   */
+    //  Draw surface of the planet
     //  Set texture
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, get_texture_id());
     //  Latitude bands
     glColor3f(1,1,1);
-    for(ph = -90; ph < 90; ph += 5)
+    for(j = -90; j < 90; j += 5)
     {
        glBegin(GL_QUAD_STRIP);
-           for(th = -180; th <= 180; th += 5)
+           for(i = 0; i <= 360; i += 5)
            {
-               _Vertex(th,ph);
-               _Vertex(th,ph+5);
+               _Vertex(i,j);
+               _Vertex(i,j+5);
            }
        glEnd();
     }
@@ -223,9 +218,7 @@ void Earth::draw()
     glDisable(GL_TEXTURE_2D);
 }
 
-/*
- *  Draw earth
- */
+// Draw earth
 void Earth::draw_plane(float z)
 {
     int i, j;
@@ -243,50 +236,29 @@ void Earth::draw_plane(float z)
        y1 = lat[j + 1] / 180.0;
 
        glBegin(GL_QUAD_STRIP);
-       for(i = 0; i < nlon/2; ++i)
+       for(i = 0; i < nlon; ++i)
        {
            x = lon[i] / 180.0;
+           if(x > 1.0)
+	      x -= 2.0;
            glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5*x + 1.0, y0);
+           glTexCoord2d(x, y0);
            glVertex3d(x, y0, z);
 
            glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5*x + 1.0, y1);
+           glTexCoord2d(x, y1);
            glVertex3d(x, y1, z);
        }
 
        x = 0.0;
        glNormal3d(0.0, 0.0, 1.0);
-       glTexCoord2d(0.5*x + 1.0, y0);
+       glTexCoord2d(x, y0);
        glVertex3d(x, y0, z);
 
        glNormal3d(0.0, 0.0, 1.0);
-       glTexCoord2d(0.5*x + 1.0, y1);
+       glTexCoord2d(x, y1);
        glVertex3d(x, y1, z);
 
-       glEnd();
-
-       glBegin(GL_QUAD_STRIP);
-       x = 0.0;
-       glNormal3d(0.0, 0.0, 1.0);
-       glTexCoord2d(0.5*x, y0);
-       glVertex3d(x, y0, z);
-
-       glNormal3d(0.0, 0.0, 1.0);
-       glTexCoord2d(0.5*x, y1);
-       glVertex3d(x, y1, z);
-
-       for(i = nlon/2; i < nlon; ++i)
-       {
-           x = lon[i] / 180.0;
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5*x, y0);
-           glVertex3d(x, y0, z);
-
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5*x, y1);
-           glVertex3d(x, y1, z);
-       }
        glEnd();
     }
 
@@ -308,42 +280,46 @@ void Earth::bump_plane(float z)
   //OpenGL should normalize normal vectors
   //glEnable(GL_NORMALIZE);
 
-#if 1
     for(j = 0; j < nlat - 1; ++j)
     {
        y0 = lat[j] / 180.0;
        y1 = lat[j + 1] / 180.0;
 
        glBegin(GL_QUAD_STRIP);
-           hgt = ter[j*nlon];
+         //hgt = ter[j*nlon];
+           hgt = 0.0;
            glNormal3d(0.0, 0.0, 1.0);
            glTexCoord2d(0.0, y0 + 0.5);
            if(hgt > 0.0)
-               glVertex3d(-1.0, y0, z + scl*hgt);
+               glVertex3d(0.0, y0, z + scl*hgt);
            else
-               glVertex3d(-1.0, y0, z);
+               glVertex3d(0.0, y0, z);
 
            glNormal3d(0.0, 0.0, 1.0);
            glTexCoord2d(0.0, y1 + 0.5);
            if(hgt > 0.0)
-               glVertex3d(-1.0, y1, z + scl*hgt);
+               glVertex3d(0.0, y1, z + scl*hgt);
            else
-               glVertex3d(-1.0, y1, z);
+               glVertex3d(0.0, y1, z);
 
            for(i = 0; i < nlon; ++i)
            {
                x = lon[i] / 180.0;
+	       if(x > 1.0)
+		  x -= 2.0;
                glNormal3d(0.0, 0.0, 1.0);
-               glTexCoord2d(0.5*(x + 1.0), y0 + 0.5);
-               hgt = ter[j*nlon + i];
+               glTexCoord2d(x, y0 + 0.5);
+             //hgt = ter[j*nlon + i];
+               hgt = 0.0;
                if(hgt > 0.0)
                    glVertex3d(x, y0, z + scl*hgt);
                else
                    glVertex3d(x, y0, z);
 
                glNormal3d(0.0, 0.0, 1.0);
-               glTexCoord2d(0.5*(x + 1.0), y1 + 0.5);
-               hgt = ter[(j+1)*nlon + i]; 
+               glTexCoord2d(x, y1 + 0.5);
+             //hgt = ter[(j+1)*nlon + i]; 
+               hgt = 0.0;
                if(hgt > 0.0)
                    glVertex3d(x, y1, z + scl*hgt);
                else
@@ -353,91 +329,6 @@ void Earth::bump_plane(float z)
            glNormal3d(0.0, 0.0, 1.0);
            glTexCoord2d(1.0 , y0 + 0.5);
            if(hgt > 0.0)
-               glVertex3d(1.0, y0, z + scl*hgt);
-           else
-               glVertex3d(1.0, y0, z);
-
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(1.0 , y1 + 0.5);
-           if(hgt > 0.0)
-               glVertex3d(1.0, y1, z + scl*hgt);
-           else
-               glVertex3d(1.0, y1, z);
-       glEnd();
-    }
-#else
-    for(j = 0; j < nlat - 1; ++j)
-    {
-       y0 = lat[j] / 180.0;
-       y1 = lat[j + 1] / 180.0;
-
-       glBegin(GL_QUAD_STRIP);
-           hgt = ter[j*nlon];
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5, y0 + 0.5);
-           if(hgt > 0.0)
-               glVertex3d(0.0, y0, z + scl*hgt);
-           else
-               glVertex3d(0.0, y0, z);
-
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5, y1 + 0.5);
-           if(hgt > 0.0)
-               glVertex3d(0.0, y1, z + scl*hgt);
-           else
-               glVertex3d(0.0, y1, z);
-
-       for(i = 0; i < nlon/2; ++i)
-       {
-           x = 2.0 + lon[i] / 180.0;
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5*x - 0.5, y0 + 0.5);
-           hgt = ter[j*nlon + i];
-           if(hgt > 0.0)
-               glVertex3d(x - 1.0, y0, z + scl*hgt);
-           else
-               glVertex3d(x - 1.0, y0, z);
-
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5*x - 0.5, y1 + 0.5);
-           hgt = ter[(j+1)*nlon + i]; 
-           if(hgt > 0.0)
-               glVertex3d(x - 1.0, y1, z + scl*hgt);
-           else
-               glVertex3d(x - 1.0, y1, z);
-
-         //if(0 == j)
-         //   fprintf(stderr, "\tlon[%d] = %f, x = %f\n", i, lon[i], x);
-       }
-       glEnd();
-
-       glBegin(GL_QUAD_STRIP);
-       for(i = nlon/2; i < nlon; ++i)
-       {
-           x = lon[i] / 180.0;
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5*x + 0.5 , y0 + 0.5);
-           hgt = ter[j*nlon + i]; 
-           if(hgt > 0.0)
-               glVertex3d(x - 1.0, y0, z + scl*hgt);
-           else
-               glVertex3d(x - 1.0, y0, z);
-
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(0.5*x + 0.5 , y1 + 0.5);
-           hgt = ter[(j+1)*nlon + i];
-           if(hgt > 0.0)
-               glVertex3d(x - 1.0, y1, z + scl*hgt);
-           else
-               glVertex3d(x - 1.0, y1, z);
-
-         //if(0 == j)
-         //   fprintf(stderr, "\tlon[%d] = %f, x = %f\n", i, lon[i], x);
-       }
-
-           glNormal3d(0.0, 0.0, 1.0);
-           glTexCoord2d(1.0 , y0 + 0.5);
-           if(hgt > 0.0)
                glVertex3d(0.0, y0, z + scl*hgt);
            else
                glVertex3d(0.0, y0, z);
@@ -450,52 +341,54 @@ void Earth::bump_plane(float z)
                glVertex3d(0.0, y1, z);
        glEnd();
     }
-#endif
 
     glDisable(GL_TEXTURE_2D);
 }
 
 void Earth::read_terrain()
 {
-    FILE* infl;
+    netCDF::NcFile* ncfl;
 
     float hgt = 0.0;
 
     int i = 0;
     int j = 0;
-    int n = 0;
-    int nter = 0;
+    size_t n = 0;
 
-    strcpy(_topoflnm, getenv("NV_DATA"));
-    strcat(_topoflnm, "/data/topo.bin");
+    const char* path = getenv("STARVIEWERHOME");
+    if (path == nullptr) {
+        cout << "ERROR: STARVIEWERHOME not set!" << endl;
+        throw(errno);
+    }
+    strcpy(_topoflnm, path);
+    strcat(_topoflnm, "/data/GMTED2010_15n060_0250deg.nc");
+    cout << "_topoflnm: " << _topoflnm << endl;
 
-  //cout << "File: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "_topoflnm: " << _topoflnm << endl;
+    try {
+        // Use the constructor to re-initialize the ncfl object
+        ncfl = new netCDF::NcFile(_topoflnm, netCDF::NcFile::read);
 
-    infl = fopen(_topoflnm, "r");
-    if(NULL == infl)
-    {
-        fprintf(stderr, "\nfile: %s, line: %d\n", __FILE__, __LINE__);
-        fprintf(stderr, "\nCan not open <%s> for reading\n", _topoflnm);
-        return;
+        cout << "Successfully opened: " << _topoflnm << endl;
+    } catch (netCDF::exceptions::NcException& e) {
+        cerr << "Error opening file: " << e.what() << endl;
     }
 
-    fread(&nlon, sizeof(int), 1, infl);
-    fread(&nlat, sizeof(int), 1, infl);
-    fread(&nter, sizeof(int), 1, infl);
+    // Load necessary variables
+    netCDF::NcVar lonVar = ncfl->getVar("longitude");
+    netCDF::NcVar latVar = ncfl->getVar("latitude");
+    netCDF::NcVar terVar = ncfl->getVar("elevation");
+    nlon = lonVar.getDim(0).getSize();
+    nlat = latVar.getDim(0).getSize();
+    size_t nter = nlon*nlat;
 
-  //fprintf(stderr, "\nfile: %s, line: %d\n", __FILE__, __LINE__);
-  //fprintf(stderr, "\tnlon = %d, nlat = %d, nter = %d\n", nlon, nlat, nter);
+    lon.resize(nlon);
+    lat.resize(nlat);
+    ter.resize(nter);
+    vector<short> ster(nter);
 
-    lon = (float *) calloc(nlon, sizeof(float));
-    lat = (float *) calloc(nlat, sizeof(float));
-    ter = (float *) calloc(nter, sizeof(float));
-
-    fread(lon, sizeof(float), nlon, infl);
-    fread(lat, sizeof(float), nlat, infl);
-    fread(ter, sizeof(float), nter, infl);
-
-    fclose(infl);
+    lonVar.getVar(lon.data());
+    latVar.getVar(lat.data());
+    terVar.getVar(ster.data());
 
     maxhgt = 0.0;
     minhgt = 0.0;
@@ -503,27 +396,26 @@ void Earth::read_terrain()
     n = 0;
     for(j = 0; j < nlat; ++j)
     {
-      //fprintf(stderr, "\tlat[%d] = %f\n", j, lat[j]);
         for(i = 0; i < nlon; ++i)
         {
-          //if(0 == j)
-          //   fprintf(stderr, "\tlon[%d] = %f\n", i, lon[i]);
-
-            hgt = ter[n];
+            hgt = ster[n];
             if(maxhgt < hgt)
                maxhgt = hgt;
             if(minhgt > hgt)
                minhgt = hgt;
+            ter[n] = hgt;
 
             ++n;
         }
     }
 
-  //cout << "\tmaxhgt = " << maxhgt << endl;
-  //cout << "\tminhgt = " << minhgt << endl;
+    ster.clear();
+    ster.shrink_to_fit();
 
-  //Maximum mountain height: 6244.
-  //Maximum ocean depth: 10651.
+    free(ncfl);
+
+    cout << "\tmaxhgt = " << maxhgt << endl;
+    cout << "\tminhgt = " << minhgt << endl;
 }
 
 void Earth::bump(float r)

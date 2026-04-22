@@ -32,20 +32,20 @@ class ControlWidget : public QWidget
         void set_colortable(ColorTable* ct) { colorTable = ct; };
         void set_translator(BaseTranslator* t) { translator = t; };
 
-        void disable_ncl() { ncl_cb->setEnabled(false); };
+      //void disable_ncl() { ncl_cb->setEnabled(false); };
         void disable_bump() { bump_cb->setEnabled(false); };
         void disable_sphere() { sphere_cb->setEnabled(false); };
         void disable_flat() { flat_cb->setEnabled(false); };
         void disable_onmap() { onmap_cb->setEnabled(false); };
       //void disable_surface() { surface_cb->setEnabled(false); };
-        void disable_title() { title_cb->setEnabled(false); };
+      //void disable_title() { title_cb->setEnabled(false); };
         void disable_coastline() { coastline_cb->setEnabled(false); };
         void disable_x2() { x2_cb->setEnabled(false); };
         void disable_y2() { y2_cb->setEnabled(false); };
         void disable_z2() { z2_cb->setEnabled(false); };
         void disable_t2() { t2_cb->setEnabled(false); };
 
-        void selectNCL();
+      //void selectNCL();
 
     protected:
         BaseTranslator* translator;
@@ -56,7 +56,7 @@ class ControlWidget : public QWidget
 
         QCheckBox* proj_cb;  // Check box for projection
         QCheckBox* axis_cb;  // Check box for axis
-        QCheckBox* ncl_cb;   // Check box for NCL
+      //QCheckBox* ncl_cb;   // Check box for NCL
 
         QCheckBox* bump_cb;       // Check box for bump
         QCheckBox* surface_cb;    // Check box for surface
@@ -64,7 +64,7 @@ class ControlWidget : public QWidget
         QCheckBox* flat_cb;       // Check box for flat
         QCheckBox* bgBW_cb;       // Check box for background color
         QCheckBox* onmap_cb;      // Check box for on-map
-        QCheckBox* title_cb;      // Check box for title
+      //QCheckBox* title_cb;      // Check box for title
         QCheckBox* coastline_cb;  // Check box for coastline
 
         QCheckBox* x2_cb;  // Check box for X2

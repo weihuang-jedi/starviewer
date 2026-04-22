@@ -1,13 +1,4 @@
-// 1. Include the header that contains Qt first
 #include "basecontour.h"
-
-// 2. If NCL's MapPlot.h still causes issues, undefine 'debug' before including it
-#ifdef debug
-#undef debug
-#endif
-
-#include <ncarg/hlu/MapPlot.h>
-#include "nclInterface.h"
 
 //Constructor
 BaseContour::BaseContour(ColorTable *ct)
@@ -74,32 +65,10 @@ void BaseContour::initialize()
     clen[0] = colorTable->get_clen();;
     clen[1] = 3;
 
-  //Initialize the high level utility library
-    guiNhlInitialize();
+  //surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, (float)iwidth, (float)iheight);
 
-    surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, (float)iwidth, (float)iheight);
-
-    setCairoQtSurface(surface);
-    setCairoQtWinSize(iwidth, iheight);
-
-  //Create an application context. Set the app dir to the current directory
-  //so the application looks for a resource file in the working directory.
-  //In this example the resource file supplies the plot title only.
-    srlist = guiNhlRLCreate(NhlSETRL);
-    guiNhlRLClear(srlist);
-    guiNhlRLSetString(srlist,(char *)NhlNappUsrDir,"./");
-    guiNhlCreate(&appid,"contour",NhlappClass,NhlDEFAULT_APP,srlist);
-
-    guiNhlRLClear(srlist);
-    guiNhlRLSetString(srlist,(char *)NhlNwkFormat,"qt");
-    guiNhlCreate(&wksid,"workstation",NhlcairoQtWorkstationClass,appid,srlist);
-
-    guiNhlRLClear(srlist);
-    guiNhlRLSetMDFloatArray(srlist,NhlNwkColorMap,cmap,2,clen);
-    guiNhlSetValues(wksid,srlist);
-
-    guiNhlSetColor(wksid, 0, 1.0, 1.0, 1.0);
-    guiNhlSetColor(wksid, 1, 0.0, 0.0, 1.0);
+  //setCairoQtSurface(surface);
+  //setCairoQtWinSize(iwidth, iheight);
 }
 
 void BaseContour::update_colormap()
@@ -109,23 +78,13 @@ void BaseContour::update_colormap()
     clen[0] = colorTable->get_clen();;
     clen[1] = 3;
 
-    guiNhlRLClear(srlist);
-    guiNhlRLSetMDFloatArray(srlist,NhlNwkColorMap,cmap,2,clen);
-    guiNhlSetValues(wksid,srlist);
-
     reinitialize();
 }
 
 void BaseContour::finalize()
 {
-  //Destroy the objects created, close the HLU library and exit.
-    guiNhlDestroy(wksid);
-    guiNhlDestroy(appid);
-
   //Destroy the surface
-    cairo_surface_destroy(surface);
-
-    guiNhlClose();
+  //cairo_surface_destroy(surface);
 }
 
 void BaseContour::reinitialize()
@@ -183,90 +142,14 @@ void BaseContour::reinitialize()
 void BaseContour::_general_setup()
 {
     float opacity = 0.01 * _opacity;
-
-    guiNhlRLClear(srlist);
-    guiNhlRLSetFloat(srlist,NhlNcnLineThicknessF,2.0);
-    guiNhlRLSetFloat(srlist,NhlNcnFillOpacityF,opacity);
-  //guiNhlRLSetString(srlist,NhlNtxFontColor,"Blue");
-  //guiNhlRLSetString(srlist,NhlNtmXBLabelFontColor,"Blue");
-  //guiNhlRLSetString(srlist,NhlNtmXTLabelFontColor,"Blue");
-  //guiNhlRLSetString(srlist,NhlNtmYLLabelFontColor,"Blue");
-  //guiNhlRLSetString(srlist,NhlNtmYRLabelFontColor,"Blue");
-    guiNhlRLSetString(srlist,NhlNcnMonoLineDashPattern,"false");
-    guiNhlRLSetString(srlist,NhlNcnMonoLineColor,"false");
-    guiNhlSetValues(cnid,srlist);
-
-    guiNhlRLClear(srlist);
-    guiNhlRLSetFloat(srlist,NhlNcnLineThicknessF,1.0);
-    guiNhlRLSetString(srlist,NhlNcnMonoLineDashPattern,"true");
-    guiNhlRLSetString(srlist,NhlNcnMonoLineColor,"true");
-    guiNhlRLSetString(srlist,NhlNcnFillOn,"true");
-    guiNhlRLSetString(srlist,NhlNcnMonoFillColor,"true");
-    guiNhlRLSetString(srlist,NhlNcnMonoFillPattern,"false");
-
-  //Turn off the contour lines and labels.
-    guiNhlRLSetString(srlist,NhlNcnLinesOn,"False");
-    guiNhlRLSetString(srlist,NhlNcnLineLabelsOn,"False");
-    guiNhlRLSetString(srlist,NhlNcnHighLabelsOn,"False");
-    guiNhlRLSetString(srlist,NhlNcnLowLabelsOn,"False");
-    guiNhlRLSetString(srlist,NhlNcnInfoLabelOn,"False");
-
-  //guiNhlRLSetString(srlist,NhlNtmYLMode,"EXPLICIT");
-  //guiNhlRLSetFloat(srlist,NhlNtmXBLabelFontHeightF,.016);
-  //guiNhlRLSetFloat(srlist,NhlNtmYLLabelFontHeightF,.016);
-  //guiNhlRLSetString(srlist,NhlNtmXBLabelFont,"times-roman");
-  //guiNhlRLSetString(srlist,NhlNtmYLLabelFont,"times-roman");
-  //guiNhlRLSetString(srlist,NhlNtmXBMinorOn,"False");
-  //guiNhlRLSetString(srlist,NhlNtmYLMinorOn,"False");
-    guiNhlRLSetString(srlist,NhlNpmLabelBarDisplayMode,"ALWAYS");
-    guiNhlRLSetFloat(srlist,NhlNpmLabelBarHeightF,.15);
-    guiNhlRLSetFloat(srlist,NhlNpmLabelBarWidthF,vpw);
-    guiNhlRLSetString(srlist,NhlNpmLabelBarSide,"bottom");
-    guiNhlRLSetString(srlist,NhlNlbOrientation,"horizontal");
-    guiNhlRLSetInteger(srlist,NhlNlbBoxLinesOn,0);
-    guiNhlRLSetString(srlist,NhlNlbLabelsOn,"True");
-    guiNhlRLSetString(srlist,NhlNlbPerimOn,"False");
-    guiNhlRLSetString(srlist,NhlNlbAutoManage,"False");
-    guiNhlRLSetFloat(srlist,NhlNlbLabelFontHeightF,0.015);
-    guiNhlRLSetString(srlist,NhlNlbLabelFont,"times-roman");
-
-    guiNhlSetValues(cnid,srlist);
-
-    guiNhlRLClear(srlist);
-  //guiNhlRLSetInteger(srlist,NhlNcnLineColor,NhlBACKGROUND);
-    guiNhlRLSetString(srlist,NhlNcnMonoFillColor,"false");
-    guiNhlRLSetString(srlist,NhlNcnMonoFillPattern,"true");
-    guiNhlSetValues(cnid,srlist);
-
-
-    guiNhlRLClear(srlist);
-  //guiNhlRLSetString(srlist,NhlNcnLevelSelectionMode,cnLevelSelectionMode.c_str());
-    guiNhlRLSetString(srlist,NhlNcnLevelSelectionMode,"ManualLevels");
-    guiNhlRLSetFloat(srlist,NhlNcnMinLevelValF,cnMinLevelValF);
-    guiNhlRLSetFloat(srlist,NhlNcnMaxLevelValF,cnMaxLevelValF);
-    guiNhlRLSetFloat(srlist,NhlNcnLevelSpacingF,cnLevelSpacingF);
-    guiNhlSetValues(cnid,srlist);
 }
 
 void BaseContour::_viewport_setup()
 {
-    guiNhlRLSetFloat(srlist,NhlNvpXF,vpx);
-    guiNhlRLSetFloat(srlist,NhlNvpYF,vpy);
-    guiNhlRLSetFloat(srlist,NhlNvpWidthF,vpw);
-    guiNhlRLSetFloat(srlist,NhlNvpHeightF,vph);
-    guiNhlSetValues(cnid,srlist);
 }   
 
 void BaseContour::_get_viewportXinfo()
 {
-    grlist = guiNhlRLCreate(NhlGETRL);
-    guiNhlRLClear(grlist);
-    guiNhlRLGetFloat(grlist,NhlNvpXF,&vpxX);
-    guiNhlRLGetFloat(grlist,NhlNvpYF,&vpyX);
-    guiNhlRLGetFloat(grlist,NhlNvpWidthF,&vpwX);
-    guiNhlRLGetFloat(grlist,NhlNvpHeightF,&vphX);
-    guiNhlGetValues(cnid,grlist);
-
     _yStartX = vpxX;
     _zStartX = vpyX - vphX;
 
@@ -283,23 +166,10 @@ void BaseContour::_get_viewportXinfo()
 
 void BaseContour::_viewportXsetup()
 {
-    guiNhlRLSetFloat(srlist,NhlNvpXF,vpxX);
-    guiNhlRLSetFloat(srlist,NhlNvpYF,vpyX);
-    guiNhlRLSetFloat(srlist,NhlNvpWidthF,vpwX);
-    guiNhlRLSetFloat(srlist,NhlNvpHeightF,vphX);
-    guiNhlSetValues(cnid,srlist);
 }  
 
 void BaseContour::_get_viewportYinfo()
 {
-    grlist = guiNhlRLCreate(NhlGETRL);
-    guiNhlRLClear(grlist);
-    guiNhlRLGetFloat(grlist,NhlNvpXF,&vpxY);
-    guiNhlRLGetFloat(grlist,NhlNvpYF,&vpyY);
-    guiNhlRLGetFloat(grlist,NhlNvpWidthF,&vpwY);
-    guiNhlRLGetFloat(grlist,NhlNvpHeightF,&vphY);
-    guiNhlGetValues(cnid,grlist);
-
     _xStartY = vpxY;
     _zStartY = vpyY - vphY;
 
@@ -316,22 +186,17 @@ void BaseContour::_get_viewportYinfo()
 
 void BaseContour::_viewportYsetup()
 {
-    guiNhlRLSetFloat(srlist,NhlNvpXF,vpxY);
-    guiNhlRLSetFloat(srlist,NhlNvpYF,vpyY);
-    guiNhlRLSetFloat(srlist,NhlNvpWidthF,vpwY);
-    guiNhlRLSetFloat(srlist,NhlNvpHeightF,vphY);
-    guiNhlSetValues(cnid,srlist);
 }
 
 void BaseContour::initialize_context()
 {
   //Set surface to translucent color (r, g, b, a) without disturbing graphics state.
-    context = getCairoQtContext();
-    cairo_set_source_rgba(context, 1.0, 1.0, 1.0, 1.0);
-    cairo_save(context);
-    cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
-    cairo_paint(context);
-    cairo_restore(context);
+  //context = getCairoQtContext();
+  //cairo_set_source_rgba(context, 1.0, 1.0, 1.0, 1.0);
+  //cairo_save(context);
+  //cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
+  //cairo_paint(context);
+  //cairo_restore(context);
 }
 
 unsigned int BaseContour::get_textureID(unsigned int textureID)
@@ -341,9 +206,9 @@ unsigned int BaseContour::get_textureID(unsigned int textureID)
     unsigned int   height;
     unsigned int   newTextureID;
 
-    pixels = static_cast<unsigned char *>(cairo_image_surface_get_data(surface));
-    width  = cairo_image_surface_get_width(surface);
-    height = cairo_image_surface_get_height(surface);
+  //pixels = static_cast<unsigned char *>(cairo_image_surface_get_data(surface));
+  //width  = cairo_image_surface_get_width(surface);
+  //height = cairo_image_surface_get_height(surface);
 
     if(textureID)
     {
@@ -389,11 +254,6 @@ void BaseContour::setup(string vn, float *var)
 
     _time = 0;
   //_opacity = 100;
-
-    guiGetEndpointsAndStepSize(evaluator->get_min(), evaluator->get_max(),
-                               cnMaxLev, 1,
-                               &cnMinLevelValF, &cnMaxLevelValF,
-                               &cnLevelSpacingF);
 
     vpx = 0.2;
     vpy = 0.8;
