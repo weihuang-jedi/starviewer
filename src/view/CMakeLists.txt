@@ -13,7 +13,6 @@ target_include_directories(view PUBLIC
     ${CMAKE_SOURCE_DIR}/shared
     ${CMAKE_SOURCE_DIR}/spreadsheet
     ${CMAKE_SOURCE_DIR}/leveler
-  # ${CMAKE_SOURCE_DIR}/nclapp
     ${CMAKE_SOURCE_DIR}/coastline
     ${CMAKE_SOURCE_DIR}/contour
     ${CMAKE_SOURCE_DIR}/marchingCube
@@ -23,6 +22,7 @@ target_include_directories(view PUBLIC
 # Link Qt5
 target_link_libraries(view PUBLIC
     ${NetCDF_LIBRARIES}
+    coastline
     Qt5::Core
     Qt5::Widgets
     Qt5::OpenGL

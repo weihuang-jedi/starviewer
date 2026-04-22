@@ -1,6 +1,8 @@
 #include <QtOpenGL>
 
+#include <GL/gl.h>
 #include <GL/glu.h>
+#include <GL/glx.h> // Ensure this header is included
 
 #include "basetranslator.h"
 
@@ -1097,8 +1099,7 @@ void BaseTranslator::selectCoastLine(int f)
 
 void BaseTranslator::_renderText(double x, double y, double z, const QString &str)
 {
-    //const QFont & font = QFont();
-    const QFont & font = QFont("Times", 24, QFont::Bold);
+    QFont font("Times", 24, QFont::Bold);
 
     // Retrieve last OpenGL color to use as a font color
     GLdouble glColor[4];
@@ -1124,36 +1125,62 @@ void BaseTranslator::writeHeader()
     if(nvoptions->get_cb(NV_TITLEON))
     {
 #if 1
-        const QFont & font = QFont("Times", 24, QFont::Bold);
-	QString namestr = _varname.c_str();
-	glDisable(GL_DEPTH_TEST);  // Prevents text from being "cut" by 3D objects
-        glDisable(GL_LIGHTING);    // Prevents text from being shaded grey/black
-	glDisable(GL_CLIP_PLANE0);
-        glEnable(GL_BLEND);        // Required for smooth font edges
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      //QFont font("Times", 24, QFont::Bold);
+        QFont font("DejaVu Sans", 24, QFont::Bold);
+        font.setStyleStrategy(QFont::NoAntialias); // Try to bypass the texture blender
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        // Inside writeHeader()
+        const GLubyte* renderer = glGetString(GL_RENDERER);
+        const GLubyte* version = glGetString(GL_VERSION);
+        const GLubyte* vendor = glGetString(GL_VENDOR);
 
-        renderText(30.0, 30.0, namestr, font);
-      //renderText(30.0, 30.0, _varname.c_str(), font);
+        cout << "GL Renderer: " << renderer << endl;
+        cout << "GL Version:  " << version << endl;
+        cout << "GL Vendor:   " << vendor << endl;
+
+        // Inside your function
+        Display *dpy = glXGetCurrentDisplay();
+        if (dpy) {
+            int major, minor;
+            if (glXQueryVersion(dpy, &major, &minor)) {
+                cout << "GLX Version: " << major << "." << minor << endl;
+            }
+        } else {
+            cout << "No active X11 Display found via GLX." << endl;
+        }
+
+      //glPushAttrib(GL_ALL_ATTRIB_BITS); // Save every single state
+      //glDisable(GL_DEPTH_TEST);
+      //glDisable(GL_LIGHTING);
+      //glDisable(GL_CULL_FACE);
+      //glDisable(GL_TEXTURE_2D); // Qt will enable this itself
+      //glEnable(GL_BLEND);
+      //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // Force the text color to something distinct
+        glColor4f(1.0f, 1.0f, 0.0f, 1.0f); // Bright Yellow
+
+        renderText(30.0, 30.0, _varname.c_str(), font);
         renderText(30.0, 60.0, _timeinfo.c_str(), font);
+      //renderText(30.0, 30.0, _title.c_str(),    font);
+      //renderText(30.0, 90.0, _position.c_str(), font);
 
-        glEnable(GL_DEPTH_TEST);
+      //glPopAttrib();
 #else
-#if 1
-	// In your header
-        QString namestring = _varname.c_str();
-        QString timestring = _timeinfo.c_str();
+    // In your header
+    QStaticText varText;
 
-	_renderText(30.0, 30.0, 0.0, namestring);
-	_renderText(30.0, 30.0, 0.0, timestring);
-#else
-        renderText(30.0, 30.0, _varname.c_str(),  QFont("Times", 24, QFont::Bold));
-      //renderText(30.0, 30.0, _title.c_str(),    QFont("Times", 24, QFont::Bold));
-        renderText(30.0, 60.0, _timeinfo.c_str(), QFont("Times", 24, QFont::Bold));
-      //renderText(30.0, 90.0, _position.c_str(), QFont("Times", 24, QFont::Bold));
-#endif
+    // In your update logic
+    varText.setText(_varname.c_str());
+    varText.prepare(QTransform(), font());
+
+    // In paintGL()
+    QPainter painter(this);
+    painter.drawStaticText(30, 30, varText);
+
+    varText.setText(_timeinfo.c_str());
+    varText.prepare(QTransform(), font());
+    painter.drawStaticText(30, 30, varText);
 #endif
     }
   //cout << "Leave Function: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -1407,6 +1434,11 @@ void BaseTranslator::_displayColorBar()
 
     mstep = clen/(maxLev - 1);
 
+  //QStaticText varText;
+  //QPainter painter(this);
+  //QFont font("Times", 12, QFont::Bold);
+    QFont font("DejaVu Sans", 12, QFont::Bold);
+
     a *= 0.95;
     y = -0.975;
     for(n = 0; n <= clen; n += mstep)
@@ -1417,8 +1449,12 @@ void BaseTranslator::_displayColorBar()
         sprintf(buf, format, v);
 
         x = a * (s * n - 0.55);
-      //y = a * (s * n - 0.5);
-        renderText(x, y, 0.0, buf, QFont("Times", 15, QFont::Bold));
+      //renderText(x, y, 0.0, buf, QFont("Times", 15, QFont::Bold));
+        renderText(x, y, 0.0, buf, font);
+
+      //varText.setText(buf);
+      //varText.prepare(QTransform(), font);
+      //painter.drawStaticText(x, y, varText);
 
       //cout << "\tNo " << n << ": x = " << x << ", y = " << y << ", buf = " << buf << endl;
     }

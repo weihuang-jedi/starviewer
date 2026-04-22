@@ -6,6 +6,10 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 
+find_package(GDAL REQUIRED)
+# Add this so every sub-directory knows where GDAL is regardless of linking
+include_directories(${GDAL_INCLUDE_DIRS})
+
 # Find Qt5
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui)
 

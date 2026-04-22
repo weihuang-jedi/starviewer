@@ -175,13 +175,13 @@ void MainWindow::_setup_controlPanel()
            //controlPanel->disable_ncl();
              break;
         case POP:
-             controlPanel->disable_ncl();
+           //controlPanel->disable_ncl();
              controlPanel->disable_bump();
              controlPanel->disable_onmap();
              controlPanel->disable_sphere();
              break;
         case MPAS:
-             controlPanel->disable_ncl();
+           //controlPanel->disable_ncl();
              controlPanel->disable_bump();
              controlPanel->disable_onmap();
              controlPanel->disable_sphere();
@@ -192,14 +192,13 @@ void MainWindow::_setup_controlPanel()
              controlPanel->disable_t2();
              break;
         case CAMSE:
-           //cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-             controlPanel->disable_ncl();
+           //controlPanel->disable_ncl();
              controlPanel->disable_onmap();
              controlPanel->disable_sphere();
            //controlPanel->disable_surface();
              break;
         case RADX:
-             controlPanel->disable_ncl();
+           //controlPanel->disable_ncl();
              controlPanel->disable_onmap();
              controlPanel->disable_sphere();
              controlPanel->disable_flat();
@@ -209,7 +208,7 @@ void MainWindow::_setup_controlPanel()
              controlPanel->disable_t2();
              break;
         case MPIDEMO:
-             controlPanel->disable_ncl();
+           //controlPanel->disable_ncl();
              controlPanel->disable_onmap();
              controlPanel->disable_sphere();
              controlPanel->disable_flat();
@@ -220,7 +219,7 @@ void MainWindow::_setup_controlPanel()
              translator->updateSliders();
              break;
         case HDF:
-             controlPanel->disable_ncl();
+           //controlPanel->disable_ncl();
              controlPanel->disable_bump();
              controlPanel->disable_onmap();
              controlPanel->disable_sphere();

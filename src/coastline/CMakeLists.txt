@@ -1,27 +1,27 @@
-file(GLOB_RECURSE SOURCES *.cpp *.h *.ui *.qrc)
+# 1. Define sources
+file(GLOB COASTLINE_SOURCES *.cpp *.h)
 
-find_library(NETCDF_CPP_LIB netcdf_c++4 REQUIRED)
-find_library(NETCDF_C_LIB netcdf REQUIRED)
-
-# 1. Find the OpenGL component of Qt5
+# 2. Find Dependencies
+find_package(GDAL REQUIRED)
 find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
 
-# 2. Define the library
-file(GLOB COASTLINE_SOURCES *.cpp *.h)
+# 3. Create the target FIRST
 add_library(coastline STATIC ${COASTLINE_SOURCES})
 
-# --- ADD THIS SECTION ---
-# 3. Tell the compiler where to find netcdf.h
-target_include_directories(coastline PRIVATE
-    /usr/include
+# 4. Now configure the target (using PUBLIC so 'view' and 'control' can see GDAL)
+target_include_directories(coastline PUBLIC 
+    ${GDAL_INCLUDE_DIRS}
 )
-# ------------------------
 
-# 4. Link the libraries
-target_link_libraries(coastline PRIVATE
-    ${NETCDF_CPP_LIB} 
-    ${NETCDF_C_LIB}
+# 5. Link libraries
+# Note: Use PUBLIC for GDAL so other modules that include coastline.h 
+# automatically find the GDAL headers/libs.
+target_link_libraries(coastline PUBLIC 
+    ${GDAL_LIBRARIES}
     Qt5::Widgets
     Qt5::OpenGL
+)
+
+target_link_libraries(coastline PRIVATE
     shared
 )

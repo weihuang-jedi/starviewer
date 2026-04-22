@@ -446,7 +446,7 @@ void UFS2dViewer::_evaluate(float *var)
 {
     size_t varsize;
     size_t n = 0;
-    char vn[128];
+    char vn[256];
 
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\t _varname: " << _varname << endl;
@@ -455,11 +455,11 @@ void UFS2dViewer::_evaluate(float *var)
     varsize = geometry->get_nlon() * geometry->get_nlat() * geometry->get_nlev();
   //varsize = geometry->get_nlon() * geometry->get_nlat();
 
-    cout << "\tin <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\t_nlon =" << _nlon << endl;
-    cout << "\t_nlat =" << _nlat << endl;
-    cout << "\t_nlev =" << _nlev << endl;
-    cout << "\tvarsize =" << varsize << ", _nlon*_nlat=" << _nlon*_nlat << endl;
+  //cout << "\tin <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\t_nlon =" << _nlon << endl;
+  //cout << "\t_nlat =" << _nlat << endl;
+  //cout << "\t_nlev =" << _nlev << endl;
+  //cout << "\tvarsize =" << varsize << ", _nlon*_nlat=" << _nlon*_nlat << endl;
 
     _valmax = var[0];
     _valmin = var[0];
