@@ -764,7 +764,7 @@ void UFS2dViewer::_display_Xflat_plane(int xs)
     int i = xs-1;
 
     for(k = 0; k < _nlev; ++k)
-        height[k] = (double) (_nlev - 1 - k) / _nlev;
+        height[k] = _k2h(k);
 
     sv = 1.0 / (_valmax - _valmin);
 

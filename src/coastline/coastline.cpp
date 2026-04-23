@@ -5,7 +5,7 @@ CoastLine::CoastLine()
     int n;
     char flnm[1024];
 
-    cout << "\tEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     GDALAllRegister(); // 1. Register Drivers
 
@@ -32,7 +32,7 @@ CoastLine::CoastLine()
         exit -1;
     }
 
-    cout << "\tLeave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tLeave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 CoastLine::~CoastLine()
@@ -91,8 +91,6 @@ void CoastLine::drawOnSphere(double r, int n)
 
 void CoastLine::_drawOnSphere(double radius)
 {
-    cout << "\tEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
     // Access Layer
     OGRLayer *poLayer = poDS->GetLayer(0);
     poLayer->ResetReading();
@@ -107,20 +105,17 @@ void CoastLine::_drawOnSphere(double radius)
             OGRLinearRing *poRing = poPolygon->getExteriorRing();
 
 	    ++n;
-            cout << "Polygon No. " << n << endl;
             // Loop through points and send to plotting function
             glBegin(GL_LINE_STRIP);
             for (i = 0; i < poRing->getNumPoints(); i++) {
                 lon = poRing->getX(i);
                 lat = poRing->getY(i);
-                cout << "\ti=" << i << ", lon=" << lon << ", lat=" << lat << endl;
                 _lonlat2xyz(lon, lat, radius);
             }
             glEnd();
         }
         OGRFeature::DestroyFeature(poFeature);
     }
-    cout << "\tLeave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void CoastLine::drawOnPlane(double hgt, int n)
@@ -170,13 +165,13 @@ void CoastLine::_drawOnPlane(double z)
             OGRLinearRing *poRing = poPolygon->getExteriorRing();
 
             ++n;
-            cout << "Polygon No. " << n << endl;
+            //cout << "Polygon No. " << n << endl;
             // Loop through points and send to plotting function
             glBegin(GL_LINE_STRIP);
             for (i = 0; i < poRing->getNumPoints(); i++) {
                 lon = poRing->getX(i);
                 lat = poRing->getY(i);
-                cout << "\ti=" << i << ", lon=" << lon << ", lat=" << lat << endl;
+                // cout << "\ti=" << i << ", lon=" << lon << ", lat=" << lat << endl;
                 _lonlat2xy(lon, lat, z);
             }
             glEnd();
