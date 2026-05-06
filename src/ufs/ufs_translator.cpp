@@ -116,7 +116,8 @@ void UFSTranslator::setup()
 //Show the image
 void UFSTranslator::show()
 {
-    glShadeModel(GL_SMOOTH);
+  //glShadeModel(GL_SMOOTH);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     if(nvoptions->get_tsec() != _glbTime)
     {
@@ -149,7 +150,9 @@ void UFSTranslator::show()
 
 void UFSTranslator::createVarInfo()
 {
-    _varinfo = "Dim nlon="+QString::number(geometry->get_nlon())
+    _varinfo = QString(_varname.c_str()) + "\n"
+             + QString(_timeinfo.c_str()) + "\n"
+             + "Dim nx="+QString::number(geometry->get_nlon())
              + ", nlat=" + QString::number(geometry->get_nlat())
              + ", nlev=" + QString::number(geometry->get_nlev())
              + "\nVar min=" + QString::number(ufs_controller->get_minval())

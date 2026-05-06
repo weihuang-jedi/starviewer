@@ -5,8 +5,6 @@ CoastLine::CoastLine()
     int n;
     char flnm[1024];
 
-    cout << "\tEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
     GDALAllRegister(); // 1. Register Drivers
 
     height = 0.0;
@@ -22,8 +20,7 @@ CoastLine::CoastLine()
     strcpy(flnm, path);
     strcat(flnm, "/data/gshhg-shp-2.3.7/GSHHS_shp/c/GSHHS_c_L1.shp");
 
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\tshapefile flnm: " << flnm << endl;
+    // cout << "\tshapefile flnm: " << flnm << endl;
 
     // Open Dataset
     poDS = (GDALDataset*) OGROpen(flnm, FALSE, NULL);
@@ -31,8 +28,6 @@ CoastLine::CoastLine()
         cerr << "Opening failed." << endl;
         exit -1;
     }
-
-    cout << "\tLeave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 CoastLine::~CoastLine()
@@ -91,8 +86,6 @@ void CoastLine::drawOnSphere(double r, int n)
 
 void CoastLine::_drawOnSphere(double radius)
 {
-    cout << "\tEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
     // Access Layer
     OGRLayer *poLayer = poDS->GetLayer(0);
     poLayer->ResetReading();
@@ -106,21 +99,23 @@ void CoastLine::_drawOnSphere(double radius)
             OGRPolygon *poPolygon = (OGRPolygon*) poGeometry;
             OGRLinearRing *poRing = poPolygon->getExteriorRing();
 
+            if(poRing->getNumPoints() < 5)
+                continue;
+
 	    ++n;
-            cout << "Polygon No. " << n << endl;
+            // cout << "Polygon No. " << n << endl;
             // Loop through points and send to plotting function
             glBegin(GL_LINE_STRIP);
             for (i = 0; i < poRing->getNumPoints(); i++) {
                 lon = poRing->getX(i);
                 lat = poRing->getY(i);
-                cout << "\ti=" << i << ", lon=" << lon << ", lat=" << lat << endl;
+                // cout << "\ti=" << i << ", lon=" << lon << ", lat=" << lat << endl;
                 _lonlat2xyz(lon, lat, radius);
             }
             glEnd();
         }
         OGRFeature::DestroyFeature(poFeature);
     }
-    cout << "\tLeave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void CoastLine::drawOnPlane(double hgt, int n)
@@ -150,7 +145,6 @@ void CoastLine::_lonlat2xy(double lon, double lat, double z)
     if(x > 1.0)
        x -= 2.0;
     y = lat * oneover;
-    // cout << "\t\t\tlon=" << lon << ", lat=" << lat << ", x=" << x << ", y=" << y << endl;
     glVertex3f(x, y, z);
 }
 
@@ -169,14 +163,17 @@ void CoastLine::_drawOnPlane(double z)
             OGRPolygon *poPolygon = (OGRPolygon*) poGeometry;
             OGRLinearRing *poRing = poPolygon->getExteriorRing();
 
+            if(poRing->getNumPoints() < 5)
+                continue;
+
             ++n;
-            cout << "Polygon No. " << n << endl;
+            // cout << "Polygon No. " << n << endl;
             // Loop through points and send to plotting function
             glBegin(GL_LINE_STRIP);
             for (i = 0; i < poRing->getNumPoints(); i++) {
                 lon = poRing->getX(i);
                 lat = poRing->getY(i);
-                cout << "\ti=" << i << ", lon=" << lon << ", lat=" << lat << endl;
+                // cout << "\ti=" << i << ", lon=" << lon << ", lat=" << lat << endl;
                 _lonlat2xy(lon, lat, z);
             }
             glEnd();

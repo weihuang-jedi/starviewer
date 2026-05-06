@@ -1093,38 +1093,17 @@ void BaseTranslator::selectCoastLine(int f)
     updateGL();
 }
 
-// Source - https://stackoverflow.com/a/34218115
-// Posted by Nils Schimmelmann
-// Retrieved 2026-04-20, License - CC BY-SA 3.0
-
-void BaseTranslator::_renderText(double x, double y, double z, const QString &str)
-{
-    QFont font("Times", 24, QFont::Bold);
-
-    // Retrieve last OpenGL color to use as a font color
-    GLdouble glColor[4];
-    glGetDoublev(GL_CURRENT_COLOR, glColor);
-    QColor fontColor = QColor(glColor[0], glColor[1], glColor[2], glColor[3]);
-
-    // Render text
-    QPainter painter(this);
-    painter.setPen(fontColor);
-    painter.setFont(font);
-    painter.drawText(x, y, str);
-    painter.end();
-}
-
 void BaseTranslator::writeHeader()
 {
   //cout << "Enter Function: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\tnvoptions->get_cb(NV_TITLEON) = " << nvoptions->get_cb(NV_TITLEON) << endl;
-  //cout << "\t_title.c_str() = " << _title.c_str() << endl;
-  //cout << "\t_timeinfo.c_str() = " << _timeinfo.c_str() << endl;
   //cout << "\t_varname.c_str() = " << _varname.c_str() << endl;
+  //cout << "\t_timeinfo.c_str() = " << _timeinfo.c_str() << endl;
+  //cout << "\t_title.c_str() = " << _title.c_str() << endl;
   //cout << "\t_position.c_str() = " << _position.c_str() << endl;
     if(nvoptions->get_cb(NV_TITLEON))
     {
-#if 1
+#if 0
       //QFont font("Times", 24, QFont::Bold);
         QFont font("DejaVu Sans", 24, QFont::Bold);
         font.setStyleStrategy(QFont::NoAntialias); // Try to bypass the texture blender
@@ -1148,40 +1127,27 @@ void BaseTranslator::writeHeader()
         } else {
             cout << "No active X11 Display found via GLX." << endl;
         }
-
-      //glPushAttrib(GL_ALL_ATTRIB_BITS); // Save every single state
-      //glDisable(GL_DEPTH_TEST);
-      //glDisable(GL_LIGHTING);
-      //glDisable(GL_CULL_FACE);
-      //glDisable(GL_TEXTURE_2D); // Qt will enable this itself
-      //glEnable(GL_BLEND);
-      //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        // Force the text color to something distinct
-        glColor4f(1.0f, 1.0f, 0.0f, 1.0f); // Bright Yellow
-
-        renderText(30.0, 30.0, _varname.c_str(), font);
-        renderText(30.0, 60.0, _timeinfo.c_str(), font);
-      //renderText(30.0, 30.0, _title.c_str(),    font);
-      //renderText(30.0, 90.0, _position.c_str(), font);
-
-      //glPopAttrib();
-#else
-    // In your header
-    QStaticText varText;
-
-    // In your update logic
-    varText.setText(_varname.c_str());
-    varText.prepare(QTransform(), font());
-
-    // In paintGL()
-    QPainter painter(this);
-    painter.drawStaticText(30, 30, varText);
-
-    varText.setText(_timeinfo.c_str());
-    varText.prepare(QTransform(), font());
-    painter.drawStaticText(30, 30, varText);
 #endif
+      //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      //qglColor(Qt::blue); // Set text color
+      //cout << "In Function: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+      //cout << "Has problem to display var name:" << _varname << endl;
+      //cout << "and timeinfo:" << _timeinfo << endl;
+      //renderText(30, 30, _varname.c_str(), QFont("DejaVu", 16));
+      //renderText(30, 60, _timeinfo.c_str(), QFont("DejaVu", 16));
+
+      //QPainter painter(this);
+      //painter.setPen(Qt::blue);
+      //painter.setFont(QFont("Time", 16));
+      //painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+      //painter.drawText(30, 30, _varname.c_str());
+      //painter.drawText(30, 60, _timeinfo.c_str());
+      //painter.end();
+
+      //renderText(30.0, 30.0, 0.0, _varname.c_str());
+      //renderText(30.0, 60.0, 0.0, _timeinfo.c_str());
+      //renderText(30.0, 30.0, 0.0, _title.c_str());
+      //renderText(30.0, 90.0,0.0,  _position.c_str());
     }
   //cout << "Leave Function: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
@@ -1377,6 +1343,7 @@ void BaseTranslator::_displayColorBar()
     glPushMatrix();
 
     glNormal3d(0.0, 0.0, -1.0);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__
   //     << ", function: " << __PRETTY_FUNCTION__ << endl;
@@ -1434,10 +1401,9 @@ void BaseTranslator::_displayColorBar()
 
     mstep = clen/(maxLev - 1);
 
-  //QStaticText varText;
-  //QPainter painter(this);
   //QFont font("Times", 12, QFont::Bold);
-    QFont font("DejaVu Sans", 12, QFont::Bold);
+  //QFont font("DejaVu Sans", 12, QFont::Bold);
+    QFont font("DejaVu", 12, QFont::Bold);
 
     a *= 0.95;
     y = -0.975;
@@ -1450,11 +1416,7 @@ void BaseTranslator::_displayColorBar()
 
         x = a * (s * n - 0.55);
       //renderText(x, y, 0.0, buf, QFont("Times", 15, QFont::Bold));
-        renderText(x, y, 0.0, buf, font);
-
-      //varText.setText(buf);
-      //varText.prepare(QTransform(), font);
-      //painter.drawStaticText(x, y, varText);
+        renderText(x, y, 0.0, buf);
 
       //cout << "\tNo " << n << ": x = " << x << ", y = " << y << ", buf = " << buf << endl;
     }
