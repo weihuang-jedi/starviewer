@@ -101,6 +101,7 @@ class UFS2dViewer : public QGLWidget
         float* pltvar;
 
         float _valmin;
+        float _valavg;
         float _valmax;
 
         double oneover;
@@ -108,6 +109,7 @@ class UFS2dViewer : public QGLWidget
 
         void _initialize();
         void _evaluate(float* var);
+        void _adjust_minmax(float* var);
 
         void _lonlat2xyz(double lon, double lat, double radius,
                          double fact);
@@ -127,6 +129,9 @@ class UFS2dViewer : public QGLWidget
         void _draw_cross(double radius);
         double _k2h(int k);
         double _k2r(int k);
+
+    private:
+        void _set_normal(double nx, float lat);
 };
 #endif
 

@@ -1095,10 +1095,10 @@ void BaseTranslator::selectCoastLine(int f)
 
 void BaseTranslator::writeHeader()
 {
-    cout << "Enter Function: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tnvoptions->get_cb(NV_TITLEON) = " << nvoptions->get_cb(NV_TITLEON) << endl;
-    cout << "\t_varname.c_str() = " << _varname.c_str() << endl;
-    cout << "\t_timeinfo.c_str() = " << _timeinfo.c_str() << endl;
+  //cout << "Enter Function: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\tnvoptions->get_cb(NV_TITLEON) = " << nvoptions->get_cb(NV_TITLEON) << endl;
+  //cout << "\t_varname.c_str() = " << _varname.c_str() << endl;
+  //cout << "\t_timeinfo.c_str() = " << _timeinfo.c_str() << endl;
   //cout << "\t_title.c_str() = " << _title.c_str() << endl;
   //cout << "\t_position.c_str() = " << _position.c_str() << endl;
     if(nvoptions->get_cb(NV_TITLEON))
@@ -1128,10 +1128,13 @@ void BaseTranslator::writeHeader()
             cout << "No active X11 Display found via GLX." << endl;
         }
 #endif
-
-        qglColor(Qt::blue); // Set text color
-        renderText(30, 30, _varname.c_str(), QFont("DejaVu", 16));
-        renderText(30, 60, _timeinfo.c_str(), QFont("DejaVu", 16));
+      //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      //qglColor(Qt::blue); // Set text color
+      //cout << "In Function: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+      //cout << "Has problem to display var name:" << _varname << endl;
+      //cout << "and timeinfo:" << _timeinfo << endl;
+      //renderText(30, 30, _varname.c_str(), QFont("DejaVu", 16));
+      //renderText(30, 60, _timeinfo.c_str(), QFont("DejaVu", 16));
 
       //QPainter painter(this);
       //painter.setPen(Qt::blue);
@@ -1340,6 +1343,7 @@ void BaseTranslator::_displayColorBar()
     glPushMatrix();
 
     glNormal3d(0.0, 0.0, -1.0);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__
   //     << ", function: " << __PRETTY_FUNCTION__ << endl;
