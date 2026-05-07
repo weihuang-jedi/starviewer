@@ -129,6 +129,9 @@ class UFS2dViewer : public QGLWidget
         void _draw_cross(double radius);
         double _k2h(int k);
         double _k2r(int k);
+
+    private:
+        void _set_normal(double nx, float lat);
 };
 #endif
 

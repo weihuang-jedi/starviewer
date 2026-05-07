@@ -291,8 +291,8 @@ void UFS2dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact
         alpha = 0.0;
     else if(alpha > 1.0)
         alpha = 1.0;
-    glColor4d(fact, fact, fact, alpha);
 
+    glColor4d(fact, fact, fact, alpha);
     glNormal3f(x, y, z);
     glVertex3d(x * radius, y * radius, z * radius);
 }
@@ -904,9 +904,6 @@ void UFS2dViewer::_sphereBump()
 
     glPushMatrix();
 
-  //glEnable(GL_TEXTURE_1D);
-  //glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
     glNormal3f(0.0, 0.0, -1.0);
     if(k < _nlev || 1 == _nlev) {
     for(j = 1; j < _nlat; ++j)
@@ -936,6 +933,15 @@ void UFS2dViewer::_sphereBump()
     glEndList();
 }
 
+void UFS2dViewer::_set_normal(double nx, float lat)
+{
+    double ny = sin(deg2rad*lat);
+    double nz = cos(deg2rad*lat);
+    int i;
+
+    glNormal3f(nx, ny, nz);
+}
+
 void UFS2dViewer::_flatBump()
 {
     int i, j, k, k1;
@@ -944,6 +950,7 @@ void UFS2dViewer::_flatBump()
     double alpha, fact;
     double amp = 1.05;
     double magnifier = 0.125;
+    double rlat;
 
     k1 = nvoptions->get_zsec()+1;
     k = _nlev-k1;
@@ -983,9 +990,6 @@ void UFS2dViewer::_flatBump()
 
     glPushMatrix();
 
-  //glEnable(GL_TEXTURE_1D);
-  //glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
     glNormal3f(0.0, 0.0, -1.0);
     if(k < _nlev || 1 == _nlev) {
     for(j = 1; j < _nlat; ++j)
@@ -1001,8 +1005,10 @@ void UFS2dViewer::_flatBump()
                 alpha = 0.0;
             else if(alpha > 1.0)
                 alpha = 1.0;
+
             glColor4d(fact, fact, fact, alpha);
-            glVertex3d(_xFlat[i], _yFlat[j], magnifier * fact);
+            _set_normal(_xFlat[i], _lat[j]);
+            glVertex3d(_xFlat[i], _yFlat[j], magnifier*fact);
 
             fact = sv * (pltvar[mpos+i] - _valmin);
             alpha = amp * fact;
@@ -1010,10 +1016,10 @@ void UFS2dViewer::_flatBump()
                 alpha = 0.0;
             else if(alpha > 1.0)
                 alpha = 1.0;
-            else
-                glTexCoord1d(fact);
+
             glColor4d(fact, fact, fact, alpha);
-            glVertex3d(_xFlat[i], _yFlat[j-1], magnifier * fact);
+            _set_normal(_xFlat[i], _lat[j-1]);
+            glVertex3d(_xFlat[i], _yFlat[j-1],  magnifier*fact);
         }
 
         for(i = 0; i <= _hlon; ++i)
@@ -1024,8 +1030,10 @@ void UFS2dViewer::_flatBump()
                 alpha = 0.0;
             else if(alpha > 1.0)
                 alpha = 1.0;
+
             glColor4d(fact, fact, fact, alpha);
-            glVertex3d(_xFlat[i], _yFlat[j], magnifier * fact);
+            _set_normal(_xFlat[i], _lat[j]);
+            glVertex3d(_xFlat[i], _yFlat[j], magnifier*fact);
 
             fact = sv * (pltvar[mpos+i] - _valmin);
             alpha = amp * fact;
@@ -1033,15 +1041,16 @@ void UFS2dViewer::_flatBump()
                 alpha = 0.0;
             else if(alpha > 1.0)
                 alpha = 1.0;
+
             glColor4d(fact, fact, fact, alpha);
-            glVertex3d(_xFlat[i], _yFlat[j-1], magnifier * fact);
+            _set_normal(_xFlat[i], _lat[j-1]);
+            glVertex3d(_xFlat[i], _yFlat[j-1],  magnifier*fact);
         }
         glEnd();
     }
     coastline->drawOnPlane(0.01);
     }
 
-    glDisable(GL_TEXTURE_1D);
     glPopMatrix();
     glEndList();
 }
