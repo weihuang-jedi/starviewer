@@ -293,7 +293,7 @@ void UFS2dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact
         alpha = 1.0;
 
     glColor4d(fact, fact, fact, alpha);
-    glNormal3f(x, y, z);
+    glNormal3d(x, y, z);
     glVertex3d(x * radius, y * radius, z * radius);
 }
 
@@ -873,6 +873,7 @@ void UFS2dViewer::_sphereBump()
   //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\t_varname: <" << _varname << ">, lev = " << k << endl;
 
+    // sv = 1.0 / (_valmax - _valmin);
     sv = 1.0 / (_valmax - _valmin);
 
     zcl = glGenLists(1);
@@ -933,15 +934,6 @@ void UFS2dViewer::_sphereBump()
     glEndList();
 }
 
-void UFS2dViewer::_set_normal(double nx, float lat)
-{
-    double ny = sin(deg2rad*lat);
-    double nz = cos(deg2rad*lat);
-    int i;
-
-    glNormal3f(nx, ny, nz);
-}
-
 void UFS2dViewer::_flatBump()
 {
     int i, j, k, k1;
@@ -958,6 +950,7 @@ void UFS2dViewer::_flatBump()
   //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\t_varname: <" << _varname << ">, lev = " << k << endl;
 
+    // sv = 1.0 / (_valmax - _valmin);
     sv = 1.0 / (_valmax - _valmin);
 
     zcl = glGenLists(1);
@@ -1007,7 +1000,7 @@ void UFS2dViewer::_flatBump()
                 alpha = 1.0;
 
             glColor4d(fact, fact, fact, alpha);
-            _set_normal(_xFlat[i], _lat[j]);
+            glNormal3d(0.0, _yFlat[j], magnifier*fact);
             glVertex3d(_xFlat[i], _yFlat[j], magnifier*fact);
 
             fact = sv * (pltvar[mpos+i] - _valmin);
@@ -1018,11 +1011,13 @@ void UFS2dViewer::_flatBump()
                 alpha = 1.0;
 
             glColor4d(fact, fact, fact, alpha);
-            _set_normal(_xFlat[i], _lat[j-1]);
+            glNormal3d(0.0, _yFlat[j-1], magnifier*fact);
             glVertex3d(_xFlat[i], _yFlat[j-1],  magnifier*fact);
         }
+        // glEnd();
 
-        for(i = 0; i <= _hlon; ++i)
+        // glBegin(GL_QUAD_STRIP);
+        for(i = 0; i < _hlon; ++i)
         {
             fact = sv * (pltvar[npos+i] - _valmin);
             alpha = amp * fact;
@@ -1032,7 +1027,7 @@ void UFS2dViewer::_flatBump()
                 alpha = 1.0;
 
             glColor4d(fact, fact, fact, alpha);
-            _set_normal(_xFlat[i], _lat[j]);
+            glNormal3d(0.0, _yFlat[j], magnifier*fact);
             glVertex3d(_xFlat[i], _yFlat[j], magnifier*fact);
 
             fact = sv * (pltvar[mpos+i] - _valmin);
@@ -1043,7 +1038,7 @@ void UFS2dViewer::_flatBump()
                 alpha = 1.0;
 
             glColor4d(fact, fact, fact, alpha);
-            _set_normal(_xFlat[i], _lat[j-1]);
+            glNormal3d(0.0, _yFlat[j-1], magnifier*fact);
             glVertex3d(_xFlat[i], _yFlat[j-1],  magnifier*fact);
         }
         glEnd();
