@@ -27,4 +27,9 @@ data/gshhg-gmt-2.3.7
 data/gshhg.info
 data/GMTED2010_15n060_0250deg.nc
 data/read-gshhg.cpp
+data/gshhg-shp-2.3.7.zip
+data/gshhg-shp-2.3.7/
 removed.colormaps
+log.nv
+no-gdal.starviewer.sif
+

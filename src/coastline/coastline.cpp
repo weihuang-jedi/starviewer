@@ -103,13 +103,11 @@ void CoastLine::_drawOnSphere(double radius)
                 continue;
 
 	    ++n;
-            // cout << "Polygon No. " << n << endl;
             // Loop through points and send to plotting function
             glBegin(GL_LINE_STRIP);
             for (i = 0; i < poRing->getNumPoints(); i++) {
                 lon = poRing->getX(i);
                 lat = poRing->getY(i);
-                // cout << "\ti=" << i << ", lon=" << lon << ", lat=" << lat << endl;
                 _lonlat2xyz(lon, lat, radius);
             }
             glEnd();
@@ -167,13 +165,11 @@ void CoastLine::_drawOnPlane(double z)
                 continue;
 
             ++n;
-            // cout << "Polygon No. " << n << endl;
             // Loop through points and send to plotting function
             glBegin(GL_LINE_STRIP);
             for (i = 0; i < poRing->getNumPoints(); i++) {
                 lon = poRing->getX(i);
                 lat = poRing->getY(i);
-                // cout << "\ti=" << i << ", lon=" << lon << ", lat=" << lat << endl;
                 _lonlat2xy(lon, lat, z);
             }
             glEnd();
