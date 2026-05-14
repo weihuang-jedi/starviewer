@@ -17,7 +17,7 @@ Earth::Earth()
 
     strcat(_bmpflnm, "/data/earth.bmp");
 
-    _loadTexBMP();
+    // loadTexBMP();
 
     radius = 1.0;
 
@@ -29,7 +29,7 @@ Earth::Earth()
 Earth::Earth(const char *flnm)
 {
     strcpy(_bmpflnm, flnm);
-    _loadTexBMP();
+    // loadTexBMP();
 }
 
 Earth::Earth(const char *flnm, ncReader* nchandler)
@@ -42,7 +42,7 @@ Earth::Earth(const char *flnm, ncReader* nchandler)
     initializeGL();
 
     strcpy(_bmpflnm, flnm);
-    _loadTexBMP();
+    // loadTexBMP();
 
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     nlon = nchandler->getNlon();
@@ -127,12 +127,12 @@ void Earth::_errCheck(const char *where, const char *fl, int ln)
 /*
  *  Load texture from BMP file
  */
-void Earth::_loadTexBMP()
+void Earth::loadTexBMP()
 {
     GLuint textureID = 0;
 
-  //cout << "enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tfunctions: _bmpflnm: <" << _bmpflnm << ">" << endl;
+    cout << "enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tfunctions: _bmpflnm: <" << _bmpflnm << ">" << endl;
 
     // Load the image
     QImage b(_bmpflnm);
@@ -144,23 +144,30 @@ void Earth::_loadTexBMP()
   //    qDebug() << "Image loaded successfully" << b.size();
   //}
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+    if (!QOpenGLContext::currentContext()) {
+       cerr << "CRITICAL ERROR: No OpenGL context is current in this thread!" << endl;
+       return; // This prevents the crash, but you need to move the call
+    }
+
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     glEnable(GL_TEXTURE_2D);
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     
     QImage t = QGLWidget::convertToGLFormat( b );
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     glGenTextures(1, &textureID);
 
     // set texture name
     set_texture_id(textureID);
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tt.width(): " << t.width() << ", t.height(): " << t.height() << endl;
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tt.width(): " << t.width() << ", t.height(): " << t.height() << endl;
 
     glBindTexture(GL_TEXTURE_2D, textureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -170,7 +177,7 @@ void Earth::_loadTexBMP()
     glTexImage2D(GL_TEXTURE_2D, 0, 3, t.width(), t.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, t.bits());
     glGenerateMipmap(GL_TEXTURE_2D);  //Generate mipmaps now!!!
     glDisable(GL_TEXTURE_2D);
-  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 // Draw vertex in polar coordinates

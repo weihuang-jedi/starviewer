@@ -14,8 +14,6 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt)
     texture1d->set_name(ct->get_name());
 
     _var = NULL;
- 
-    earth = new Earth();
 
     nvoptions->set_xsec(0);
     nvoptions->set_ysec(0);
@@ -49,7 +47,6 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, nc
     _var = NULL;
 
     ncfile = nchandler;
-    earth = new Earth(bmpflnm, ncfile);
 
     nvoptions->set_xsec(0);
     nvoptions->set_ysec(0);
@@ -68,6 +65,8 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, nc
 
     previoustimelevel = -1;
     current_timelevel = 0;
+
+    earth = new Earth(bmpflnm);
 }
 
 UFS2dViewer::~UFS2dViewer()
@@ -84,6 +83,8 @@ void UFS2dViewer::set_geometry(UFSGeometry *gm)
     geometry = gm;
 
     _initialize();
+
+    initializeGL();
 }
 
 void UFS2dViewer::setup(string vn, float *var)
@@ -110,6 +111,16 @@ void UFS2dViewer::setup(string vn, float *var)
 void UFS2dViewer::reset()
 {
     lister->reinitialize(_nlon+1, _nlat+1, geometry->get_nlev()+1);
+}
+
+void UFS2dViewer::initializeGL()
+{
+    // 1. Initialize OpenGL functions (if using a loader)
+    initializeOpenGLFunctions();
+
+    // 2. NOW it is safe to call your Earth texture loader
+    // At this point, Qt has guaranteed that the context is "current"
+    earth->loadTexBMP();
 }
 
 void UFS2dViewer::_initialize()

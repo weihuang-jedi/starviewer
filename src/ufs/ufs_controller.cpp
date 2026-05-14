@@ -93,7 +93,8 @@ void UFSController::setup()
     geometry->set_has2dLat(false);
 
   //_varname = string("sst");
-    _varname = string("hgtsfc");
+  //_varname = string("hgtsfc");
+    _varname = string("pressfc");
 
     _sphere = false;
     _ball = false;

@@ -1,0 +1,48 @@
+#!/bin/bash
+
+ set -x
+
+ # Create a temporary wildcard cookie file
+#touch /scratch/wei/tmp/xauth_wildcard
+#xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | xauth -f /scratch/wei/tmp/xauth_wildcard nmerge -
+
+#vncserver :1
+#export DISPLAY=:1
+
+#for cadre
+ export STARVIEWERHOME=/scratch/wei/cadre/starviewer
+ export CONTAINER_DIR=${STARVIEWERHOME}
+ export CONTAINER_BINDINGS="-B /scratch"
+ export RUNTIME_DIR=/scratch/wei/tmp/runtime-dir
+
+ export CONTAINER_SIF=${CONTAINER_DIR}/starviewer.sif
+
+ export LIBGL_ALWAYS_SOFTWARE=1
+ export QT_QUICK_BACKEND=software
+
+ if [ ! -d $RUNTIME_DIR ]; then
+     mkdir -p $RUNTIME_DIR
+     chmod 700 $RUNTIME_DIR
+ fi
+
+# 1. On the host terminal (e01g01), allow the connection
+xhost +local:$(whoami)
+
+# Add the socket binding (-B /tmp/.X11-unix) and pass the DISPLAY variable
+singularity exec --cleanenv \
+    -B /scratch \
+    -B /tmp/.X11-unix \
+    --hostname $(hostname) \
+    --env DISPLAY=$DISPLAY \
+    --env STARVIEWERHOME=${STARVIEWERHOME} \
+    --env LIBGL_ALWAYS_SOFTWARE=1 \
+    --env QT_QUICK_BACKEND=software \
+    "${CONTAINER_SIF}" \
+    gdb --args \
+    ${STARVIEWERHOME}/build/main/starviewer \
+    -ufs /scratch/wei/cadre/cadre26_noaa_tutorial/exp_case/wei_cadre26.8/output/cubed_sphere_grid_atminc.jedi.nc
+
+ exit 0
+#   gdb --args \
+
+ xdg-open img_0015.png

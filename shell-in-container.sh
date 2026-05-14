@@ -2,6 +2,6 @@
 
 set -x
 
-singularity shell -B /scratch3 -B /scratch4 -B /scratch5 \
-	/scratch5/purged/Wei.Huang/src/nv/starviewer/starviewer.sif
+singularity shell -B /scratch \
+	/scratch/wei/cadre/starviewer/starviewer.sif
 
