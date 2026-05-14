@@ -347,6 +347,7 @@ void UFS2dViewer::_sphereDisplay()
 
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   //#pragma omp parallel for
     if(k < _nlev || 1 == _nlev) {
@@ -402,6 +403,7 @@ void UFS2dViewer::_flatDisplay()
     glEnable(GL_NORMALIZE);
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glNormal3f(0.0, 0.0, -1.0);
 
     if(k < _nlev || 1 == _nlev) {
@@ -807,7 +809,7 @@ void UFS2dViewer::_display_Xflat_plane(int xs)
 
 void UFS2dViewer::_sphereBump()
 {
-    int i, j, k;
+    int i, j, k, k1;
     size_t mpos, npos;
 
     double sv = 1.0;
@@ -817,20 +819,17 @@ void UFS2dViewer::_sphereBump()
     double amp = 0.1;
     double offset = 0.5;
 
-    k = nvoptions->get_zsec();
-
   //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\t_varname: <" << _varname << ">, lev = " << lev << endl;
   //cout << "\tncenters = " << ncenters << ", nvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
 
-    if(k < _nlev)
-    {
+    k1 = nvoptions->get_zsec()+1;
+    k = _nlev-k1;
+
+    if(1 < _nlev)
         radius = _k2r(k);
-    }
     else
-    {
         radius = 1.001;
-    }
 
     sv = 1.0 / (_valmax - _valmin);
 
@@ -854,7 +853,7 @@ void UFS2dViewer::_sphereBump()
 
     glPopMatrix();
 
-    earth->bump(radius-0.15);
+    earth->bump(radius-0.002);
 
     glPopMatrix();
 
@@ -890,6 +889,8 @@ void UFS2dViewer::_sphereBump()
         glEnd();
     }
 
+    coastline->drawOnSphere(radius+0.01);
+
     glDisable(GL_TEXTURE_1D);
 
     glPopMatrix();
@@ -899,7 +900,7 @@ void UFS2dViewer::_sphereBump()
 
 void UFS2dViewer::_flatBump()
 {
-    int i, j, k;
+    int i, j, k, k1;
     size_t mpos, npos;
     double sv = 1.0;
     double alpha, fact;
@@ -907,7 +908,8 @@ void UFS2dViewer::_flatBump()
     double amp = 0.2;
     double offset = 0.5;
 
-    k = nvoptions->get_zsec();
+    k1 = nvoptions->get_zsec()+1;
+    k = _nlev-k1;
 
     if(1 < _nlev)
         height = _k2h(k);
@@ -942,7 +944,7 @@ void UFS2dViewer::_flatBump()
 
   //glShadeModel(GL_SMOOTH);
 
-    earth->bump_plane(height - 0.1);
+    earth->bump_plane(height - 0.001);
 
     glPopMatrix();
 
@@ -1039,6 +1041,7 @@ void UFS2dViewer::_flatBump()
             glEnd();
         }
     }
+    coastline->drawOnPlane(height+0.01);
     glDisable(GL_TEXTURE_1D);
     glPopMatrix();
 

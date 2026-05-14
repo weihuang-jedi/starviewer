@@ -116,7 +116,8 @@ void UFSTranslator::setup()
 //Show the image
 void UFSTranslator::show()
 {
-    glShadeModel(GL_SMOOTH);
+  //glShadeModel(GL_SMOOTH);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     if(nvoptions->get_tsec() != _glbTime)
     {
