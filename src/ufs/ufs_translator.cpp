@@ -150,7 +150,9 @@ void UFSTranslator::show()
 
 void UFSTranslator::createVarInfo()
 {
-    _varinfo = "Dim nlon="+QString::number(geometry->get_nlon())
+    _varinfo = QString(_varname.c_str()) + "\n"
+             + QString(_timeinfo.c_str()) + "\n"
+             + "Dim nx="+QString::number(geometry->get_nlon())
              + ", nlat=" + QString::number(geometry->get_nlat())
              + ", nlev=" + QString::number(geometry->get_nlev())
              + "\nVar min=" + QString::number(ufs_controller->get_minval())

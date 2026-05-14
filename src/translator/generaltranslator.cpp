@@ -127,7 +127,9 @@ void GeneralTranslator::show()
 
 void GeneralTranslator::createVarInfo()
 {
-    _varinfo = "Dim nx="+QString::number(geometry->get_nx())
+    _varinfo = QString(_varname.c_str()) + "\n"
+             + QString(_timeinfo.c_str()) + "\n"
+             + "Dim nx="+QString::number(geometry->get_nx())
              + ", ny=" + QString::number(geometry->get_ny())
              + ", nz=" + QString::number(geometry->get_nz())
              + "\nVar min=" + QString::number(controller->get_minval())

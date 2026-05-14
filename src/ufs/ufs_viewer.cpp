@@ -286,19 +286,14 @@ void UFS2dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact
     double z = dist * cos(lamda);
     double y = sin(phi);
 
-    if(nvoptions->get_cb(NV_BUMPON))
-    {
-        double alpha = 1.25 * fact;
-        if(alpha < 0.1)
-            alpha = 0.0;
-        if(alpha > 1.0)
-            alpha = 1.0;
-        glColor4d(fact, fact, fact, alpha);
-    }
-    else
-        glTexCoord1d(fact);
+    double alpha = 1.05 * fact;
+    if(alpha < 0.1)
+        alpha = 0.0;
+    else if(alpha > 1.0)
+        alpha = 1.0;
 
-    glNormal3f(x, y, z);
+    glColor4d(fact, fact, fact, alpha);
+    glNormal3d(x, y, z);
     glVertex3d(x * radius, y * radius, z * radius);
 }
 
@@ -448,11 +443,10 @@ void UFS2dViewer::_evaluate(float *var)
 {
     size_t varsize;
     size_t n = 0;
-    char vn[256];
+    float total;
 
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\t _varname: " << _varname << endl;
-    strcpy(vn, _varname.c_str());
 
     varsize = geometry->get_nlon() * geometry->get_nlat() * geometry->get_nlev();
   //varsize = geometry->get_nlon() * geometry->get_nlat();
@@ -465,6 +459,7 @@ void UFS2dViewer::_evaluate(float *var)
 
     _valmax = var[0];
     _valmin = var[0];
+    total = var[0];
 
     for(n = 1; n < varsize; ++n)
     {
@@ -476,16 +471,73 @@ void UFS2dViewer::_evaluate(float *var)
         {
            _valmin = var[n];
         }
+        total += var[n];
     }
 
     if(1.0e-10 > (_valmax - _valmin))
        _valmax += 1.0e-10;
 
-  //cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << endl;
+    _valavg = total / varsize;
+
+  //cout << "\t_valmin = " << _valmin << ", _valavg = " << _valavg << ", _valmax = " << _valmax << endl;
 
 #if 0
     nvoptions->set_trueminimum(_valmin);
     nvoptions->set_truemaximum(_valmax);
+#endif
+  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+}
+
+void UFS2dViewer::_adjust_minmax(float *var)
+{
+    size_t varsize;
+    size_t n = 0;
+    float total;
+
+  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+    varsize = geometry->get_nlon() * geometry->get_nlat();
+
+    _valmax = var[0];
+    _valmin = var[0];
+    total = var[0];
+
+    for(n = 1; n < varsize; ++n)
+    {
+        if(_valmax < var[n])
+        {
+           _valmax = var[n];
+        }
+        if(_valmin > var[n])
+        {
+           _valmin = var[n];
+        }
+        total += var[n];
+    }
+
+    if(1.0e-10 > (_valmax - _valmin))
+       _valmax += 1.0e-10;
+
+    _valavg = total / varsize;
+
+  //cout << "\t_valmin = " << _valmin << ", _valavg = " << _valavg << ", _valmax = " << _valmax << endl;
+
+#if 0
+    // adjust _valmin _valmax;
+    for(n = 0; n < 2; ++n)
+    {
+    double sd = _valavg - _valmin;
+    double du = _valmax - _valavg;
+
+    if(sd > du)
+      //_valmin = _valavg - du;
+        _valmin = 0.5*(_valavg + _valmin);
+    else
+      //_valmax = _valavg + sd;
+        _valmax = 0.5*(_valavg + _valmax);
+
+  //cout << "\t_valmin = " << _valmin << ", _valavg = " << _valavg << ", _valmax = " << _valmax << endl;
+    }
 #endif
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
@@ -811,116 +863,18 @@ void UFS2dViewer::_sphereBump()
 {
     int i, j, k, k1;
     size_t mpos, npos;
-
-    double sv = 1.0;
-    double fact;
-    double radius = 1.001;
-
-    double amp = 0.1;
-    double offset = 0.5;
-
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t_varname: <" << _varname << ">, lev = " << lev << endl;
-  //cout << "\tncenters = " << ncenters << ", nvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
-
-    k1 = nvoptions->get_zsec()+1;
-    k = _nlev-k1;
-
-    if(1 < _nlev)
-        radius = _k2r(k);
-    else
-        radius = 1.001;
-
-    sv = 1.0 / (_valmax - _valmin);
-
-    zcl = glGenLists(1);
-  //glNewList(zcl, GL_COMPILE);
-    glNewList(zcl, GL_COMPILE_AND_EXECUTE);
-    lister->set_zid(k, zcl);
-
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << ", sv = " << sv << endl;
-  //cout << "\tzcl = " << zcl << endl;
-
-  //OpenGL should normalize normal vectors
-    glEnable(GL_NORMALIZE);
-
-    glEnable(GL_BLEND);
-  //glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-
-    glShadeModel(GL_SMOOTH);
-
-    glPopMatrix();
-
-    earth->bump(radius-0.002);
-
-    glPopMatrix();
-
-    glPushMatrix();
-
-    glDisable(GL_LIGHTING);
-
-    glColor4f(1.0, 1.0, 1.0, 1.0);
-    glColor4f(0.0, 0.0, 0.0, 0.0);
-
-    glEnable(GL_TEXTURE_1D);
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
-  //#pragma omp parallel for
-    for(j = 1; j < _nlat; ++j)
-    {
-        mpos = (k*_nlat + (j-1))*_nlon;
-        npos = (k*_nlat + j)*_nlon;
-        glBegin(GL_QUAD_STRIP);
-        for(i = 0; i < _nlon; ++i)
-        {
-            fact = sv * (pltvar[npos+i] - _valmin);
-            _lonlat2xyz(_lon[i], _lat[j], radius + amp * (fact - offset), fact);
-
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            _lonlat2xyz(_lon[i], _lat[j-1], radius + amp * (fact - offset), fact);
-        }
-        fact = sv * (pltvar[npos] - _valmin);
-        _lonlat2xyz(_lon[0], _lat[j], radius + amp * (fact - offset), fact);
-
-        fact = sv * (pltvar[mpos] - _valmin);
-        _lonlat2xyz(_lon[0], _lat[j-1], radius + amp * (fact - offset), fact);
-        glEnd();
-    }
-
-    coastline->drawOnSphere(radius+0.01);
-
-    glDisable(GL_TEXTURE_1D);
-
-    glPopMatrix();
-
-    glEndList();
-}
-
-void UFS2dViewer::_flatBump()
-{
-    int i, j, k, k1;
-    size_t mpos, npos;
     double sv = 1.0;
     double alpha, fact;
-    double height = 0.00;
-    double amp = 0.2;
-    double offset = 0.5;
+    double amp = 1.05;
+    double magnifier = 0.125;
+    double radius = 1.0;
 
     k1 = nvoptions->get_zsec()+1;
     k = _nlev-k1;
-
-    if(1 < _nlev)
-        height = _k2h(k);
-    else
-        height = 0.001;
-
   //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\t_varname: <" << _varname << ">, lev = " << k << endl;
-  //cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
-  //cout << "\tcurrent_timelevel = " << current_timelevel << endl;
 
+    // sv = 1.0 / (_valmax - _valmin);
     sv = 1.0 / (_valmax - _valmin);
 
     zcl = glGenLists(1);
@@ -930,7 +884,9 @@ void UFS2dViewer::_flatBump()
 
   //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << ", sv = " << sv << endl;
-  //cout << "\tzcl = " << zcl << endl;
+  //cout << "\tzcl = " << zcl << ", k = " << k << endl;
+
+  //_adjust_minmax(&pltvar[k*_nlat*_nlon]);
 
     glPushMatrix();
 
@@ -944,107 +900,154 @@ void UFS2dViewer::_flatBump()
 
   //glShadeModel(GL_SMOOTH);
 
-    earth->bump_plane(height - 0.001);
+    earth->draw(0.999);
 
     glPopMatrix();
 
     glPushMatrix();
 
-    glEnable(GL_TEXTURE_1D);
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
     glNormal3f(0.0, 0.0, -1.0);
-    if(nvoptions->get_cb(NV_BUMPON))
+    if(k < _nlev || 1 == _nlev) {
+    for(j = 1; j < _nlat; ++j)
     {
-        for(j = 1; j < _nlat; ++j)
+        mpos = (k*_nlat + (j-1))*_nlon;
+        npos = (k*_nlat + j)*_nlon;
+        glBegin(GL_QUAD_STRIP);
+        for(i = 0; i < _nlon; ++i)
         {
-	    mpos = (k*_nlat+(j-1))*_nlon;
-            npos = (k*_nlat+j)*_nlon;
-            glBegin(GL_QUAD_STRIP);
-	    for(i = _hlon; i < _nlon; ++i)
-            {
-                fact = sv * (pltvar[npos+i] - _valmin);
-                alpha = 1.125 * fact;
-                if(alpha < 0.01)
-                    alpha = 0.0;
-                else if(alpha > 1.0)
-                {
-                    alpha = 1.0;
-                    glColor4d(1.5*fact, 1.5*fact, 1.5*fact, alpha);
-                }
-                else
-                    glTexCoord1d(fact);
-                glVertex3d(_xFlat[i], _yFlat[j], height + amp * (fact - offset));
+            fact = sv * (pltvar[npos+i] - _valmin);
+            _lonlat2xyz(_lon[i], _lat[j], radius + magnifier*fact, fact);
 
-                fact = sv * (pltvar[mpos+i] - _valmin);
-                alpha = 1.125 * fact;
-                if(alpha < 0.01)
-                    alpha = 0.0;
-                else if(alpha > 1.0)
-                {
-                    alpha = 1.0;
-                    glColor4d(1.5*fact, 1.5*fact, 1.5*fact, alpha);
-                }
-                else
-                    glTexCoord1d(fact);
-                glVertex3d(_xFlat[i], _yFlat[j-1], height + amp * (fact - offset));
-            }
-
-            for(i = 0; i < _hlon; ++i)
-            {
-                fact = sv * (pltvar[npos+i] - _valmin);
-                alpha = 1.125 * fact;
-                if(alpha < 0.01)
-                    alpha = 0.0;
-		else if(alpha > 1.0)
-		{
-                    alpha = 1.0;
-                    glColor4d(1.5*fact, 1.5*fact, 1.5*fact, alpha);
-                }
-                else
-                    glTexCoord1d(fact);
-                glVertex3d(_xFlat[i], _yFlat[j], height + amp * (fact - offset));
-
-		fact = sv * (pltvar[mpos+i] - _valmin);
-                alpha = 1.125 * fact;
-                if(alpha < 0.01)
-                    alpha = 0.0;
-                else if(alpha > 1.0)
-                {
-                    alpha = 1.0;
-                    glColor4d(1.5*fact, 1.5*fact, 1.5*fact, alpha);
-                }
-                else
-                    glTexCoord1d(fact);
-                glVertex3d(_xFlat[i], _yFlat[j-1], height + amp * (fact - offset));
-            }
-            glEnd();
+            fact = sv * (pltvar[mpos+i] - _valmin);
+            _lonlat2xyz(_lon[i], _lat[j-1], radius + magnifier*fact, fact);
         }
-    }
-    else
-    {
-        for(j = 1; j < _nlat; ++j)
-        {
-	    mpos = (k*_nlat+(j-1))*_nlon;
-            npos = (k*_nlat+j)*_nlon;
-            glBegin(GL_QUAD_STRIP);
-            for(i = 0; i < _nlon; ++i)
-            {
-                fact = sv * (pltvar[npos+i] - _valmin);
-                glTexCoord1d(fact);
-                glVertex3d(_xFlat[i], _yFlat[j], height);
+        fact = sv * (pltvar[npos] - _valmin);
+        _lonlat2xyz(_lon[0], _lat[j], radius + magnifier*fact, fact);
 
-		fact = sv * (pltvar[mpos+i] - _valmin);
-                glTexCoord1d(fact);
-                glVertex3d(_xFlat[i], _yFlat[j-1], height);
-            }
-            glEnd();
-        }
+        fact = sv * (pltvar[mpos] - _valmin);
+        _lonlat2xyz(_lon[0], _lat[j-1], radius + magnifier*fact, fact);
+        glEnd();
     }
-    coastline->drawOnPlane(height+0.01);
-    glDisable(GL_TEXTURE_1D);
+    coastline->drawOnPlane(0.01);
+    }
+
+    glPopMatrix();
+    glEndList();
+}
+
+void UFS2dViewer::_flatBump()
+{
+    int i, j, k, k1;
+    size_t mpos, npos;
+    double sv = 1.0;
+    double alpha, fact;
+    double amp = 1.05;
+    double magnifier = 0.125;
+    double rlat;
+
+    k1 = nvoptions->get_zsec()+1;
+    k = _nlev-k1;
+
+  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\t_varname: <" << _varname << ">, lev = " << k << endl;
+
+    // sv = 1.0 / (_valmax - _valmin);
+    sv = 1.0 / (_valmax - _valmin);
+
+    zcl = glGenLists(1);
+  //glNewList(zcl, GL_COMPILE);
+    glNewList(zcl, GL_COMPILE_AND_EXECUTE);
+    lister->set_zid(k, zcl);
+
+  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << ", sv = " << sv << endl;
+  //cout << "\tzcl = " << zcl << ", k = " << k << endl;
+
+  //_adjust_minmax(&pltvar[k*_nlat*_nlon]);
+
+    glPushMatrix();
+
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+
+  //OpenGL should normalize normal vectors
+    glEnable(GL_NORMALIZE);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
+  //glShadeModel(GL_SMOOTH);
+
+  //earth->bump_plane(height - 0.1);
+    earth->draw_plane(-0.001);
+
     glPopMatrix();
 
+    glPushMatrix();
+
+    glNormal3f(0.0, 0.0, -1.0);
+    if(k < _nlev || 1 == _nlev) {
+    for(j = 1; j < _nlat; ++j)
+    {
+        mpos = (k*_nlat+(j-1))*_nlon;
+        npos = (k*_nlat+j)*_nlon;
+        glBegin(GL_QUAD_STRIP);
+        for(i = _hlon; i < _nlon; ++i)
+        {
+            fact = sv * (pltvar[npos+i] - _valmin);
+            alpha = amp * fact;
+            if(alpha < 0.0001)
+                alpha = 0.0;
+            else if(alpha > 1.0)
+                alpha = 1.0;
+
+            glColor4d(fact, fact, fact, alpha);
+            glNormal3d(0.0, _yFlat[j], magnifier*fact);
+            glVertex3d(_xFlat[i], _yFlat[j], magnifier*fact);
+
+            fact = sv * (pltvar[mpos+i] - _valmin);
+            alpha = amp * fact;
+            if(alpha < 0.0001)
+                alpha = 0.0;
+            else if(alpha > 1.0)
+                alpha = 1.0;
+
+            glColor4d(fact, fact, fact, alpha);
+            glNormal3d(0.0, _yFlat[j-1], magnifier*fact);
+            glVertex3d(_xFlat[i], _yFlat[j-1],  magnifier*fact);
+        }
+        // glEnd();
+
+        // glBegin(GL_QUAD_STRIP);
+        for(i = 0; i < _hlon; ++i)
+        {
+            fact = sv * (pltvar[npos+i] - _valmin);
+            alpha = amp * fact;
+            if(alpha < 0.0001)
+                alpha = 0.0;
+            else if(alpha > 1.0)
+                alpha = 1.0;
+
+            glColor4d(fact, fact, fact, alpha);
+            glNormal3d(0.0, _yFlat[j], magnifier*fact);
+            glVertex3d(_xFlat[i], _yFlat[j], magnifier*fact);
+
+            fact = sv * (pltvar[mpos+i] - _valmin);
+            alpha = amp * fact;
+            if(alpha < 0.0001)
+                alpha = 0.0;
+            else if(alpha > 1.0)
+                alpha = 1.0;
+
+            glColor4d(fact, fact, fact, alpha);
+            glNormal3d(0.0, _yFlat[j-1], magnifier*fact);
+            glVertex3d(_xFlat[i], _yFlat[j-1],  magnifier*fact);
+        }
+        glEnd();
+    }
+    coastline->drawOnPlane(0.01);
+    }
+
+    glPopMatrix();
     glEndList();
 }
 
@@ -1063,26 +1066,26 @@ void UFS2dViewer::_draw_cross(double radius)
     m = 2;
 
     glBegin(GL_LINE_STRIP);
-        for(n = -m; n <= m; ++n)
-        {
-            x =   delt * sin((lon + n) * ARC);
-            y = radius * sin(lat * ARC);
-            z =   delt * cos((lon + n) * ARC);
-            glVertex3f(x, y, z);
-        }
+    for(n = -m; n <= m; ++n)
+    {
+        x =   delt * sin((lon + n) * ARC);
+        y = radius * sin(lat * ARC);
+        z =   delt * cos((lon + n) * ARC);
+        glVertex3f(x, y, z);
+    }
     glEnd();
 
     m = 2;
 
     glBegin(GL_LINE_STRIP);
-        for(n = -m; n <= m; ++n)
-        {
-            delt = radius * cos((lat + n) * ARC);
-            x =   delt * sin(lon * ARC);
-            y = radius * sin((lat + n) * ARC);
-            z =   delt * cos(lon * ARC);
-            glVertex3f(x, y, z);
-        }
+    for(n = -m; n <= m; ++n)
+    {
+        delt = radius * cos((lat + n) * ARC);
+        x =   delt * sin(lon * ARC);
+        y = radius * sin((lat + n) * ARC);
+        z =   delt * cos(lon * ARC);
+        glVertex3f(x, y, z);
+    }
     glEnd();
 }
 

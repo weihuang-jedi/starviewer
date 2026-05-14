@@ -1,7 +1,7 @@
 #include <earth.h>
 
-#define Cos(th) cos(3.1416*(th)/180.0)
-#define Sin(th) sin(3.1416*(th)/180.0)
+#define Cos(th) cos(3.141592659*(th)/180.0)
+#define Sin(th) sin(3.141592659*(th)/180.0)
 
 //
 //  Constructor
@@ -176,11 +176,11 @@ void Earth::_loadTexBMP()
 // Draw vertex in polar coordinates
 void Earth::_Vertex(int th, int ph)
 {
-   double x = radius*Cos(th)*Cos(ph);
-   double y =         radius*Sin(ph);
-   double z = radius*Sin(th)*Cos(ph);
+   double x = radius*Sin((double)th)*Cos((double)ph);
+   double y = radius*Sin((double)ph);
+   double z = radius*Cos((double)th)*Cos((double)ph);
    glNormal3d(x,y,z);
-   glTexCoord2d(th/180.0, 0.5+ph/180.0);
+   glTexCoord2d((double)th/360.0, 0.5+(double)ph/180.0);
    glVertex3d(x,y,z);
 }
 
@@ -204,14 +204,14 @@ void Earth::draw()
     glBindTexture(GL_TEXTURE_2D, get_texture_id());
     //  Latitude bands
     glColor3f(1,1,1);
-    for(j = -90; j < 90; j += 5)
+    for(j = 90; j > -90; j -= 2)
     {
        glBegin(GL_QUAD_STRIP);
-           for(i = 0; i <= 360; i += 5)
-           {
-               _Vertex(i,j);
-               _Vertex(i,j+5);
-           }
+       for(i = 0; i <= 360; i += 2)
+       {
+           _Vertex(i,j);
+           _Vertex(i,j-5);
+       }
        glEnd();
     }
 
@@ -230,34 +230,23 @@ void Earth::draw_plane(float z)
 
   //Latitude bands
     glColor3f(1,1,1);
-    for(j = 0; j < nlat - 1; ++j)
+    for(j = 180; j > 0; --j)
     {
-       y0 = lat[j] / 180.0;
-       y1 = lat[j + 1] / 180.0;
+       y0 = (float)j / 180.0;
+       y1 = (float)(j - 1) / 180.0;
 
        glBegin(GL_QUAD_STRIP);
-       for(i = 0; i < nlon; ++i)
+       for(i = 0; i < 361; ++i)
        {
-           x = lon[i] / 180.0;
-           if(x > 1.0)
-	      x -= 2.0;
+           x = (float)i / 360.0;
            glNormal3d(0.0, 0.0, 1.0);
            glTexCoord2d(x, y0);
-           glVertex3d(x, y0, z);
+           glVertex3d(2.0*(x-0.5), y0-0.5, z);
 
            glNormal3d(0.0, 0.0, 1.0);
            glTexCoord2d(x, y1);
-           glVertex3d(x, y1, z);
+           glVertex3d(2.0*(x-0.5), y1-0.5, z);
        }
-
-       x = 0.0;
-       glNormal3d(0.0, 0.0, 1.0);
-       glTexCoord2d(x, y0);
-       glVertex3d(x, y0, z);
-
-       glNormal3d(0.0, 0.0, 1.0);
-       glTexCoord2d(x, y1);
-       glVertex3d(x, y1, z);
 
        glEnd();
     }

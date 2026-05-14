@@ -1129,9 +1129,12 @@ void BaseTranslator::writeHeader()
         }
 #endif
       //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        qglColor(Qt::blue); // Set text color
-        renderText(30, 30, _varname.c_str(), QFont("DejaVu", 16));
-        renderText(30, 60, _timeinfo.c_str(), QFont("DejaVu", 16));
+      //qglColor(Qt::blue); // Set text color
+      //cout << "In Function: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+      //cout << "Has problem to display var name:" << _varname << endl;
+      //cout << "and timeinfo:" << _timeinfo << endl;
+      //renderText(30, 30, _varname.c_str(), QFont("DejaVu", 16));
+      //renderText(30, 60, _timeinfo.c_str(), QFont("DejaVu", 16));
 
       //QPainter painter(this);
       //painter.setPen(Qt::blue);
@@ -1146,7 +1149,6 @@ void BaseTranslator::writeHeader()
       //renderText(30.0, 30.0, 0.0, _title.c_str());
       //renderText(30.0, 90.0,0.0,  _position.c_str());
     }
-  //cout << "Leave Function: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void BaseTranslator::writeVarInfo()
