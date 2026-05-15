@@ -128,7 +128,6 @@ target_link_libraries(starviewer PRIVATE
     windvector
     topography
     coastline
-  # coastline2
     marchingCube
     leveler
     lic
@@ -141,25 +140,10 @@ target_link_libraries(starviewer PRIVATE
 
     # 3. THE NCL CORE GROUP (Critical for get_dimensions and ESprintf)
     -Wl,--start-group
-  # ${NCL_LIB}      # libncl.a
-  # ${NI_LIB}       # libnio.a
-  # ${HLU_LIB}      # libhlu.a
-  # ${NCARG_LIB}    # libncarg.a
-  # ${COMMON_LIB}   # libncarg_c.a
-  # ${UDUNITS_LIB}  # libudunits2.a
-   #${HDFEOS_LIB}   # libhdfeos.a
-   #${GSPREAD_LIB}
     -Wl,--end-group
 
     # 4. System Graphics and Fortran Runtimes
-  # ${GKS_LIB}
-  # ${NFPFORT_LIB}
-  # ${SPHERE_LIB}
-  # ${NGMATH_LIB}
-  # ${CAIRO_LIBRARIES}
   # ${FREETYPE_LIBRARIES}
-  # ${NFP_LIB}
-  # ${COMMON_LIB}   # libncarg_c.a
     X11 Xext Xrender
     gfortran        # VITAL for the Fortran symbols in NCL and shared
     OpenMP::OpenMP_CXX
@@ -169,13 +153,8 @@ target_link_libraries(starviewer PRIVATE
     ${HDF5_HL_LIB}
     ${HDF5_LIB}
     ${ZLIB_LIBRARIES}
-  # ${NCL_LIB}      # libncl.a
-  # ${NCARG_LIB}    # libncarg.a
-  # ${COMMON_LIB}   # libncarg_c.a
-  # ${FFTPACK_LIB}    # libfftpack5_dp.a
-  # ${LAPACK_LIB}    # liblapack_ncl.a
-  # ${BLAS_LIB}    # libblas_ncl.a
     gfortran
+    yaml-cpp
     curl
     m
     dl
