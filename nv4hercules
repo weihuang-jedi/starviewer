@@ -1,0 +1,23 @@
+#!/bin/bash
+
+ set -x
+
+ export STARVIEWERHOME=/work2/noaa/epic/weihuang/nv/starviewer
+ export CONTAINER_DIR=${STARVIEWERHOME}
+ export CONTAINER_BINDINGS="-B /work -B /work2"
+ export RUNTIME_DIR=/work2/noaa/epic/weihuang/tmp/runtime-dir
+ export CONTAINER_SIF=${CONTAINER_DIR}/starviewer.sif
+
+ singularity exec --nv --cleanenv \
+    --bind $HOME/.Xauthority:/root/.Xauthority \
+    ${CONTAINER_BINDINGS} \
+    --env STARVIEWERHOME=${STARVIEWERHOME} \
+    --env XAUTHORITY=/root/.Xauthority \
+    --env DISPLAY=$DISPLAY \
+    --env XDG_RUNTIME_DIR=$RUNTIME_DIR \
+    --env QT_X11_NO_MITSHM=1 \
+    "${CONTAINER_SIF}" \
+    gdb --args \
+    ${STARVIEWERHOME}/build/main/starviewer \
+    -ufs /work2/noaa/epic/weihuang/cadre/CADRE-DA-training/year2_cases/exp_case/cadre26_day1.8909339/output/cubed_sphere_grid_atminc.jedi.nc
+

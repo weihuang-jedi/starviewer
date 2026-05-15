@@ -17,19 +17,19 @@ Earth::Earth()
 
     strcat(_bmpflnm, "/data/earth.bmp");
 
-    _loadTexBMP();
-
     radius = 1.0;
 
     deg2arc = 3.1415926535897932 / 180.0;
 
     read_terrain();
+
+    _bmpLoaded = false;
 }
 
 Earth::Earth(const char *flnm)
 {
     strcpy(_bmpflnm, flnm);
-    _loadTexBMP();
+    // _loadTexBMP();
 }
 
 Earth::Earth(const char *flnm, ncReader* nchandler)
@@ -39,10 +39,10 @@ Earth::Earth(const char *flnm, ncReader* nchandler)
     float hgt;
 
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    initializeGL();
+    // initializeGL();
 
     strcpy(_bmpflnm, flnm);
-    _loadTexBMP();
+    // _loadTexBMP();
 
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     nlon = nchandler->getNlon();
@@ -95,6 +95,13 @@ Earth::~Earth()
    ter.shrink_to_fit();
 }
 
+bool Earth::need_load_bmp() {
+    if (_bmpLoaded)
+        return false;
+    else
+	return true;
+}
+
 void Earth::initializeGL() {
     initializeOpenGLFunctions(); // This "activates" the function pointers
     // ...
@@ -131,8 +138,8 @@ void Earth::_loadTexBMP()
 {
     GLuint textureID = 0;
 
-  //cout << "enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tfunctions: _bmpflnm: <" << _bmpflnm << ">" << endl;
+    cout << "enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tfunctions: _bmpflnm: <" << _bmpflnm << ">" << endl;
 
     // Load the image
     QImage b(_bmpflnm);
@@ -144,23 +151,23 @@ void Earth::_loadTexBMP()
   //    qDebug() << "Image loaded successfully" << b.size();
   //}
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     glEnable(GL_TEXTURE_2D);
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     
     QImage t = QGLWidget::convertToGLFormat( b );
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     glGenTextures(1, &textureID);
 
     // set texture name
     set_texture_id(textureID);
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tt.width(): " << t.width() << ", t.height(): " << t.height() << endl;
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tt.width(): " << t.width() << ", t.height(): " << t.height() << endl;
 
     glBindTexture(GL_TEXTURE_2D, textureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -170,7 +177,7 @@ void Earth::_loadTexBMP()
     glTexImage2D(GL_TEXTURE_2D, 0, 3, t.width(), t.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, t.bits());
     glGenerateMipmap(GL_TEXTURE_2D);  //Generate mipmaps now!!!
     glDisable(GL_TEXTURE_2D);
-  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 // Draw vertex in polar coordinates
@@ -198,6 +205,12 @@ void Earth::draw()
 {
     int i,j;
 
+    if (need_load_bmp())
+    {
+       _loadTexBMP();
+       _bmpLoaded = true;
+    }
+
     //  Draw surface of the planet
     //  Set texture
     glEnable(GL_TEXTURE_2D);
@@ -223,6 +236,12 @@ void Earth::draw_plane(float z)
 {
     int i, j;
     float x, y0, y1;
+
+    if (need_load_bmp())
+    {
+       _loadTexBMP();
+       _bmpLoaded = true;
+    }
 
   //Set texture
     glEnable(GL_TEXTURE_2D);
@@ -261,6 +280,12 @@ void Earth::bump_plane(float z)
 
     float hgt = 0.0;
     float scl = 0.1 / maxhgt;
+
+    if (need_load_bmp())
+    {
+       _loadTexBMP();
+       _bmpLoaded = true;
+    }
 
   //Set texture
     glEnable(GL_TEXTURE_2D);
@@ -421,6 +446,12 @@ void Earth::bump()
 
     float hgt = 0.0;
     float scl = 0.1 / maxhgt;
+
+    if (need_load_bmp())
+    {
+       _loadTexBMP();
+       _bmpLoaded = true;
+    }
 
   //Set texture
     glEnable(GL_TEXTURE_2D);

@@ -71,11 +71,11 @@ void UFSTranslator::setup()
   //}
   //else
   //{
-      //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+        cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
         ufs_controller = new UFSController(colorTable, nvoptions, _filename.c_str());
   //}
 
-  //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufs_controller->setup();
 
     _jpgNotSaved = true;
@@ -83,7 +83,7 @@ void UFSTranslator::setup()
 
     makeCurrent();
 
-  //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     geometry = ufs_controller->get_geometry();
 
     _varname = string("pressfc");

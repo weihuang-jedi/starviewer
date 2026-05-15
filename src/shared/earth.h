@@ -45,6 +45,8 @@ class Earth : public QGLWidget, protected QOpenGLFunctions
         void set_texture_id(GLuint id) {_texture_id = id;};
         GLuint get_texture_id() {return _texture_id;};
 
+	bool need_load_bmp();
+
     private:
         char _bmpflnm[1024];
         char _topoflnm[1024];
@@ -66,6 +68,8 @@ class Earth : public QGLWidget, protected QOpenGLFunctions
         void _bumpVertex(float th, float ph, double radius);
         void _fatal(const char* format , ...);
         void _errCheck(const char *where, const char *fl, int ln);
+
+	bool _bmpLoaded;
 };
 #endif
 
