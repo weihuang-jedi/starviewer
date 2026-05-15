@@ -1,1 +1,6 @@
 *.sif filter=lfs diff=lfs merge=lfs -text
+*.shp filter=lfs diff=lfs merge=lfs -text
+data/gshhg-shp-2.3.7/GSHHS_shp/*/GSHHS_*_L1.shp filter=lfs diff=lfs merge=lfs -text
+data/gshhg-shp-2.3.7/GSHHS_shp/*/GSHHS_*_L2.shp filter=lfs diff=lfs merge=lfs -text
+data/gshhg-shp-2.3.7/GSHHS_shp/*/GSHHS_*_L3.shp filter=lfs diff=lfs merge=lfs -text
+data/gshhg-shp-2.3.7/GSHHS_shp/f/GSHHS_f_L1.shp filter=lfs diff=lfs merge=lfs -text

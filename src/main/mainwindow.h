@@ -4,6 +4,8 @@
 #define USE_RSL_VARS
 //#include "rsl.h"
 
+#include "yamlhandler.h"
+
 #include "basetranslator.h"
 #include "colorTable.h"
 #include "light.h"
@@ -54,6 +56,7 @@ class MainWindow : public QMainWindow
     public:
         MainWindow(string flnm, bool isList,
                    string camse_mfnm, NVOptions* opt);
+        MainWindow(string yamlfile);
        ~MainWindow();
 
     private slots:
@@ -183,6 +186,8 @@ class MainWindow : public QMainWindow
     private:
         int nInstance;
         int numberOfWidget;
+
+	string yamlfile;
 
         void _setup_controlPanel();
         void _setup_display();

@@ -1,15 +1,3 @@
-/*
-#include <QApplication>
-
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <cerrno>
-#include <algorithm>
-
-#include "nclInterface.h"
-*/
 #include "mainwindow.h"
 
 using namespace std;
@@ -49,7 +37,10 @@ int main(int argc, char *argv[])
     string tmpstr;
     string camse_mappingFilename = "unknown";
 
+    string yamlfile = "config.yaml";
+
     bool isList = false;
+    bool hasYAMLfile = false;
 
     NVOptions* nvoptions = new NVOptions();
 
@@ -119,6 +110,12 @@ int main(int argc, char *argv[])
             ++n;
             continue;
         }
+	else if(0 == tmpstr.compare("-yaml"))
+        {
+            ++n;
+            yamlfile = argv[n];
+	    hasYAMLfile = true;
+        }
         else
         {
             filename = argv[n];
@@ -144,9 +141,12 @@ int main(int argc, char *argv[])
   //cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\tfilename: <" << filename << ">, isList = " << isList << endl;
 
-    mainwindow = new MainWindow(filename, isList,
-                                camse_mappingFilename,
-                                nvoptions);
+    if (hasYAMLfile) 
+        mainwindow = new MainWindow(yamlfile);
+    else
+        mainwindow = new MainWindow(filename, isList,
+                                    camse_mappingFilename,
+                                    nvoptions);
 
     mainwindow->show();
 

@@ -50,6 +50,72 @@ MainWindow::MainWindow(string flnm, bool isList,
   //cout << "Leave MainWindow: file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
+MainWindow::MainWindow(string yamlfile)
+{
+    QDesktopWidget *desktop = QApplication::desktop();
+
+    screenWidth = desktop->width();
+    screenHeight = desktop->height(); 
+
+    YAMLHandler *yamlHandler = new YAMLHandler(yamlfile.c_str());
+    yamlHandler->read_yaml();
+
+    vector<string> datafiles = yamlHandler->get_datafiles();
+
+    isFileList = false;
+    fileName = QString(datafiles[0].c_str());
+
+    NVOptions* nvoptions = new NVOptions();
+
+    string tmpstr = yamlHandler->get_model();
+    if(0 == tmpstr.compare("ufs"))
+        nvoptions->set_model(UFS);
+    else if(0 == tmpstr.compare("mpas"))
+        nvoptions->set_model(MPAS);
+    else if(0 == tmpstr.compare("test"))
+        nvoptions->set_model(TEST);
+    else if(0 == tmpstr.compare("mpi"))
+        nvoptions->set_model(MPIDEMO);
+    else if(0 == tmpstr.compare("pop"))
+        nvoptions->set_model(POP);
+    else if(0 == tmpstr.compare("wrf"))
+        nvoptions->set_model(WRF);
+  //else if(0 == tmpstr.compare("radx"))
+  //    nvoptions->set_model(RADX);
+  //else if(0 == tmpstr.compare("vtk"))
+  //    nvoptions->set_model(VTK);
+  //else if(0 == tmpstr.compare("hdf"))
+  //    nvoptions->set_model(HDF);
+  //else if(0 == tmpstr.compare("subset"))
+  //    nvoptions->set_cb(NV_MPAS_SUBSET, true);
+
+    cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+
+    nInstance = 0;
+    numberOfWidget = 0;
+
+    createActions();
+    createMenus();
+
+    setMinimumSize(480, 320);
+    resize(960, 640);
+
+    light = new Light();
+
+    locator = new Locator();
+
+    colorTable = new ColorTable();
+
+    controlPanel = new ControlWidget();
+    display = new DisplayWidget();
+
+    cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+
+    _setup();
+
+    cout << "Leave MainWindow: file: " << __FILE__ << ", line: " << __LINE__ << endl;
+}
+
 MainWindow::~MainWindow()
 {
   //cout << "\tEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
