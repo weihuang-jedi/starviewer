@@ -37,6 +37,7 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt)
 
 UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler)
 {
+    cout << "Enter: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     colorTable = ct;
     nvoptions = opt;
 
@@ -46,8 +47,12 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, nc
 
     _var = NULL;
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ncfile = nchandler;
+  //earth = new Earth(bmpflnm, ncfile);
+    earth = new Earth(bmpflnm);
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     nvoptions->set_xsec(0);
     nvoptions->set_ysec(0);
     nvoptions->set_zsec(0);
@@ -67,6 +72,7 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, nc
     current_timelevel = 0;
 
     earth = new Earth(bmpflnm);
+    cout << "Leave: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 UFS2dViewer::~UFS2dViewer()

@@ -17,19 +17,18 @@ Earth::Earth()
 
     strcat(_bmpflnm, "/data/earth.bmp");
 
-    // loadTexBMP();
-
     radius = 1.0;
 
     deg2arc = 3.1415926535897932 / 180.0;
 
     read_terrain();
+
+    _bmpLoaded = false;
 }
 
 Earth::Earth(const char *flnm)
 {
     strcpy(_bmpflnm, flnm);
-    // loadTexBMP();
 }
 
 Earth::Earth(const char *flnm, ncReader* nchandler)
@@ -39,10 +38,9 @@ Earth::Earth(const char *flnm, ncReader* nchandler)
     float hgt;
 
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    initializeGL();
+    // initializeGL();
 
     strcpy(_bmpflnm, flnm);
-    // loadTexBMP();
 
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     nlon = nchandler->getNlon();
@@ -93,6 +91,13 @@ Earth::~Earth()
    lat.shrink_to_fit();
    ter.clear();
    ter.shrink_to_fit();
+}
+
+bool Earth::need_load_bmp() {
+    if (_bmpLoaded)
+        return false;
+    else
+	return true;
 }
 
 void Earth::initializeGL() {
@@ -205,6 +210,12 @@ void Earth::draw()
 {
     int i,j;
 
+    if (need_load_bmp())
+    {
+       _loadTexBMP();
+       _bmpLoaded = true;
+    }
+
     //  Draw surface of the planet
     //  Set texture
     glEnable(GL_TEXTURE_2D);
@@ -230,6 +241,12 @@ void Earth::draw_plane(float z)
 {
     int i, j;
     float x, y0, y1;
+
+    if (need_load_bmp())
+    {
+       _loadTexBMP();
+       _bmpLoaded = true;
+    }
 
   //Set texture
     glEnable(GL_TEXTURE_2D);
@@ -268,6 +285,12 @@ void Earth::bump_plane(float z)
 
     float hgt = 0.0;
     float scl = 0.1 / maxhgt;
+
+    if (need_load_bmp())
+    {
+       _loadTexBMP();
+       _bmpLoaded = true;
+    }
 
   //Set texture
     glEnable(GL_TEXTURE_2D);
@@ -428,6 +451,12 @@ void Earth::bump()
 
     float hgt = 0.0;
     float scl = 0.1 / maxhgt;
+
+    if (need_load_bmp())
+    {
+       _loadTexBMP();
+       _bmpLoaded = true;
+    }
 
   //Set texture
     glEnable(GL_TEXTURE_2D);
