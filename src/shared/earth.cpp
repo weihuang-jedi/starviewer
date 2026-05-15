@@ -132,7 +132,7 @@ void Earth::_errCheck(const char *where, const char *fl, int ln)
 /*
  *  Load texture from BMP file
  */
-void Earth::loadTexBMP()
+void Earth::_loadTexBMP()
 {
     GLuint textureID = 0;
 

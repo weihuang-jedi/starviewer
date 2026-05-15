@@ -84,6 +84,10 @@ void MainWindow::_setup()
           //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
             ufs();
             break;
+        case UFS_INCR:
+          //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
+            ufs_incr();
+            break;
       //case RADX:
       //    radx();
       //    break;
@@ -171,6 +175,10 @@ void MainWindow::_setup_controlPanel()
            //controlPanel->disable_ncl();
              break;
         case UFS:
+           //controlPanel->selectNCL();
+           //controlPanel->disable_ncl();
+             break;
+        case UFS_INCR:
            //controlPanel->selectNCL();
            //controlPanel->disable_ncl();
              break;
@@ -286,6 +294,20 @@ void MainWindow::ufs()
     translator = ufs_translator;
 
     setWindowTitle(tr("NV for UFS"));
+
+    _setup_controlPanel();
+
+    _setup_display();
+}
+
+void MainWindow::ufs_incr()
+{
+    ufs_incr_translator = new UFSincrTranslator(colorTable, nvoptions,
+                                                fileName.toStdString(),
+                                                isFileList);
+    translator = ufs_incr_translator;
+
+    setWindowTitle(tr("NV for UFS Increments"));
 
     _setup_controlPanel();
 

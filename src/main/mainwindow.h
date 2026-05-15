@@ -101,6 +101,7 @@ class MainWindow : public QMainWindow
         GeneralTranslator* general_translator;
       //WRFTranslator* wrf_translator;
         UFSTranslator* ufs_translator;
+        UFSincrTranslator* ufs_incr_translator;
       //POPTranslator* pop_translator;
       //MPASTranslator* mpas_translator;
       //CAMseTranslator* camse_translator;
