@@ -1149,7 +1149,6 @@ void BaseTranslator::writeHeader()
       //renderText(30.0, 30.0, 0.0, _title.c_str());
       //renderText(30.0, 90.0,0.0,  _position.c_str());
     }
-    // cout << "Leave Function: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void BaseTranslator::writeVarInfo()
