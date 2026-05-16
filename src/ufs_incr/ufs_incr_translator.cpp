@@ -2,7 +2,7 @@
 
 #include <QtOpenGL>
 
-#include "ufs_translator.h"
+#include "ufs_incr_translator.h"
 #include "colorTable.h"
 
 template<typename T>
@@ -24,9 +24,9 @@ string number2string(T n)
 }
 
 //Constructor
-UFSincrincrTranslator::UFSincrincrTranslator(ColorTable* ct, NVOptions* opt,
+UFSincrTranslator::UFSincrTranslator(ColorTable* ct, NVOptions* opt,
                                  string flnm, bool isList, string mfnm, QWidget* parent)
-               : BaseTranslator(ct, opt, parent)
+                  : BaseTranslator(ct, opt, parent)
 {
   //cout << "\tEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\t\tCAM-SE file: " << flnm << endl;
@@ -47,7 +47,31 @@ UFSincrincrTranslator::UFSincrincrTranslator(ColorTable* ct, NVOptions* opt,
   //cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
-UFSincrincrTranslator::~UFSincrincrTranslator()
+//Constructor
+UFSincrTranslator::UFSincrTranslator(ColorTable* ct, NVOptions* opt,
+                                     string atmfile, string sfcfile,
+                                     vector<string> datafiles, QWidget* parent)
+                  : BaseTranslator(ct, opt, parent)
+{
+    cout << "\tEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+
+    _atmfile = atmfile;
+    _sfcfile = sfcfile;
+    _datafiles = datafiles;
+
+    nvoptions->set_xsec(-1);
+    nvoptions->set_ysec(-1);
+    nvoptions->set_zsec(0);
+    nvoptions->set_tsec(0);
+
+    ufs_controller = NULL;
+
+    _timestr = new string[2];
+
+  //cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+}
+
+UFSincrTranslator::~UFSincrTranslator()
 {
     if(NULL != ufs_controller)
         delete ufs_controller;
@@ -56,7 +80,7 @@ UFSincrincrTranslator::~UFSincrincrTranslator()
     ufs_controller = NULL;
 }
 
-void UFSincrincrTranslator::setup()
+void UFSincrTranslator::setup()
 {
     int n;
 
@@ -64,16 +88,8 @@ void UFSincrincrTranslator::setup()
     if(NULL != ufs_controller)
         delete ufs_controller;
 
-  //if(_hasFileList)
-  //{
-  //  //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //    ufs_controller = new UFSincrincrController(colorTable, nvoptions, _filename.c_str(), _hasFileList);
-  //}
-  //else
-  //{
-        cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-        ufs_controller = new UFSincrincrController(colorTable, nvoptions, _filename.c_str());
-  //}
+    cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    ufs_controller = new UFSincrController(colorTable, nvoptions, _atmfile, _sfctime, _datafiles);
 
     cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufs_controller->setup();
@@ -84,7 +100,7 @@ void UFSincrincrTranslator::setup()
     makeCurrent();
 
     cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    geometry = ufs_controller->get_geometry();
+    incr_geometry = ufs_controller->get_incr_geometry();
 
     _varname = string("pressfc");
 
@@ -114,7 +130,7 @@ void UFSincrincrTranslator::setup()
 /*************************  OpenGL Events  *************************/
 /*******************************************************************/
 //Show the image
-void UFSincrincrTranslator::show()
+void UFSincrTranslator::show()
 {
   //glShadeModel(GL_SMOOTH);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -148,24 +164,24 @@ void UFSincrincrTranslator::show()
         writeLocatorMsg();
 }
 
-void UFSincrincrTranslator::createVarInfo()
+void UFSincrTranslator::createVarInfo()
 {
     _varinfo = QString(_varname.c_str()) + "\n"
              + QString(_timeinfo.c_str()) + "\n"
-             + "Dim nx="+QString::number(geometry->get_nlon())
-             + ", nlat=" + QString::number(geometry->get_nlat())
-             + ", nlev=" + QString::number(geometry->get_nlev())
+             + "Dim nx="+QString::number(incr_geometry->get_nx())
+             + ", nlat=" + QString::number(incr_geometry->get_ny())
+             + ", nlev=" + QString::number(incr_geometry->get_np())
              + "\nVar min=" + QString::number(ufs_controller->get_minval())
              + ", max=" + QString::number(ufs_controller->get_maxval());
 }
 
-void UFSincrincrTranslator::writeVarInfo()
+void UFSincrTranslator::writeVarInfo()
 {
     createVarInfo();
     emit info(_varinfo);
 }
 
-void UFSincrincrTranslator::writeFrameInfo()
+void UFSincrTranslator::writeFrameInfo()
 {
     if(nvoptions->get_cb(NV_ANIMATIONON))
     {
@@ -174,7 +190,7 @@ void UFSincrincrTranslator::writeFrameInfo()
     }
 }
 
-void UFSincrincrTranslator::make_timeNpositionString()
+void UFSincrTranslator::make_timeNpositionString()
 {
     int framenumb = 0;
 
@@ -208,7 +224,7 @@ void UFSincrincrTranslator::make_timeNpositionString()
 }
 
 #if 0
-void UFSincrincrTranslator::SaveJpg(int n)
+void UFSincrTranslator::SaveJpg(int n)
 {
     bool withAlpha = true;
   //Copy from OpenGL
@@ -226,17 +242,17 @@ void UFSincrincrTranslator::SaveJpg(int n)
 #endif
 
 //Select a variable
-void UFSincrincrTranslator::select0dVar(const QString& str)
+void UFSincrTranslator::select0dVar(const QString& str)
 {
    cout << "0d var: <" << str.toStdString() << "> is selected." << endl;
 }
 
-void UFSincrincrTranslator::select1dVar(const QString& str)
+void UFSincrTranslator::select1dVar(const QString& str)
 {
    cout << "0d var: <" << str.toStdString() << "> is selected." << endl;
 }
 
-void UFSincrincrTranslator::select2dVar(const QString& str)
+void UFSincrTranslator::select2dVar(const QString& str)
 {
     cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
     cout << "1d var: <" << str.toStdString() << "> is selected." << endl;
@@ -245,14 +261,14 @@ void UFSincrincrTranslator::select2dVar(const QString& str)
 
     ufs_controller->set1dvarname(_varname);
 
-    sliderNspinX->set_max(geometry->get_nlon());
+    sliderNspinX->set_max(incr_geometry->get_nlon());
     sliderNspinX->setValue(0);
-    sliderNspinY->set_max(geometry->get_nlat());
+    sliderNspinY->set_max(incr_geometry->get_nlat());
     sliderNspinY->set_min(0);
     sliderNspinY->setValue(0);
     sliderNspinZ->set_max(1);
     sliderNspinZ->setValue(0);
-    sliderNspinT->set_max(geometry->get_nt());
+    sliderNspinT->set_max(incr_geometry->get_nt());
     sliderNspinT->setValue(0);
 
     _minval = ufs_controller->get_minval();
@@ -265,7 +281,7 @@ void UFSincrincrTranslator::select2dVar(const QString& str)
     updateGL();
 }
 
-void UFSincrincrTranslator::select3dVar(const QString& str)
+void UFSincrTranslator::select3dVar(const QString& str)
 {
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "2d var: <" << str.toStdString() << "> is selected." << endl;
@@ -274,11 +290,11 @@ void UFSincrincrTranslator::select3dVar(const QString& str)
 
     ufs_controller->set3dvarname(_varname);
 
-    sliderNspinX->set_max(geometry->get_nlon());
+    sliderNspinX->set_max(incr_geometry->get_nlon());
     sliderNspinX->setValue(0);
-    sliderNspinY->set_max(geometry->get_nlat());
+    sliderNspinY->set_max(incr_geometry->get_nlat());
     sliderNspinY->set_min(0);
-    sliderNspinZ->set_max(geometry->get_nlev());
+    sliderNspinZ->set_max(incr_geometry->get_nlev());
     sliderNspinZ->setValue(0);
   //sliderNspinT->set_max(_ntim);
     sliderNspinT->set_max(1);
@@ -294,7 +310,7 @@ void UFSincrincrTranslator::select3dVar(const QString& str)
     updateGL();
 }
 
-void UFSincrincrTranslator::selectColorMap(const QString& str)
+void UFSincrTranslator::selectColorMap(const QString& str)
 {
   //cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__
   //     << ">, line: " << __LINE__ << endl;
@@ -306,12 +322,12 @@ void UFSincrincrTranslator::selectColorMap(const QString& str)
     updateGL();
 }
 
-int UFSincrincrTranslator::get_ndv(int n)
+int UFSincrTranslator::get_ndv(int n)
 {
     return ufs_controller->get_ndv(n);
 }
 
-string* UFSincrincrTranslator::get_ndvNames(int n)
+string* UFSincrTranslator::get_ndvNames(int n)
 {
     vector<string> vecnames = ufs_controller->get_ndvNames(n);
     int numbvars = get_ndv(n);
@@ -327,7 +343,7 @@ string* UFSincrincrTranslator::get_ndvNames(int n)
     return varnames;
 }
 
-void UFSincrincrTranslator::update_frame()
+void UFSincrTranslator::update_frame()
 {
     ++_glbTime;
     if(_glbTime >= _maxTime)
@@ -379,7 +395,7 @@ void UFSincrincrTranslator::update_frame()
     updateGL();
 }
 
-void UFSincrincrTranslator::nextFrame()
+void UFSincrTranslator::nextFrame()
 {
     ++_glbTime;
     if(_glbTime >= _maxTime)
@@ -392,7 +408,7 @@ void UFSincrincrTranslator::nextFrame()
     updateGL();
 }
 
-void UFSincrincrTranslator::backFrame()
+void UFSincrTranslator::backFrame()
 {
     --_glbTime;
     if(_glbTime < 0)
@@ -406,13 +422,13 @@ void UFSincrincrTranslator::backFrame()
 }
 
 
-void UFSincrincrTranslator::set_light(Light* l)
+void UFSincrTranslator::set_light(Light* l)
 {
     light = l;
   //ufs_controller->set_light(l);
 }
 
-void UFSincrincrTranslator::set_locator(Locator* l)
+void UFSincrTranslator::set_locator(Locator* l)
 {
     locator = l;
 
@@ -424,7 +440,7 @@ void UFSincrincrTranslator::set_locator(Locator* l)
     ufs_controller->set_locator(l);
 }
 
-void UFSincrincrTranslator::writeLocatorMsg()
+void UFSincrTranslator::writeLocatorMsg()
 {
      _locatorinfo = "Location lon="+QString::number(locator->x())
                + ", lat=" + QString::number(locator->y());

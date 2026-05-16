@@ -1,12 +1,12 @@
-#include "ufs_geometry.h"
+#include "ufs_incr_geometry.h"
 
-UFSincrincrGeometry::UFSincrincrGeometry()
+UFSincrGeometry::UFSincrGeometry()
 {
     _hlon = 0;
     _set_default();
 }
 
-UFSincrincrGeometry::~UFSincrincrGeometry()
+UFSincrGeometry::~UFSincrGeometry()
 {
     if(NULL != _xSphere)
         delete [] _xSphere;
@@ -28,7 +28,7 @@ UFSincrincrGeometry::~UFSincrincrGeometry()
         delete [] _lev;
 }
 
-void UFSincrincrGeometry::_set_default()
+void UFSincrGeometry::_set_default()
 {
     if(NULL != _xSphere)
         delete [] _xSphere;
@@ -63,25 +63,25 @@ void UFSincrincrGeometry::_set_default()
     reset();
 } 
 
-void UFSincrincrGeometry::reset_dimension()
+void UFSincrGeometry::reset_dimension()
 {
     _nlon = 1;
     _nlat = 1;
     _nlev = 1;
 }
 
-void UFSincrincrGeometry::reset()
+void UFSincrGeometry::reset()
 {
     reset_dimension();
 }
 
-void UFSincrincrGeometry::print()
+void UFSincrGeometry::print()
 {
    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
    cout << "Info of <" << name << ">:" << endl;
 }
 
-void UFSincrincrGeometry::setup()
+void UFSincrGeometry::setup()
 {
     double pi = 3.1415926535897932;
     double arc = pi / 180.0;

@@ -1,6 +1,6 @@
 application:
   name: StarViewer
-  model: ufs
+  model: ufs_incr
   version: 0.0.1
 
 earth:
@@ -9,7 +9,17 @@ earth:
 coastline:
   name: data/gshhg-shp-2.3.7/GSHHS_shp
   resolution: c
+  level: 3
+  max_level: 5
 
-input:
-  data:
-    - /scratch5/purged/Wei.Huang/src/nv/data/gdas.t00z.atm.f006.nc
+data:
+  background:
+    atm: ufsda.t18z.atm.f006.cubed_sphere_grid.nc
+    sfc: ufsda.t18z.sfc.f006.cubed_sphere_grid.nc
+  increment:
+    - /scratch/wei/cadre/cadre26_noaa_tutorial/exp_case/wei_cadre26.8/output/ufsda.t00z.atminc.cubed_sphere_grid.tile1.nc
+    - /scratch/wei/cadre/cadre26_noaa_tutorial/exp_case/wei_cadre26.8/output/ufsda.t00z.atminc.cubed_sphere_grid.tile2.nc
+    - /scratch/wei/cadre/cadre26_noaa_tutorial/exp_case/wei_cadre26.8/output/ufsda.t00z.atminc.cubed_sphere_grid.tile3.nc
+    - /scratch/wei/cadre/cadre26_noaa_tutorial/exp_case/wei_cadre26.8/output/ufsda.t00z.atminc.cubed_sphere_grid.tile4.nc
+    - /scratch/wei/cadre/cadre26_noaa_tutorial/exp_case/wei_cadre26.8/output/ufsda.t00z.atminc.cubed_sphere_grid.tile5.nc
+    - /scratch/wei/cadre/cadre26_noaa_tutorial/exp_case/wei_cadre26.8/output/ufsda.t00z.atminc.cubed_sphere_grid.tile6.nc

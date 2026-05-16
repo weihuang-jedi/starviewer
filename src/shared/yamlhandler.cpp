@@ -68,7 +68,7 @@ void YAMLHandler::read_yaml()
     {
         int n=0;
 
-        _datafiles = config["input"]["data"].as<vector<string>>();
+        _datafiles = config["data"]["increment"].as<vector<string>>();
 
         for (const auto& df : _datafiles)
 	{
@@ -76,7 +76,25 @@ void YAMLHandler::read_yaml()
             cout << "Data file #" << n << ": " << df << endl;
         }
     } catch (const YAML::TypedBadConversion<vector<string>>& e) {
-        cerr << "Error: 'input/data' is not a list of strings!" << endl;
+        cerr << "Error: 'data/increment' is not a list of strings!" << endl;
+    }
+
+    try
+    {
+        _atmfile = config["data"]["background"]["atm"].as<string>();
+
+        cout << "atm file: " << _atmfile << endl;
+    } catch (const YAML::TypedBadConversion<string>& e) {
+        cerr << "Error: '_atmfile' is not a string!" << endl;
+    }
+
+    try
+    {
+        _sfcfile = config["data"]["background"]["sfc"].as<string>();
+
+        cout << "sfc file: " << _sfcfile << endl;
+    } catch (const YAML::TypedBadConversion<string>& e) {
+        cerr << "Error: '_sfcfile' is not a string!" << endl;
     }
 }
 

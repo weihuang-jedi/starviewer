@@ -2,9 +2,9 @@
 
 #include <vector>
 
-#include "ufs_viewer.h"
+#include "ufs_incr_viewer.h"
 
-UFSincrincr2dViewer::UFSincrincr2dViewer(ColorTable *ct, NVOptions* opt)
+UFSincr2dViewer::UFSincr2dViewer(ColorTable *ct, NVOptions* opt)
 {
     colorTable = ct;
     nvoptions = opt;
@@ -35,7 +35,7 @@ UFSincrincr2dViewer::UFSincrincr2dViewer(ColorTable *ct, NVOptions* opt)
     current_timelevel = 0;
 }
 
-UFSincrincr2dViewer::UFSincrincr2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler)
+UFSincr2dViewer::UFSincr2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler)
 {
     cout << "Enter: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     colorTable = ct;
@@ -75,7 +75,7 @@ UFSincrincr2dViewer::UFSincrincr2dViewer(ColorTable *ct, NVOptions* opt, const c
     cout << "Leave: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
-UFSincrincr2dViewer::~UFSincrincr2dViewer()
+UFSincr2dViewer::~UFSincr2dViewer()
 {
     locator->turnOff();
 
@@ -84,22 +84,22 @@ UFSincrincr2dViewer::~UFSincrincr2dViewer()
     delete texture1d;
 }
 
-void UFSincrincr2dViewer::set_geometry(UFSincrincrGeometry *gm)
+void UFSincr2dViewer::set_incr_geometry(UFSincrGeometry *gm)
 {
-    geometry = gm;
+    incr_geometry = gm;
 
     _initialize();
 
     // initializeGL();
 }
 
-void UFSincrincr2dViewer::setup(string vn, float *var)
+void UFSincr2dViewer::setup(string vn, float *var)
 {
     reset();
 
     _varname  = vn;
     _var = var;
-    _nlev = geometry->get_nlev();
+    _nlev = incr_geometry->get_nlev();
 
   //nvoptions->set_xsec(_nlon);
   //nvoptions->set_ysec(_nlat);
@@ -114,18 +114,18 @@ void UFSincrincr2dViewer::setup(string vn, float *var)
     previoustimelevel = -1;
 }
 
-void UFSincrincr2dViewer::reset()
+void UFSincr2dViewer::reset()
 {
-    lister->reinitialize(_nlon+1, _nlat+1, geometry->get_nlev()+1);
+    lister->reinitialize(_nlon+1, _nlat+1, incr_geometry->get_nlev()+1);
 }
 
-void UFSincrincr2dViewer::initializeGL()
+void UFSincr2dViewer::initializeGL()
 {
     // 1. Initialize OpenGL functions (if using a loader)
     initializeOpenGLFunctions();
 }
 
-void UFSincrincr2dViewer::_initialize()
+void UFSincr2dViewer::_initialize()
 {
     int i, j, m, n;
 
@@ -134,24 +134,24 @@ void UFSincrincr2dViewer::_initialize()
 
     previoustimelevel = -1;
 
-    _hlon = geometry->get_hlon();
-    _nlon = geometry->get_nlon();
-    _nlat = geometry->get_nlat();
-    _nlev = geometry->get_nlev();
+    _hlon = incr_geometry->get_hlon();
+    _nlon = incr_geometry->get_nlon();
+    _nlat = incr_geometry->get_nlat();
+    _nlev = incr_geometry->get_nlev();
 
-    _lon = geometry->get_lon();
-    _lat = geometry->get_lat();
-    _lev = geometry->get_lev();
+    _lon = incr_geometry->get_lon();
+    _lat = incr_geometry->get_lat();
+    _lev = incr_geometry->get_lev();
 
   //lister->reinitialize(361, 181, _nlev);
 
-    _xFlat = geometry->get_xFlat();
-    _yFlat = geometry->get_yFlat();
+    _xFlat = incr_geometry->get_xFlat();
+    _yFlat = incr_geometry->get_yFlat();
 
-    geometry->set_ntim(1);
+    incr_geometry->set_ntim(1);
 }
 
-void UFSincrincr2dViewer::draw()
+void UFSincr2dViewer::draw()
 {
     size_t nsquare = _nlon * _nlat;
 
@@ -172,10 +172,10 @@ void UFSincrincr2dViewer::draw()
     if(current_timelevel != previoustimelevel)
         reset();
     previoustimelevel = current_timelevel;
-    if(current_timelevel >= geometry->get_nt())
+    if(current_timelevel >= incr_geometry->get_nt())
         return;
 
-    if((geometry->get_nlev() <= nvoptions->get_zsec()) && (0 > nvoptions->get_zsec()))
+    if((incr_geometry->get_nlev() <= nvoptions->get_zsec()) && (0 > nvoptions->get_zsec()))
         return;
 
 #if 0
@@ -289,7 +289,7 @@ void UFSincrincr2dViewer::draw()
     }
 }
 
-void UFSincrincr2dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact)
+void UFSincr2dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact)
 {
     double phi = lat * deg2rad;
     double dist = cos(phi);
@@ -310,7 +310,7 @@ void UFSincrincr2dViewer::_lonlat2xyz(double lon, double lat, double radius, dou
     glVertex3d(x * radius, y * radius, z * radius);
 }
 
-void UFSincrincr2dViewer::_lonlat2xyz_texture(double lon, double lat,
+void UFSincr2dViewer::_lonlat2xyz_texture(double lon, double lat,
 		                      double radius, double fact)
 {
     double phi = lat * deg2rad;
@@ -327,7 +327,7 @@ void UFSincrincr2dViewer::_lonlat2xyz_texture(double lon, double lat,
     glVertex3d(x * radius, y * radius, z * radius);
 }
 
-void UFSincrincr2dViewer::_sphereDisplay()
+void UFSincr2dViewer::_sphereDisplay()
 {
     int i, j, k, k1;
     size_t mpos, npos;
@@ -386,7 +386,7 @@ void UFSincrincr2dViewer::_sphereDisplay()
     glEndList();
 }
 
-void UFSincrincr2dViewer::_flatDisplay()
+void UFSincr2dViewer::_flatDisplay()
 {
     int i, j, k, k1;
     size_t mpos, npos;
@@ -450,7 +450,7 @@ void UFSincrincr2dViewer::_flatDisplay()
     glEndList();
 }
 
-void UFSincrincr2dViewer::_evaluate(float *var)
+void UFSincr2dViewer::_evaluate(float *var)
 {
     size_t varsize;
     size_t n = 0;
@@ -459,8 +459,8 @@ void UFSincrincr2dViewer::_evaluate(float *var)
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\t _varname: " << _varname << endl;
 
-    varsize = geometry->get_nlon() * geometry->get_nlat() * geometry->get_nlev();
-  //varsize = geometry->get_nlon() * geometry->get_nlat();
+    varsize = incr_geometry->get_nlon() * incr_geometry->get_nlat() * incr_geometry->get_nlev();
+  //varsize = incr_geometry->get_nlon() * incr_geometry->get_nlat();
 
   //cout << "\tin <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\t_nlon =" << _nlon << endl;
@@ -499,7 +499,7 @@ void UFSincrincr2dViewer::_evaluate(float *var)
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
-void UFSincrincr2dViewer::_adjust_minmax(float *var)
+void UFSincr2dViewer::_adjust_minmax(float *var)
 {
     size_t varsize;
     size_t n = 0;
@@ -507,7 +507,7 @@ void UFSincrincr2dViewer::_adjust_minmax(float *var)
 
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
-    varsize = geometry->get_nlon() * geometry->get_nlat();
+    varsize = incr_geometry->get_nlon() * incr_geometry->get_nlat();
 
     _valmax = var[0];
     _valmin = var[0];
@@ -553,7 +553,7 @@ void UFSincrincr2dViewer::_adjust_minmax(float *var)
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
-void UFSincrincr2dViewer::reset_texture1d(ColorTable *ct)
+void UFSincr2dViewer::reset_texture1d(ColorTable *ct)
 {
     colorTable = ct;
 
@@ -564,7 +564,7 @@ void UFSincrincr2dViewer::reset_texture1d(ColorTable *ct)
     texture1d->set_name(ct->get_name());
 }
 
-void UFSincrincr2dViewer::draw_sphere_grids()
+void UFSincr2dViewer::draw_sphere_grids()
 {
     int i, j, k;
     size_t npos;
@@ -576,9 +576,9 @@ void UFSincrincr2dViewer::draw_sphere_grids()
   //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\tncenters = " << ncenters << endl;
 
-    _xSphere = geometry->get_xSphere();
-    _ySphere = geometry->get_ySphere();
-    _zSphere = geometry->get_zSphere();
+    _xSphere = incr_geometry->get_xSphere();
+    _ySphere = incr_geometry->get_ySphere();
+    _zSphere = incr_geometry->get_zSphere();
 
     k = nvoptions->get_zsec();
     radius = _k2r(k);
@@ -609,7 +609,7 @@ void UFSincrincr2dViewer::draw_sphere_grids()
     glPopMatrix();
 }
 
-void UFSincrincr2dViewer::draw_plane_grids()
+void UFSincr2dViewer::draw_plane_grids()
 {
     int i, j;
     size_t npos;
@@ -644,7 +644,7 @@ void UFSincrincr2dViewer::draw_plane_grids()
     glPopMatrix();
 }
 
-void UFSincrincr2dViewer::_display_Yflat_plane(int ys)
+void UFSincr2dViewer::_display_Yflat_plane(int ys)
 {
     int i, k;
     size_t mpos, npos;
@@ -709,7 +709,7 @@ void UFSincrincr2dViewer::_display_Yflat_plane(int ys)
     glEndList();
 }
 
-void UFSincrincr2dViewer::_sphereXplane(int xs)
+void UFSincr2dViewer::_sphereXplane(int xs)
 {
     int j, k;
     size_t mpos, npos;
@@ -762,7 +762,7 @@ void UFSincrincr2dViewer::_sphereXplane(int xs)
     glEndList();
 }
 
-void UFSincrincr2dViewer::_sphereYplane(int ys)
+void UFSincr2dViewer::_sphereYplane(int ys)
 {
     int i, k;
     size_t mpos, npos;
@@ -819,7 +819,7 @@ void UFSincrincr2dViewer::_sphereYplane(int ys)
 }
 
 
-void UFSincrincr2dViewer::_display_Xflat_plane(int xs)
+void UFSincr2dViewer::_display_Xflat_plane(int xs)
 {
     int j, k;
     size_t mpos, npos;
@@ -870,7 +870,7 @@ void UFSincrincr2dViewer::_display_Xflat_plane(int xs)
     glEndList();
 }
 
-void UFSincrincr2dViewer::_sphereBump()
+void UFSincr2dViewer::_sphereBump()
 {
     int i, j, k, k1;
     size_t mpos, npos;
@@ -947,7 +947,7 @@ void UFSincrincr2dViewer::_sphereBump()
     glEndList();
 }
 
-void UFSincrincr2dViewer::_flatBump()
+void UFSincr2dViewer::_flatBump()
 {
     int i, j, k, k1;
     size_t mpos, npos;
@@ -1063,7 +1063,7 @@ void UFSincrincr2dViewer::_flatBump()
     glEndList();
 }
 
-void UFSincrincr2dViewer::_draw_cross(double radius)
+void UFSincr2dViewer::_draw_cross(double radius)
 {
     int m, n;
     double x, y, z;
@@ -1101,13 +1101,13 @@ void UFSincrincr2dViewer::_draw_cross(double radius)
     glEnd();
 }
 
-double UFSincrincr2dViewer::_k2h(int k)
+double UFSincr2dViewer::_k2h(int k)
 {
     double height = 0.5 * ((double) (_nlev-k) / _nlev);
     return height;
 }
 
-double UFSincrincr2dViewer::_k2r(int k)
+double UFSincr2dViewer::_k2r(int k)
 {
     double radius = 1.0 + _k2h(k);
     return radius;

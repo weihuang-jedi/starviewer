@@ -6,8 +6,11 @@
 #include <iostream>
 
 #include "ncreader.h"
-#include "ufs_viewer.h"
 #include "locator.h"
+// #include "coastline.h"
+// #include "colorTable.h"
+// #include "nvoptions.h"
+#include "ufs_incr_viewer.h"
 
 using namespace std;
 
@@ -19,14 +22,15 @@ class UFSincrController
 {
     public:
         UFSincrController(ColorTable* ct, NVOptions* opt,
-                        const char* fn, bool isList = false);
+                          string atmfile, string sfcfile,
+                          vector<string> datafiles);
        ~UFSincrController();
 
         void setup();
 
-        int getNlon() { return geometry->get_nlon(); };
-        int getNlat() { return geometry->get_nlat(); };
-        int getNlev() { return geometry->get_nlev(); };
+        int getNlon() { return incr_geometry->get_nlon(); };
+        int getNlat() { return incr_geometry->get_nlat(); };
+        int getNlev() { return incr_geometry->get_nlev(); };
         int getNtim() { return _ntim; };
         int get_tl() { return _tvalue; };
 
@@ -44,7 +48,7 @@ class UFSincrController
         string get_timestring();
 
       //Evaluator* get_evaluator() { return evaluator; };
-        UFSincrGeometry* get_geometry() { return geometry; };
+        UFSincrGeometry* get_incr_geometry() { return incr_geometry; };
 
         float get_minval() { return _minval; };
         float get_maxval() { return _maxval; };
@@ -63,7 +67,7 @@ class UFSincrController
 
     protected:
         ncReader* ncfile;
-        UFSincrGeometry* geometry;
+        UFSincrGeometry* incr_geometry;
         ColorTable* colorTable;
         NVOptions* nvoptions;
         CoastLine* coastline;
@@ -72,7 +76,7 @@ class UFSincrController
 
         char _flnm[NAME_LENG];
 
-        UFSincr2dViewer* ufs_viewer;
+        UFSincr2dViewer* ufs_incr_viewer;
       //UFSincr3dViewer* ufs_3dviewer;
 
         int _max_frame;
@@ -108,6 +112,10 @@ class UFSincrController
         void _set_glbTime();
         template<typename T>
         void _print1d(T* var, int nl);
+
+        string _atmfile;
+        string _sfcfile;
+        vector<string> _datafiles;
 };
 #endif
 

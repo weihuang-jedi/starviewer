@@ -13,7 +13,6 @@
 #include <QGLWidget>
 // #include <QOpenGLWidget>
 
-#include "ufs_geometry.h"
 #include "coastline.h"
 #include "colorTable.h"
 #include "texture1d.h"
@@ -23,6 +22,7 @@
 #include "locator.h"
 #include "nvoptions.h"
 #include "ncreader.h"
+#include "ufs_incr_geometry.h"
 
 using namespace std;
 
@@ -35,7 +35,7 @@ using namespace std;
 #define NEAR_EAST_BOUNDARY	0.9999
 #define NEAR_WEST_BOUNDARY	-NEAR_EAST_BOUNDARY
 
-class UFSincr2dViewer : public QGLWidget, public QOpenGLWidget, protected QOpenGLFunctions
+class UFSincr2dViewer : public QOpenGLWidget, protected QOpenGLFunctions
 {
 
     public:
@@ -49,7 +49,7 @@ class UFSincr2dViewer : public QGLWidget, public QOpenGLWidget, protected QOpenG
 
         void reset();
         void setup(string vn, float* var);
-        void set_geometry(UFSincrGeometry* gm);
+        void set_incr_geometry(UFSincrGeometry* gm);
         void reset_texture1d(ColorTable *ct);
 
         void set_coastline(CoastLine* cl) { coastline = cl; };
@@ -65,7 +65,7 @@ class UFSincr2dViewer : public QGLWidget, public QOpenGLWidget, protected QOpenG
 
     protected:
         ColorTable* colorTable;
-        UFSincrGeometry* geometry;
+        UFSincrGeometry* incr_geometry;
         CoastLine* coastline;
         Texture1d* texture1d;
         ncReader* ncfile;

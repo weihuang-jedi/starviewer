@@ -1,23 +1,27 @@
-#include "ufs_controller.h"
+#include "ufs_incr_controller.h"
 
-UFSincrincrController::UFSincrincrController(ColorTable *ct, NVOptions* opt,
-                                 const char *fn, bool isList)
+UFSincrController::UFSincrController(ColorTable *ct, NVOptions* opt,
+                                     string atmfile, string _sfcfile,
+                                     vector<string> datafiles)
 {
     cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     string sfn = string(fn);
 
     colorTable = ct;
     nvoptions = opt;
-    strcpy(_flnm, fn);
+
+    _atmfile = atmfile;
+    _sfcfile = sfcfile;
+    _datafiles = datafiles;
 
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\t_flnm: <" << fn << endl;
-    ncfile = new ncReader(fn);
+    cout << "\t_sfcfile: <" << sfcfile << endl;
+    ncfile = new ncReader(sfcfile);
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
-    geometry = new UFSincrincrGeometry();
+    incr_geometry = new UFSincrGeometry();
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    geometry->set_name(sfn);
+    incr_geometry->set_name(sfn);
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     cout << "\tsfn: <" << sfn << endl;
 
@@ -28,24 +32,24 @@ UFSincrincrController::UFSincrincrController(ColorTable *ct, NVOptions* opt,
     _maxFile = 1;
     _ntim = 1;
 
-    ufs_viewer = NULL;
+    ufs_incr_viewer = NULL;
     cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
-UFSincrincrController::~UFSincrincrController()
+UFSincrController::~UFSincrController()
 {
     delete coastline;
     delete ncfile;
     
-    if(NULL != ufs_viewer)
-        delete ufs_viewer;
-    ufs_viewer = NULL;
+    if(NULL != ufs_incr_viewer)
+        delete ufs_incr_viewer;
+    ufs_incr_viewer = NULL;
     
-    delete geometry;
+    delete incr_geometry;
 } 
 
 template<typename T>
-void UFSincrincrController::_print1d(T* var, int nl)
+void UFSincrController::_print1d(T* var, int nl)
 {
     int i;
 
@@ -58,7 +62,7 @@ void UFSincrincrController::_print1d(T* var, int nl)
     cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 } 
 
-void UFSincrincrController::setup()
+void UFSincrController::setup()
 {
     int n;
     char bmpflnm[1024];
@@ -84,23 +88,23 @@ void UFSincrincrController::setup()
 
   //lister = new Lister[_maxTime];
 
-    geometry->set_nlon(ncfile->getNlon());
-    geometry->set_nlat(ncfile->getNlat());
-  //geometry->set_nlev(ncfile->getNlev());
-    geometry->set_nlev(1);
-  //geometry->set_ntim(_ntimes[0]);
-    geometry->set_ntim(_maxTime);
+    incr_geometry->set_nlon(ncfile->getNlon());
+    incr_geometry->set_nlat(ncfile->getNlat());
+  //incr_geometry->set_nlev(ncfile->getNlev());
+    incr_geometry->set_nlev(1);
+  //incr_geometry->set_ntim(_ntimes[0]);
+    incr_geometry->set_ntim(_maxTime);
 
-    geometry->set_lon(ncfile->getLon());
-    geometry->set_lat(ncfile->getLat());
-    geometry->set_lev(ncfile->getPfull());
-    geometry->setup();
+    incr_geometry->set_lon(ncfile->getLon());
+    incr_geometry->set_lat(ncfile->getLat());
+    incr_geometry->set_lev(ncfile->getPfull());
+    incr_geometry->setup();
 
-    geometry->set_has1dLon(true);
-    geometry->set_has1dLat(true);
+    incr_geometry->set_has1dLon(true);
+    incr_geometry->set_has1dLat(true);
 
-    geometry->set_has2dLon(false);
-    geometry->set_has2dLat(false);
+    incr_geometry->set_has2dLon(false);
+    incr_geometry->set_has2dLat(false);
 
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //_varname = string("sst");
@@ -116,9 +120,9 @@ void UFSincrincrController::setup()
     _curTime = 0;
     _preFile = _curFile;
 
-    ufs_viewer = new UFSincrincr2dViewer(colorTable, nvoptions, bmpflnm, ncfile);
+    ufs_incr_viewer = new UFSincr2dViewer(colorTable, nvoptions, bmpflnm, ncfile);
 
-  //ufs_viewer->set_lister(&lister[0]);
+  //ufs_incr_viewer->set_lister(&lister[0]);
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     cout << "\tvarname:" << _varname << endl;
 
@@ -126,23 +130,23 @@ void UFSincrincrController::setup()
     _title = _varname;
 
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //geometry->print();
+  //incr_geometry->print();
 
-    ufs_viewer->set_coastline(coastline);
-    ufs_viewer->set_geometry(geometry);
+    ufs_incr_viewer->set_coastline(coastline);
+    ufs_incr_viewer->set_incr_geometry(incr_geometry);
   //ufs_3dviewer->set_geoufs_(geoufs_);
 
-    ufs_viewer->setup(_varname, _value);
-    _minval = ufs_viewer->get_minval();
-    _maxval = ufs_viewer->get_maxval();
+    ufs_incr_viewer->setup(_varname, _value);
+    _minval = ufs_incr_viewer->get_minval();
+    _maxval = ufs_incr_viewer->get_maxval();
 }
 
-void UFSincrincrController::draw()
+void UFSincrController::draw()
 {
-    ufs_viewer->draw();
+    ufs_incr_viewer->draw();
 }
 
-void UFSincrincrController::set1dvarname(string vn)
+void UFSincrController::set1dvarname(string vn)
 {
     _varname = vn;
     _sphere = true;
@@ -158,20 +162,20 @@ void UFSincrincrController::set1dvarname(string vn)
 
     _initialized = true;
 
-    geometry->set_nlev(1);
+    incr_geometry->set_nlev(1);
 
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "setup for <" << vn << ">" << endl;
 
-  //ufs_viewer->set_lister(&lister[0]);
-    ufs_viewer->set_geometry(geometry);
-    ufs_viewer->setup(vn, _value);
+  //ufs_incr_viewer->set_lister(&lister[0]);
+    ufs_incr_viewer->set_incr_geometry(incr_geometry);
+    ufs_incr_viewer->setup(vn, _value);
 
-    _minval = ufs_viewer->get_minval();
-    _maxval = ufs_viewer->get_maxval();
+    _minval = ufs_incr_viewer->get_minval();
+    _maxval = ufs_incr_viewer->get_maxval();
 }
 
-void UFSincrincrController::set2dvarname(string vn)
+void UFSincrController::set2dvarname(string vn)
 {
     _varname = vn;
     _sphere = false;
@@ -187,20 +191,20 @@ void UFSincrincrController::set2dvarname(string vn)
 
     _initialized = true;
 
-    geometry->set_nlev(1);
+    incr_geometry->set_nlev(1);
 
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "setup for <" << vn << ">" << endl;
 
-  //ufs_viewer->set_lister(&lister[0]);
-    ufs_viewer->set_geometry(geometry);
-    ufs_viewer->setup(vn, _value);
+  //ufs_incr_viewer->set_lister(&lister[0]);
+    ufs_incr_viewer->set_incr_geometry(incr_geometry);
+    ufs_incr_viewer->setup(vn, _value);
 
-    _minval = ufs_viewer->get_minval();
-    _maxval = ufs_viewer->get_maxval();
+    _minval = ufs_incr_viewer->get_minval();
+    _maxval = ufs_incr_viewer->get_maxval();
 }
 
-void UFSincrincrController::set3dvarname(string vn)
+void UFSincrController::set3dvarname(string vn)
 {
     _varname = vn;
     _sphere = false;
@@ -216,44 +220,44 @@ void UFSincrincrController::set3dvarname(string vn)
 
     _initialized = true;
 
-    geometry->set_nlon(ncfile->getNlon());
-    geometry->set_nlat(ncfile->getNlat());
-    geometry->set_nlev(ncfile->getNlev());
+    incr_geometry->set_nlon(ncfile->getNlon());
+    incr_geometry->set_nlat(ncfile->getNlat());
+    incr_geometry->set_nlev(ncfile->getNlev());
 
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "setup for <" << vn << ">" << endl;
   //cout << "nvfile->get_dim_size('lev') = " << nvfile->get_dim_size("lev") << endl;
 
-  //ufs_viewer->set_lister(&lister[0]);
-    ufs_viewer->set_geometry(geometry);
-    ufs_viewer->setup(vn, _value);
+  //ufs_incr_viewer->set_lister(&lister[0]);
+    ufs_incr_viewer->set_incr_geometry(incr_geometry);
+    ufs_incr_viewer->setup(vn, _value);
 
-    _minval = ufs_viewer->get_minval();
-    _maxval = ufs_viewer->get_maxval();
+    _minval = ufs_incr_viewer->get_minval();
+    _maxval = ufs_incr_viewer->get_maxval();
 }
 
-void UFSincrincrController::set_colorTable(ColorTable *ct)
+void UFSincrController::set_colorTable(ColorTable *ct)
 {
-    ufs_viewer->reset_texture1d(ct);
+    ufs_incr_viewer->reset_texture1d(ct);
 }
 
-int UFSincrincrController::get_callList()
+int UFSincrController::get_callList()
 {
   //cout << "\nFunction: " << __PRETTY_FUNCTION__
   //     << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 
-  //return ufs_viewer->get_callList();
+  //return ufs_incr_viewer->get_callList();
     return 0;
 }
 
-void UFSincrincrController::update_file(const char* fn)
+void UFSincrController::update_file(const char* fn)
 {
     cout << "\nFunction: " << __PRETTY_FUNCTION__ 
          << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     cout << "\tfilename: <" << fn << ">" << endl;
 }
 
-int UFSincrincrController::get_ndv(int n)
+int UFSincrController::get_ndv(int n)
 {
     int ndv = 0;
     if (1 == n)
@@ -265,7 +269,7 @@ int UFSincrincrController::get_ndv(int n)
     return ndv;
 }
 
-vector<string> UFSincrincrController::get_ndvNames(int n)
+vector<string> UFSincrController::get_ndvNames(int n)
 {
     vector<string> varnames;
     if (2 == n)
@@ -275,12 +279,12 @@ vector<string> UFSincrincrController::get_ndvNames(int n)
     return varnames;
 }
 
-string UFSincrincrController::get_timestring()
+string UFSincrController::get_timestring()
 {
     return ncfile->getTimeString();
 }
 
-void UFSincrincrController::set_fileNtime(int nf, int nt)
+void UFSincrController::set_fileNtime(int nf, int nt)
 {
     size_t gridsize = 1;
 
@@ -299,25 +303,25 @@ void UFSincrincrController::set_fileNtime(int nf, int nt)
         _value = ncfile->get_fv(_varname.c_str());
         _title = _varname;
 
-        geometry->set_nlev(1);
-        geometry->set_ntim(_ntimes[_curFile]);
+        incr_geometry->set_nlev(1);
+        incr_geometry->set_ntim(_ntimes[_curFile]);
 
-        _minval = ufs_viewer->get_minval();
-        _maxval = ufs_viewer->get_maxval();
+        _minval = ufs_incr_viewer->get_minval();
+        _maxval = ufs_incr_viewer->get_maxval();
 
         _initialized = true;
     }
 
     _preFile = _curFile;
 
-    gridsize = _curTime * geometry->get_nlon() * geometry->get_nlat() * geometry->get_nlev();
+    gridsize = _curTime * incr_geometry->get_nlon() * incr_geometry->get_nlat() * incr_geometry->get_nlev();
 
     _set_glbTime();
-  //ufs_viewer->set_lister(&lister[_glbTime]);
-    ufs_viewer->setup(_varname, &_value[gridsize]);
+  //ufs_incr_viewer->set_lister(&lister[_glbTime]);
+    ufs_incr_viewer->setup(_varname, &_value[gridsize]);
 }
 
-void UFSincrincrController::_set_glbTime()
+void UFSincrController::_set_glbTime()
 {
     int n;
 
@@ -326,10 +330,10 @@ void UFSincrincrController::_set_glbTime()
         _glbTime += _ntimes[n];
 }
 
-void UFSincrincrController::set_locator(Locator* l)
+void UFSincrController::set_locator(Locator* l)
 {
      locator = l;
 
-     ufs_viewer->set_locator(l);
+     ufs_incr_viewer->set_locator(l);
 }
 

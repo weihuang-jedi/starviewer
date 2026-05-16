@@ -18,10 +18,10 @@ find_path(GLU_INCLUDE_DIR NAMES GL/glu.h
 )
 
 # Create a library for this module
-add_library(ufs STATIC ${SOURCES})
+add_library(ufs_incr STATIC ${SOURCES})
 
 # Allow other modules to find these headers
-target_include_directories(ufs PUBLIC
+target_include_directories(ufs_incr PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${GLU_INCLUDE_DIR}
@@ -47,7 +47,7 @@ target_include_directories(ufs PUBLIC
 )
 
 # Link Qt5
-target_link_libraries(ufs PUBLIC
+target_link_libraries(ufs_incr PUBLIC
     ${OPENGL_LIBRARIES}
     ${NetCDF_LIBRARIES}
     ${GLU_LIBRARY}

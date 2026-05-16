@@ -57,7 +57,7 @@ MainWindow::MainWindow(string yamlfile)
     screenWidth = desktop->width();
     screenHeight = desktop->height(); 
 
-    YAMLHandler *yamlHandler = new YAMLHandler(yamlfile.c_str());
+    yamlHandler = new YAMLHandler(yamlfile.c_str());
     yamlHandler->read_yaml();
 
     vector<string> datafiles = yamlHandler->get_datafiles();
@@ -70,6 +70,8 @@ MainWindow::MainWindow(string yamlfile)
     string tmpstr = yamlHandler->get_model();
     if(0 == tmpstr.compare("ufs"))
         nvoptions->set_model(UFS);
+    else if(0 == tmpstr.compare("ufs_incr"))
+        nvoptions->set_model(UFS_INCR);
     else if(0 == tmpstr.compare("mpas"))
         nvoptions->set_model(MPAS);
     else if(0 == tmpstr.compare("test"))
@@ -183,6 +185,7 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
     menu.addAction(generalAct);
   //menu.addAction(wrfAct);
     menu.addAction(ufsAct);
+    menu.addAction(ufs_incrAct);
   //menu.addAction(mpasAct);
   //menu.addAction(camseAct);
   //menu.addAction(popAct);
@@ -368,9 +371,12 @@ void MainWindow::ufs()
 
 void MainWindow::ufs_incr()
 {
+    string atmfile = yamlHandler->get_atmfile();
+    string sfcfile = yamlHandler->get_sfcfile();
+    vector<string> datafiles = yamlHandler->get_datafiles();
     ufs_incr_translator = new UFSincrTranslator(colorTable, nvoptions,
-                                                fileName.toStdString(),
-                                                isFileList);
+                                                atmfile, sfcfile,
+                                                datafiles);
     translator = ufs_incr_translator;
 
     setWindowTitle(tr("NV for UFS Increments"));
@@ -565,6 +571,11 @@ void MainWindow::createActions()
     ufsAct->setStatusTip(tr("Try to activate 'ufs' application"));
     connect(ufsAct, SIGNAL(triggered()), this, SLOT(ufs()));
 
+    ufs_incrAct = new QAction(tr("&UFS_INC"), this);
+  //ufs_incrAct->setShortcut(QKeySequence::Global);
+    ufs_incrAct->setStatusTip(tr("Try to activate 'ufs_incr' application"));
+    connect(ufs_incrAct, SIGNAL(triggered()), this, SLOT(ufs_incr()));
+
   //mpasAct = new QAction(tr("&MPAS"), this);
   //mpasAct->setShortcut(QKeySequence::Global);
   //mpasAct->setStatusTip(tr("Try to activate 'mpas' application"));
@@ -689,6 +700,7 @@ void MainWindow::createMenus()
     appsMenu->addAction(generalAct);
   //appsMenu->addAction(wrfAct);
     appsMenu->addAction(ufsAct);
+    appsMenu->addAction(ufs_incrAct);
   //appsMenu->addAction(mpasAct);
   //appsMenu->addAction(camseAct);
   //appsMenu->addAction(popAct);

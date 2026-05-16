@@ -88,6 +88,7 @@ target_include_directories(starviewer PUBLIC
     ${CMAKE_SOURCE_DIR}/lic
   # ${CMAKE_SOURCE_DIR}/wrf
     ${CMAKE_SOURCE_DIR}/ufs
+    ${CMAKE_SOURCE_DIR}/ufs_incr
   # ${CMAKE_SOURCE_DIR}/pop
   # ${CMAKE_SOURCE_DIR}/camse
   # ${CMAKE_SOURCE_DIR}/hdf
@@ -113,6 +114,7 @@ target_link_libraries(starviewer PRIVATE
     test
   # wrf
     ufs
+    ufs_incr
   # mpas
   # camse
   # pop

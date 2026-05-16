@@ -21,15 +21,18 @@
 
 #include "sliderNspin.h"
 #include "basetranslator.h"
-#include "ufs_controller.h"
+#include "ufs_incr_controller.h"
 
 class UFSincrTranslator : public BaseTranslator
 {
     Q_OBJECT                                             //  Qt magic macro
     public:
         UFSincrTranslator(ColorTable* ct, NVOptions* opt,
-                        string flnm, bool isList=false,
-                        string mfnm = "unknown", QWidget* parent=0);	//  Constructor
+                          string flnm, bool isList=false,
+                          string mfnm = "unknown", QWidget* parent=0);	//  Constructor
+        UFSincrTranslator(ColorTable* ct, NVOptions* opt,
+                          string atmfile, string sfcfile,
+                          vector<string> datafiles, QWidget* parent=0);
        ~UFSincrTranslator();				//  Destructor
     
         void show();
@@ -60,7 +63,11 @@ class UFSincrTranslator : public BaseTranslator
 
     private:
         UFSincrController* ufs_controller;
-        UFSincrGeometry* geometry;
+        UFSincrGeometry* incr_geometry;
+
+	string _atmfile;
+       	string _sfcfile;
+        vector<string> _datafiles;
 
     private:
 #if 0

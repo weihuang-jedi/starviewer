@@ -30,6 +30,7 @@
 #include "generaltranslator.h"
 //#include "wrftranslator.h"
 #include "ufs_translator.h"
+#include "ufs_incr_translator.h"
 //#include "mpastranslator.h"
 //#include "camsetranslator.h"
 //#include "poptranslator.h"
@@ -72,6 +73,7 @@ class MainWindow : public QMainWindow
         void general();
       //void wrf();
         void ufs();
+        void ufs_incr();
       //void mpas();
       //void camse();
       //void pop();
@@ -161,6 +163,7 @@ class MainWindow : public QMainWindow
         QAction *generalAct;
       //QAction *wrfAct;
         QAction *ufsAct;
+        QAction *ufs_incrAct;
       //QAction *mpasAct;
       //QAction *camseAct;
       //QAction *popAct;
@@ -191,6 +194,8 @@ class MainWindow : public QMainWindow
 
         void _setup_controlPanel();
         void _setup_display();
+
+	YAMLHandler *yamlHandler;
 };
 #endif
 

@@ -35,7 +35,7 @@ using namespace std;
 #define NEAR_EAST_BOUNDARY	0.9999
 #define NEAR_WEST_BOUNDARY	-NEAR_EAST_BOUNDARY
 
-class UFS2dViewer : public QGLWidget, public QOpenGLWidget, protected QOpenGLFunctions
+class UFS2dViewer : public QOpenGLWidget, protected QOpenGLFunctions
 {
 
     public:

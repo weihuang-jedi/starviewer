@@ -39,7 +39,6 @@ class UFSincrGeometry : public Geometry {
 
 	void set_ntim(int v) { _ntim = v; };
 	int get_ntim() { return _ntim; };
-	int get_hlon() { return _hlon; };
 
     protected:
         string name;
@@ -51,15 +50,23 @@ class UFSincrGeometry : public Geometry {
         double* _xFlat;
         double* _yFlat;
 
-        float _hmax;
-        float _hmin;
+        double* _lon;
+        double* _lat;
+        double* _time;
 
-	int _hlon;
+        float* _pfull;
+        float* _phalf;
 
     private:
         void _set_default();
 
+	int _nx;
+	int _ny;
+	int _np;
 	int _ntim;
+	int _ntile;
+
+	int* _tile;
 };
 #endif
 
