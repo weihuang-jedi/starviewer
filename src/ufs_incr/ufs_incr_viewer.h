@@ -40,7 +40,7 @@ class UFSincr2dViewer : public QOpenGLWidget, protected QOpenGLFunctions
 
     public:
         UFSincr2dViewer(ColorTable* ct, NVOptions* opt);
-        UFSincr2dViewer(ColorTable* ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler);
+        UFSincr2dViewer(ColorTable* ct, NVOptions* opt, const char* bmpflnm);
        ~UFSincr2dViewer();
 
         void draw();
@@ -80,14 +80,17 @@ class UFSincr2dViewer : public QOpenGLWidget, protected QOpenGLFunctions
         int previoustimelevel;
         int current_timelevel;
 
-        double* _lon;
-        double* _lat;
+        double* _lon2d;
+        double* _lat2d;
         float* _lev;
+        int* _tile;
 
-        int _hlon;
-        int _nlon;
-        int _nlat;
+        int _nx;
+        int _ny;
+	int _nlon;
+	int _nlat;
         int _nlev;
+        int _ntiles;
 
         GLuint zcl;
         GLuint ycl;

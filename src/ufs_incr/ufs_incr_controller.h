@@ -7,9 +7,6 @@
 
 #include "ncreader.h"
 #include "locator.h"
-// #include "coastline.h"
-// #include "colorTable.h"
-// #include "nvoptions.h"
 #include "ufs_incr_viewer.h"
 
 using namespace std;
@@ -17,6 +14,9 @@ using namespace std;
 #ifndef NAME_LENG
 #define NAME_LENG	1024
 #endif
+
+class UFSincrGeometry;
+class UFSincr2dViewer;
 
 class UFSincrController
 {
@@ -28,10 +28,12 @@ class UFSincrController
 
         void setup();
 
-        int getNlon() { return incr_geometry->get_nlon(); };
-        int getNlat() { return incr_geometry->get_nlat(); };
-        int getNlev() { return incr_geometry->get_nlev(); };
-        int getNtim() { return _ntim; };
+        int getNx();
+        int getNy();
+        int getNlev();
+        int getNtiles();
+
+        int getNtims() { return _ntim; };
         int get_tl() { return _tvalue; };
 
         void set_colorTable(ColorTable* ct);

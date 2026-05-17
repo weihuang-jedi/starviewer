@@ -1,11 +1,12 @@
 #include "ufs_incr_controller.h"
-
+#include "ufs_incr_geometry.h"
+#include "ufs_incr_viewer.h"
+			       
 UFSincrController::UFSincrController(ColorTable *ct, NVOptions* opt,
-                                     string atmfile, string _sfcfile,
+                                     string atmfile, string sfcfile,
                                      vector<string> datafiles)
 {
     cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    string sfn = string(fn);
 
     colorTable = ct;
     nvoptions = opt;
@@ -16,18 +17,17 @@ UFSincrController::UFSincrController(ColorTable *ct, NVOptions* opt,
 
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     cout << "\t_sfcfile: <" << sfcfile << endl;
-    ncfile = new ncReader(sfcfile);
+    ncfile = new ncReader(sfcfile.c_str());
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     incr_geometry = new UFSincrGeometry();
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    incr_geometry->set_name(sfn);
+    incr_geometry->set_name(sfcfile.c_str());
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\tsfn: <" << sfn << endl;
+    cout << "\tsfcfile: <" << sfcfile << endl;
 
     coastline = new CoastLine();
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\tsfn: <" << sfn << endl;
   
     _maxFile = 1;
     _ntim = 1;
@@ -88,9 +88,8 @@ void UFSincrController::setup()
 
   //lister = new Lister[_maxTime];
 
-    incr_geometry->set_nlon(ncfile->getNlon());
-    incr_geometry->set_nlat(ncfile->getNlat());
-  //incr_geometry->set_nlev(ncfile->getNlev());
+    incr_geometry->set_nx(ncfile->getNx());
+    incr_geometry->set_nx(ncfile->getNx());
     incr_geometry->set_nlev(1);
   //incr_geometry->set_ntim(_ntimes[0]);
     incr_geometry->set_ntim(_maxTime);
@@ -120,7 +119,7 @@ void UFSincrController::setup()
     _curTime = 0;
     _preFile = _curFile;
 
-    ufs_incr_viewer = new UFSincr2dViewer(colorTable, nvoptions, bmpflnm, ncfile);
+    ufs_incr_viewer = new UFSincr2dViewer(colorTable, nvoptions, bmpflnm);
 
   //ufs_incr_viewer->set_lister(&lister[0]);
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
@@ -139,6 +138,26 @@ void UFSincrController::setup()
     ufs_incr_viewer->setup(_varname, _value);
     _minval = ufs_incr_viewer->get_minval();
     _maxval = ufs_incr_viewer->get_maxval();
+}
+
+int UFSincrController::getNx()
+{
+    return incr_geometry->get_nx();
+}
+
+int UFSincrController::getNy()
+{
+    return incr_geometry->get_ny();
+}
+
+int UFSincrController::getNlev()
+{
+    return incr_geometry->get_nlev();
+}
+
+int UFSincrController::getNtiles()
+{
+    return incr_geometry->get_ntiles();
 }
 
 void UFSincrController::draw()

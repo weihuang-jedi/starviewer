@@ -2,7 +2,6 @@
 
 UFSincrGeometry::UFSincrGeometry()
 {
-    _hlon = 0;
     _set_default();
 }
 
@@ -26,6 +25,9 @@ UFSincrGeometry::~UFSincrGeometry()
         delete [] _lat;
     if(NULL != _lev)
         delete [] _lev;
+
+    if(NULL != _tile)
+        delete [] _tile;
 }
 
 void UFSincrGeometry::_set_default()
@@ -68,6 +70,7 @@ void UFSincrGeometry::reset_dimension()
     _nlon = 1;
     _nlat = 1;
     _nlev = 1;
+    _ntiles = 0;
 }
 
 void UFSincrGeometry::reset()
@@ -86,22 +89,22 @@ void UFSincrGeometry::setup()
     double pi = 3.1415926535897932;
     double arc = pi / 180.0;
     double delt;
-    int i, j;
+    int i, j, k;
     size_t n;
-    size_t nsquare;
+    size_t length;
 
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "_nlon = " << _nlon << endl;
   //cout << "_nlat = " << _nlat << endl;
   //cout << "_nlev = " << _nlev << endl;
-    nsquare = _nlon * _nlat;
-    _xSphere = new double[nsquare];
-    _ySphere = new double[nsquare];
-    _zSphere = new double[nsquare];
+    length = _nx * _ny * _ntiles;
+    _xSphere = new double[length];
+    _ySphere = new double[length];
+    _zSphere = new double[length];
   //cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
-    _xFlat = new double[_nlon];
-    _yFlat = new double[_nlat];
+    _xFlat = new double[length];
+    _yFlat = new double[length];
 
   //cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     if(NULL == _lat) {
@@ -114,31 +117,24 @@ void UFSincrGeometry::setup()
 	throw(errno);
 	exit (-1);
     }
-    _hmax = 0.0;
-    _hmin = 1000000.0;
-    for(j = 0; j < _nlat; ++j) {
-        _yFlat[j] = _lat[j]/180.0;
-      //cout << "j=" << j << ", lat[j]=" << _lat[j] <<", _yFlat[j]=" << _yFlat[j] << endl;
-	n = j*_nlon;
-        delt = cos(_lat[j] * arc);
-        for(i = 0; i < _nlon; ++i)
-        {
-            _xSphere[n+i] = delt * sin(_lon[i] * arc);
-            _ySphere[n+i] =        sin(_lat[j] * arc);
-            _zSphere[n+i] = delt * cos(_lon[i] * arc);
-        }
-    }
 
-    _hlon = 0;
-    for(i = 0; i < _nlon; ++i)
-    {
-        _xFlat[i] = _lon[i]/180.0;
-        if(_xFlat[i] > 1.0) {
-           _xFlat[i] -= 2.0;
-	   if(0 == _hlon)
-	      _hlon = i;
-	}
-      //cout << "i=" << i << ", _lon=" << _lon[i] << ", _xFlat=" << _xFlat[i] << endl;
+    for(k = 0; k < _ntiles; ++k) {
+        for(j = 0; j < _nx; ++j) {
+          //cout << "j=" << j << ", lat[j]=" << _lat[j] <<", _yFlat[j]=" << _yFlat[j] << endl;
+	    n = (k*_ny + j)*_nx;
+            delt = cos(_lat[j] * arc);
+            for(i = 0; i < _nlon; ++i)
+            {
+                _xSphere[n+i] = delt * sin(_lon2d[i] * arc);
+                _ySphere[n+i] =        sin(_lat2d[j] * arc);
+                _zSphere[n+i] = delt * cos(_lon2d[i] * arc);
+
+                _yFlat[n+i] = _lat2d[n+i]/180.0;
+                _xFlat[n+i] = _lon2d[n+i]/180.0;
+                if(_xFlat[n+i] > 1.0)
+                   _xFlat[n+i] -= 2.0;
+            }
+        }
     }
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }

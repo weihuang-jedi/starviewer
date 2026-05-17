@@ -34,11 +34,23 @@ class UFSincrGeometry : public Geometry {
         double* get_xFlat() { return _xFlat; };
         double* get_yFlat() { return _yFlat; };
 
+        int* get_tile() { return _tile; };
+
       //UFSincr
         void setup();
 
+	void set_nx(int v) { _nx = v; };
+	void set_ny(int v) { _ny = v; };
+	int get_nx() { return _nx; };
+	int get_ny() { return _ny; };
+
+	void set_nlev(int v) { _nlev = v; };
 	void set_ntim(int v) { _ntim = v; };
+	int get_nlev() { return _nlev; };
 	int get_ntim() { return _ntim; };
+
+	void set_ntiles(int v) { _ntiles = v; };
+	int get_ntiles() { return _ntiles; };
 
     protected:
         string name;
@@ -50,8 +62,8 @@ class UFSincrGeometry : public Geometry {
         double* _xFlat;
         double* _yFlat;
 
-        double* _lon;
-        double* _lat;
+        double* _lon2d;
+        double* _lat2d;
         double* _time;
 
         float* _pfull;
@@ -62,9 +74,9 @@ class UFSincrGeometry : public Geometry {
 
 	int _nx;
 	int _ny;
-	int _np;
+	int _nlev;
 	int _ntim;
-	int _ntile;
+	int _ntiles;
 
 	int* _tile;
 };

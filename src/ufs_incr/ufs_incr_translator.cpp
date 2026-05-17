@@ -89,7 +89,7 @@ void UFSincrTranslator::setup()
         delete ufs_controller;
 
     cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    ufs_controller = new UFSincrController(colorTable, nvoptions, _atmfile, _sfctime, _datafiles);
+    ufs_controller = new UFSincrController(colorTable, nvoptions, _atmfile, _sfcfile, _datafiles);
 
     cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufs_controller->setup();
@@ -170,7 +170,7 @@ void UFSincrTranslator::createVarInfo()
              + QString(_timeinfo.c_str()) + "\n"
              + "Dim nx="+QString::number(incr_geometry->get_nx())
              + ", nlat=" + QString::number(incr_geometry->get_ny())
-             + ", nlev=" + QString::number(incr_geometry->get_np())
+             + ", nlev=" + QString::number(incr_geometry->get_nlev())
              + "\nVar min=" + QString::number(ufs_controller->get_minval())
              + ", max=" + QString::number(ufs_controller->get_maxval());
 }
