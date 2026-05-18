@@ -55,8 +55,16 @@ void Controller::setup()
   //     << ", file: <" << __FILE__ << ">" << endl;
 
     ncfile = new ncReader(_flnm.c_str());
+    ncfile->exploreFile();
     _grdsize = ncfile->get_grdsize();
     _ntimes = ncfile->get_ntimes();
+    _ntiles = ncfile->get_ntiles();
+
+    cout << "\t" << __PRETTY_FUNCTION__ << ">, line: "
+         << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\t_grdsize[0]: " << _grdsize[0] << endl;
+    cout << "\t_ntimes[0]: " << _ntimes[0] << endl;
+    cout << "\t_ntiles: " << _ntiles << endl;
 
     geometry = new Geometry();
     geometry->set_name(_flnm);
@@ -65,31 +73,46 @@ void Controller::setup()
     geometry->set_mz(_grdsize[1]);
     geometry->set_nt(_ntimes[0]);
 
-    geometry->set_has1dLon(true);
-    geometry->set_has1dLat(true);
-    geometry->set_has1dLev(true);
-    geometry->set_lon(ncfile->getLon());
-    geometry->set_lat(ncfile->getLat());
-    geometry->set_lev(ncfile->getLev());
+    cout << "\t" << __PRETTY_FUNCTION__ << ">, line: "
+         << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+    if (_ntiles == 0)
+    {
+        geometry->set_has1dLon(true);
+        geometry->set_has1dLat(true);
+        geometry->set_has1dLev(true);
+        geometry->set_lon(ncfile->getLon());
+        geometry->set_lat(ncfile->getLat());
+        geometry->set_lev(ncfile->getLev());
+
+        geometry->set_nx(ncfile->getNlon());
+        geometry->set_ny(ncfile->getNlat());
+        geometry->set_nz(ncfile->getNlev());
+    }
+    else
+    {
+        geometry->set_has1dLon(false);
+        geometry->set_has1dLat(false);
+        geometry->set_has1dLev(true);
+        geometry->set_lev(ncfile->getLev());
+    }
 
     geometry->set_has2dLon(true);
     geometry->set_lon2d(ncfile->getLon2d());
     geometry->set_has2dLat(true);
     geometry->set_lat2d(ncfile->getLat2d());
 
-    cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: "
+    cout << "\t<" << __PRETTY_FUNCTION__ << ">, line: "
          << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\t_varname" << _varname << endl;
 
+    _varname = "pressfc";
     _value = ncfile->getFloat(_varname.c_str());
   //_title = ncfile->get_title();
 
     geometry->set_hasFillValue(false);
   //if(geometry->get_hasFillValue())
   //   geometry->set_fillValue(ncfile->get_fillValue());
-
-    geometry->set_nx(ncfile->getNlon());
-    geometry->set_ny(ncfile->getNlat());
-    geometry->set_nz(ncfile->getNlev());
 
   //geometry->print();
 
@@ -103,10 +126,10 @@ void Controller::setup()
     _nt = geometry->get_nt();
     _nm = 1;
 
-  //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: "
-  //     << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tvariable name: <" << _varname << ">" << endl;
-  //cout << "\ttitle: <" << _title << ">" << endl;
+    cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: "
+         << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tvariable name: <" << _varname << ">" << endl;
+    cout << "\ttitle: <" << _title << ">" << endl;
 
   //We need to setup 2 viewers, no matter which one is currently used.
   //nclviewer = new NCL_Viewer(colorTable, nvoptions);

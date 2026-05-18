@@ -18,6 +18,7 @@ UFSincrController::UFSincrController(ColorTable *ct, NVOptions* opt,
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     cout << "\t_sfcfile: <" << sfcfile << endl;
     ncfile = new ncReader(sfcfile.c_str());
+    ncfile->exploreFile();
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     incr_geometry = new UFSincrGeometry();
@@ -25,6 +26,10 @@ UFSincrController::UFSincrController(ColorTable *ct, NVOptions* opt,
     incr_geometry->set_name(sfcfile.c_str());
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     cout << "\tsfcfile: <" << sfcfile << endl;
+
+    delete ncfile;
+    ncfile = new ncReader(datafiles[0].c_str());
+    ncfile->CheckIncrement();
 
     coastline = new CoastLine();
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
@@ -89,10 +94,15 @@ void UFSincrController::setup()
   //lister = new Lister[_maxTime];
 
     incr_geometry->set_nx(ncfile->getNx());
-    incr_geometry->set_nx(ncfile->getNx());
+    incr_geometry->set_ny(ncfile->getNy());
     incr_geometry->set_nlev(1);
   //incr_geometry->set_ntim(_ntimes[0]);
     incr_geometry->set_ntim(_maxTime);
+
+    cout << "\tncfile->getNx() = " << ncfile->getNx() << endl;
+    cout << "\tncfile->getNy() = " << ncfile->getNy() << endl;
+    cout << "\tncfile->getNlev() = " << ncfile->getNlev() << endl;
+    cout << "\tncfile->getNtiles() = " << ncfile->getNtiles() << endl;
 
     incr_geometry->set_lon(ncfile->getLon());
     incr_geometry->set_lat(ncfile->getLat());

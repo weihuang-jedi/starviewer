@@ -50,7 +50,7 @@ MainWindow::MainWindow(string flnm, bool isList,
   //cout << "Leave MainWindow: file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
-MainWindow::MainWindow(string yamlfile)
+MainWindow::MainWindow(string yamlfile, NVOptions* opt)
 {
     QDesktopWidget *desktop = QApplication::desktop();
 
@@ -65,7 +65,7 @@ MainWindow::MainWindow(string yamlfile)
     isFileList = false;
     fileName = QString(datafiles[0].c_str());
 
-    NVOptions* nvoptions = new NVOptions();
+    nvoptions = opt;
 
     string tmpstr = yamlHandler->get_model();
     if(0 == tmpstr.compare("ufs"))
@@ -131,7 +131,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::_setup()
 {
-  //cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     switch(nvoptions->get_model())
     {
@@ -175,7 +175,7 @@ void MainWindow::_setup()
             general();
             break;
     }
-  //cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::contextMenuEvent(QContextMenuEvent *event)

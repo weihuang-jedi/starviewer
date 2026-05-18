@@ -40,7 +40,7 @@ singularity exec --cleanenv \
     "${CONTAINER_SIF}" \
     gdb --args \
     ${STARVIEWERHOME}/build/main/starviewer \
-    -ufs /scratch/wei/cadre/cadre26_noaa_tutorial/exp_case/wei_cadre26.8/output/cubed_sphere_grid_atminc.jedi.nc
+    -yaml config.yaml
 
  exit 0
 #   gdb --args \

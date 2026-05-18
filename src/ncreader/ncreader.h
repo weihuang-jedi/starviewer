@@ -146,7 +146,9 @@ class ncReader {
     int*   get_grdsize() { return _dimsize; };
     int*   get_varsize();
     int*   get_ntimes() { return _ntimes; };
+    int    get_ntiles() { return _ntiles; };
 
     void select_file(int nf);
+    void CheckIncrement();
 };
 #endif

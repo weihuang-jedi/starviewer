@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
   //cout << "\tfilename: <" << filename << ">, isList = " << isList << endl;
 
     if (hasYAMLfile) 
-        mainwindow = new MainWindow(yamlfile);
+        mainwindow = new MainWindow(yamlfile, nvoptions);
     else
         mainwindow = new MainWindow(filename, isList,
                                     camse_mappingFilename,

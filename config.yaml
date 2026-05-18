@@ -17,6 +17,7 @@ data:
     atm: ufsda.t18z.atm.f006.cubed_sphere_grid.nc
     sfc: ufsda.t18z.sfc.f006.cubed_sphere_grid.nc
   increment:
+    - /scratch/wei/cadre/cadre26_noaa_tutorial/exp_case/wei_cadre26.8/output/cubed_sphere_grid_atminc.jedi.nc
     - /scratch/wei/cadre/cadre26_noaa_tutorial/exp_case/wei_cadre26.8/output/ufsda.t00z.atminc.cubed_sphere_grid.tile1.nc
     - /scratch/wei/cadre/cadre26_noaa_tutorial/exp_case/wei_cadre26.8/output/ufsda.t00z.atminc.cubed_sphere_grid.tile2.nc
     - /scratch/wei/cadre/cadre26_noaa_tutorial/exp_case/wei_cadre26.8/output/ufsda.t00z.atminc.cubed_sphere_grid.tile3.nc

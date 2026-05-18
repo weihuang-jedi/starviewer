@@ -57,7 +57,7 @@ class MainWindow : public QMainWindow
     public:
         MainWindow(string flnm, bool isList,
                    string camse_mfnm, NVOptions* opt);
-        MainWindow(string yamlfile);
+        MainWindow(string yamlfile, NVOptions* opt);
        ~MainWindow();
 
     private slots:
