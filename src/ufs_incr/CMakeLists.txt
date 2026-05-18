@@ -32,7 +32,6 @@ target_include_directories(ufs_incr PUBLIC
     ${CMAKE_SOURCE_DIR}/spreadsheet
     ${CMAKE_SOURCE_DIR}/coastline
     ${CMAKE_SOURCE_DIR}/topography
-    ${CMAKE_SOURCE_DIR}/nclapp
     ${CMAKE_SOURCE_DIR}/stateboundary
     ${CMAKE_SOURCE_DIR}/contour
     ${CMAKE_SOURCE_DIR}/control

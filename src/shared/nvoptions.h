@@ -43,7 +43,6 @@ typedef enum
     NV_NONE = 0,
     NV_ISPERSPECTIVE,
     NV_AXISON,
-    NV_USENCL,
     NV_BGBLACK,
     NV_BUMPON,
     NV_FLATON,

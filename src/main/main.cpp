@@ -134,12 +134,11 @@ int main(int argc, char *argv[])
         filename = default_filename;
     }
 
-  //initializeNcl();
-
     isList = isTextFile(filename.c_str());
 
-  //cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tfilename: <" << filename << ">, isList = " << isList << endl;
+    cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\thasYAMLfile: <" << hasYAMLfile << endl;
+    cout << "\tfilename: <" << filename << ">, isList = " << isList << endl;
 
     if (hasYAMLfile) 
         mainwindow = new MainWindow(yamlfile, nvoptions);
@@ -151,8 +150,6 @@ int main(int argc, char *argv[])
     mainwindow->show();
 
     app.exec();
-
-  //finalizeNcl();
 
   //delete nvoptions;
 

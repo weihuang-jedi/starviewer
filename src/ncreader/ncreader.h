@@ -140,7 +140,6 @@ class ncReader {
     float* getPhalf() { return _phalf; };
     float* getLev() { return _pfull; };
 
-    // simulate ncl functions.
     double* get_dv( const char* vn ) { return getDouble(vn); };
     float* get_fv( const char* vn ) { return getFloat(vn); };
     int*   get_grdsize() { return _dimsize; };

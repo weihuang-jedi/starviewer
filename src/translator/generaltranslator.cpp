@@ -78,6 +78,7 @@ void GeneralTranslator::setup()
     _varname = controller->get_varname();
 
     cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    cout << "\t_varname: <" << _varname << endl;
 
     _isDummy = false;
 

@@ -25,10 +25,9 @@ Controller::Controller(ColorTable *ct, NVOptions* opt,
     _preTime = -1;
     _curTime = 0;
 
+    ncfile = new ncReader(_flnm.c_str());
     geometry = NULL;
-    ncfile = NULL;
     glviewer = NULL;
-    nclviewer = NULL;
     pixelviewer = NULL;
     spreadsheet = NULL;
 }
@@ -41,8 +40,6 @@ Controller::~Controller()
         delete ncfile;
     if(NULL != glviewer)
         delete glviewer;
-    if(NULL != nclviewer)
-        delete nclviewer;
     if(NULL != pixelviewer)
         delete pixelviewer;
     if(NULL != spreadsheet)
@@ -54,7 +51,6 @@ void Controller::setup()
   //cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
   //     << ", file: <" << __FILE__ << ">" << endl;
 
-    ncfile = new ncReader(_flnm.c_str());
     ncfile->exploreFile();
     _grdsize = ncfile->get_grdsize();
     _ntimes = ncfile->get_ntimes();
@@ -131,11 +127,6 @@ void Controller::setup()
     cout << "\tvariable name: <" << _varname << ">" << endl;
     cout << "\ttitle: <" << _title << ">" << endl;
 
-  //We need to setup 2 viewers, no matter which one is currently used.
-  //nclviewer = new NCL_Viewer(colorTable, nvoptions);
-  //nclviewer->set_geometry(geometry);
-  //nclviewer->setup(_varname, _value);
-
     glviewer = new GL_Viewer(colorTable, nvoptions);
     glviewer->set_geometry(geometry);
     glviewer->setup(_varname, _value);
@@ -202,7 +193,6 @@ void Controller::set_fileNtime(int nf, int nt)
     gridsize = _curTime * geometry->get_nx() *  geometry->get_ny() *  geometry->get_nz();
 
     pixelviewer->setup(_varname, &_value[gridsize]);
-  //nclviewer->setup(_varname, &_value[gridsize]);
     glviewer->setup(_varname, &_value[gridsize]);
 }
 
@@ -211,7 +201,6 @@ void Controller::draw()
   //cout << "\nEnter functions: <" << __PRETTY_FUNCTION__
   //     << ">, line: " << __LINE__
   //     << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tnvoptions->get_cb(NV_USENCL) = " << nvoptions->get_cb(NV_USENCL) << endl;
   //cout << "\tnvoptions->get_cb(NV_PIXELON) = " << nvoptions->get_cb(NV_PIXELON) << endl;
 
     if(nvoptions->get_cb(NV_DATAVIEWON))
@@ -233,10 +222,7 @@ void Controller::draw()
     }
     else
     {
-        if(nvoptions->get_cb(NV_USENCL))
-            nclviewer->draw();
-        else
-            glviewer->draw();
+        glviewer->draw();
     }
 
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
@@ -290,7 +276,6 @@ void Controller::set2dvarname(string vn)
    */
 
     pixelviewer->setup(vn, _value);
-    nclviewer->setup(vn, _value);
     glviewer->setup(vn, _value);
 
     _minval = glviewer->get_minval();
@@ -340,7 +325,6 @@ void Controller::set3dvarname(string vn)
     */
 
     pixelviewer->setup(vn, _value);
-    nclviewer->setup(vn, _value);
     glviewer->setup(vn, _value);
 
     _minval = glviewer->get_minval();
@@ -355,7 +339,6 @@ void Controller::set3dvarname(string vn)
 
 void Controller::update_colormap()
 {
-    nclviewer->update_colormap();
     glviewer->update_colormap();
 }
 
@@ -363,7 +346,11 @@ int Controller::get_ndv(int n)
 {
     cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
          << ", file: <" << __FILE__ << ">" << endl;
-  //return nvfile->get_ndv(n);
+    cout << "\t n = " << n << endl;
+    if (n == 2)
+	return ncfile->getNumV2ds();
+    else if (n == 3)
+	return ncfile->getNumV3ds();
     return 1;
 }
 
@@ -371,18 +358,30 @@ string* Controller::get_ndvNames(int n)
 {
     cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
          << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\t n = " << n << endl;
+    if (n == 2)
+    {
+	vector<string> vec = ncfile->getV2dNames();
+	string* strpntr = vec.data();
+	return strpntr;
+    }
+    else if (n == 3)
+    {
+	vector<string> vec = ncfile->getV3dNames();
+	string* strpntr = vec.data();
+	return strpntr;
+    }
     string* vn = new string[2];
     return vn;
-  //return nvfile->get_ndvNames(n);
 }
 
 string* Controller::get_timestring()
 {
     cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
          << ", file: <" << __FILE__ << ">" << endl;
-    string* vn = new string[2];
-    return vn;
-  //return nvfile->get_timestr();
+    string* ts = new string[1];
+    ts[0] = ncfile->getTimeString();
+    return ts;
 } 
 
 void Controller::setup_vector()

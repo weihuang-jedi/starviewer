@@ -5,35 +5,10 @@ set(OpenGL_GL_PREFERENCE GLVND)
 # hdfeos fixes: cuErrorOccurred
 #find_library(HDFEOS_LIB NAMES hdfeos PATHS /apps/spack-managed/gcc-11.3.1/*/lib)
 
-# Gspread (optional but often needed for NCL symbols)
-#find_library(GSPREAD_LIB NAMES gspread PATHS /apps/spack-managed/gcc-11.3.1/*/lib)
-
 # Check if we found them (optional but helpful for debugging)
 #if(NOT UDUNITS_LIB)
 #    message(WARNING "UDUNITS not found. cdRel2Comp errors may persist.")
 #endif()
-
-# 3. Find NCL Libraries
-#find_library(NCL_LIB NAMES ncl PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
-
-# 4. Standard dependencies often required by static NCL
-#find_package(ZLIB REQUIRED)
-#find_library(SZIP_LIB NAMES sz szip)
-#find_library(CURL_LIB NAMES curl)
-#find_library(HLU_LIB NAMES hlu PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
-#find_library(GKS_LIB NAMES ncarg_gks PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
-#find_library(NFP_LIB NAMES nfp PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
-#find_library(NCARG_LIB NAMES ncarg PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
-#find_library(NGMATH_LIB NAMES ngmath PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
-#find_library(COMMON_LIB NAMES ncarg_c PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
-#find_library(SPHERE_LIB NAMES sphere3.1_dp PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
-#find_library(NFPFORT_LIB NAMES nfpfort PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
-#find_library(FFTPACK_LIB NAMES fftpack5_dp PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
-#find_library(LAPACK_LIB NAMES lapack_ncl PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
-#find_library(BLAS_LIB NAMES blas_ncl PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
-
-# Look for the NCL I/O and Interpreter library
-#find_library(NI_LIB NAMES nio PATHS ${NCL_LIB_DIR} NO_DEFAULT_PATH)
 
 #find_package(Freetype REQUIRED)
 
@@ -72,9 +47,7 @@ target_include_directories(starviewer PUBLIC
     ${CMAKE_SOURCE_DIR}/geometry
     ${CMAKE_SOURCE_DIR}/shared
     ${CMAKE_SOURCE_DIR}/coastline
-  # ${CMAKE_SOURCE_DIR}/coastline2
     ${CMAKE_SOURCE_DIR}/topography
-  # ${CMAKE_SOURCE_DIR}/nclapp
     ${CMAKE_SOURCE_DIR}/ncreader
     ${CMAKE_SOURCE_DIR}/stateboundary
     ${CMAKE_SOURCE_DIR}/contour
@@ -119,7 +92,6 @@ target_link_libraries(starviewer PRIVATE
   # camse
   # pop
   # hdf
-  # nclapp
     ncreader
     view
     control
@@ -139,15 +111,13 @@ target_link_libraries(starviewer PRIVATE
     control
     view
     leveler
-
-    # 3. THE NCL CORE GROUP (Critical for get_dimensions and ESprintf)
     -Wl,--start-group
     -Wl,--end-group
 
     # 4. System Graphics and Fortran Runtimes
   # ${FREETYPE_LIBRARIES}
     X11 Xext Xrender
-    gfortran        # VITAL for the Fortran symbols in NCL and shared
+    gfortran 
     OpenMP::OpenMP_CXX
 
     # 5. Data Formats and Math

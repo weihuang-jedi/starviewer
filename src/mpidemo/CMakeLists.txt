@@ -30,7 +30,6 @@ target_include_directories(mpidemo PUBLIC
     ${CMAKE_SOURCE_DIR}/shared
     ${CMAKE_SOURCE_DIR}/coastline
     ${CMAKE_SOURCE_DIR}/topography
-    ${CMAKE_SOURCE_DIR}/nclapp
     ${CMAKE_SOURCE_DIR}/stateboundary
     ${CMAKE_SOURCE_DIR}/contour
     ${CMAKE_SOURCE_DIR}/control
