@@ -1,57 +1,8 @@
 #include "mainwindow.h"
 
-MainWindow::MainWindow(string flnm, bool isList,
-                       string camse_mfnm, NVOptions* opt)
-{
-    QDesktopWidget *desktop = QApplication::desktop();
-
-  //cout << "\nEnter MainWindow: file: " << __FILE__ << ", line: " << __LINE__ << endl;
-
-    isFileList = isList;
-    fileName = QString(flnm.c_str());
-    camse_mappingFilename = camse_mfnm;
-    nvoptions = opt;
-
-    screenWidth = desktop->width();
-    screenHeight = desktop->height(); 
-
-    nInstance = 0;
-    numberOfWidget = 0;
-
-  //cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-
-    createActions();
-    createMenus();
-
-    setMinimumSize(480, 320);
-    resize(960, 640);
-
-  //cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-
-    light = new Light();
-
-  //cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-
-    locator = new Locator();
-
-  //cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-
-    colorTable = new ColorTable();
-
-  //cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-
-    controlPanel = new ControlWidget();
-    display = new DisplayWidget();
-
-  //cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-
-    _setup();
-
-  //cout << "Leave MainWindow: file: " << __FILE__ << ", line: " << __LINE__ << endl;
-}
-
 MainWindow::MainWindow(string yamlfile)
 {
+    nvoptions = new NVOptions();
     QDesktopWidget *desktop = QApplication::desktop();
 
     screenWidth = desktop->width();
@@ -124,6 +75,7 @@ MainWindow::~MainWindow()
     delete colorTable;
     delete controlPanel;
     delete display;
+    delete nvoptions;
   //cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 

@@ -1,9 +1,6 @@
 #ifndef _MainWindow_H
 #define _MainWindow_H
 
-#define USE_RSL_VARS
-//#include "rsl.h"
-
 #include "yamlhandler.h"
 
 #include "basetranslator.h"
@@ -33,9 +30,7 @@
 //#include "mpastranslator.h"
 //#include "camsetranslator.h"
 //#include "poptranslator.h"
-#ifdef UseRADX
-#include "radxtranslator.h"
-#endif
+//#include "radxtranslator.h"
 //#include "vtktranslator.h"
 #include "testtranslator.h"
 #include "mpitranslator.h"
@@ -54,8 +49,6 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     public:
-        MainWindow(string flnm, bool isList,
-                   string camse_mfnm, NVOptions* opt);
         MainWindow(string yamlfile);
        ~MainWindow();
 
