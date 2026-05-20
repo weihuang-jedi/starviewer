@@ -94,7 +94,6 @@ void ColorTable::_setup()
 
   //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
 
-  //set_colorMap(string("ncl_default"));
     set_colorMap(string("gui_default"));
 
   //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;

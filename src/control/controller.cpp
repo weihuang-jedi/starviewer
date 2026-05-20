@@ -28,7 +28,6 @@ Controller::Controller(ColorTable *ct, NVOptions* opt,
     geometry = NULL;
     ncfile = NULL;
     glviewer = NULL;
-    nclviewer = NULL;
     pixelviewer = NULL;
     spreadsheet = NULL;
 }
@@ -41,8 +40,6 @@ Controller::~Controller()
         delete ncfile;
     if(NULL != glviewer)
         delete glviewer;
-    if(NULL != nclviewer)
-        delete nclviewer;
     if(NULL != pixelviewer)
         delete pixelviewer;
     if(NULL != spreadsheet)
@@ -107,11 +104,6 @@ void Controller::setup()
   //     << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\tvariable name: <" << _varname << ">" << endl;
   //cout << "\ttitle: <" << _title << ">" << endl;
-
-  //We need to setup 2 viewers, no matter which one is currently used.
-  //nclviewer = new NCL_Viewer(colorTable, nvoptions);
-  //nclviewer->set_geometry(geometry);
-  //nclviewer->setup(_varname, _value);
 
     glviewer = new GL_Viewer(colorTable, nvoptions);
     glviewer->set_geometry(geometry);
@@ -179,7 +171,6 @@ void Controller::set_fileNtime(int nf, int nt)
     gridsize = _curTime * geometry->get_nx() *  geometry->get_ny() *  geometry->get_nz();
 
     pixelviewer->setup(_varname, &_value[gridsize]);
-  //nclviewer->setup(_varname, &_value[gridsize]);
     glviewer->setup(_varname, &_value[gridsize]);
 }
 
@@ -188,7 +179,6 @@ void Controller::draw()
   //cout << "\nEnter functions: <" << __PRETTY_FUNCTION__
   //     << ">, line: " << __LINE__
   //     << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tnvoptions->get_cb(NV_USENCL) = " << nvoptions->get_cb(NV_USENCL) << endl;
   //cout << "\tnvoptions->get_cb(NV_PIXELON) = " << nvoptions->get_cb(NV_PIXELON) << endl;
 
     if(nvoptions->get_cb(NV_DATAVIEWON))
@@ -210,10 +200,7 @@ void Controller::draw()
     }
     else
     {
-        if(nvoptions->get_cb(NV_USENCL))
-            nclviewer->draw();
-        else
-            glviewer->draw();
+        glviewer->draw();
     }
 
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
@@ -267,7 +254,6 @@ void Controller::set2dvarname(string vn)
    */
 
     pixelviewer->setup(vn, _value);
-    nclviewer->setup(vn, _value);
     glviewer->setup(vn, _value);
 
     _minval = glviewer->get_minval();
@@ -317,7 +303,6 @@ void Controller::set3dvarname(string vn)
     */
 
     pixelviewer->setup(vn, _value);
-    nclviewer->setup(vn, _value);
     glviewer->setup(vn, _value);
 
     _minval = glviewer->get_minval();
@@ -332,7 +317,6 @@ void Controller::set3dvarname(string vn)
 
 void Controller::update_colormap()
 {
-    nclviewer->update_colormap();
     glviewer->update_colormap();
 }
 

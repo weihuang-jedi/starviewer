@@ -621,7 +621,7 @@ void BaseTranslator::_set_current_time()
 //Draw color bar
 void BaseTranslator::drawColorBar()
 {
-    if(nvoptions->get_cb(NV_COLORBARON) && (! nvoptions->get_cb(NV_USENCL)))
+    if(nvoptions->get_cb(NV_COLORBARON))
     {
         _displayColorBar();
     }
@@ -739,17 +739,6 @@ void BaseTranslator::drawAxis()
         y_axis(len, 0.05*len, 30.0);
         z_axis(len, 0.05*len, 30.0);
     }
-}
-
-void BaseTranslator::selectNCL(int n)
-{
-    nvoptions->set_cb(NV_STATUS_CHANGED, true);
-    if(n)
-        nvoptions->set_cb(NV_USENCL, true);
-    else
-        nvoptions->set_cb(NV_USENCL, false);
-
-   updateGL();   //  Request redisplay
 }
 
 void BaseTranslator::selectX2(int n)

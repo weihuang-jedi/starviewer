@@ -1,9 +1,12 @@
+#include "mpidemoparser.h"
 #include "mainwindow.h"
 
 MainWindow::MainWindow(string yamlfile)
 {
     nvoptions = new NVOptions();
     QDesktopWidget *desktop = QApplication::desktop();
+
+    ModelType userConfig = ModelType::NOMODEL;
 
     screenWidth = desktop->width();
     screenHeight = desktop->height(); 
@@ -19,26 +22,39 @@ MainWindow::MainWindow(string yamlfile)
     NVOptions* nvoptions = new NVOptions();
 
     string tmpstr = yamlHandler->get_model();
+    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\ttmpstr: " << tmpstr << endl;
     if(0 == tmpstr.compare("ufs"))
+    {
         nvoptions->set_model(UFS);
-    else if(0 == tmpstr.compare("mpas"))
-        nvoptions->set_model(MPAS);
-    else if(0 == tmpstr.compare("test"))
-        nvoptions->set_model(TEST);
-    else if(0 == tmpstr.compare("mpi"))
+        userConfig = ModelType::UFS;
+        cout << "\tUFS: " << UFS << endl;
+        cout << "\tModelType::UFS: " << ModelType::UFS << endl;
+    }
+    else if(0 == tmpstr.compare("mpidemo"))
+    {
         nvoptions->set_model(MPIDEMO);
+        userConfig = ModelType::MPIDEMO;
+        cout << "\tMPIDEMO: " << MPIDEMO << endl;
+        cout << "\tModelType::MPIDEMO: " << ModelType::MPIDEMO << endl;
+    }
     else if(0 == tmpstr.compare("pop"))
+    {
         nvoptions->set_model(POP);
+    }
+    else if(0 == tmpstr.compare("mpas"))
+    {
+        nvoptions->set_model(MPAS);
+        userConfig = ModelType::MPAS;
+    }
     else if(0 == tmpstr.compare("wrf"))
+    {
         nvoptions->set_model(WRF);
-  //else if(0 == tmpstr.compare("radx"))
-  //    nvoptions->set_model(RADX);
-  //else if(0 == tmpstr.compare("vtk"))
-  //    nvoptions->set_model(VTK);
-  //else if(0 == tmpstr.compare("hdf"))
-  //    nvoptions->set_model(HDF);
-  //else if(0 == tmpstr.compare("subset"))
-  //    nvoptions->set_cb(NV_MPAS_SUBSET, true);
+    }
+    else if(0 == tmpstr.compare("test"))
+    {
+        nvoptions->set_model(TEST);
+    }
 
     cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
 
@@ -62,6 +78,25 @@ MainWindow::MainWindow(string yamlfile)
 
     cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
 
+    // Use the factory to generate the object
+    myParser = ModelParserFactory::createParser(userConfig);
+
+    if (myParser) {
+        // Polymorphism handles execution automatically
+        myParser->parse(yamlHandler, nvoptions, colorTable,
+			controlPanel, locator, light);
+	translator = myParser->get_translator();
+        setWindowTitle(tr("NV to demo MPI"));
+    } else {
+        cerr << "Unknown Model." << endl;
+    }
+
+    cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+
+    // unordered_map<string, function<unique_ptr<ModelParser>()>> registry;
+
+    cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+
     _setup();
 
     cout << "Leave MainWindow: file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -82,45 +117,32 @@ MainWindow::~MainWindow()
 void MainWindow::_setup()
 {
   //cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-
     switch(nvoptions->get_model())
     {
-      //case CAMSE:
-      //    camse();
-      //    break;
-      //case POP:
-      //    pop();
-      //    break;
-      //case MPAS:
-      //    mpas();
-      //    break;
-      //case WRF:
-          //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
-      //    wrf();
-      //    break;
         case UFS:
           //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
             ufs();
             break;
-      //case RADX:
-      //    radx();
+        case MPIDEMO:
+            mpidemo();
+            break;
+      //case MPAS:
+      //    mpas();
       //    break;
-      //case VTK:
-      //    vtk();
+      //case POP:
+      //    pop();
+      //    break;
+      //case WRF:
+      //    wrf();
       //    break;
         case TEST:
             test();
             break;
-        case MPIDEMO:
-            mpidemo();
-            break;
-      //case HDF:
-      //    hdf();
-      //    break;
         default:
             general();
             break;
     }
+
   //cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
@@ -174,80 +196,6 @@ void MainWindow::redo()
 
 void MainWindow::_setup_controlPanel()
 {
-    translator->setup();
-    translator->set_light(light);
-    translator->set_locator(locator);
-
-    controlPanel->set_colortable(colorTable);
-    controlPanel->set_translator(translator);
-    controlPanel->setup();
-
-    switch(nvoptions->get_model())
-    {
-        case WRF:
-           //controlPanel->selectNCL();
-           //controlPanel->disable_ncl();
-             break;
-        case UFS:
-           //controlPanel->selectNCL();
-           //controlPanel->disable_ncl();
-             break;
-        case POP:
-           //controlPanel->disable_ncl();
-             controlPanel->disable_bump();
-             controlPanel->disable_onmap();
-             controlPanel->disable_sphere();
-             break;
-        case MPAS:
-           //controlPanel->disable_ncl();
-             controlPanel->disable_bump();
-             controlPanel->disable_onmap();
-             controlPanel->disable_sphere();
-           //controlPanel->disable_surface();
-             controlPanel->disable_x2();
-             controlPanel->disable_y2();
-             controlPanel->disable_z2();
-             controlPanel->disable_t2();
-             break;
-        case CAMSE:
-           //controlPanel->disable_ncl();
-             controlPanel->disable_onmap();
-             controlPanel->disable_sphere();
-           //controlPanel->disable_surface();
-             break;
-        case RADX:
-           //controlPanel->disable_ncl();
-             controlPanel->disable_onmap();
-             controlPanel->disable_sphere();
-             controlPanel->disable_flat();
-             controlPanel->disable_x2();
-             controlPanel->disable_y2();
-             controlPanel->disable_z2();
-             controlPanel->disable_t2();
-             break;
-        case MPIDEMO:
-           //controlPanel->disable_ncl();
-             controlPanel->disable_onmap();
-             controlPanel->disable_sphere();
-             controlPanel->disable_flat();
-             controlPanel->disable_x2();
-             controlPanel->disable_y2();
-             controlPanel->disable_z2();
-             controlPanel->disable_t2();
-             translator->updateSliders();
-             break;
-        case HDF:
-           //controlPanel->disable_ncl();
-             controlPanel->disable_bump();
-             controlPanel->disable_onmap();
-             controlPanel->disable_sphere();
-             break;
-        default:
-           //controlPanel->disable_ncl();
-             controlPanel->disable_flat();
-             break;
-    }
-
     controlPanel->move(0, 0);
     controlPanel->show();
 }
@@ -298,10 +246,7 @@ void MainWindow::wrf()
 
 void MainWindow::ufs()
 {
-    ufs_translator = new UFSTranslator(colorTable, nvoptions,
-                                       fileName.toStdString(),
-                                       isFileList);
-    translator = ufs_translator;
+    translator = myParser->get_translator();
 
     setWindowTitle(tr("NV for UFS"));
 
@@ -309,88 +254,6 @@ void MainWindow::ufs()
 
     _setup_display();
 }
-
-/*
-void MainWindow::mpas()
-{
-    mpas_translator = new MPASTranslator(colorTable, nvoptions,
-                                         fileName.toStdString(),
-                                         isFileList);
-
-    translator = mpas_translator;
-
-    setWindowTitle(tr("NV for MPAS"));
-
-    _setup_controlPanel();
-    _setup_display();
-}
-
-void MainWindow::camse()
-{
-  //cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-
-    camse_translator = new CAMseTranslator(colorTable, nvoptions,
-                                           fileName.toStdString(),
-                                           isFileList,
-                                           camse_mappingFilename);
-    translator = camse_translator;
-
-    setWindowTitle(tr("NV for CAM-SE"));
-
-  //cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    _setup_controlPanel();
-  //cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    _setup_display();
-
-  //cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-}
-
-void MainWindow::pop()
-{
-    pop_translator = new POPTranslator(colorTable, nvoptions,
-                                       fileName.toStdString(),
-                                       isFileList);
-    translator = pop_translator;
-
-    setWindowTitle(tr("NV for POP"));
-
-    _setup_controlPanel();
-    _setup_display();
-}
-*/
-
-#ifdef UseRADX
-void MainWindow::radx()
-{
-    nvoptions->set_zsec(0);
-
-    radx_translator = new RadxTranslator(colorTable, nvoptions,
-                                         fileName.toStdString(),
-                                         isFileList);
-
-    translator = radx_translator;
-
-    setWindowTitle(tr("NV for RADX"));
-
-    _setup_controlPanel();
-    _setup_display();
-}
-#endif
-
-#if 0
-void MainWindow::vtk()
-{
-    vtk_translator = new VTKTranslator(colorTable, nvoptions,
-                                       fileName.toStdString(),
-                                       isFileList);
-    translator = vtk_translator;
-
-    setWindowTitle(tr("NV for VTK"));
-
-    _setup_controlPanel();
-    _setup_display();
-}
-#endif
 
 void MainWindow::test()
 {
@@ -409,11 +272,7 @@ void MainWindow::test()
 
 void MainWindow::mpidemo()
 {
-    mpidemo_translator = new MPITranslator(colorTable, nvoptions,
-                                         fileName.toStdString(),
-                                         isFileList);
-
-    translator = mpidemo_translator;
+    translator = myParser->get_translator();;
 
     setWindowTitle(tr("NV to demo MPI"));
 
@@ -702,7 +561,6 @@ void MainWindow::inspector_func()
     {
         case POP:
         case MPAS:
-        case CAMSE:
              inspectorWidget->set_lon(360);
              inspectorWidget->set_lat(180);
              break;

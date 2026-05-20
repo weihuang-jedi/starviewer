@@ -11,7 +11,6 @@
 #include "ncreader.h"
 #include "nvoptions.h"
 #include "gl_viewer.h"
-#include "ncl_viewer.h"
 #include "spreadsheet.h"
 #include "pixel_viewer.h"
 
@@ -76,7 +75,6 @@ class Controller
         ncReader*   ncfile;
         Geometry*   geometry;
         ColorTable* colorTable;
-        NCL_Viewer* nclviewer;
         GL_Viewer*  glviewer;
         NVOptions*  nvoptions;
         SpreadSheet* spreadsheet;

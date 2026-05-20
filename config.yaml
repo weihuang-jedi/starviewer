@@ -1,6 +1,6 @@
 application:
   name: StarViewer
-  model: ufs
+  model: mpidemo
   version: 0.0.1
 
 earth:

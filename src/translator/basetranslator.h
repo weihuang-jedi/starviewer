@@ -104,7 +104,6 @@ class BaseTranslator : public QGLWidget
         void selectSphere(int f);
         void selectOnMap(int n);
         void selectBump(int f);
-        void selectNCL(int f);
         void selectSaveImage();
         void selectColorBar(int f);
         void selectFlat(int n);

@@ -32,8 +32,8 @@ void YAMLHandler::read_yaml()
     if (config["application"].IsDefined())
     {
         _name = config["application"]["name"].as<string>();
-        _model = config["application"]["name"].as<string>();
-        _version = config["application"]["name"].as<string>();
+        _model = config["application"]["model"].as<string>();
+        _version = config["application"]["version"].as<string>();
         cout << "name: " << _name << endl;
         cout << "model: " << _model << endl;
     }

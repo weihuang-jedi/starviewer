@@ -36,6 +36,9 @@
 #include "mpitranslator.h"
 //#include "hdftranslator.h"
 
+#include "modelparser.h"
+#include "modelparserFactory.h"
+
 #include <QMainWindow>
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -43,6 +46,8 @@ class QActionGroup;
 class QLabel;
 class QMenu;
 QT_END_NAMESPACE
+
+class MPIDEMOParser;
 
 class MainWindow : public QMainWindow
 {
@@ -121,6 +126,8 @@ class MainWindow : public QMainWindow
         SubsetWidget* subsetWidget;
         MinMaxWidget* minmaxWidget;
 
+	unique_ptr<ModelParser> myParser;
+
         int screenWidth;
         int screenHeight;
 
@@ -181,8 +188,8 @@ class MainWindow : public QMainWindow
 
 	string yamlfile;
 
-        void _setup_controlPanel();
-        void _setup_display();
+	void _setup_controlPanel();
+	void _setup_display();
 };
 #endif
 
