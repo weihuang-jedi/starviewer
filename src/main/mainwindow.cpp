@@ -15,19 +15,18 @@ MainWindow::MainWindow(string yamlfile)
     YAMLHandler *yamlHandler = new YAMLHandler(yamlfile.c_str());
     yamlHandler->read_yaml();
 
-    vector<string> datafiles = yamlHandler->get_datafiles();
-
-    NVOptions* nvoptions = new NVOptions();
+    nvoptions = new NVOptions();
 
     string tmpstr = yamlHandler->get_model();
-    // cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    // cout << "\ttmpstr: " << tmpstr << endl;
+    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\ttmpstr: " << tmpstr << endl;
     if(0 == tmpstr.compare("ufs"))
     {
         nvoptions->set_model(UFS);
         userConfig = ModelType::UFS;
         cout << "\tUFS: " << UFS << endl;
         cout << "\tModelType::UFS: " << ModelType::UFS << endl;
+        cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
     }
     else if(0 == tmpstr.compare("mpidemo"))
     {
@@ -50,7 +49,8 @@ MainWindow::MainWindow(string yamlfile)
         nvoptions->set_model(WRF);
     }
 
-    // cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
 
     nInstance = 0;
     numberOfWidget = 0;
@@ -76,15 +76,14 @@ MainWindow::MainWindow(string yamlfile)
     myParser = ModelParserFactory::createParser(userConfig);
 
     if (myParser) {
-        cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+        // cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
         // Polymorphism handles execution automatically
         myParser->parse(yamlHandler, nvoptions, colorTable,
 			controlPanel, locator, light);
-        cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+        // cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
         translator = myParser->get_translator();
-        cout << "\ttranslator: " << translator << endl;
-        setWindowTitle(tr("NV to demo MPI"));
-        cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+        // cout << "\ttranslator: " << translator << endl;
+        // cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
     } else {
         cerr << "Unknown Model." << endl;
     }
@@ -116,12 +115,19 @@ MainWindow::~MainWindow()
 void MainWindow::_setup()
 {
     // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
+    // cout << "\tUFS: " << UFS << endl;
+    // cout << "\tMPIDEMO: " << MPIDEMO << endl;
     switch(nvoptions->get_model())
     {
         case UFS:
+            // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+            setWindowTitle(tr("UFS MODEL"));
             ufs();
             break;
         case MPIDEMO:
+            // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+            setWindowTitle(tr("NV to demo MPI"));
             mpidemo();
             break;
       //case MPAS:
@@ -194,22 +200,22 @@ void MainWindow::_setup_controlPanel()
 void MainWindow::_setup_display()
 {
     int x, y;
-    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     x = screenWidth / 2;
     y = screenHeight / 2;
 
     setCentralWidget(display);
-    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     display->set_translator(translator);
-    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     display->setup();
-    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     display->move(x, y);
-    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     display->show();
-    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 /*
@@ -230,20 +236,8 @@ void MainWindow::wrf()
 
 void MainWindow::ufs()
 {
-    translator = myParser->get_translator();
-
-    setWindowTitle(tr("NV for UFS"));
-
-    _setup_controlPanel();
-
-    _setup_display();
-}
-
-void MainWindow::mpidemo()
-{
     cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-
-    setWindowTitle(tr("NV to demo MPI"));
+    setWindowTitle(tr("NV for UFS"));
     cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     _setup_controlPanel();
@@ -253,20 +247,14 @@ void MainWindow::mpidemo()
     cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
-/*
-void MainWindow::hdf()
+void MainWindow::mpidemo()
 {
-    hdf_translator = new HDFTranslator(colorTable, nvoptions,
-                                       fileName.toStdString(),
-                                       isFileList);
-    translator = hdf_translator;
-
-    setWindowTitle(tr("NV for HDF"));
+    setWindowTitle(tr("NV to demo MPI"));
 
     _setup_controlPanel();
+
     _setup_display();
 }
-*/
 
 void MainWindow::about()
 {

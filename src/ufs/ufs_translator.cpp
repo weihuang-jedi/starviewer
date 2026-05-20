@@ -28,9 +28,7 @@ UFSTranslator::UFSTranslator(ColorTable* ct, NVOptions* opt,
                              string flnm, bool isList, string mfnm, QWidget* parent)
                : BaseTranslator(ct, opt, parent)
 {
-  //cout << "\tEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t\tCAM-SE file: " << flnm << endl;
-  //cout << "\t\tCAM-SE mapping file: " << mfnm << endl;
+  //cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     _filename = flnm;
     _hasFileList = isList;
@@ -60,22 +58,22 @@ void UFSTranslator::setup()
 {
     int n;
 
-  //cout << "\tEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if(NULL != ufs_controller)
         delete ufs_controller;
 
   //if(_hasFileList)
   //{
-  //  //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //  //cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //    ufs_controller = new UFSController(colorTable, nvoptions, _filename.c_str(), _hasFileList);
   //}
   //else
   //{
-      //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+        cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
         ufs_controller = new UFSController(colorTable, nvoptions, _filename.c_str());
   //}
 
-  //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufs_controller->setup();
 
     _jpgNotSaved = true;
@@ -83,7 +81,7 @@ void UFSTranslator::setup()
 
     makeCurrent();
 
-  //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     geometry = ufs_controller->get_geometry();
 
     _varname = string("pressfc");
@@ -107,7 +105,7 @@ void UFSTranslator::setup()
 
   //cout << "\t_maxFile = " << _maxFile << endl;
   //cout << "\t_maxTime = " << _maxTime << endl;
-  //cout << "\tLeave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 /*******************************************************************/
@@ -116,6 +114,7 @@ void UFSTranslator::setup()
 //Show the image
 void UFSTranslator::show()
 {
+    cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //glShadeModel(GL_SMOOTH);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -146,6 +145,7 @@ void UFSTranslator::show()
 
     if(locator->on())
         writeLocatorMsg();
+    cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFSTranslator::createVarInfo()
@@ -434,5 +434,47 @@ void UFSTranslator::writeLocatorMsg()
 
 void UFSTranslator::paintGL()
 {
-    // Your OpenGL rendering routines (glClear, drawing grids, etc.) go here!
+    cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    set_modelview();
+
+    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+  //Clear screen and Z-buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  //Enable Z-buffering in OpenGL
+    glEnable(GL_DEPTH_TEST);
+
+    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+    // if(!locator)
+    // {
+    //     cout << "WARNING: locator is null. Skipping view configuration until initialized." << endl;
+    //     return; // Exits safely, preventing the segmentation fault!
+    // }
+
+    setViewOptions();
+
+    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+    setBackgroundColor();
+
+    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+    show();
+
+    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+    drawColorBar();
+
+    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+    // if(! nvoptions->get_cb(NV_PIXELON))
+    //     drawAxis();
+
+    if(nvoptions->get_cb(NV_STATUS_CHANGED))
+        save_status();
+
+  //Done
+    glFlush();
+    cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
