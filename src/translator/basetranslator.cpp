@@ -315,13 +315,6 @@ void BaseTranslator::resizeGL(int width, int height)
   //project();
 }
 
-void BaseTranslator::show()
-{
-    cout << "Functions: <" << __PRETTY_FUNCTION__
-         << ">, line: " << __LINE__
-         << ", file: <" << __FILE__ << ">" << endl;
-}
-
 //Set projection
 void BaseTranslator::set_modelview()
 {
@@ -1468,34 +1461,19 @@ void BaseTranslator::SaveJpg(int n)
 
 void BaseTranslator::set_locator(Locator* l)
 {
-    cout << "Enter Functions: <" << __PRETTY_FUNCTION__
-         << ">, line: " << __LINE__
-         << ", file: <" << __FILE__ << ">" << endl;
-
     locator = l;
 
-    locator->set_dim(dim);
-    locator->set_fovy(fovy);
-    locator->set_zfar(zFar);
-    locator->set_znear(zNear);
-
     if(locator)
-        cout << "l->on(): " << l->on() << endl;
-    else
-        cout << "l is null." << endl;
+    {
+        locator->set_dim(dim);
+        locator->set_fovy(fovy);
+        locator->set_zfar(zFar);
+        locator->set_znear(zNear);
+    }
 }
 
 void BaseTranslator::set_light(Light* l)
 {
-    cout << "Enter Functions: <" << __PRETTY_FUNCTION__
-         << ">, line: " << __LINE__
-         << ", file: <" << __FILE__ << ">" << endl;
-
     light = l;
-
-    if(light)
-        cout << "l->on(): " << l->on() << endl;
-    else
-        cout << "l is null." << endl;
 }
 

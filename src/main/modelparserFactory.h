@@ -15,10 +15,10 @@ public:
                 return unique_ptr<ModelParser>(new MPIDEMOParser());
             case ModelType::UFS:
                 return unique_ptr<ModelParser>(new UFSParser());
-            case ModelType::UFSINCR:
-                return unique_ptr<ModelParser>(new UFSINCRParser());
-            case ModelType::MPAS:
-                return unique_ptr<ModelParser>(new MPASParser());
+            // case ModelType::UFSINCR:
+            //     return unique_ptr<ModelParser>(new UFSINCRParser());
+            // case ModelType::MPAS:
+            //     return unique_ptr<ModelParser>(new MPASParser());
             default:
                 return nullptr;
         }

@@ -61,6 +61,11 @@ void MPITranslator::setup()
 //Show the image
 void MPITranslator::show()
 {
+    cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__
+         << ">, line: " << __LINE__ << endl;
+    cout << "locator->on(): " << locator->on() << endl;
+    cout << "light->on(): " << light->on() << endl;
+    
     glShadeModel(GL_SMOOTH);
 
   //Clear screen and Z-buffer

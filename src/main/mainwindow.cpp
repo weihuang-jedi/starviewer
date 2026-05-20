@@ -1,4 +1,5 @@
 #include "mpidemoparser.h"
+#include "ufsparser.h"
 #include "mainwindow.h"
 
 MainWindow::MainWindow(string yamlfile)
@@ -16,14 +17,11 @@ MainWindow::MainWindow(string yamlfile)
 
     vector<string> datafiles = yamlHandler->get_datafiles();
 
-    isFileList = false;
-    fileName = QString(datafiles[0].c_str());
-
     NVOptions* nvoptions = new NVOptions();
 
     string tmpstr = yamlHandler->get_model();
-    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\ttmpstr: " << tmpstr << endl;
+    // cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\ttmpstr: " << tmpstr << endl;
     if(0 == tmpstr.compare("ufs"))
     {
         nvoptions->set_model(UFS);
@@ -52,7 +50,7 @@ MainWindow::MainWindow(string yamlfile)
         nvoptions->set_model(WRF);
     }
 
-    cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     nInstance = 0;
     numberOfWidget = 0;
@@ -72,34 +70,35 @@ MainWindow::MainWindow(string yamlfile)
     controlPanel = new ControlWidget();
     display = new DisplayWidget();
 
-    cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    if(locator)
-        cout << "locator->on(): " << locator->on() << endl;
-    else
-        cout << "locator is null." << endl;
+    // cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     // Use the factory to generate the object
     myParser = ModelParserFactory::createParser(userConfig);
 
     if (myParser) {
+        cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
         // Polymorphism handles execution automatically
         myParser->parse(yamlHandler, nvoptions, colorTable,
 			controlPanel, locator, light);
-	translator = myParser->get_translator();
+        cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+        translator = myParser->get_translator();
+        cout << "\ttranslator: " << translator << endl;
         setWindowTitle(tr("NV to demo MPI"));
+        cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
     } else {
         cerr << "Unknown Model." << endl;
     }
 
     cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\ttranslator: " << translator << endl;
 
     // unordered_map<string, function<unique_ptr<ModelParser>()>> registry;
 
-    cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     _setup();
 
-    cout << "Leave MainWindow: file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave MainWindow: file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 MainWindow::~MainWindow()
@@ -116,7 +115,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::_setup()
 {
-    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     switch(nvoptions->get_model())
     {
         case UFS:
@@ -139,7 +138,7 @@ void MainWindow::_setup()
             break;
     }
 
-    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::contextMenuEvent(QContextMenuEvent *event)
@@ -154,7 +153,7 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
     menu.addAction(mpidemoAct);
 
     menu.exec(event->globalPos());
-    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::newFile()
@@ -163,7 +162,7 @@ void MainWindow::newFile()
 
 void MainWindow::open()
 {
-    fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
                                                     QDir::currentPath());
 
   //fprintf(stderr, "\nFile: %s, line: %d\n", __FILE__, __LINE__);
@@ -195,16 +194,22 @@ void MainWindow::_setup_controlPanel()
 void MainWindow::_setup_display()
 {
     int x, y;
+    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     x = screenWidth / 2;
     y = screenHeight / 2;
 
     setCentralWidget(display);
+    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     display->set_translator(translator);
+    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     display->setup();
+    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     display->move(x, y);
+    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     display->show();
+    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 /*
@@ -237,11 +242,12 @@ void MainWindow::ufs()
 void MainWindow::mpidemo()
 {
     cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-    translator = myParser->get_translator();;
 
     setWindowTitle(tr("NV to demo MPI"));
+    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     _setup_controlPanel();
+    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     _setup_display();
     cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
@@ -271,7 +277,7 @@ void MainWindow::about()
 
 void MainWindow::createActions()
 {
-    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     newAct = new QAction(tr("&New"), this);
     newAct->setShortcuts(QKeySequence::New);
     newAct->setStatusTip(tr("Create a new file"));
@@ -321,12 +327,12 @@ void MainWindow::createActions()
   //popAct->setStatusTip(tr("Try to activate 'pop' application"));
   //connect(popAct, SIGNAL(triggered()), this, SLOT(pop()));
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     mpidemoAct = new QAction(tr("&MPIDEMO"), this);
   //mpidemoAct->setShortcut(QKeySequence::Global);
     mpidemoAct->setStatusTip(tr("Try to activate 'mpidemo' application"));
     connect(mpidemoAct, SIGNAL(triggered()), this, SLOT(mpidemo()));
-    cout << "\t" << __PRETTY_FUNCTION__ << ", in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     animationAct = new QAction(tr("&Animation"), this);
   //animationAct->setShortcut(QKeySequence::Global);
@@ -387,12 +393,12 @@ void MainWindow::createActions()
   //lightAct->setShortcut(QKeySequence::Global);
     lightAct->setStatusTip(tr("Activate light"));
     connect(lightAct, SIGNAL(triggered()), this, SLOT(light_func()));
-    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::createMenus()
 {
-    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     fileMenu = menuBar()->addMenu(tr("&File"));
   //fileMenu->addAction(newAct);
 
@@ -431,7 +437,7 @@ void MainWindow::createMenus()
 
     helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(aboutAct);
-    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::animation_func()

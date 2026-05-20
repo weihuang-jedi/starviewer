@@ -25,7 +25,7 @@ string number2string(T n)
 
 //Constructor
 UFSTranslator::UFSTranslator(ColorTable* ct, NVOptions* opt,
-                                 string flnm, bool isList, string mfnm, QWidget* parent)
+                             string flnm, bool isList, string mfnm, QWidget* parent)
                : BaseTranslator(ct, opt, parent)
 {
   //cout << "\tEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -432,3 +432,7 @@ void UFSTranslator::writeLocatorMsg()
     emit locator_msg(_locatorinfo);
 }
 
+void UFSTranslator::paintGL()
+{
+    // Your OpenGL rendering routines (glClear, drawing grids, etc.) go here!
+}

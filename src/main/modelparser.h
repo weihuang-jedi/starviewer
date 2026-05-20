@@ -22,7 +22,8 @@ public:
     virtual void parse(YAMLHandler *yamlHandler, NVOptions* nvoptions,
                        ColorTable *colorTable, ControlWidget* controlPanel,
                        Locator* locator, Light* light) = 0; // Pure virtual function
-    BaseTranslator* get_translator() { return translator; };
+    virtual BaseTranslator* get_translator() = 0;
+    virtual void cleanup() = 0;
 
 protected:
     BaseTranslator* translator;

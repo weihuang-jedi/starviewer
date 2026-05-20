@@ -18,7 +18,9 @@ class MPIDEMOParser : public ModelParser
                    ColorTable *colorTable, ControlWidget* controlPanel,
                    Locator* locator, Light* light) override;
 
-        BaseTranslator* get_translator() { return mpidemo_translator; };
+        BaseTranslator* get_translator() override;
+
+	void cleanup() override;
 
     protected:
         MPITranslator* mpidemo_translator;

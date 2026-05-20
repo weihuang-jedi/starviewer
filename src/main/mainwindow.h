@@ -42,6 +42,7 @@ class QMenu;
 QT_END_NAMESPACE
 
 class MPIDEMOParser;
+class UFSParser;
 
 class MainWindow : public QMainWindow
 {
@@ -112,10 +113,6 @@ class MainWindow : public QMainWindow
 
         int screenWidth;
         int screenHeight;
-
-        QString fileName;
-        string camse_mappingFilename;
-        bool isFileList;
 
         void _setup();
 

@@ -25,7 +25,8 @@ find_library(GLU_LIBRARY NAMES GLU glu)
 add_executable(starviewer
     main.cpp
     mainwindow.cpp
-    mpidemoparser.cpp # <--- Make sure this is included!
+    mpidemoparser.cpp
+    ufsparser.cpp
     # ... other files
     ../ncreader/ncreader.cpp
     ../geometry/geometry.cpp

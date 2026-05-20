@@ -175,7 +175,7 @@ class BaseTranslator : public QGLWidget
         void resizeGL(int width, int height);  //  Resize widget
 
         virtual void paintGL() = 0;
-        virtual void show();                   //  Draw widget
+        virtual void show() = 0;
 
         NVOptions*  nvoptions;
         ColorTable* colorTable;
