@@ -5,10 +5,12 @@ void MPIDEMOParser::parse(YAMLHandler *yamlHandler, NVOptions* nvoptions,
 			  Locator* locator, Light* light)
 {
     cout << "MPI demo..." << endl;
-    string fileName = "notneed";
-    bool isFileList = false;
-    mpidemo_translator = new MPITranslator(colorTable, nvoptions,
-                                         fileName, isFileList);
+    mpidemo_translator = new MPITranslator(colorTable, nvoptions);
+
+    if(locator)
+        cout << "locator->on(): " << locator->on() << endl;
+    else
+        cout << "locator is null." << endl;
 
     mpidemo_translator->setup();
     mpidemo_translator->set_light(light);

@@ -65,11 +65,12 @@ BaseTranslator::BaseTranslator(ColorTable* ct, NVOptions* opt, QWidget* parent)
     }
 #endif
 
-#if 1
     _jpgNotSaved = true;
     _saveJpg = false;
     _startSave = false;
-#endif
+
+    locator = nullptr;
+    light = nullptr;
 
   //cout << "\tLeave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
@@ -312,37 +313,6 @@ void BaseTranslator::resizeGL(int width, int height)
 
   //Set projection
   //project();
-}
-
-void BaseTranslator::paintGL()
-{
-  //cout << "Functions: <" << __PRETTY_FUNCTION__
-  //     << ">, line: " << __LINE__
-  //     << ", file: <" << __FILE__ << ">" << endl;
-
-    set_modelview();
-
-  //Clear screen and Z-buffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  //Enable Z-buffering in OpenGL
-    glEnable(GL_DEPTH_TEST);
-
-    setViewOptions();
-
-    setBackgroundColor();
-
-    show();
-
-    drawColorBar();
-
-    if(! nvoptions->get_cb(NV_PIXELON))
-        drawAxis();
-
-    if(nvoptions->get_cb(NV_STATUS_CHANGED))
-        save_status();
-
-  //Done
-    glFlush();
 }
 
 void BaseTranslator::show()
@@ -662,8 +632,14 @@ void BaseTranslator::setViewOptions()
     float eZ = 7.5;
     double dimsize = 1.0;
 
-    if(locator->on())
+    cout << "Enter Functions: <" << __PRETTY_FUNCTION__
+         << ">, line: " << __LINE__
+         << ", file: <" << __FILE__ << ">" << endl;
+
+    if(locator && locator->on())
     {
+        cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
         if(nvoptions->get_cb(NV_ISPERSPECTIVE))
         {
             fovy = pow(0.9525, (double) locator->z()) * locator->get_fovy();
@@ -679,7 +655,11 @@ void BaseTranslator::setViewOptions()
             m_d_top_plane = dimsize;
         }
 
+        cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
         project();
+
+        cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
       //eZ = (0.99 * locator->z() + 1.0) * locator->get_height();
       //eZ = 4.0 * locator->get_height();
@@ -707,9 +687,13 @@ void BaseTranslator::setViewOptions()
              glRotated(eY, 1,0,0);
              glRotated(-eX, 0,1,0);
         }
+
+        cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     }
     else
     {
+        cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
         project();
 
         if(nvoptions->get_cb(NV_ISPERSPECTIVE))
@@ -719,13 +703,21 @@ void BaseTranslator::setViewOptions()
                       0.0, 1.0, 0.0);
         }
 
+        cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
         if(! nvoptions->get_cb(NV_PIXELON))
         {
           //Set rotation
             glRotated(xRot, 1,0,0);
             glRotated(zRot, 0,1,0);
         }
+
+        cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     }
+
+    cout << "Leave Functions: <" << __PRETTY_FUNCTION__
+         << ">, line: " << __LINE__
+         << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void BaseTranslator::drawAxis()
@@ -1472,5 +1464,38 @@ void BaseTranslator::SaveJpg(int n)
 
     sprintf(flnm, "img_%4.4d.png", n);
     SaveImage(flnm);
+}
+
+void BaseTranslator::set_locator(Locator* l)
+{
+    cout << "Enter Functions: <" << __PRETTY_FUNCTION__
+         << ">, line: " << __LINE__
+         << ", file: <" << __FILE__ << ">" << endl;
+
+    locator = l;
+
+    locator->set_dim(dim);
+    locator->set_fovy(fovy);
+    locator->set_zfar(zFar);
+    locator->set_znear(zNear);
+
+    if(locator)
+        cout << "l->on(): " << l->on() << endl;
+    else
+        cout << "l is null." << endl;
+}
+
+void BaseTranslator::set_light(Light* l)
+{
+    cout << "Enter Functions: <" << __PRETTY_FUNCTION__
+         << ">, line: " << __LINE__
+         << ", file: <" << __FILE__ << ">" << endl;
+
+    light = l;
+
+    if(light)
+        cout << "l->on(): " << l->on() << endl;
+    else
+        cout << "l is null." << endl;
 }
 

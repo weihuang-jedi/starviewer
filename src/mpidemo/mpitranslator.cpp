@@ -25,13 +25,9 @@ string number2string(T n)
 //
 //  Constructor
 //
-MPITranslator::MPITranslator(ColorTable* ct, NVOptions* opt,
-                             string flnm, bool isList, QWidget* parent)
+MPITranslator::MPITranslator(ColorTable* ct, NVOptions* opt, QWidget* parent)
              : BaseTranslator(ct, opt, parent)
 {
-    _filename = flnm;
-    _hasFileList = isList;
-
     _glbTime = 0;
     _maxTime = 100;
     _curFile = 0;
@@ -230,24 +226,6 @@ string* MPITranslator::get_ndvNames(int n)
     return varnames;
 }
 
-void MPITranslator::set_light(Light* l)
-{
-    light = l;
-  //radarcontroller->set_light(l);
-}
-
-void MPITranslator::set_locator(Locator* l)
-{
-    locator = l;
-
-    locator->set_dim(dim);
-    locator->set_fovy(fovy);
-    locator->set_zfar(zFar);
-    locator->set_znear(zNear);
-
-  //radarcontroller->set_locator(l);
-}
-
 void MPITranslator::writeLocatorMsg()
 {
      _locatorinfo = "Location lon="+QString::number(locator->x())
@@ -294,3 +272,55 @@ void MPITranslator::backFrame()
     updateGL();
 }
 
+void MPITranslator::paintGL()
+{
+    cout << "Enter Functions: <" << __PRETTY_FUNCTION__
+         << ">, line: " << __LINE__
+         << ", file: <" << __FILE__ << ">" << endl;
+
+    set_modelview();
+
+    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+  //Clear screen and Z-buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  //Enable Z-buffering in OpenGL
+    glEnable(GL_DEPTH_TEST);
+
+    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+    // if(!locator)
+    // {
+    //     cout << "WARNING: locator is null. Skipping view configuration until initialized." << endl;
+    //     return; // Exits safely, preventing the segmentation fault!
+    // }
+
+    setViewOptions();
+
+    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+    setBackgroundColor();
+
+    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+    show();
+
+    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+    drawColorBar();
+
+    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+    if(! nvoptions->get_cb(NV_PIXELON))
+        drawAxis();
+
+    if(nvoptions->get_cb(NV_STATUS_CHANGED))
+        save_status();
+
+  //Done
+    glFlush();
+
+    cout << "Leave Functions: <" << __PRETTY_FUNCTION__
+         << ">, line: " << __LINE__
+         << ", file: <" << __FILE__ << ">" << endl;
+}

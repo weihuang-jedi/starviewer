@@ -23,19 +23,16 @@ class MPITranslator : public BaseTranslator
     Q_OBJECT                                             //  Qt magic macro
     public:
         MPITranslator(ColorTable* ct, NVOptions* opt,
-                        string flnm, bool isList = false,
                         QWidget* parent=0);	//  Constructor
        ~MPITranslator();					//  Destructor
     
         void show();
         void setup();
-        void setfilename(string flnm) { _filename = flnm; };
-
-        void set_light(Light* l);
-        void set_locator(Locator* l);
 
         int get_ndv(int n);
         string* get_ndvNames(int n);
+
+	void paintGL();
 
     public slots:
         void select1dVar(const QString& str);

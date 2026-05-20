@@ -51,10 +51,6 @@ MainWindow::MainWindow(string yamlfile)
     {
         nvoptions->set_model(WRF);
     }
-    else if(0 == tmpstr.compare("test"))
-    {
-        nvoptions->set_model(TEST);
-    }
 
     cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
 
@@ -77,6 +73,10 @@ MainWindow::MainWindow(string yamlfile)
     display = new DisplayWidget();
 
     cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    if(locator)
+        cout << "locator->on(): " << locator->on() << endl;
+    else
+        cout << "locator is null." << endl;
 
     // Use the factory to generate the object
     myParser = ModelParserFactory::createParser(userConfig);
@@ -116,11 +116,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::_setup()
 {
-  //cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     switch(nvoptions->get_model())
     {
         case UFS:
-          //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
             ufs();
             break;
         case MPIDEMO:
@@ -135,34 +134,27 @@ void MainWindow::_setup()
       //case WRF:
       //    wrf();
       //    break;
-        case TEST:
-            test();
-            break;
         default:
-            general();
+            mpidemo();
             break;
     }
 
-  //cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 {
+    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     QMenu menu(this);
 
-    menu.addAction(generalAct);
   //menu.addAction(wrfAct);
     menu.addAction(ufsAct);
   //menu.addAction(mpasAct);
-  //menu.addAction(camseAct);
   //menu.addAction(popAct);
-  //menu.addAction(hdfAct);
-  //menu.addAction(radxAct);
-  //menu.addAction(vtkAct);
-    menu.addAction(testAct);
     menu.addAction(mpidemoAct);
 
     menu.exec(event->globalPos());
+    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::newFile()
@@ -215,19 +207,6 @@ void MainWindow::_setup_display()
     display->show();
 }
 
-void MainWindow::general()
-{
-    general_translator = new GeneralTranslator(colorTable, nvoptions,
-                                               fileName.toStdString(),
-                                               isFileList);
-    translator = general_translator;
-
-    setWindowTitle(tr("NV"));
-
-    _setup_controlPanel();
-    _setup_display();
-}
-
 /*
 void MainWindow::wrf()
 {
@@ -255,23 +234,9 @@ void MainWindow::ufs()
     _setup_display();
 }
 
-void MainWindow::test()
-{
-    test_translator = new TestTranslator(colorTable, nvoptions,
-                                         fileName.toStdString(),
-                                         isFileList);
-
-    translator = test_translator;
-
-    setWindowTitle(tr("NV for TEST"));
-
-    _setup_controlPanel();
-
-    _setup_display();
-}
-
 void MainWindow::mpidemo()
 {
+    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     translator = myParser->get_translator();;
 
     setWindowTitle(tr("NV to demo MPI"));
@@ -279,6 +244,7 @@ void MainWindow::mpidemo()
     _setup_controlPanel();
 
     _setup_display();
+    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 /*
@@ -305,6 +271,7 @@ void MainWindow::about()
 
 void MainWindow::createActions()
 {
+    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     newAct = new QAction(tr("&New"), this);
     newAct->setShortcuts(QKeySequence::New);
     newAct->setStatusTip(tr("Create a new file"));
@@ -339,11 +306,6 @@ void MainWindow::createActions()
     aboutAct->setStatusTip(tr("Show the application's About box"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
-    generalAct = new QAction(tr("&General"), this);
-  //generalAct->setShortcut(QKeySequence::Global);
-    generalAct->setStatusTip(tr("Try to activate 'general' application"));
-    connect(generalAct, SIGNAL(triggered()), this, SLOT(general()));
-
   //wrfAct = new QAction(tr("&WRF"), this);
   //wrfAct->setShortcut(QKeySequence::Global);
   //wrfAct->setStatusTip(tr("Try to activate 'wrf' application"));
@@ -354,49 +316,17 @@ void MainWindow::createActions()
     ufsAct->setStatusTip(tr("Try to activate 'ufs' application"));
     connect(ufsAct, SIGNAL(triggered()), this, SLOT(ufs()));
 
-  //mpasAct = new QAction(tr("&MPAS"), this);
-  //mpasAct->setShortcut(QKeySequence::Global);
-  //mpasAct->setStatusTip(tr("Try to activate 'mpas' application"));
-  //connect(mpasAct, SIGNAL(triggered()), this, SLOT(mpas()));
-
-  //camseAct = new QAction(tr("&CAMse"), this);
-  //camseAct->setShortcut(QKeySequence::Global);
-  //camseAct->setStatusTip(tr("Try to activate 'camse' application"));
-  //connect(camseAct, SIGNAL(triggered()), this, SLOT(camse()));
-
   //popAct = new QAction(tr("&POP"), this);
   //popAct->setShortcut(QKeySequence::Global);
   //popAct->setStatusTip(tr("Try to activate 'pop' application"));
   //connect(popAct, SIGNAL(triggered()), this, SLOT(pop()));
 
-#ifdef UseRADX
-    radxAct = new QAction(tr("&RADX"), this);
-  //radxAct->setShortcut(QKeySequence::Global);
-    radxAct->setStatusTip(tr("Try to activate 'radx' application"));
-    connect(radxAct, SIGNAL(triggered()), this, SLOT(radx()));
-#endif
-
-#if 0
-    vtkAct = new QAction(tr("&VTK"), this);
-  //vtkAct->setShortcut(QKeySequence::Global);
-    vtkAct->setStatusTip(tr("Try to activate 'vtk' application"));
-    connect(vtkAct, SIGNAL(triggered()), this, SLOT(vtk()));
-#endif
-
-    testAct = new QAction(tr("&TEST"), this);
-  //testAct->setShortcut(QKeySequence::Global);
-    testAct->setStatusTip(tr("Try to activate 'test' application"));
-    connect(testAct, SIGNAL(triggered()), this, SLOT(test()));
-
+    cout << "\t" << __PRETTY_FUNCTION__ << ", in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     mpidemoAct = new QAction(tr("&MPIDEMO"), this);
   //mpidemoAct->setShortcut(QKeySequence::Global);
     mpidemoAct->setStatusTip(tr("Try to activate 'mpidemo' application"));
     connect(mpidemoAct, SIGNAL(triggered()), this, SLOT(mpidemo()));
-
-  //hdfAct = new QAction(tr("&HDF"), this);
-  //hdfAct->setShortcut(QKeySequence::Global);
-  //hdfAct->setStatusTip(tr("Try to activate 'hdf' application"));
-  //connect(hdfAct, SIGNAL(triggered()), this, SLOT(hdf()));
+    cout << "\t" << __PRETTY_FUNCTION__ << ", in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     animationAct = new QAction(tr("&Animation"), this);
   //animationAct->setShortcut(QKeySequence::Global);
@@ -457,10 +387,12 @@ void MainWindow::createActions()
   //lightAct->setShortcut(QKeySequence::Global);
     lightAct->setStatusTip(tr("Activate light"));
     connect(lightAct, SIGNAL(triggered()), this, SLOT(light_func()));
+    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::createMenus()
 {
+    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     fileMenu = menuBar()->addMenu(tr("&File"));
   //fileMenu->addAction(newAct);
 
@@ -475,16 +407,10 @@ void MainWindow::createMenus()
     editMenu->addSeparator();
 
     appsMenu = menuBar()->addMenu(tr("&PlotTypes"));
-    appsMenu->addAction(generalAct);
   //appsMenu->addAction(wrfAct);
     appsMenu->addAction(ufsAct);
   //appsMenu->addAction(mpasAct);
-  //appsMenu->addAction(camseAct);
   //appsMenu->addAction(popAct);
-  //appsMenu->addAction(hdfAct);
-  //appsMenu->addAction(radxAct);
-  //appsMenu->addAction(vtkAct);
-    appsMenu->addAction(testAct);
     appsMenu->addAction(mpidemoAct);
     appsMenu->addSeparator();
 
@@ -505,6 +431,7 @@ void MainWindow::createMenus()
 
     helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(aboutAct);
+    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::animation_func()

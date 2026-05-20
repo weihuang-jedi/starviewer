@@ -56,8 +56,6 @@ target_include_directories(starviewer PUBLIC
   # ${CMAKE_SOURCE_DIR}/wrf
     ${CMAKE_SOURCE_DIR}/ufs
   # ${CMAKE_SOURCE_DIR}/pop
-  # ${CMAKE_SOURCE_DIR}/hdf
-    ${CMAKE_SOURCE_DIR}/test
     ${CMAKE_SOURCE_DIR}/mpidemo
     ${NetCDF_INCLUDE_DIRS}
 )
@@ -71,13 +69,10 @@ target_link_libraries(starviewer PRIVATE
     mpidemo         # Fixes mpidemo symbols
 
     # 2. Logic and Data Modules
-    test
   # wrf
     ufs
   # mpas
-  # camse
   # pop
-  # hdf
     view
     contour
     shared
