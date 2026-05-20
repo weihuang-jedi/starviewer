@@ -29,22 +29,4 @@ protected:
     BaseTranslator* translator;
 };
 
-class UFSINCRParser : public ModelParser {
-public:
-    void parse(YAMLHandler *yamlHandler, NVOptions* nvoptions,
-               ColorTable *colorTable, ControlWidget* controlPanel,
-               Locator* locator, Light* light) override {
-        cout << "Parsing UFS tiled grid..." << endl;
-    }
-};
-
-class MPASParser : public ModelParser {
-public:
-    void parse(YAMLHandler *yamlHandler, NVOptions* nvoptions,
-               ColorTable *colorTable, ControlWidget* controlPanel,
-               Locator* locator, Light* light) override {
-        cout << "Parsing unstructured MPAS geodesic Voronoi grid..." << endl;
-    }
-};
-
 #endif
