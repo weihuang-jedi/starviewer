@@ -24,16 +24,19 @@ MainWindow::MainWindow(string yamlfile)
     {
         nvoptions->set_model(UFS);
         userConfig = ModelType::UFS;
-        cout << "\tUFS: " << UFS << endl;
-        cout << "\tModelType::UFS: " << ModelType::UFS << endl;
+    }
+    else if(0 == tmpstr.compare("ufsincr"))
+    {
+        nvoptions->set_model(UFSINCR);
+        userConfig = ModelType::UFSINCR;
+        cout << "\tUFSINCR: " << UFSINCR << endl;
+        cout << "\tModelType::UFSINCR: " << ModelType::UFSINCR << endl;
         cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
     }
     else if(0 == tmpstr.compare("mpidemo"))
     {
         nvoptions->set_model(MPIDEMO);
         userConfig = ModelType::MPIDEMO;
-        cout << "\tMPIDEMO: " << MPIDEMO << endl;
-        cout << "\tModelType::MPIDEMO: " << ModelType::MPIDEMO << endl;
     }
     else if(0 == tmpstr.compare("pop"))
     {
@@ -70,25 +73,25 @@ MainWindow::MainWindow(string yamlfile)
     controlPanel = new ControlWidget();
     display = new DisplayWidget();
 
-    // cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     // Use the factory to generate the object
     myParser = ModelParserFactory::createParser(userConfig);
 
     if (myParser) {
-        // cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+        cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
         // Polymorphism handles execution automatically
         myParser->parse(yamlHandler, nvoptions, colorTable,
 			controlPanel, locator, light);
-        // cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+        cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
         translator = myParser->get_translator();
-        // cout << "\ttranslator: " << translator << endl;
-        // cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+        cout << "\ttranslator: " << translator << endl;
+        cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
     } else {
         cerr << "Unknown Model." << endl;
     }
 
-    cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
     cout << "\ttranslator: " << translator << endl;
 
     // unordered_map<string, function<unique_ptr<ModelParser>()>> registry;

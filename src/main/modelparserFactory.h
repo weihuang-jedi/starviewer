@@ -2,8 +2,9 @@
 #define MODEL_PARSER_FACTORY_H
 
 #include "nvoptions.h"
-#include "ufsparser.h"
 #include "mpidemoparser.h"
+#include "ufsparser.h"
+#include "ufsincrparser.h"
 #include <memory>  // Explicitly ensure smart pointers are available
 
 class ModelParserFactory {
@@ -15,8 +16,8 @@ public:
                 return unique_ptr<ModelParser>(new MPIDEMOParser());
             case ModelType::UFS:
                 return unique_ptr<ModelParser>(new UFSParser());
-            // case ModelType::UFSINCR:
-            //     return unique_ptr<ModelParser>(new UFSINCRParser());
+            case ModelType::UFSINCR:
+                return unique_ptr<ModelParser>(new UFSINCRParser());
             // case ModelType::MPAS:
             //     return unique_ptr<ModelParser>(new MPASParser());
             default:

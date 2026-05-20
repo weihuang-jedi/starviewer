@@ -1,6 +1,6 @@
 application:
   name: StarViewer
-  model: ufs
+  model: ufsincr
   version: 0.0.1
 
 earth:
