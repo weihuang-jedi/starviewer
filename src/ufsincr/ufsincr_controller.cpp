@@ -18,6 +18,7 @@ UFSINCRController::UFSINCRController(ColorTable *ct, NVOptions* opt,
     _ntim = 1;
 
     ncfile = new ncReader(fn);
+    ncfile->exploreFile();
 
     ufsincr_viewer = NULL;
 }

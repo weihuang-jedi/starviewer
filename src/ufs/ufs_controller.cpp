@@ -18,6 +18,7 @@ UFSController::UFSController(ColorTable *ct, NVOptions* opt,
     _ntim = 1;
 
     ncfile = new ncReader(fn);
+    ncfile->exploreFile();
 
     ufs_viewer = NULL;
 }
