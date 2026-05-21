@@ -4,18 +4,15 @@ void UFSINCRParser::parse(YAMLHandler *yamlHandler, NVOptions* nvoptions,
                           ColorTable *colorTable, ControlWidget* controlPanel,
                           Locator* locator, Light* light)
 {
-    vector<string> datafiles = yamlHandler->get_datafiles();
-    bool isList = false;
-    string flnm = datafiles[0];
-    string mfnm = "unknown";
+    vector<string> gridfiles = yamlHandler->get_gridfiles();
+    vector<string> incrfiles = yamlHandler->get_incrfiles();
 
     cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     cout << "Parsing UFSINCR lon-lat grid..." << endl;
-    cout << "flnm: " << flnm << endl;
     cout << "nvoptions->get_model(): " << nvoptions->get_model() << endl;
 
     ufsincr_translator = new UFSINCRTranslator(colorTable, nvoptions,
-                                               flnm, isList, mfnm);
+                                               gridfiles, incrfile);
 
     if(ufsincr_translator)
         cout << "ufsincr_translator: " << ufsincr_translator << endl;

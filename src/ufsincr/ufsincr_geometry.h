@@ -9,23 +9,13 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include <geometry.h>
-
 using namespace std;
 
-class UFSINCRGeometry : public Geometry {
+class UFSINCRGeometry
+{
     public:
-        UFSINCRGeometry();
+        UFSINCRGeometry(int nlon, int nlat, float* lon, float* lat);
        ~UFSINCRGeometry();
-
-
-        string get_name() { return name; };
-
-        void  set_name(string vn) { name = vn; };
-
-        void print();
-        void reset();
-        void reset_dimension();
 
         double* get_xSphere() { return _xSphere; };
         double* get_ySphere() { return _ySphere; };
@@ -34,15 +24,14 @@ class UFSINCRGeometry : public Geometry {
         double* get_xFlat() { return _xFlat; };
         double* get_yFlat() { return _yFlat; };
 
-      //UFSINCR
-        void setup();
+        float* get_geolon() { return _geolon; };
+        float* get_geolat() { return _geolat; };
 
-	void set_ntim(int v) { _ntim = v; };
-	int get_ntim() { return _ntim; };
-	int get_hlon() { return _hlon; };
+	int getNlon() { return _nlon; };
+	int getNlat() { return _nlat; };
 
     protected:
-        string name;
+        void _setup();
 
         double* _xSphere;
         double* _ySphere;
@@ -51,15 +40,11 @@ class UFSINCRGeometry : public Geometry {
         double* _xFlat;
         double* _yFlat;
 
-        float _hmax;
-        float _hmin;
+        float* _geolon;
+        float* _geolat;
 
-	int _hlon;
-
-    private:
-        void _set_default();
-
-	int _ntim;
+	int _nlon;
+	int _nlat;
 };
 #endif
 

@@ -37,7 +37,9 @@ UFSINCR2dViewer::UFSINCR2dViewer(ColorTable *ct, NVOptions* opt)
     current_timelevel = 0;
 }
 
-UFSINCR2dViewer::UFSINCR2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler)
+UFSINCR2dViewer::UFSINCR2dViewer(ColorTable *ct, NVOptions* opt,
+		                 const char* bmpflnm,
+				 vector<UFSIncrementReader*> nchandler)
 {
     colorTable = ct;
     nvoptions = opt;
@@ -49,7 +51,7 @@ UFSINCR2dViewer::UFSINCR2dViewer(ColorTable *ct, NVOptions* opt, const char* bmp
     _var = NULL;
 
     ncfile = nchandler;
-    earth = new Earth(bmpflnm, ncfile);
+    earth = new Earth(bmpflnm);
 
     nvoptions->set_xsec(0);
     nvoptions->set_ysec(0);
@@ -79,7 +81,7 @@ UFSINCR2dViewer::~UFSINCR2dViewer()
     delete texture1d;
 }
 
-void UFSINCR2dViewer::set_geometry(UFSINCRGeometry *gm)
+void UFSINCR2dViewer::set_geometry(vector<UFSINCRGeometry*> gm)
 {
     geometry = gm;
 
@@ -92,7 +94,7 @@ void UFSINCR2dViewer::setup(string vn, float *var)
 
     _varname  = vn;
     _var = var;
-    _nlev = geometry->get_nlev();
+    _nlev = ncfile[0]->getNz();
 
   //nvoptions->set_xsec(_nlon);
   //nvoptions->set_ysec(_nlat);
@@ -109,7 +111,7 @@ void UFSINCR2dViewer::setup(string vn, float *var)
 
 void UFSINCR2dViewer::reset()
 {
-    lister->reinitialize(_nlon+1, _nlat+1, geometry->get_nlev()+1);
+    lister->reinitialize(_nlon+1, _nlat+1, _nlev+1);
 }
 
 void UFSINCR2dViewer::_initialize()
@@ -121,21 +123,18 @@ void UFSINCR2dViewer::_initialize()
 
     previoustimelevel = -1;
 
-    _hlon = geometry->get_hlon();
-    _nlon = geometry->get_nlon();
-    _nlat = geometry->get_nlat();
-    _nlev = geometry->get_nlev();
+    _nlon = geometry[0]->getNlon();
+    _nlat = geometry[0]->getNlat();
+    _nlev = ncfile[0]->getZaxis();
 
-    _lon = geometry->get_lon();
-    _lat = geometry->get_lat();
-    _lev = geometry->get_lev();
+    _lon = geometry->get_geolon();
+    _lat = geometry->get_geolat();
+    // _lev = geometry->get_lev();
 
   //lister->reinitialize(361, 181, _nlev);
 
     _xFlat = geometry->get_xFlat();
     _yFlat = geometry->get_yFlat();
-
-    geometry->set_ntim(1);
 }
 
 void UFSINCR2dViewer::draw()
@@ -159,10 +158,10 @@ void UFSINCR2dViewer::draw()
     if(current_timelevel != previoustimelevel)
         reset();
     previoustimelevel = current_timelevel;
-    if(current_timelevel >= geometry->get_nt())
+    if(current_timelevel >= 1)
         return;
 
-    if((geometry->get_nlev() <= nvoptions->get_zsec()) && (0 > nvoptions->get_zsec()))
+    if((_nlev <= nvoptions->get_zsec()) && (0 > nvoptions->get_zsec()))
         return;
 
 #if 0

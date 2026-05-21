@@ -1,25 +1,29 @@
-#include "ufsgridreader.h"
+#include "ufsincrementreader.h"
 #include <cstring>
  
 // implementation of constructor method from ncgridreader.h
-UFSGridReader::UFSGridReader(const char* fname)
-	      :NCBaseReader(fname)
+UFSIncrementReader::UFSIncrementReader(const char* fname)
+             :NCBaseReader(fname)
 {
-  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     exploreFile();
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 } 
  
 // empty deconstructor method
-UFSGridReader::~UFSGridReader() {
-    if (_geolon)
-        delete[] _geolon;
-    if (_geolat)
-        delete[] _geolat;
+UFSIncrementReader::~UFSIncrementReader() {
+    if (_xaxis_1)
+        delete[] _xaxis_1;
+    if (_yaxis_1)
+        delete[] _yaxis_1;
+    if (_zaxis_1)
+        delete[] _zaxis_1;
+    if (_Time)
+        delete[] _Time;
     close();
 }
  
-void UFSGridReader::get_dim_info() {
+void UFSIncrementReader::get_dim_info() {
     int n = 0;
     char recname[NC_MAX_NAME+1];
     size_t length, recs;
@@ -46,13 +50,21 @@ void UFSGridReader::get_dim_info() {
         if (status != NC_NOERR) handle_error(status);
 	dim_names[n] = recname;
 
-	if (0 == strcmp(recname, "lon")) {
-            _nlon = _dimsize[n];
-            cout << " _nlon " << _nlon << endl;
+	if (0 == strcmp(recname, "xaxis_1")) {
+            _nx = _dimsize[n];
+            cout << " _nx " << _nx << endl;
 	}
-	else if (0 == strcmp(recname, "lat")) {
-            _nlat = _dimsize[n];
-            cout << " _nlat " << _nlat << endl;
+	else if (0 == strcmp(recname, "yaxis_1")) {
+            _ny = _dimsize[n];
+            cout << " _ny " << _ny << endl;
+	}
+	else if (0 == strcmp(recname, "zaxis_1")) {
+            _nz = _dimsize[n];
+            cout << " _nz " << _nz << endl;
+	}
+	else if (0 == strcmp(recname, "Time")) {
+            _nt = _dimsize[n];
+            cout << " _nt " << _nt << endl;
 	}
 
         cout << "  - " << dim_names[n] << ": " << dim_length[n] << endl;
@@ -60,7 +72,7 @@ void UFSGridReader::get_dim_info() {
     cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
-void UFSGridReader::get_var_info() {
+void UFSIncrementReader::get_var_info() {
     int n = 0; 
     int  var_id;
     nc_type var_type;
@@ -84,17 +96,17 @@ void UFSGridReader::get_var_info() {
 
 	var_names[n] = var_name;
         cout << "  - " << var_name << " Type: " << var_type << endl;
-        if (2 == var_ndims) {
-	    v2d_names[num_v2ds] = var_name;
-            num_v2ds++;
+        if (4 == var_ndims) {
+	    v3d_names[num_v3ds] = var_name;
+            num_v3ds++;
         }
     }
 
-    v2d_names.resize(num_v2ds);
+    v3d_names.resize(num_v3ds);
 }
 
 // Function to dimensions, and variables
-void UFSGridReader::exploreFile() {
+void UFSIncrementReader::exploreFile() {
     int i = 0;
     int j = 0;
     int n = 0;
@@ -107,14 +119,18 @@ void UFSGridReader::exploreFile() {
     if (status != NC_NOERR) handle_error(status);
 
     get_dim_info();
-    cout << "_nlon:" << _nlon << endl;
-    cout << "_nlat:" << _nlat << endl;
+    cout << "_nx:" << _nx << endl;
+    cout << "_ny:" << _ny << endl;
+    cout << "_nz:" << _nz << endl;
+    cout << "_nt:" << _nt << endl;
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     get_var_info();
 
     // Find element with var name
-    _geolon = getFloat("lon");
-    _geolat = getFloat("lat");
+    _xaxis_1 = getDouble("xaxis_1");
+    _yaxis_1 = getDouble("yaxis_1");
+    _zaxis_1 = getDouble("zaxis_1");
+    _Time = getDouble("Time");
     cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
  

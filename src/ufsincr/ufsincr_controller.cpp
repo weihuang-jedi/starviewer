@@ -1,24 +1,24 @@
 #include "ufsincr_controller.h"
 
 UFSINCRController::UFSINCRController(ColorTable *ct, NVOptions* opt,
-                                 const char *fn, bool isList)
+                                     vector<string> gridflnm, vector<string> incrflnm)
 {
-    string sfn = string(fn);
+    _ntiles = gridflnm.size();
 
     colorTable = ct;
     nvoptions = opt;
-    strcpy(_flnm, fn);
 
-    geometry = new UFSINCRGeometry();
-    geometry->set_name(sfn);
+    _gridfilenames = gridflnm;
+    _incrementfilenames = incrflnm;
+
+    ncgridfile.resize(_ntiles);
+    ncincrfile.resize(_ntiles);
+    geometry.resize(_ntiles);
 
     coastline = new CoastLine();
   
     _maxFile = 1;
     _ntim = 1;
-
-    ncfile = new ncReader(fn);
-    ncfile->exploreFile();
 
     ufsincr_viewer = NULL;
 }
@@ -26,13 +26,28 @@ UFSINCRController::UFSINCRController(ColorTable *ct, NVOptions* opt,
 UFSINCRController::~UFSINCRController()
 {
     delete coastline;
-    delete ncfile;
     
     if(NULL != ufsincr_viewer)
         delete ufsincr_viewer;
-    ufsincr_viewer = NULL;
     
-    delete geometry;
+    for(UFSGridReader* ncfl : ncgridfile) {
+        delete ncfl; // Safely deletes the concrete object on the heap
+    }
+
+    // Optional: clear the vector structure.
+    // Not strictly necessary here since the vector is about to die anyway.
+    ncgridfile.clear();
+
+    for(UFSIncrementReader* ncfl : ncincrfile) {
+        delete ncfl; // Safely deletes the concrete object on the heap
+    }
+
+    ncincrfile.clear();
+
+    for(UFSINCRGeometry* gm : geometry) {
+        delete gm; // Safely deletes the concrete object on the heap
+    }
+    geometry.clear();
 } 
 
 template<typename T>
@@ -61,51 +76,40 @@ void UFSINCRController::setup()
     strcpy(bmpflnm, path);
     strcat(bmpflnm, "/data/earth.bmp");
 
-  //_ntimes = ncfile->get_ntimes();
-
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\t_ntimes = " << _ntimes << endl;
 
   //_maxFile = get_nfiles();
     _maxFile = 1;
 
   //for(n = 0; n < _maxFile; ++n)
-  //    _maxTime += _ntimes[n];
     _maxTime = 1;
 
   //lister = new Lister[_maxTime];
 
-    geometry->set_nlon(ncfile->getNlon());
-    geometry->set_nlat(ncfile->getNlat());
-  //geometry->set_nlev(ncfile->getNlev());
-    geometry->set_nlev(1);
-  //geometry->set_ntim(_ntimes[0]);
-    geometry->set_ntim(_maxTime);
+    for(n = 0; n < _ntiles; ++n)
+    {
+        ncgridfile[n] = new UFSGridReader(_gridfilenames[n].c_str());
+        _nlon = ncgridfile[n]->getNlon();
+        _nlat = ncgridfile[n]->getNlat();
+        ncincrfile[n] = new UFSIncrementReader(_incrementfilenames[n].c_str());
+	_nlev = ncincrfile[n]->getNz();
+	_ntim = ncincrfile[n]->getNt();
+        geometry[n] = new UFSINCRGeometry(_nlon, _nlat,
+			                  ncgridfile[n]->getGeoLon(),
+			                  ncgridfile[n]->getGeoLat());
+    }
 
-    geometry->set_lon(ncfile->getLon());
-    geometry->set_lat(ncfile->getLat());
-    geometry->set_lev(ncfile->getPfull());
-    geometry->setup();
-
-    geometry->set_has1dLon(true);
-    geometry->set_has1dLat(true);
-
-    geometry->set_has2dLon(false);
-    geometry->set_has2dLat(false);
-
-  //_varname = string("sst");
-    _varname = string("hgtsfc");
+    _varname = string("T_inc");
 
     _sphere = false;
     _ball = false;
     _initialized = false;
     _tvalue = 0;
-    _time_interval = 128;
     _curFile = 0;
     _curTime = 0;
     _preFile = _curFile;
 
-    ufsincr_viewer = new UFSINCR2dViewer(colorTable, nvoptions, bmpflnm, ncfile);
+    ufsincr_viewer = new UFSINCR2dViewer(colorTable, nvoptions, bmpflnm, ncincrfile);
 
   //ufsincr_viewer->set_lister(&lister[0]);
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
@@ -262,57 +266,6 @@ vector<string> UFSINCRController::get_ndvNames(int n)
     else if (3 == n)
         varnames = ncfile->getV3dNames();
     return varnames;
-}
-
-string UFSINCRController::get_timestring()
-{
-    return ncfile->getTimeString();
-}
-
-void UFSINCRController::set_fileNtime(int nf, int nt)
-{
-    size_t gridsize = 1;
-
-  //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tcurFile: " << nf << ", curTime: " << nt << ", varname: <" << _varname << ">" << endl;
-  //cout << "\t_preFile: " << _preFile << ", _curFile: " << _curFile << endl;
-
-    _curFile = nf;
-    _curTime = nt;
-
-    if(_preFile != _curFile)
-    {
-        if(_initialized)
-            free(_value);
-
-        _value = ncfile->get_fv(_varname.c_str());
-        _title = _varname;
-
-        geometry->set_nlev(1);
-        geometry->set_ntim(_ntimes[_curFile]);
-
-        _minval = ufsincr_viewer->get_minval();
-        _maxval = ufsincr_viewer->get_maxval();
-
-        _initialized = true;
-    }
-
-    _preFile = _curFile;
-
-    gridsize = _curTime * geometry->get_nlon() * geometry->get_nlat() * geometry->get_nlev();
-
-    _set_glbTime();
-  //ufsincr_viewer->set_lister(&lister[_glbTime]);
-    ufsincr_viewer->setup(_varname, &_value[gridsize]);
-}
-
-void UFSINCRController::_set_glbTime()
-{
-    int n;
-
-    _glbTime = _curTime;
-    for(n = 0; n < _curFile; ++n)
-        _glbTime += _ntimes[n];
 }
 
 void UFSINCRController::set_locator(Locator* l)

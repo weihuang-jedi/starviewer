@@ -19,7 +19,6 @@
 #include <QString>
 #include <QTimer>
 
-#include "yamlhandler.h"
 #include "sliderNspin.h"
 #include "controlWidget.h"
 #include "basetranslator.h"
@@ -30,14 +29,13 @@ class UFSINCRTranslator : public BaseTranslator
     Q_OBJECT                                             //  Qt magic macro
     public:
         UFSINCRTranslator(ColorTable* ct, NVOptions* opt,
-                      string flnm, bool isList=false,
-                      string mfnm = "unknown", QWidget* parent=0);	//  Constructor
+                          vector<string> gridflnm, vector<string> incrflnm,
+			  QWidget* parent=0);	//  Constructor
        ~UFSINCRTranslator();				//  Destructor
     
         void paintGL();
         void show();
         void setup();
-        void setfilename(string flnm) { _filename = flnm; };
         void set_light(Light* l);
         void set_locator(Locator* l);
 
@@ -63,23 +61,16 @@ class UFSINCRTranslator : public BaseTranslator
 
     private:
         UFSINCRController* ufsincr_controller;
-        UFSINCRGeometry* geometry;
+
+	vector<string> _gridflnm;
+	vector<string> _incrflnm;
 
     private:
-#if 0
-        bool _jpgNotSaved;
-        bool _startSave;
-
-        void SaveJpg(int n);
-#endif
-
         void _initialize();
 
         void createVarInfo();
         void writeFrameInfo();
         void make_timeNpositionString();
-
-        vector<int> frameList;
 };
 #endif
 

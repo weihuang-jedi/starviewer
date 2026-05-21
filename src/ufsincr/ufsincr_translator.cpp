@@ -25,13 +25,14 @@ string number2string(T n)
 
 //Constructor
 UFSINCRTranslator::UFSINCRTranslator(ColorTable* ct, NVOptions* opt,
-                             string flnm, bool isList, string mfnm, QWidget* parent)
+                                     vector<string> gridflnm, vector<string> incrflnm,
+				     QWidget* parent)
                : BaseTranslator(ct, opt, parent)
 {
   //cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 
-    _filename = flnm;
-    _hasFileList = isList;
+    _gridflnm = gridflnm;
+    _incrflnm = incrflnm;
 
     nvoptions->set_xsec(-1);
     nvoptions->set_ysec(-1);
@@ -62,16 +63,8 @@ void UFSINCRTranslator::setup()
     if(NULL != ufsincr_controller)
         delete ufsincr_controller;
 
-  //if(_hasFileList)
-  //{
-  //  //cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //    ufsincr_controller = new UFSINCRController(colorTable, nvoptions, _filename.c_str(), _hasFileList);
-  //}
-  //else
-  //{
-        cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-        ufsincr_controller = new UFSINCRController(colorTable, nvoptions, _filename.c_str());
-  //}
+    cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    ufsincr_controller = new UFSINCRController(colorTable, nvoptions, _gridflnm, _incrflnm);
 
     cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufsincr_controller->setup();
@@ -82,7 +75,6 @@ void UFSINCRTranslator::setup()
     makeCurrent();
 
     cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    geometry = ufsincr_controller->get_geometry();
 
     _varname = string("pressfc");
 
@@ -92,7 +84,8 @@ void UFSINCRTranslator::setup()
     _maxval = ufsincr_controller->get_maxval();
 
     _title   = ufsincr_controller->get_title();
-    _timestr[0] = ufsincr_controller->get_timestring();
+    // _timestr[0] = ufsincr_controller->get_timestring();
+    _timestr[0] = "Analysis Time";
     _maxFile = ufsincr_controller->get_nfiles();
 
   //_nTimes  = ufsincr_controller->get_ntimes();
@@ -123,8 +116,6 @@ void UFSINCRTranslator::show()
         _glbTime = nvoptions->get_tsec();
 
         _set_current_time();
-
-        ufsincr_controller->set_fileNtime(_curFile, _curTime);
     }
 
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -152,9 +143,9 @@ void UFSINCRTranslator::createVarInfo()
 {
     _varinfo = QString(_varname.c_str()) + "\n"
              + QString(_timeinfo.c_str()) + "\n"
-             + "Dim nx="+QString::number(geometry->get_nlon())
-             + ", nlat=" + QString::number(geometry->get_nlat())
-             + ", nlev=" + QString::number(geometry->get_nlev())
+             + "Dim nx="+QString::number(ufsincr_controller->get_nlon())
+             + ", nlat=" + QString::number(ufsincr_controller->get_nlat())
+             + ", nlev=" + QString::number(ufsincr_controller->get_nlev())
              + "\nVar min=" + QString::number(ufsincr_controller->get_minval())
              + ", max=" + QString::number(ufsincr_controller->get_maxval());
 }
@@ -207,24 +198,6 @@ void UFSINCRTranslator::make_timeNpositionString()
         _position += ", Level: " + zstr;
 }
 
-#if 0
-void UFSINCRTranslator::SaveJpg(int n)
-{
-    bool withAlpha = true;
-  //Copy from OpenGL
-    QImage *image = new QImage(grabFrameBuffer(withAlpha));
-
-    char flnm[128];
-
-    if(image)
-    {
-        sprintf(flnm, "img%4.4d.jpg", n);
-        image->save(flnm);
-        delete image;
-    }
-}
-#endif
-
 //Select a variable
 void UFSINCRTranslator::select0dVar(const QString& str)
 {
@@ -245,14 +218,14 @@ void UFSINCRTranslator::select2dVar(const QString& str)
 
     ufsincr_controller->set1dvarname(_varname);
 
-    sliderNspinX->set_max(geometry->get_nlon());
+    sliderNspinX->set_max(ufsincr_controller->get_nlon());
     sliderNspinX->setValue(0);
-    sliderNspinY->set_max(geometry->get_nlat());
+    sliderNspinY->set_max(ufsincr_controller->get_nlat());
     sliderNspinY->set_min(0);
     sliderNspinY->setValue(0);
     sliderNspinZ->set_max(1);
     sliderNspinZ->setValue(0);
-    sliderNspinT->set_max(geometry->get_nt());
+    sliderNspinT->set_max(1);
     sliderNspinT->setValue(0);
 
     _minval = ufsincr_controller->get_minval();
@@ -274,11 +247,11 @@ void UFSINCRTranslator::select3dVar(const QString& str)
 
     ufsincr_controller->set3dvarname(_varname);
 
-    sliderNspinX->set_max(geometry->get_nlon());
+    sliderNspinX->set_max(ufsincr_controller->get_nlon());
     sliderNspinX->setValue(0);
-    sliderNspinY->set_max(geometry->get_nlat());
+    sliderNspinY->set_max(ufsincr_controller->get_nlat());
     sliderNspinY->set_min(0);
-    sliderNspinZ->set_max(geometry->get_nlev());
+    sliderNspinZ->set_max(ufsincr_controller->get_nlev());
     sliderNspinZ->setValue(0);
   //sliderNspinT->set_max(_ntim);
     sliderNspinT->set_max(1);
@@ -334,8 +307,8 @@ void UFSINCRTranslator::update_frame()
        _glbTime = 0;
 
     _set_current_time();
-    ufsincr_controller->set_fileNtime(_curFile, _curTime);
-    _timestr[0] = ufsincr_controller->get_timestring();
+    // _timestr[0] = ufsincr_controller->get_timestring();
+    _timestr[0] = "Analysis Time";
 
     if(nvoptions->get_cb(NV_ANIMATIONON))
     {
@@ -386,8 +359,8 @@ void UFSINCRTranslator::nextFrame()
        _glbTime = 0;
 
     _set_current_time();
-    ufsincr_controller->set_fileNtime(_curFile, _curTime);
-    _timestr[0] = ufsincr_controller->get_timestring();
+    // _timestr[0] = ufsincr_controller->get_timestring();
+    _timestr[0] = "Analysis Time";
 
     updateGL();
 }
@@ -399,8 +372,8 @@ void UFSINCRTranslator::backFrame()
        _glbTime += _maxTime;
 
     _set_current_time();
-    ufsincr_controller->set_fileNtime(_curFile, _curTime);
-    _timestr[0] = ufsincr_controller->get_timestring();
+    // _timestr[0] = ufsincr_controller->get_timestring();
+    _timestr[0] = "Analysis Time";
 
     updateGL();
 }

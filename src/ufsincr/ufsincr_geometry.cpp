@@ -1,9 +1,13 @@
 #include "ufsincr_geometry.h"
 
-UFSINCRGeometry::UFSINCRGeometry()
+UFSINCRGeometry::UFSINCRGeometry(int nlon, int nlat, float* lon, float* lat)
 {
-    _hlon = 0;
-    _set_default();
+    _nlon = nlon;
+    _nlat = nlat;
+    _geolon = lon;
+    _geolat = lat;
+
+    _setup();
 }
 
 UFSINCRGeometry::~UFSINCRGeometry()
@@ -19,17 +23,17 @@ UFSINCRGeometry::~UFSINCRGeometry()
         delete [] _xFlat;
     if(NULL != _yFlat)
         delete [] _yFlat;
-
-    if(NULL != _lon)
-        delete [] _lon;
-    if(NULL != _lat)
-        delete [] _lat;
-    if(NULL != _lev)
-        delete [] _lev;
 }
 
-void UFSINCRGeometry::_set_default()
+void UFSINCRGeometry::_setup()
 {
+    double pi = 3.1415926535897932;
+    double arc = pi / 180.0;
+    double delt;
+    int i, j;
+    size_t n;
+    size_t nsquare;
+
     if(NULL != _xSphere)
         delete [] _xSphere;
     if(NULL != _ySphere)
@@ -42,103 +46,49 @@ void UFSINCRGeometry::_set_default()
     if(NULL != _yFlat)
         delete [] _yFlat;
 
-    if(NULL != _lon)
-        delete [] _lon;
-    if(NULL != _lat)
-        delete [] _lat;
-    if(NULL != _lev)
-        delete [] _lev;
-
     _xSphere = NULL;
     _ySphere = NULL;
     _zSphere = NULL;
 
-    _lon = NULL;
-    _lat = NULL;
-    _lev = NULL;
-
     _xFlat = NULL;
     _yFlat = NULL;
-
-    reset();
-} 
-
-void UFSINCRGeometry::reset_dimension()
-{
-    _nlon = 1;
-    _nlat = 1;
-    _nlev = 1;
-}
-
-void UFSINCRGeometry::reset()
-{
-    reset_dimension();
-}
-
-void UFSINCRGeometry::print()
-{
-   cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-   cout << "Info of <" << name << ">:" << endl;
-}
-
-void UFSINCRGeometry::setup()
-{
-    double pi = 3.1415926535897932;
-    double arc = pi / 180.0;
-    double delt;
-    int i, j;
-    size_t n;
-    size_t nsquare;
 
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "_nlon = " << _nlon << endl;
   //cout << "_nlat = " << _nlat << endl;
-  //cout << "_nlev = " << _nlev << endl;
     nsquare = _nlon * _nlat;
     _xSphere = new double[nsquare];
     _ySphere = new double[nsquare];
     _zSphere = new double[nsquare];
-  //cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
-    _xFlat = new double[_nlon];
-    _yFlat = new double[_nlat];
+    _xFlat = new double[nsquare];
+    _yFlat = new double[nsquare];
 
   //cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    if(NULL == _lat) {
-	cout << "_lat in NULL. Stop" << endl;
+    if(NULL == _geolat) {
+	cout << "_geolat in NULL. Stop" << endl;
 	throw(errno);
 	exit (-1);
     }
-    if(NULL == _lon) {
-	cout << "_lon in NULL. Stop" << endl;
+    if(NULL == _geolon) {
+	cout << "_geolon in NULL. Stop" << endl;
 	throw(errno);
 	exit (-1);
     }
-    _hmax = 0.0;
-    _hmin = 1000000.0;
+
     for(j = 0; j < _nlat; ++j) {
-        _yFlat[j] = _lat[j]/180.0;
-      //cout << "j=" << j << ", lat[j]=" << _lat[j] <<", _yFlat[j]=" << _yFlat[j] << endl;
 	n = j*_nlon;
-        delt = cos(_lat[j] * arc);
+        delt = cos(_geolat[j] * arc);
         for(i = 0; i < _nlon; ++i)
         {
-            _xSphere[n+i] = delt * sin(_lon[i] * arc);
-            _ySphere[n+i] =        sin(_lat[j] * arc);
-            _zSphere[n+i] = delt * cos(_lon[i] * arc);
-        }
-    }
+            _xSphere[n+i] = delt * sin(_geolon[i] * arc);
+            _ySphere[n+i] =        sin(_geolat[j] * arc);
+            _zSphere[n+i] = delt * cos(_geolon[i] * arc);
 
-    _hlon = 0;
-    for(i = 0; i < _nlon; ++i)
-    {
-        _xFlat[i] = _lon[i]/180.0;
-        if(_xFlat[i] > 1.0) {
-           _xFlat[i] -= 2.0;
-	   if(0 == _hlon)
-	      _hlon = i;
-	}
-      //cout << "i=" << i << ", _lon=" << _lon[i] << ", _xFlat=" << _xFlat[i] << endl;
+            _xFlat[n+i] = _geolon[n+i]/180.0;
+            if(_xFlat[n+i] > 1.0)
+               _xFlat[n+i] -= 2.0;
+            _yFlat[n+i] = _geolat[n+i]/180.0;
+        }
     }
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }

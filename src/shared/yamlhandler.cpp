@@ -64,7 +64,7 @@ void YAMLHandler::read_yaml()
         cerr << "Warning: coastline_file is not defined." << endl;
     }
 
-    try
+    if (config["input"].IsDefined())
     {
         int n=0;
 
@@ -75,8 +75,32 @@ void YAMLHandler::read_yaml()
             ++n;
             cout << "Data file #" << n << ": " << df << endl;
         }
-    } catch (const YAML::TypedBadConversion<vector<string>>& e) {
-        cerr << "Error: 'input/data' is not a list of strings!" << endl;
+    }
+
+    if (config["grid"].IsDefined())
+    {
+        int n=0;
+
+        _gridfiles = config["grid"]["data"].as<vector<string>>();
+
+        for (const auto& df : _gridfiles)
+        {
+            ++n;
+            cout << "Grid file #" << n << ": " << df << endl;
+        }
+    }
+
+    if (config["increment"].IsDefined())
+    {
+        int n=0;
+
+        _incrfiles = config["increment"]["data"].as<vector<string>>();
+
+        for (const auto& df : _incrfiles)
+        {
+            ++n;
+            cout << "Increment file #" << n << ": " << df << endl;
+        }
     }
 }
 

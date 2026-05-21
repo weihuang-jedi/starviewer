@@ -13,7 +13,6 @@
 #include <QGLWidget>
 // #include <QOpenGLWidget>
 
-#include "ufsincr_geometry.h"
 #include "coastline.h"
 #include "colorTable.h"
 #include "texture1d.h"
@@ -22,7 +21,8 @@
 #include "lister.h"
 #include "locator.h"
 #include "nvoptions.h"
-#include "ncreader.h"
+#include "ufsincr_geometry.h"
+#include "ufsincrementreader.h"
 
 using namespace std;
 
@@ -40,7 +40,9 @@ class UFSINCR2dViewer : public QGLWidget
 
     public:
         UFSINCR2dViewer(ColorTable* ct, NVOptions* opt);
-        UFSINCR2dViewer(ColorTable* ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler);
+        UFSINCR2dViewer(ColorTable* ct, NVOptions* opt,
+			const char* bmpflnm,
+			vector<UFSIncrementReader*> nchandler);
        ~UFSINCR2dViewer();
 
         void draw();
@@ -49,7 +51,7 @@ class UFSINCR2dViewer : public QGLWidget
 
         void reset();
         void setup(string vn, float* var);
-        void set_geometry(UFSINCRGeometry* gm);
+        void set_geometry(vector<UFSINCRGeometry*> gm);
         void reset_texture1d(ColorTable *ct);
 
         void set_coastline(CoastLine* cl) { coastline = cl; };
@@ -63,10 +65,10 @@ class UFSINCR2dViewer : public QGLWidget
 
     protected:
         ColorTable* colorTable;
-        UFSINCRGeometry* geometry;
+        vector<UFSINCRGeometry*> geometry;
         CoastLine* coastline;
         Texture1d* texture1d;
-        ncReader* ncfile;
+        vector<UFSIncrementReader*> ncfile;
         Earth* earth;
         Lister* lister;
         Locator* locator;
@@ -77,8 +79,8 @@ class UFSINCR2dViewer : public QGLWidget
         int previoustimelevel;
         int current_timelevel;
 
-        double* _lon;
-        double* _lat;
+        float* _lon;
+        float* _lat;
         float* _lev;
 
         int _hlon;

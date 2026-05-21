@@ -5,7 +5,8 @@
 
 #include <iostream>
 
-#include "ncreader.h"
+#include "ufsgridreader.h"
+#include "ufsincrementreader.h"
 #include "ufsincr_viewer.h"
 #include "locator.h"
 
@@ -19,15 +20,16 @@ class UFSINCRController
 {
     public:
         UFSINCRController(ColorTable* ct, NVOptions* opt,
-                        const char* fn, bool isList = false);
+                          vector<string> gridflnm, vector<string> incrflnm);
        ~UFSINCRController();
 
         void setup();
 
-        int getNlon() { return geometry->get_nlon(); };
-        int getNlat() { return geometry->get_nlat(); };
-        int getNlev() { return geometry->get_nlev(); };
+        int getNlon() { return _nlon; };
+        int getNlat() { return _nlat; };
+        int getNlev() { return _nlev; };
         int getNtim() { return _ntim; };
+        int getNtiles() { return _ntiles; };
         int get_tl() { return _tvalue; };
 
         void set_colorTable(ColorTable* ct);
@@ -41,10 +43,9 @@ class UFSINCRController
 
         string get_varname() { return _varname; };
         string get_title() { return _title; };
-        string get_timestring();
 
       //Evaluator* get_evaluator() { return evaluator; };
-        UFSINCRGeometry* get_geometry() { return geometry; };
+        vector<UFSINCRGeometry*> get_geometry() { return geometry; };
 
         float get_minval() { return _minval; };
         float get_maxval() { return _maxval; };
@@ -56,30 +57,32 @@ class UFSINCRController
         int get_ndv(int n);
       //int get_nfiles() { return ncfile->get_nfiles(); };
         int get_nfiles() { return _maxFile; };
-        int* get_ntimes() { return _ntimes; };
+
+        int get_nlon() { return _nlon; };
+        int get_nlat() { return _nlat; };
+        int get_nlev() { return _nlev; };
 
         vector<string> get_ndvNames(int n);
-        void set_fileNtime(int nf, int nt);
 
     protected:
-        ncReader* ncfile;
-        UFSINCRGeometry* geometry;
+        vector<UFSGridReader*> ncgridfile;
+        vector<UFSIncrementReader*> ncincrfile;
+        vector<UFSINCRGeometry*> geometry;
         ColorTable* colorTable;
         NVOptions* nvoptions;
         CoastLine* coastline;
       //Lister* lister;
         Locator* locator;
 
-        char _flnm[NAME_LENG];
+        vector<string> _gridfilenames;
+        vector<string> _incrementfilenames;
 
         UFSINCR2dViewer* ufsincr_viewer;
       //UFSINCR3dViewer* ufsincr_3dviewer;
 
         int _max_frame;
-        int _time_interval;
 
         string _varname;
-        string _timestr;
         string _title;
 
         int _preFile;
@@ -89,7 +92,11 @@ class UFSINCRController
         int _glbTime;
         int _curTime;
         int _maxTime;
+        int _ntiles;
         int _ntim;
+        int _nlon;
+        int _nlat;
+        int _nlev;
 
         int _tvalue;
 
@@ -97,7 +104,6 @@ class UFSINCRController
         bool _ball;
         bool _initialized;
 
-        int* _ntimes;
         int* _grdsize;
         int* _varsize;
 
@@ -105,7 +111,6 @@ class UFSINCRController
         float _minval;
         float _maxval;
 
-        void _set_glbTime();
         template<typename T>
         void _print1d(T* var, int nl);
 };
