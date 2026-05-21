@@ -21,14 +21,15 @@ int main(int argc, char *argv[])
 
         transform(tmpstr.begin(), tmpstr.end(), tmpstr.begin(), ::tolower);
 
-      //cout << "\targv[" << n << "]: <" << argv[n] << ">" << endl;
-      //cout << "\ttmpstr: <" << tmpstr << ">" << endl;
+        // cout << "\targv[" << n << "]: <" << argv[n] << ">" << endl;
+        // cout << "\ttmpstr: <" << tmpstr << ">" << endl;
 
 	if(0 == tmpstr.compare("-yaml"))
         {
             ++n;
             yamlfile = argv[n];
 	    hasYAMLfile = true;
+            // cout << "\tyamlfile: <" << yamlfile << ">" << endl;
         }
         else
         {
@@ -39,7 +40,10 @@ int main(int argc, char *argv[])
     }
 
     if (hasYAMLfile)
+    {
+        // cout << "\tyamlfile: <" << yamlfile << ">" << endl;
         mainwindow = new MainWindow(yamlfile);
+    }
     else
     {
 	cout << "Usage: " << argv[0] << " -yaml yaml-file" << endl;

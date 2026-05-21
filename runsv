@@ -1,8 +1,54 @@
 #!/bin/bash
 
- set -x
+############################################################
+# Help                                                     #
+############################################################
+Help()
+{
+   # Display Help
+   echo "Syntax: scriptName [-m|h|v|V]"
+   echo "options:"
+   echo "h     Print this Help."
+   echo "m     model."
+   echo "v     Verbose mode."
+   echo "V     Print software version and exit."
+   echo
+}
 
- # Create a temporary wildcard cookie file
+# Set default model
+model=ufs
+
+############################################################
+# Process the input options. Add options as needed.        #
+############################################################
+# Get the options
+while getopts "h:m:vV" option; do
+   case $option in
+      h) # display Help
+         Help
+         exit 0;;
+      m) # Enter a name
+         model=$OPTARG
+	 ;;
+      v) # set verbose
+         set -x
+         ;;
+      V) # print software version
+         echo "StarViwer 0.0.1"
+         exit 0;;
+     \?) # Invalid option
+         echo "Error: Invalid option"
+         exit -1;;
+   esac
+done
+
+echo "model: $model"
+
+yamlfile="yamlfiles/${model}-config.yaml"
+
+echo "yamlfile: $yamlfile"
+
+# Create a temporary wildcard cookie file
  touch /scratch5/purged/Wei.Huang/tmp/xauth_wildcard
  xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | xauth -f /scratch5/purged/Wei.Huang/tmp/xauth_wildcard nmerge -
 
@@ -51,7 +97,7 @@ singularity exec --rocm \
     --env LIBGL_ALWAYS_INDIRECT=0 \
     "${CONTAINER_SIF}" \
     ${STARVIEWERHOME}/build/main/starviewer \
-    -yaml yamlfiles/mpidemo-config.yaml
+    -yaml "${yamlfile}"
 
 #   -yaml config.yaml
 

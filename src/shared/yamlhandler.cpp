@@ -23,7 +23,7 @@ YAMLHandler::~YAMLHandler()
 
 void YAMLHandler::read_yaml()
 {
-    ifstream fin("config.yaml"); // Create a named object (lvalue)
+    ifstream fin(_flnm.c_str()); // Create a named object (lvalue)
     if (fin.is_open())
     {
         config = YAML::Load(fin);
