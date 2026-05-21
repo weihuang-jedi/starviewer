@@ -625,13 +625,13 @@ void BaseTranslator::setViewOptions()
     float eZ = 7.5;
     double dimsize = 1.0;
 
-    cout << "Enter Functions: <" << __PRETTY_FUNCTION__
-         << ">, line: " << __LINE__
-         << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "Enter Functions: <" << __PRETTY_FUNCTION__
+    //      << ">, line: " << __LINE__
+    //      << ", file: <" << __FILE__ << ">" << endl;
 
     if(locator && locator->on())
     {
-        cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+        // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
         if(nvoptions->get_cb(NV_ISPERSPECTIVE))
         {
@@ -648,11 +648,11 @@ void BaseTranslator::setViewOptions()
             m_d_top_plane = dimsize;
         }
 
-        cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+        // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
         project();
 
-        cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+        // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
       //eZ = (0.99 * locator->z() + 1.0) * locator->get_height();
       //eZ = 4.0 * locator->get_height();
@@ -681,11 +681,11 @@ void BaseTranslator::setViewOptions()
              glRotated(-eX, 0,1,0);
         }
 
-        cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+        // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     }
     else
     {
-        cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+        // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
         project();
 
@@ -696,7 +696,7 @@ void BaseTranslator::setViewOptions()
                       0.0, 1.0, 0.0);
         }
 
-        cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+        // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
         if(! nvoptions->get_cb(NV_PIXELON))
         {
@@ -705,12 +705,12 @@ void BaseTranslator::setViewOptions()
             glRotated(zRot, 0,1,0);
         }
 
-        cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+        // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     }
 
-    cout << "Leave Functions: <" << __PRETTY_FUNCTION__
-         << ">, line: " << __LINE__
-         << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "Leave Functions: <" << __PRETTY_FUNCTION__
+    //      << ">, line: " << __LINE__
+    //      << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void BaseTranslator::drawAxis()
