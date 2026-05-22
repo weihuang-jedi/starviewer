@@ -59,14 +59,14 @@ void UFSINCRTranslator::setup()
 {
     int n;
 
-    cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if(NULL != ufsincr_controller)
         delete ufsincr_controller;
 
-    cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufsincr_controller = new UFSINCRController(colorTable, nvoptions, _gridflnm, _incrflnm);
 
-    cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufsincr_controller->setup();
 
     _jpgNotSaved = true;
@@ -74,11 +74,11 @@ void UFSINCRTranslator::setup()
 
     makeCurrent();
 
-    cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 
-    _varname = string("pressfc");
+    _varname = string("T_inc");
 
-    ufsincr_controller->set2dvarname(_varname);
+    ufsincr_controller->set3dvarname(_varname);
 
     _minval = ufsincr_controller->get_minval();
     _maxval = ufsincr_controller->get_maxval();
@@ -96,9 +96,7 @@ void UFSINCRTranslator::setup()
     if(_maxTime > 12)
         _maxTime = 12;
 
-  //cout << "\t_maxFile = " << _maxFile << endl;
-  //cout << "\t_maxTime = " << _maxTime << endl;
-    cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 /*******************************************************************/
@@ -118,13 +116,13 @@ void UFSINCRTranslator::show()
         _set_current_time();
     }
 
-  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufsincr_controller->draw();
 
     _varname = ufsincr_controller->get_varname();
 
-  //cout << "\t_varname : " << _varname << endl;
-  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t_varname : " << _varname << endl;
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     setLabelColor();
 
     make_timeNpositionString();
@@ -410,14 +408,14 @@ void UFSINCRTranslator::paintGL()
     cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     set_modelview();
 
-    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
   //Clear screen and Z-buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   //Enable Z-buffering in OpenGL
     glEnable(GL_DEPTH_TEST);
 
-    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     // if(!locator)
     // {
@@ -427,7 +425,7 @@ void UFSINCRTranslator::paintGL()
 
     setViewOptions();
 
-    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     setBackgroundColor();
 

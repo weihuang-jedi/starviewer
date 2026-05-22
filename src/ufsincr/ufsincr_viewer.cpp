@@ -43,13 +43,18 @@ UFSINCR2dViewer::UFSINCR2dViewer(ColorTable *ct, NVOptions* opt,
     colorTable = ct;
     nvoptions = opt;
 
+    cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     texture1d = new Texture1d();
     texture1d->set_colors(ct->get_clen(), ct->get_cmap());
     texture1d->set_name(ct->get_name());
 
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     ncfile = nchandler;
-    earth = new Earth(bmpflnm);
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tbmpflnm: <" << bmpflnm << ">" << endl;
+    strcpy(_bmpflnm, bmpflnm);
 
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     nvoptions->set_xsec(0);
     nvoptions->set_ysec(0);
     nvoptions->set_zsec(0);
@@ -59,10 +64,12 @@ UFSINCR2dViewer::UFSINCR2dViewer(ColorTable *ct, NVOptions* opt,
     _ntiles = ncfile.size();
 
     _var.resize(_ntiles);
+    pltvar.resize(_ntiles);
 
     oneover = 1.0 / 180.0;
     deg2rad = 3.1415926535897932 * oneover;
 
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     lister = new Lister();
     lister->setup(361, 181, 121);
 
@@ -70,6 +77,9 @@ UFSINCR2dViewer::UFSINCR2dViewer(ColorTable *ct, NVOptions* opt,
 
     previoustimelevel = -1;
     current_timelevel = 0;
+
+    earth = new Earth(_bmpflnm);
+    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 UFSINCR2dViewer::~UFSINCR2dViewer()
@@ -156,6 +166,11 @@ void UFSINCR2dViewer::draw()
 {
     size_t nsquare = _nlon * _nlat;
 
+    cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tearth: " << earth << endl;
+    if (nullptr == earth)
+       earth = new Earth(_bmpflnm);
+
     if(nvoptions->get_cb(NV_RESET))
     {
         nvoptions->set_cb(NV_RESET, false);
@@ -165,6 +180,7 @@ void UFSINCR2dViewer::draw()
             texture1d->set_opacity(1.0);
         reset();
     }
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     if(nvoptions->get_cb(NV_STATUS_CHANGED))
         reset();
@@ -179,6 +195,7 @@ void UFSINCR2dViewer::draw()
     if((_nlev <= nvoptions->get_zsec()) && (0 > nvoptions->get_zsec()))
         return;
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 #if 0
     if(nvoptions->get_cb(NV_HASMINMAX))
     {
@@ -191,28 +208,39 @@ void UFSINCR2dViewer::draw()
         _valmax = nvoptions->get_truemaximum();
     }
 #endif
-  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t" <<"current_timelevel: " << current_timelevel << endl;
-  //cout << "\t" <<"_nlev: " << _nlev << endl;
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\t" << "current_timelevel: " << current_timelevel << endl;
+    // cout << "\t" << "_nlon: " << _nlon << endl;
+    // cout << "\t" << "_nlat: " << _nlat << endl;
+    // cout << "\t" << "_nlev: " << _nlev << endl;
+    // cout << "\t" << "_ntiles: " << _ntiles << endl;
+    // cout << "\t" << "_var.size(): " << _var.size() << endl;
+    // cout << "\t" << "pltvar.size(): " << pltvar.size() << endl;
 
   //pltvar = &_var[current_timelevel * _nlon * _nlat];
     for(int n=0; n<_ntiles; ++n)
+    {
+        // cout << "\t" << "_var[" << n << "]: " << _var[n] << endl;
+        // cout << "\t" << "_var[" << n << "][0]: " << _var[n][0] << endl;
         pltvar[n] = &_var[n][current_timelevel * _nlon * _nlat * _nlev];
+    }
 
-  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     zcl = lister->get_zid(nvoptions->get_zsec());
     ycl = lister->get_yid(nvoptions->get_ysec());
     xcl = lister->get_xid(nvoptions->get_xsec());
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //makeCurrent();
   //Clear screen and Z-buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  //glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClearColor(0.0, 0.0, 0.0, 0.0);
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if(nvoptions->get_cb(NV_BUMPON))
     {
-  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+        cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
         if(nvoptions->get_cb(NV_FLATON))
         {
             if(zcl)
@@ -222,6 +250,7 @@ void UFSINCR2dViewer::draw()
         }
         else
         {
+        cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
             if(zcl)
                 glCallList(zcl);
             else
@@ -230,12 +259,13 @@ void UFSINCR2dViewer::draw()
     }
     else
     {
+        cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
         if(nvoptions->get_cb(NV_FLATON))
         {
             if(nvoptions->get_zsec() < _nlev)
             {
-              //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-              //cout << "\t call  _flatDisplay()" << endl;
+                cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+                cout << "\t call  _flatDisplay()" << endl;
                 if(zcl)
                     glCallList(zcl);
                 else
@@ -264,6 +294,8 @@ void UFSINCR2dViewer::draw()
         {
             if(nvoptions->get_zsec() < _nlev)
             {
+                cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+                cout << "\t call  _sphereDisplay()" << endl;
                 if(zcl)
                     glCallList(zcl);
                 else
@@ -289,6 +321,7 @@ void UFSINCR2dViewer::draw()
           //draw_sphere_grids();
         }
     }
+    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFSINCR2dViewer::_flatVertex(double x, double y, double z,
@@ -1099,6 +1132,19 @@ void UFSINCR2dViewer::_draw_cross(double radius)
         glVertex3f(x, y, z);
     }
     glEnd();
+}
+
+void UFSINCR2dViewer::initializeGL() 
+{
+    // 1. Initialize your OpenGL functions wrapper if using modern headers
+    initializeOpenGLFunctions();
+
+    // 2. Clear color and set initial states
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+    // 3. NOW it is safe to load texture graphics maps!
+    if (!earth)
+       earth = new Earth(_bmpflnm);
 }
 
 double UFSINCR2dViewer::_k2h(int k)

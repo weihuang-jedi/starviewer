@@ -1,5 +1,6 @@
 #include "mpidemoparser.h"
 #include "ufsparser.h"
+#include "ufsincrparser.h"
 #include "mainwindow.h"
 
 MainWindow::MainWindow(string yamlfile)
@@ -18,8 +19,8 @@ MainWindow::MainWindow(string yamlfile)
     nvoptions = new NVOptions();
 
     string tmpstr = yamlHandler->get_model();
-    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\ttmpstr: " << tmpstr << endl;
+    // cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\ttmpstr: " << tmpstr << endl;
     if(0 == tmpstr.compare("ufs"))
     {
         nvoptions->set_model(UFS);
@@ -29,9 +30,6 @@ MainWindow::MainWindow(string yamlfile)
     {
         nvoptions->set_model(UFSINCR);
         userConfig = ModelType::UFSINCR;
-        cout << "\tUFSINCR: " << UFSINCR << endl;
-        cout << "\tModelType::UFSINCR: " << ModelType::UFSINCR << endl;
-        cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
     }
     else if(0 == tmpstr.compare("mpidemo"))
     {
@@ -52,8 +50,8 @@ MainWindow::MainWindow(string yamlfile)
         nvoptions->set_model(WRF);
     }
 
-    cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
+    // cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
 
     nInstance = 0;
     numberOfWidget = 0;
@@ -73,26 +71,26 @@ MainWindow::MainWindow(string yamlfile)
     controlPanel = new ControlWidget();
     display = new DisplayWidget();
 
-    cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     // Use the factory to generate the object
     myParser = ModelParserFactory::createParser(userConfig);
 
     if (myParser) {
-        cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+        // cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
         // Polymorphism handles execution automatically
         myParser->parse(yamlHandler, nvoptions, colorTable,
 			controlPanel, locator, light);
-        cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+        // cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
         translator = myParser->get_translator();
-        cout << "\ttranslator: " << translator << endl;
-        cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+        // cout << "\ttranslator: " << translator << endl;
+        // cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
     } else {
         cerr << "Unknown Model." << endl;
     }
 
-    cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\ttranslator: " << translator << endl;
+    // cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\ttranslator: " << translator << endl;
 
     // unordered_map<string, function<unique_ptr<ModelParser>()>> registry;
 
@@ -118,15 +116,21 @@ MainWindow::~MainWindow()
 void MainWindow::_setup()
 {
     // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-    // cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
-    // cout << "\tUFS: " << UFS << endl;
+       cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
     // cout << "\tMPIDEMO: " << MPIDEMO << endl;
+    // cout << "\tUFS: " << UFS << endl;
+       cout << "\tUFSINCR: " << UFSINCR << endl;
     switch(nvoptions->get_model())
     {
         case UFS:
             // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
             setWindowTitle(tr("UFS MODEL"));
             ufs();
+            break;
+        case UFSINCR:
+            cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+            setWindowTitle(tr("UFS MODEL"));
+            ufsincr();
             break;
         case MPIDEMO:
             // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
@@ -157,6 +161,7 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 
   //menu.addAction(wrfAct);
     menu.addAction(ufsAct);
+    menu.addAction(ufsincrAct);
   //menu.addAction(mpasAct);
   //menu.addAction(popAct);
     menu.addAction(mpidemoAct);
@@ -237,22 +242,27 @@ void MainWindow::wrf()
 }
 */
 
-void MainWindow::ufs()
-{
-    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-    setWindowTitle(tr("NV for UFS"));
-    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-
-    _setup_controlPanel();
-    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-
-    _setup_display();
-    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-}
-
 void MainWindow::mpidemo()
 {
     setWindowTitle(tr("NV to demo MPI"));
+
+    _setup_controlPanel();
+
+    _setup_display();
+}
+
+void MainWindow::ufs()
+{
+    setWindowTitle(tr("NV for UFS"));
+
+    _setup_controlPanel();
+
+    _setup_display();
+}
+
+void MainWindow::ufsincr()
+{
+    setWindowTitle(tr("NV for UFS Tiled Increment"));
 
     _setup_controlPanel();
 
@@ -312,6 +322,11 @@ void MainWindow::createActions()
   //ufsAct->setShortcut(QKeySequence::Global);
     ufsAct->setStatusTip(tr("Try to activate 'ufs' application"));
     connect(ufsAct, SIGNAL(triggered()), this, SLOT(ufs()));
+
+    ufsincrAct = new QAction(tr("&UFS"), this);
+  //ufsincrAct->setShortcut(QKeySequence::Global);
+    ufsincrAct->setStatusTip(tr("Try to activate 'ufsincr' application"));
+    connect(ufsincrAct, SIGNAL(triggered()), this, SLOT(ufsincr()));
 
   //popAct = new QAction(tr("&POP"), this);
   //popAct->setShortcut(QKeySequence::Global);
@@ -406,6 +421,7 @@ void MainWindow::createMenus()
     appsMenu = menuBar()->addMenu(tr("&PlotTypes"));
   //appsMenu->addAction(wrfAct);
     appsMenu->addAction(ufsAct);
+    appsMenu->addAction(ufsincrAct);
   //appsMenu->addAction(mpasAct);
   //appsMenu->addAction(popAct);
     appsMenu->addAction(mpidemoAct);

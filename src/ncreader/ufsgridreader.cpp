@@ -5,9 +5,7 @@
 UFSGridReader::UFSGridReader(const char* fname)
 	      :NCBaseReader(fname)
 {
-  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     exploreFile();
-  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 } 
  
 // empty deconstructor method
@@ -23,15 +21,15 @@ void UFSGridReader::get_dim_info() {
     int n = 0;
     char recname[NC_MAX_NAME+1];
     size_t length, recs;
-    cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "ncid: " << ncid << endl;
-    cout << "num_dims: " << num_dims << endl;
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "ncid: " << ncid << endl;
+    // cout << "num_dims: " << num_dims << endl;
 
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     if (NULL == _dimsize) _dimsize = new int[num_dims];
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     // Get Dimensions
     dim_names.resize(num_dims);
     dim_length.resize(num_dims);
@@ -48,16 +46,16 @@ void UFSGridReader::get_dim_info() {
 
 	if (0 == strcmp(recname, "lon")) {
             _nlon = _dimsize[n];
-            cout << " _nlon " << _nlon << endl;
+            // cout << " _nlon " << _nlon << endl;
 	}
 	else if (0 == strcmp(recname, "lat")) {
             _nlat = _dimsize[n];
-            cout << " _nlat " << _nlat << endl;
+            // cout << " _nlat " << _nlat << endl;
 	}
 
-        cout << "  - " << dim_names[n] << ": " << dim_length[n] << endl;
+        // cout << "  - " << dim_names[n] << ": " << dim_length[n] << endl;
     }
-    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void UFSGridReader::get_var_info() {
@@ -74,7 +72,7 @@ void UFSGridReader::get_var_info() {
     v2d_names.resize(num_vars);
     // Get Variables
     var_names.resize(num_vars);
-    cout << " Variables (" << num_vars << "):" << endl;
+    // cout << " Variables (" << num_vars << "):" << endl;
     for (n = 0; n < num_vars; ++n) {
         status = nc_inq_var (ncid, n, 0, &var_type, &var_ndims, var_dimids, &var_natts);
         if (status != NC_NOERR) handle_error(status);
@@ -83,7 +81,7 @@ void UFSGridReader::get_var_info() {
         if (status != NC_NOERR) handle_error(status);
 
 	var_names[n] = var_name;
-        cout << "  - " << var_name << " Type: " << var_type << endl;
+        // cout << "  - " << var_name << " Type: " << var_type << endl;
         if (2 == var_ndims) {
 	    v2d_names[num_v2ds] = var_name;
             num_v2ds++;
@@ -100,21 +98,18 @@ void UFSGridReader::exploreFile() {
     int n = 0;
     size_t attr_len;
 
-    cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     num_grps = 1;
 
-    status = nc_inq_attlen(ncid, NC_GLOBAL, "ak", &attr_len);
-    if (status != NC_NOERR) handle_error(status);
-
     get_dim_info();
-    cout << "_nlon:" << _nlon << endl;
-    cout << "_nlat:" << _nlat << endl;
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "_nlon:" << _nlon << endl;
+    // cout << "_nlat:" << _nlat << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     get_var_info();
 
     // Find element with var name
-    _geolon = getFloat("lon");
-    _geolat = getFloat("lat");
-    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    _geolon = getFloat("geolon");
+    _geolat = getFloat("geolat");
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
  

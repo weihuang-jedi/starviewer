@@ -25,10 +25,11 @@
 #include "minmaxWidget.h"
 
 //#include "wrftranslator.h"
-#include "ufs_translator.h"
 //#include "mpastranslator.h"
 //#include "poptranslator.h"
 #include "mpitranslator.h"
+#include "ufs_translator.h"
+#include "ufsincr_translator.h"
 
 #include "modelparser.h"
 #include "modelparserFactory.h"
@@ -63,10 +64,11 @@ class MainWindow : public QMainWindow
 
       //Applications
       //void wrf();
-        void ufs();
       //void mpas();
       //void pop();
         void mpidemo();
+        void ufs();
+        void ufsincr();
 
         void animation_func();
         void inspector_func();
@@ -89,10 +91,10 @@ class MainWindow : public QMainWindow
 
         BaseTranslator* translator;
       //WRFTranslator* wrf_translator;
-        UFSTranslator* ufs_translator;
+      //UFSTranslator* ufs_translator;
       //POPTranslator* pop_translator;
       //MPASTranslator* mpas_translator;
-        MPITranslator* mpidemo_translator;
+      //MPITranslator* mpidemo_translator;
 
         ControlWidget* controlPanel;
         DisplayWidget* display;
@@ -138,6 +140,7 @@ class MainWindow : public QMainWindow
 
       //QAction *wrfAct;
         QAction *ufsAct;
+        QAction *ufsincrAct;
       //QAction *mpasAct;
       //QAction *popAct;
         QAction *mpidemoAct;

@@ -76,7 +76,7 @@ void UFSINCRController::setup()
     strcpy(bmpflnm, path);
     strcat(bmpflnm, "/data/earth.bmp");
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
   //_maxFile = get_nfiles();
     _maxFile = 1;
@@ -89,17 +89,24 @@ void UFSINCRController::setup()
     _varname = string("T_inc");
     _value.resize(_ntiles);
 
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    float* geolon;
+    float* geolat;
     for(n = 0; n < _ntiles; ++n)
     {
+        // cout << "\t_gridfilenames[" << n << "]: <" << _gridfilenames[n] << ">" << endl;
         ncgridfile[n] = new UFSGridReader(_gridfilenames[n].c_str());
         _nlon = ncgridfile[n]->getNlon();
         _nlat = ncgridfile[n]->getNlat();
+        // cout << "\t_nlon: " << _nlon << ", _nlat: " << _nlat << endl;
+        // cout << "\t_incrementfilenames[" << n << "]: <" << _incrementfilenames[n] << ">" << endl;
         ncincrfile[n] = new UFSIncrementReader(_incrementfilenames[n].c_str());
 	_nlev = ncincrfile[n]->getNz();
 	_ntim = ncincrfile[n]->getNt();
-        geometry[n] = new UFSINCRGeometry(_nlon, _nlat,
-			                  ncgridfile[n]->getGeoLon(),
-			                  ncgridfile[n]->getGeoLat());
+        // cout << "\t_nlev: " << _nlev << ", _ntim: " << _ntim << endl;
+	geolon = ncgridfile[n]->getGeoLon();
+	geolat = ncgridfile[n]->getGeoLat();
+        geometry[n] = new UFSINCRGeometry(_nlon, _nlat, geolon, geolat);
     }
 
     _update_value(_varname.c_str());
@@ -111,17 +118,17 @@ void UFSINCRController::setup()
     _curFile = 0;
     _curTime = 0;
     _preFile = _curFile;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     ufsincr_viewer = new UFSINCR2dViewer(colorTable, nvoptions, bmpflnm, ncincrfile);
 
   //ufsincr_viewer->set_lister(&lister[0]);
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tvarname:" << _varname << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tvarname:" << _varname << endl;
 
     _title = _varname;
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //geometry->print();
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     ufsincr_viewer->set_coastline(coastline);
     ufsincr_viewer->set_geometry(geometry);
@@ -130,6 +137,7 @@ void UFSINCRController::setup()
     ufsincr_viewer->setup(_varname, _value);
     _minval = ufsincr_viewer->get_minval();
     _maxval = ufsincr_viewer->get_maxval();
+    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void UFSINCRController::draw()

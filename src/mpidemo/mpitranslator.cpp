@@ -61,10 +61,10 @@ void MPITranslator::setup()
 //Show the image
 void MPITranslator::show()
 {
-    cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__
-         << ">, line: " << __LINE__ << endl;
-    cout << "locator->on(): " << locator->on() << endl;
-    cout << "light->on(): " << light->on() << endl;
+    // cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__
+    //      << ">, line: " << __LINE__ << endl;
+    // cout << "locator->on(): " << locator->on() << endl;
+    // cout << "light->on(): " << light->on() << endl;
     
     glShadeModel(GL_SMOOTH);
 
@@ -243,8 +243,8 @@ void MPITranslator::update_frame()
 {
     ++_glbTime;
 
-    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\t_glbTime = " << _glbTime << endl;
+    // cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\t_glbTime = " << _glbTime << endl;
  
     if(_glbTime >= _maxTime)
        _glbTime = 0;
@@ -279,20 +279,20 @@ void MPITranslator::backFrame()
 
 void MPITranslator::paintGL()
 {
-    cout << "Enter Functions: <" << __PRETTY_FUNCTION__
-         << ">, line: " << __LINE__
-         << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "Enter Functions: <" << __PRETTY_FUNCTION__
+    //      << ">, line: " << __LINE__
+    //      << ", file: <" << __FILE__ << ">" << endl;
 
     set_modelview();
 
-    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
   //Clear screen and Z-buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   //Enable Z-buffering in OpenGL
     glEnable(GL_DEPTH_TEST);
 
-    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     // if(!locator)
     // {
@@ -302,19 +302,19 @@ void MPITranslator::paintGL()
 
     setViewOptions();
 
-    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     setBackgroundColor();
 
-    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     show();
 
-    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     drawColorBar();
 
-    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     if(! nvoptions->get_cb(NV_PIXELON))
         drawAxis();
@@ -325,7 +325,7 @@ void MPITranslator::paintGL()
   //Done
     glFlush();
 
-    cout << "Leave Functions: <" << __PRETTY_FUNCTION__
-         << ">, line: " << __LINE__
-         << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "Leave Functions: <" << __PRETTY_FUNCTION__
+    //      << ">, line: " << __LINE__
+    //      << ", file: <" << __FILE__ << ">" << endl;
 }

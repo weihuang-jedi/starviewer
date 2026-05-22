@@ -35,7 +35,7 @@ using namespace std;
 #define NEAR_EAST_BOUNDARY	0.9999
 #define NEAR_WEST_BOUNDARY	-NEAR_EAST_BOUNDARY
 
-class UFSINCR2dViewer : public QGLWidget
+class UFSINCR2dViewer : public QGLWidget, protected QOpenGLFunctions
 {
 
     public:
@@ -55,6 +55,8 @@ class UFSINCR2dViewer : public QGLWidget
         void reset_texture1d(ColorTable *ct);
 
         void set_coastline(CoastLine* cl) { coastline = cl; };
+
+        void initializeGL();
 
       //void set_lister(Lister* l) { lister = l; };
 
@@ -138,6 +140,8 @@ class UFSINCR2dViewer : public QGLWidget
         void _draw_cross(double radius);
         double _k2h(int k);
         double _k2r(int k);
+
+	char _bmpflnm[1024];
 };
 #endif
 
