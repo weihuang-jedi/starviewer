@@ -32,6 +32,10 @@ add_executable(starviewer
     ../ncreader/ncreader.cpp
     ../geometry/geometry.cpp
     ../spreadsheet/spreadsheet.cpp
+    # ADD YOUR NEW NETCDF READERS HERE:
+    ../ncreader/ncbasereader.cpp
+    ../ncreader/ufsgridreader.cpp
+    ../ncreader/ufsincrementreader.cpp
 )
 
 # Allow other modules to find these headers

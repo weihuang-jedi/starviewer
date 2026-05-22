@@ -13,8 +13,6 @@ UFSINCR2dViewer::UFSINCR2dViewer(ColorTable *ct, NVOptions* opt)
     texture1d->set_colors(ct->get_clen(), ct->get_cmap());
     texture1d->set_name(ct->get_name());
 
-    _var = NULL;
- 
     earth = new Earth();
 
     nvoptions->set_xsec(0);
@@ -24,6 +22,7 @@ UFSINCR2dViewer::UFSINCR2dViewer(ColorTable *ct, NVOptions* opt)
     _nlon = 360;
     _nlat = 180;
     _nlev = 1;
+    _ntiles = 1;
 
     oneover = 1.0 / 180.0;
     deg2rad = 3.1415926535897932 * oneover;
@@ -48,8 +47,6 @@ UFSINCR2dViewer::UFSINCR2dViewer(ColorTable *ct, NVOptions* opt,
     texture1d->set_colors(ct->get_clen(), ct->get_cmap());
     texture1d->set_name(ct->get_name());
 
-    _var = NULL;
-
     ncfile = nchandler;
     earth = new Earth(bmpflnm);
 
@@ -59,6 +56,9 @@ UFSINCR2dViewer::UFSINCR2dViewer(ColorTable *ct, NVOptions* opt,
 
     _nlon = 360;
     _nlat = 180;
+    _ntiles = ncfile.size();
+
+    _var.resize(_ntiles);
 
     oneover = 1.0 / 180.0;
     deg2rad = 3.1415926535897932 * oneover;
@@ -88,7 +88,7 @@ void UFSINCR2dViewer::set_geometry(vector<UFSINCRGeometry*> gm)
     _initialize();
 }
 
-void UFSINCR2dViewer::setup(string vn, float *var)
+void UFSINCR2dViewer::setup(string vn, vector<float*> var)
 {
     reset();
 
@@ -125,16 +125,31 @@ void UFSINCR2dViewer::_initialize()
 
     _nlon = geometry[0]->getNlon();
     _nlat = geometry[0]->getNlat();
-    _nlev = ncfile[0]->getZaxis();
-
-    _lon = geometry->get_geolon();
-    _lat = geometry->get_geolat();
-    // _lev = geometry->get_lev();
+    _nlev = ncfile[0]->getNz();
 
   //lister->reinitialize(361, 181, _nlev);
 
-    _xFlat = geometry->get_xFlat();
-    _yFlat = geometry->get_yFlat();
+    _lon.resize(_ntiles);
+    _lat.resize(_ntiles);
+    _xFlat.resize(_ntiles);
+    _yFlat.resize(_ntiles);
+    _xSphere.resize(_ntiles);
+    _ySphere.resize(_ntiles);
+    _zSphere.resize(_ntiles);
+
+    for(n=0; n<_ntiles; ++n)
+    {
+        _lon[n] = geometry[n]->get_geolon();
+        _lat[n] = geometry[n]->get_geolat();
+        // _lev = geometry->get_lev();
+
+        _xFlat[n] = geometry[n]->get_xFlat();
+        _yFlat[n] = geometry[n]->get_yFlat();
+
+        _xSphere[n] = geometry[n]->get_xSphere();
+        _ySphere[n] = geometry[n]->get_ySphere();
+        _zSphere[n] = geometry[n]->get_zSphere();
+    }
 }
 
 void UFSINCR2dViewer::draw()
@@ -181,7 +196,8 @@ void UFSINCR2dViewer::draw()
   //cout << "\t" <<"_nlev: " << _nlev << endl;
 
   //pltvar = &_var[current_timelevel * _nlon * _nlat];
-    pltvar = &_var[current_timelevel * _nlon * _nlat * _nlev];
+    for(int n=0; n<_ntiles; ++n)
+        pltvar[n] = &_var[n][current_timelevel * _nlon * _nlat * _nlev];
 
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     zcl = lister->get_zid(nvoptions->get_zsec());
@@ -275,16 +291,31 @@ void UFSINCR2dViewer::draw()
     }
 }
 
-void UFSINCR2dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact)
+void UFSINCR2dViewer::_flatVertex(double x, double y, double z,
+                                  double fact)
 {
-    double phi = lat * deg2rad;
-    double dist = cos(phi);
-    double lamda = lon * deg2rad;
+    double alpha = 1.05 * fact;
+    if(alpha < 0.1)
+        alpha = 0.0;
+    else if(alpha > 1.0)
+        alpha = 1.0;
 
-    double x = dist * sin(lamda);
-    double z = dist * cos(lamda);
-    double y = sin(phi);
+    glColor4d(fact, fact, fact, alpha);
+    glNormal3d(x, y, z);
+    glVertex3d(x, y, z);
+}
 
+void UFSINCR2dViewer::_flatVertex_texture(double x, double y, double z,
+                                          double fact)
+{
+    glTexCoord1d(fact);
+    glNormal3f(x, y, z);
+    glVertex3d(x, y, z);
+}
+
+void UFSINCR2dViewer::_sphereVertex(double x, double y, double z,
+		                    double radius, double fact)
+{
     double alpha = 1.05 * fact;
     if(alpha < 0.1)
         alpha = 0.0;
@@ -296,26 +327,17 @@ void UFSINCR2dViewer::_lonlat2xyz(double lon, double lat, double radius, double 
     glVertex3d(x * radius, y * radius, z * radius);
 }
 
-void UFSINCR2dViewer::_lonlat2xyz_texture(double lon, double lat,
-		                      double radius, double fact)
+void UFSINCR2dViewer::_sphereVertex_texture(double x, double y, double z,
+		                            double radius, double fact)
 {
-    double phi = lat * deg2rad;
-    double dist = cos(phi);
-    double lamda = lon * deg2rad;
-
-    double x = dist * sin(lamda);
-    double z = dist * cos(lamda);
-    double y = sin(phi);
-
     glTexCoord1d(fact);
-
     glNormal3f(x, y, z);
     glVertex3d(x * radius, y * radius, z * radius);
 }
 
 void UFSINCR2dViewer::_sphereDisplay()
 {
-    int i, j, k, k1;
+    int i, j, k, k1, n;
     size_t mpos, npos;
 
     double sv = 1.0;
@@ -344,28 +366,36 @@ void UFSINCR2dViewer::_sphereDisplay()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   //#pragma omp parallel for
-    if(k < _nlev || 1 == _nlev) {
-    for(j = 1; j < _nlat; ++j)
+    if(k < _nlev || 1 == _nlev)
     {
-        mpos = (k*_nlat + (j-1))*_nlon;
-        npos = (k*_nlat + j)*_nlon;
-        glBegin(GL_QUAD_STRIP);
-        for(i = 0; i < _nlon; ++i)
+      for(n = 0; n < _ntiles; ++n)
+      {
+        for(j = 1; j < _nlat; ++j)
         {
-            fact = sv * (pltvar[npos+i] - _valmin);
-            _lonlat2xyz_texture(_lon[i], _lat[j], radius, fact);
+          mpos = (k*_nlat + (j-1))*_nlon;
+          npos = (k*_nlat + j)*_nlon;
+          glBegin(GL_QUAD_STRIP);
+          for(i = 0; i < _nlon; ++i)
+          {
+            fact = sv * (pltvar[n][npos+i] - _valmin);
+            _sphereVertex_texture(_xSphere[n][npos+i], _ySphere[n][npos+i],
+			          _zSphere[n][npos+i], radius, fact);
 
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            _lonlat2xyz_texture(_lon[i], _lat[j-1], radius, fact);
+            fact = sv * (pltvar[n][mpos+i] - _valmin);
+            _sphereVertex_texture(_xSphere[n][mpos+i], _ySphere[n][mpos+i],
+                                  _zSphere[n][mpos+i], radius, fact);
+          }
+          fact = sv * (pltvar[n][npos] - _valmin);
+          _sphereVertex_texture(_xSphere[n][npos], _ySphere[n][npos],
+                                _zSphere[n][npos], radius, fact);
+
+          fact = sv * (pltvar[n][mpos] - _valmin);
+          _sphereVertex_texture(_xSphere[n][mpos], _ySphere[n][mpos],
+                                _zSphere[n][mpos], radius, fact);
+          glEnd();
         }
-        fact = sv * (pltvar[npos] - _valmin);
-        _lonlat2xyz_texture(_lon[0], _lat[j], radius, fact);
-
-        fact = sv * (pltvar[mpos] - _valmin);
-        _lonlat2xyz_texture(_lon[0], _lat[j-1], radius, fact);
-        glEnd();
-    }
-    coastline->drawOnSphere(radius+0.01);
+      }
+      coastline->drawOnSphere(radius+0.01);
     }
 
     glDisable(GL_TEXTURE_1D);
@@ -375,7 +405,7 @@ void UFSINCR2dViewer::_sphereDisplay()
 
 void UFSINCR2dViewer::_flatDisplay()
 {
-    int i, j, k, k1;
+    int i, j, k, k1, n;
     size_t mpos, npos;
     double sv = 1.0;
     double fact;
@@ -400,37 +430,29 @@ void UFSINCR2dViewer::_flatDisplay()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glNormal3f(0.0, 0.0, -1.0);
 
-    if(k < _nlev || 1 == _nlev) {
-    for(j = 1; j < _nlat; ++j)
+    if(k < _nlev || 1 == _nlev)
     {
-      //cout << "\t_yFlat[" << j << "] = " << _yFlat[j] << endl;
-        mpos = (k*_nlat+(j-1))*_nlon;
-        npos = (k*_nlat+j)*_nlon;
-        glBegin(GL_QUAD_STRIP);
-        for(i = _hlon; i < _nlon; ++i)
+      for(n = 0; n < _ntiles; ++n)
+      {
+        for(j = 1; j < _nlat; ++j)
         {
-            fact = sv * (pltvar[npos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height);
+          mpos = (k*_nlat+(j-1))*_nlon;
+          npos = (k*_nlat+j)*_nlon;
+          glBegin(GL_QUAD_STRIP);
+          for(i = 0; i < _nlon; ++i)
+          {
+            fact = sv * (pltvar[n][npos+i] - _valmin);
+	    _flatVertex_texture(_xFlat[n][npos+i], _yFlat[n][npos+i],
+			        height, fact);
 
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j-1], height);
+            fact = sv * (pltvar[n][mpos+i] - _valmin);
+	    _flatVertex_texture(_xFlat[n][mpos+i], _yFlat[n][mpos+i],
+			        height, fact);
+          }
+          glEnd();
         }
-
-	for(i = 0; i < _hlon; ++i)
-        {
-            fact = sv * (pltvar[npos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height);
-
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j-1], height);
-        }
-        glEnd();
-    }
-    coastline->drawOnPlane(height+0.01);
+      }
+      coastline->drawOnPlane(height+0.01);
     }
 
     glDisable(GL_TEXTURE_1D);
@@ -438,17 +460,17 @@ void UFSINCR2dViewer::_flatDisplay()
     glEndList();
 }
 
-void UFSINCR2dViewer::_evaluate(float *var)
+void UFSINCR2dViewer::_evaluate(vector<float*> var)
 {
     size_t varsize;
+    size_t i = 0;
     size_t n = 0;
     float total;
 
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\t _varname: " << _varname << endl;
 
-    varsize = geometry->get_nlon() * geometry->get_nlat() * geometry->get_nlev();
-  //varsize = geometry->get_nlon() * geometry->get_nlat();
+    varsize = _nlon * _nlat * _nlev;
 
   //cout << "\tin <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\t_nlon =" << _nlon << endl;
@@ -456,27 +478,33 @@ void UFSINCR2dViewer::_evaluate(float *var)
   //cout << "\t_nlev =" << _nlev << endl;
   //cout << "\tvarsize =" << varsize << ", _nlon*_nlat=" << _nlon*_nlat << endl;
 
-    _valmax = var[0];
-    _valmin = var[0];
-    total = var[0];
+    _valmax = var[0][0];
+    _valmin = var[0][0];
+    total = var[0][0];
 
-    for(n = 1; n < varsize; ++n)
+    for(n = 0; n < _ntiles; ++n)
     {
-        if(_valmax < var[n])
+      for(i = 1; i < varsize; ++i)
+      {
+        if(_valmax < var[n][i])
         {
-           _valmax = var[n];
+           _valmax = var[n][i];
         }
-        if(_valmin > var[n])
+        if(_valmin > var[n][i])
         {
-           _valmin = var[n];
+           _valmin = var[n][i];
         }
-        total += var[n];
+        total += var[n][i];
+      }
     }
 
     if(1.0e-10 > (_valmax - _valmin))
        _valmax += 1.0e-10;
 
     _valavg = total / varsize;
+    _scalelength = _valmax;
+    if(_scalelength > abs(_valmin))
+	_scalelength = abs(_valmin);
 
   //cout << "\t_valmin = " << _valmin << ", _valavg = " << _valavg << ", _valmax = " << _valmax << endl;
 
@@ -487,37 +515,44 @@ void UFSINCR2dViewer::_evaluate(float *var)
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
-void UFSINCR2dViewer::_adjust_minmax(float *var)
+void UFSINCR2dViewer::_adjust_minmax(vector<float*> var)
 {
     size_t varsize;
+    size_t i = 0;
     size_t n = 0;
     float total;
 
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
-    varsize = geometry->get_nlon() * geometry->get_nlat();
+    varsize = _nlon * _nlat;
 
-    _valmax = var[0];
-    _valmin = var[0];
-    total = var[0];
+    _valmax = var[0][0];
+    _valmin = var[0][0];
+    total = var[0][0];
 
-    for(n = 1; n < varsize; ++n)
+    for(n = 0; n < _ntiles; ++n)
     {
-        if(_valmax < var[n])
+      for(i = 1; i < varsize; ++i)
+      {
+        if(_valmax < var[n][i])
         {
-           _valmax = var[n];
+           _valmax = var[n][i];
         }
-        if(_valmin > var[n])
+        if(_valmin > var[n][i])
         {
-           _valmin = var[n];
+           _valmin = var[n][i];
         }
-        total += var[n];
+        total += var[n][i];
+      }
     }
 
     if(1.0e-10 > (_valmax - _valmin))
        _valmax += 1.0e-10;
 
     _valavg = total / varsize;
+    _scalelength = _valmax;
+    if(_scalelength > abs(_valmin))
+	_scalelength = abs(_valmin);
 
   //cout << "\t_valmin = " << _valmin << ", _valavg = " << _valavg << ", _valmax = " << _valmax << endl;
 
@@ -554,7 +589,7 @@ void UFSINCR2dViewer::reset_texture1d(ColorTable *ct)
 
 void UFSINCR2dViewer::draw_sphere_grids()
 {
-    int i, j, k;
+    int i, j, k, n;
     size_t npos;
 
     double radius = 1.001;
@@ -563,10 +598,6 @@ void UFSINCR2dViewer::draw_sphere_grids()
 
   //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\tncenters = " << ncenters << endl;
-
-    _xSphere = geometry->get_xSphere();
-    _ySphere = geometry->get_ySphere();
-    _zSphere = geometry->get_zSphere();
 
     k = nvoptions->get_zsec();
     radius = _k2r(k);
@@ -581,25 +612,27 @@ void UFSINCR2dViewer::draw_sphere_grids()
     glLineWidth(line_width);
 
   //#pragma omp parallel for
-    for(j = 0; j < _nlat; ++j)
+    for(n = 0; n < _ntiles; ++n)
     {
+      for(j = 0; j < _nlat; ++j)
+      {
         npos = j*_nlon;
 
         glBegin(GL_LINE_STRIP);
         for(i = 0; i < _nlon; ++i)
         {
-            glVertex3d(radius * _xSphere[npos+i], radius * _ySphere[npos+i], radius * _zSphere[npos+i]);
+            glVertex3d(radius * _xSphere[n][npos+i], radius * _ySphere[n][npos+i], radius * _zSphere[n][npos+i]);
         }
         glEnd();
+      }
     }
-    glEnd();
 
     glPopMatrix();
 }
 
 void UFSINCR2dViewer::draw_plane_grids()
 {
-    int i, j;
+    int i, j, n;
     size_t npos;
 
     double height = 0.01;
@@ -618,15 +651,18 @@ void UFSINCR2dViewer::draw_plane_grids()
 
     glLineWidth(line_width);
 
-    for(j = 0; j < _nlat; ++j)
+    for(n = 0; n < _ntiles; ++n)
     {
+      for(j = 0; j < _nlat; ++j)
+      {
         npos = j*_nlon;
         glBegin(GL_LINE_STRIP);
         for(i = 0; i < _nlon; ++i)
         {
-            glVertex3d(_xFlat[i], _yFlat[j], height);
+            glVertex3d(_xFlat[n][npos+i], _yFlat[n][npos+i], height);
         }
         glEnd();
+      }
     }
 
     glPopMatrix();
@@ -634,15 +670,15 @@ void UFSINCR2dViewer::draw_plane_grids()
 
 void UFSINCR2dViewer::_display_Yflat_plane(int ys)
 {
-    int i, k;
+    int i, k, n;
     size_t mpos, npos;
     double fact;
     double sv = 1.0;
     vector<double> height(_nlev);
     int j = ys-1;
 
-    if((-85.0 > _lat[j]) || (85.0 < _lat[j]))
-       return;
+    // if((-85.0 > _lat[j]) || (85.0 < _lat[j]))
+    //    return;
 
     for(k = 0; k < _nlev; ++k)
         height[k] = _k2h(k);
@@ -662,34 +698,26 @@ void UFSINCR2dViewer::_display_Yflat_plane(int ys)
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
     glNormal3f(0.0, 0.0, -1.0);
 
-    for(k = 1; k < _nlev; ++k)
+    for(n = 0; n < _ntiles; ++n)
     {
+      for(k = 1; k < _nlev; ++k)
+      {
         mpos = ((k-1)*_nlat+j)*_nlon;
         npos = (k*_nlat+j)*_nlon;
 
         glBegin(GL_QUAD_STRIP);
-        for(i = _hlon; i < _nlon; ++i)
+        for(i = 0; i < _nlon; ++i)
         {
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height[k-1]);
+            fact = sv * (pltvar[n][mpos+i] - _valmin);
+	    _flatVertex_texture(_xFlat[n][mpos+i], _yFlat[n][mpos+i],
+			        height[k-1], fact);
 
-            fact = sv * (pltvar[npos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height[k]);
-        }
-
-	for(i = 0; i < _hlon; ++i)
-        {
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height[k-1]);
-
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height[k]);
+            fact = sv * (pltvar[n][npos+i] - _valmin);
+	    _flatVertex_texture(_xFlat[n][npos+i], _yFlat[n][npos+i],
+			        height[k], fact);
         }
         glEnd();
+      }
     }
 
     glDisable(GL_TEXTURE_1D);
@@ -699,7 +727,7 @@ void UFSINCR2dViewer::_display_Yflat_plane(int ys)
 
 void UFSINCR2dViewer::_sphereXplane(int xs)
 {
-    int j, k;
+    int j, k, n;
     size_t mpos, npos;
     double fact;
     double sv = 1.0;
@@ -728,21 +756,26 @@ void UFSINCR2dViewer::_sphereXplane(int xs)
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
   //#pragma omp parallel for
-    for(k = 1; k < _nlev; ++k)
+    for(n = 0; n < _ntiles; ++n)
     {
+      for(k = 1; k < _nlev; ++k)
+      {
         glBegin(GL_QUAD_STRIP);
         for(j = 0; j < _nlat; ++j)
         {
             mpos = ((k-1)*_nlat + j)*_nlon;
             npos = (k*_nlat + j)*_nlon;
 
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            _lonlat2xyz_texture(_lon[i], _lat[j], radius[k-1], fact);
+            fact = sv * (pltvar[n][mpos+i] - _valmin);
+            _sphereVertex_texture(_xSphere[n][npos+i], _ySphere[n][npos+i],
+                                  _zSphere[n][npos+i], radius[k], fact);
 
-            fact = sv * (pltvar[npos+i] - _valmin);
-            _lonlat2xyz_texture(_lon[i], _lat[j], radius[k], fact);
+            fact = sv * (pltvar[n][npos+i] - _valmin);
+            _sphereVertex_texture(_xSphere[n][mpos+i], _ySphere[n][mpos+i],
+                                  _zSphere[n][mpos+i], radius[k-1], fact);
         }
         glEnd();
+      }
     }
 
     glDisable(GL_TEXTURE_1D);
@@ -752,7 +785,7 @@ void UFSINCR2dViewer::_sphereXplane(int xs)
 
 void UFSINCR2dViewer::_sphereYplane(int ys)
 {
-    int i, k;
+    int i, k, n;
     size_t mpos, npos;
     double fact;
     double sv = 1.0;
@@ -780,25 +813,32 @@ void UFSINCR2dViewer::_sphereYplane(int ys)
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
   //#pragma omp parallel for
-    for(k = 1; k < _nlev; ++k)
+    for(n = 0; n < _ntiles; ++n)
     {
+      for(k = 1; k < _nlev; ++k)
+      {
         mpos = ((k-1)*_nlat + j)*_nlon;
         npos = (k*_nlat + j)*_nlon;
         glBegin(GL_QUAD_STRIP);
         for(i = 0; i < _nlon; ++i)
         {
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            _lonlat2xyz_texture(_lon[i], _lat[j], radius[k-1], fact);
+            fact = sv * (pltvar[n][npos+i] - _valmin);
+            _sphereVertex_texture(_xSphere[n][npos+i], _ySphere[n][npos+i],
+                                  _zSphere[n][npos+i], radius[k], fact);
 
-            fact = sv * (pltvar[npos+i] - _valmin);
-            _lonlat2xyz_texture(_lon[i], _lat[j], radius[k], fact);
+            fact = sv * (pltvar[n][mpos+i] - _valmin);
+            _sphereVertex_texture(_xSphere[n][mpos+i], _ySphere[n][mpos+i],
+                                  _zSphere[n][mpos+i], radius[k], fact);
         }
-        fact = sv * (pltvar[mpos] - _valmin);
-        _lonlat2xyz_texture(_lon[0], _lat[j], radius[k-1], fact);
+        fact = sv * (pltvar[n][npos] - _valmin);
+        _sphereVertex_texture(_xSphere[n][npos], _ySphere[n][npos],
+                                  _zSphere[n][npos], radius[k], fact);
 
-        fact = sv * (pltvar[npos] - _valmin);
-        _lonlat2xyz_texture(_lon[0], _lat[j], radius[k], fact);
+        fact = sv * (pltvar[n][mpos] - _valmin);
+        _sphereVertex_texture(_xSphere[n][mpos], _ySphere[n][mpos],
+                              _zSphere[n][mpos], radius[k], fact);
         glEnd();
+      }
     }
 
     glDisable(GL_TEXTURE_1D);
@@ -809,7 +849,7 @@ void UFSINCR2dViewer::_sphereYplane(int ys)
 
 void UFSINCR2dViewer::_display_Xflat_plane(int xs)
 {
-    int j, k;
+    int j, k, n;
     size_t mpos, npos;
     double fact;
     double sv = 1.0;
@@ -834,23 +874,26 @@ void UFSINCR2dViewer::_display_Xflat_plane(int xs)
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
     glNormal3f(0.0, 0.0, -1.0);
 
-    for(k = 1; k < _nlev; ++k)
+    for(n = 0; n < _ntiles; ++n)
     {
+      for(k = 1; k < _nlev; ++k)
+      {
         glBegin(GL_QUAD_STRIP);
         for(j = 0; j < _nlat; ++j)
         {
             mpos = ((k-1)*_nlat+j)*_nlon;
             npos = (k*_nlat+j)*_nlon;
 
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height[k-1]);
+            fact = sv * (pltvar[n][mpos+i] - _valmin);
+	    _flatVertex_texture(_xFlat[n][mpos+i], _yFlat[n][mpos+i],
+			        height[k-1], fact);
 
-            fact = sv * (pltvar[npos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height[k]);
+            fact = sv * (pltvar[n][npos+i] - _valmin);
+	    _flatVertex_texture(_xFlat[n][npos+i], _yFlat[n][npos+i],
+			        height[k], fact);
         }
         glEnd();
+      }
     }
 
     glDisable(GL_TEXTURE_1D);
@@ -860,7 +903,7 @@ void UFSINCR2dViewer::_display_Xflat_plane(int xs)
 
 void UFSINCR2dViewer::_sphereBump()
 {
-    int i, j, k, k1;
+    int i, j, k, k1, n;
     size_t mpos, npos;
     double sv = 1.0;
     double alpha, fact;
@@ -885,7 +928,7 @@ void UFSINCR2dViewer::_sphereBump()
   //cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << ", sv = " << sv << endl;
   //cout << "\tzcl = " << zcl << ", k = " << k << endl;
 
-  //_adjust_minmax(&pltvar[k*_nlat*_nlon]);
+  //_adjust_minmax(&pltvar[n][k*_nlat*_nlon]);
 
     glPushMatrix();
 
@@ -906,28 +949,37 @@ void UFSINCR2dViewer::_sphereBump()
     glPushMatrix();
 
     glNormal3f(0.0, 0.0, -1.0);
-    if(k < _nlev || 1 == _nlev) {
-    for(j = 1; j < _nlat; ++j)
+
+    if(k < _nlev || 1 == _nlev)
     {
-        mpos = (k*_nlat + (j-1))*_nlon;
-        npos = (k*_nlat + j)*_nlon;
-        glBegin(GL_QUAD_STRIP);
-        for(i = 0; i < _nlon; ++i)
+      for(n = 0; n < _ntiles; ++n)
+      {
+        for(j = 1; j < _nlat; ++j)
         {
-            fact = sv * (pltvar[npos+i] - _valmin);
-            _lonlat2xyz(_lon[i], _lat[j], radius + magnifier*fact, fact);
+          mpos = (k*_nlat + (j-1))*_nlon;
+          npos = (k*_nlat + j)*_nlon;
+          glBegin(GL_QUAD_STRIP);
+          for(i = 0; i < _nlon; ++i)
+          {
+            fact = sv * (pltvar[n][npos+i] - _valmin);
+            _sphereVertex(_xSphere[n][npos+i], _ySphere[n][npos+i],
+                          _zSphere[n][npos+i], radius, fact);
 
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            _lonlat2xyz(_lon[i], _lat[j-1], radius + magnifier*fact, fact);
+            fact = sv * (pltvar[n][mpos+i] - _valmin);
+            _sphereVertex(_xSphere[n][mpos+i], _ySphere[n][mpos+i],
+                          _zSphere[n][mpos+i], radius, fact);
+          }
+          fact = sv * (pltvar[n][npos] - _valmin);
+          _sphereVertex(_xSphere[n][npos], _ySphere[n][npos],
+                        _zSphere[n][npos], radius, fact);
+
+          fact = sv * (pltvar[n][mpos] - _valmin);
+          _sphereVertex(_xSphere[n][mpos], _ySphere[n][mpos],
+                        _zSphere[n][mpos], radius, fact);
+          glEnd();
         }
-        fact = sv * (pltvar[npos] - _valmin);
-        _lonlat2xyz(_lon[0], _lat[j], radius + magnifier*fact, fact);
-
-        fact = sv * (pltvar[mpos] - _valmin);
-        _lonlat2xyz(_lon[0], _lat[j-1], radius + magnifier*fact, fact);
-        glEnd();
-    }
-    coastline->drawOnPlane(0.01);
+      }
+      coastline->drawOnSphere(radius+0.01);
     }
 
     glPopMatrix();
@@ -936,7 +988,7 @@ void UFSINCR2dViewer::_sphereBump()
 
 void UFSINCR2dViewer::_flatBump()
 {
-    int i, j, k, k1;
+    int i, j, k, k1, n;
     size_t mpos, npos;
     double sv = 1.0;
     double alpha, fact;
@@ -962,7 +1014,7 @@ void UFSINCR2dViewer::_flatBump()
   //cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << ", sv = " << sv << endl;
   //cout << "\tzcl = " << zcl << ", k = " << k << endl;
 
-  //_adjust_minmax(&pltvar[k*_nlat*_nlon]);
+  //_adjust_minmax(&pltvar[n][k*_nlat*_nlon]);
 
     glPushMatrix();
 
@@ -984,66 +1036,27 @@ void UFSINCR2dViewer::_flatBump()
     glPushMatrix();
 
     glNormal3f(0.0, 0.0, -1.0);
-    if(k < _nlev || 1 == _nlev) {
-    for(j = 1; j < _nlat; ++j)
+    if(k < _nlev || 1 == _nlev)
     {
-        mpos = (k*_nlat+(j-1))*_nlon;
-        npos = (k*_nlat+j)*_nlon;
-        glBegin(GL_QUAD_STRIP);
-        for(i = _hlon; i < _nlon; ++i)
+      for(n = 0; n < _ntiles; ++n)
+      {
+        for(j = 1; j < _nlat; ++j)
         {
-            fact = sv * (pltvar[npos+i] - _valmin);
-            alpha = amp * fact;
-            if(alpha < 0.0001)
-                alpha = 0.0;
-            else if(alpha > 1.0)
-                alpha = 1.0;
+          mpos = (k*_nlat+(j-1))*_nlon;
+          npos = (k*_nlat+j)*_nlon;
+          glBegin(GL_QUAD_STRIP);
+          for(i = 0; i < _nlon; ++i)
+          {
+            fact = sv * (pltvar[n][npos+i] - _valmin);
+	    _flatVertex(_xFlat[n][npos+i], _yFlat[n][npos+i], magnifier*fact, fact);
 
-            glColor4d(fact, fact, fact, alpha);
-            glNormal3d(0.0, _yFlat[j], magnifier*fact);
-            glVertex3d(_xFlat[i], _yFlat[j], magnifier*fact);
-
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            alpha = amp * fact;
-            if(alpha < 0.0001)
-                alpha = 0.0;
-            else if(alpha > 1.0)
-                alpha = 1.0;
-
-            glColor4d(fact, fact, fact, alpha);
-            glNormal3d(0.0, _yFlat[j-1], magnifier*fact);
-            glVertex3d(_xFlat[i], _yFlat[j-1],  magnifier*fact);
+            fact = sv * (pltvar[n][mpos+i] - _valmin);
+	    _flatVertex(_xFlat[n][mpos+i], _yFlat[n][mpos+i], magnifier*fact, fact);
+          }
+          glEnd();
         }
-        // glEnd();
-
-        // glBegin(GL_QUAD_STRIP);
-        for(i = 0; i < _hlon; ++i)
-        {
-            fact = sv * (pltvar[npos+i] - _valmin);
-            alpha = amp * fact;
-            if(alpha < 0.0001)
-                alpha = 0.0;
-            else if(alpha > 1.0)
-                alpha = 1.0;
-
-            glColor4d(fact, fact, fact, alpha);
-            glNormal3d(0.0, _yFlat[j], magnifier*fact);
-            glVertex3d(_xFlat[i], _yFlat[j], magnifier*fact);
-
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            alpha = amp * fact;
-            if(alpha < 0.0001)
-                alpha = 0.0;
-            else if(alpha > 1.0)
-                alpha = 1.0;
-
-            glColor4d(fact, fact, fact, alpha);
-            glNormal3d(0.0, _yFlat[j-1], magnifier*fact);
-            glVertex3d(_xFlat[i], _yFlat[j-1],  magnifier*fact);
-        }
-        glEnd();
-    }
-    coastline->drawOnPlane(0.01);
+      }
+      coastline->drawOnPlane(0.01);
     }
 
     glPopMatrix();

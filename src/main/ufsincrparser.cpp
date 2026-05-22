@@ -12,7 +12,7 @@ void UFSINCRParser::parse(YAMLHandler *yamlHandler, NVOptions* nvoptions,
     cout << "nvoptions->get_model(): " << nvoptions->get_model() << endl;
 
     ufsincr_translator = new UFSINCRTranslator(colorTable, nvoptions,
-                                               gridfiles, incrfile);
+                                               gridfiles, incrfiles);
 
     if(ufsincr_translator)
         cout << "ufsincr_translator: " << ufsincr_translator << endl;

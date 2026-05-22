@@ -86,6 +86,9 @@ void UFSINCRController::setup()
 
   //lister = new Lister[_maxTime];
 
+    _varname = string("T_inc");
+    _value.resize(_ntiles);
+
     for(n = 0; n < _ntiles; ++n)
     {
         ncgridfile[n] = new UFSGridReader(_gridfilenames[n].c_str());
@@ -99,7 +102,7 @@ void UFSINCRController::setup()
 			                  ncgridfile[n]->getGeoLat());
     }
 
-    _varname = string("T_inc");
+    _update_value(_varname.c_str());
 
     _sphere = false;
     _ball = false;
@@ -115,7 +118,6 @@ void UFSINCRController::setup()
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\tvarname:" << _varname << endl;
 
-    _value = ncfile->get_fv(_varname.c_str());
     _title = _varname;
 
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
@@ -135,6 +137,14 @@ void UFSINCRController::draw()
     ufsincr_viewer->draw();
 }
 
+void UFSINCRController::_update_value(const char* vn)
+{
+    for(int n = 0; n < _ntiles; ++n)
+    {
+        _value[n] = ncincrfile[n]->getFloat(vn);
+    }
+}
+
 void UFSINCRController::set1dvarname(string vn)
 {
     _varname = vn;
@@ -143,21 +153,15 @@ void UFSINCRController::set1dvarname(string vn)
 
     _tvalue = 0;
 
-    if(_initialized)
-        free(_value);
-
-    _value = ncfile->get_fv(vn.c_str());
     _title = vn;
+    _update_value(vn.c_str());
 
     _initialized = true;
-
-    geometry->set_nlev(1);
 
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "setup for <" << vn << ">" << endl;
 
   //ufsincr_viewer->set_lister(&lister[0]);
-    ufsincr_viewer->set_geometry(geometry);
     ufsincr_viewer->setup(vn, _value);
 
     _minval = ufsincr_viewer->get_minval();
@@ -172,21 +176,15 @@ void UFSINCRController::set2dvarname(string vn)
 
     _tvalue = 0;
 
-    if(_initialized)
-        free(_value);
-
-    _value = ncfile->get_fv(vn.c_str());
     _title = vn;
+    _update_value(vn.c_str());
 
     _initialized = true;
-
-    geometry->set_nlev(1);
 
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "setup for <" << vn << ">" << endl;
 
   //ufsincr_viewer->set_lister(&lister[0]);
-    ufsincr_viewer->set_geometry(geometry);
     ufsincr_viewer->setup(vn, _value);
 
     _minval = ufsincr_viewer->get_minval();
@@ -201,24 +199,16 @@ void UFSINCRController::set3dvarname(string vn)
 
     _tvalue = 0;
 
-    if(_initialized)
-        free(_value);
-
-    _value = ncfile->get_fv(vn.c_str());
     _title = vn;
+    _update_value(vn.c_str());
 
     _initialized = true;
-
-    geometry->set_nlon(ncfile->getNlon());
-    geometry->set_nlat(ncfile->getNlat());
-    geometry->set_nlev(ncfile->getNlev());
 
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "setup for <" << vn << ">" << endl;
   //cout << "nvfile->get_dim_size('lev') = " << nvfile->get_dim_size("lev") << endl;
 
   //ufsincr_viewer->set_lister(&lister[0]);
-    ufsincr_viewer->set_geometry(geometry);
     ufsincr_viewer->setup(vn, _value);
 
     _minval = ufsincr_viewer->get_minval();
@@ -252,9 +242,9 @@ int UFSINCRController::get_ndv(int n)
     if (1 == n)
         ndv = 4;
     else if (2 == n)
-        ndv = ncfile->getNumV2ds();
+        ndv = ncgridfile[0]->getNumV2ds();
     else if (3 == n)
-        ndv = ncfile->getNumV3ds();
+        ndv = ncincrfile[0]->getNumV3ds();
     return ndv;
 }
 
@@ -262,9 +252,9 @@ vector<string> UFSINCRController::get_ndvNames(int n)
 {
     vector<string> varnames;
     if (2 == n)
-        varnames = ncfile->getV2dNames();
+        varnames = ncgridfile[0]->getV2dNames();
     else if (3 == n)
-        varnames = ncfile->getV3dNames();
+        varnames = ncincrfile[0]->getV3dNames();
     return varnames;
 }
 

@@ -50,7 +50,7 @@ class UFSINCR2dViewer : public QGLWidget
         void draw_plane_grids();
 
         void reset();
-        void setup(string vn, float* var);
+        void setup(string vn, vector<float*> var);
         void set_geometry(vector<UFSINCRGeometry*> gm);
         void reset_texture1d(ColorTable *ct);
 
@@ -79,44 +79,51 @@ class UFSINCR2dViewer : public QGLWidget
         int previoustimelevel;
         int current_timelevel;
 
-        float* _lon;
-        float* _lat;
-        float* _lev;
+        vector<float*> _lon;
+        vector<float*> _lat;
+        vector<float*> _lev;
 
         int _hlon;
         int _nlon;
         int _nlat;
         int _nlev;
+        int _ntiles;
 
         GLuint zcl;
         GLuint ycl;
         GLuint xcl;
 
-        double* _xSphere;
-        double* _ySphere;
-        double* _zSphere;
+        vector<double*> _xSphere;
+        vector<double*> _ySphere;
+        vector<double*> _zSphere;
 
-        double* _xFlat;
-        double* _yFlat;
+        vector<double*> _xFlat;
+        vector<double*> _yFlat;
 
-        float* _var;
-        float* pltvar;
+        vector<float*> _var;
+        vector<float*> pltvar;
 
         float _valmin;
         float _valavg;
         float _valmax;
+        float _scalelength;
 
         double oneover;
         double deg2rad;
 
         void _initialize();
-        void _evaluate(float* var);
-        void _adjust_minmax(float* var);
+        void _evaluate(vector<float*> var);
+        void _adjust_minmax(vector<float*> var);
 
-        void _lonlat2xyz(double lon, double lat, double radius,
-                         double fact);
-        void _lonlat2xyz_texture(double lon, double lat,
-			         double radius, double fact);
+        void _sphereVertex(double x, double y, double z,
+			   double radius, double fact);
+        void _sphereVertex_texture(double x, double y, double z,
+			           double radius, double fact);
+
+        void _flatVertex(double x, double y, double z,
+			 double fact);
+        void _flatVertex_texture(double x, double y, double z,
+			         double fact);
 
         void _flatDisplay();
         void _display_Xflat_plane(int xs);

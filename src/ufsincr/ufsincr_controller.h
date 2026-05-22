@@ -107,12 +107,14 @@ class UFSINCRController
         int* _grdsize;
         int* _varsize;
 
-        float* _value;
+        vector<float*> _value;
+
         float _minval;
         float _maxval;
 
         template<typename T>
         void _print1d(T* var, int nl);
+        void _update_value(const char* vn);
 };
 #endif
 
