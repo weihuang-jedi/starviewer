@@ -128,7 +128,7 @@ void MainWindow::_setup()
             ufs();
             break;
         case UFSINCR:
-            cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+            // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
             setWindowTitle(tr("UFS MODEL"));
             ufsincr();
             break;

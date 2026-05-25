@@ -76,7 +76,7 @@ void UFSINCRController::setup()
     strcpy(bmpflnm, path);
     strcat(bmpflnm, "/data/earth.bmp");
 
-    cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
   //_maxFile = get_nfiles();
     _maxFile = 1;
@@ -137,7 +137,7 @@ void UFSINCRController::setup()
     ufsincr_viewer->setup(_varname, _value);
     _minval = ufsincr_viewer->get_minval();
     _maxval = ufsincr_viewer->get_maxval();
-    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void UFSINCRController::draw()

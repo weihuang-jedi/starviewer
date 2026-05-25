@@ -1,5 +1,5 @@
-#ifndef _VIEWER_H
-#define _VIEWER_H
+#ifndef _UFS_VIEWER_H
+#define _UFS_VIEWER_H
 
 #include <iostream>
 #include <vector>

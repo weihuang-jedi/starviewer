@@ -14,6 +14,7 @@ UFSINCR2dViewer::UFSINCR2dViewer(ColorTable *ct, NVOptions* opt)
     texture1d->set_name(ct->get_name());
 
     earth = new Earth();
+    _needActivateEarth = false;
 
     nvoptions->set_xsec(0);
     nvoptions->set_ysec(0);
@@ -43,18 +44,18 @@ UFSINCR2dViewer::UFSINCR2dViewer(ColorTable *ct, NVOptions* opt,
     colorTable = ct;
     nvoptions = opt;
 
-    cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     texture1d = new Texture1d();
     texture1d->set_colors(ct->get_clen(), ct->get_cmap());
     texture1d->set_name(ct->get_name());
 
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     ncfile = nchandler;
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\tbmpflnm: <" << bmpflnm << ">" << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tbmpflnm: <" << bmpflnm << ">" << endl;
     strcpy(_bmpflnm, bmpflnm);
 
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     nvoptions->set_xsec(0);
     nvoptions->set_ysec(0);
     nvoptions->set_zsec(0);
@@ -69,7 +70,7 @@ UFSINCR2dViewer::UFSINCR2dViewer(ColorTable *ct, NVOptions* opt,
     oneover = 1.0 / 180.0;
     deg2rad = 3.1415926535897932 * oneover;
 
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     lister = new Lister();
     lister->setup(361, 181, 121);
 
@@ -77,9 +78,12 @@ UFSINCR2dViewer::UFSINCR2dViewer(ColorTable *ct, NVOptions* opt,
 
     previoustimelevel = -1;
     current_timelevel = 0;
-
+  
+    _needActivateEarth = true;
     earth = new Earth(_bmpflnm);
-    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    _needActivateEarth = false;
+ 
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 UFSINCR2dViewer::~UFSINCR2dViewer()
@@ -164,13 +168,38 @@ void UFSINCR2dViewer::_initialize()
 
 void UFSINCR2dViewer::draw()
 {
+    cout << "\nEnter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+
+    // FIX TRAP: If the widget has a size of 0x0, it means it is completely
+    // invisible/detached from an active layout. Running OpenGL clear commands
+    // here will cause an immediate crash!
+    if (this->width() <= 0 || this->height() <= 0) {
+        cout << "WARNING: Viewer layout geometry is " << this->width() << "x" << this->height()
+             << ". Deferring glClear rendering passes until layout is active on-screen." << endl;
+        return; // Exit safely, skipping lines 255-257 entirely!
+    }
+
+    // GUARD GATE: If Qt hasn't exposed the frame context yet, back out safely!
+    if (QOpenGLContext::currentContext() == nullptr) {
+        // Explicitly bind this widget's context to the thread manually
+        this->makeCurrent();
+        
+        // Check again. If it's still null, the window isn't ready on screen yet.
+        if (QOpenGLContext::currentContext() == nullptr) {
+            cout << "WARNING: Widget layout not active yet. Deferring draw pass." << endl;
+            return; 
+        }
+    }
+
+    if (earth && earth->get_texture_id() == 0) {
+        cout << "Context active now. Initializing Earth textures..." << endl;
+        // Call your texture loader again now that context is valid!
+        earth->_loadTexBMP();
+    }
+
     size_t nsquare = _nlon * _nlat;
 
-    cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tearth: " << earth << endl;
-    if (nullptr == earth)
-       earth = new Earth(_bmpflnm);
-
+    // Do your options state configurations safely on the CPU
     if(nvoptions->get_cb(NV_RESET))
     {
         nvoptions->set_cb(NV_RESET, false);
@@ -180,7 +209,6 @@ void UFSINCR2dViewer::draw()
             texture1d->set_opacity(1.0);
         reset();
     }
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     if(nvoptions->get_cb(NV_STATUS_CHANGED))
         reset();
@@ -231,13 +259,15 @@ void UFSINCR2dViewer::draw()
     xcl = lister->get_xid(nvoptions->get_xsec());
 
     cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //makeCurrent();
-  //Clear screen and Z-buffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-
+    this->makeCurrent();
     cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // Set the color first
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // Then wipe the buffer canvas
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+
     if(nvoptions->get_cb(NV_BUMPON))
     {
         cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -321,8 +351,18 @@ void UFSINCR2dViewer::draw()
           //draw_sphere_grids();
         }
     }
+
+    // ADD THIS AT THE VERY END OF draw():
+    this->doneCurrent(); // Safely unbinds the viewer context until the next frame tick
+
     cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
+
+// void UFSINCR2dViewer::initializeGL()
+// {
+//     initializeOpenGLFunctions();
+//     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+// }
 
 void UFSINCR2dViewer::_flatVertex(double x, double y, double z,
                                   double fact)
@@ -1132,19 +1172,6 @@ void UFSINCR2dViewer::_draw_cross(double radius)
         glVertex3f(x, y, z);
     }
     glEnd();
-}
-
-void UFSINCR2dViewer::initializeGL() 
-{
-    // 1. Initialize your OpenGL functions wrapper if using modern headers
-    initializeOpenGLFunctions();
-
-    // 2. Clear color and set initial states
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-    // 3. NOW it is safe to load texture graphics maps!
-    if (!earth)
-       earth = new Earth(_bmpflnm);
 }
 
 double UFSINCR2dViewer::_k2h(int k)

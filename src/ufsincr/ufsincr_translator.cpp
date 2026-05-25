@@ -57,28 +57,41 @@ UFSINCRTranslator::~UFSINCRTranslator()
 
 void UFSINCRTranslator::setup()
 {
-    int n;
-
     // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+
     if(NULL != ufsincr_controller)
         delete ufsincr_controller;
 
-    // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufsincr_controller = new UFSINCRController(colorTable, nvoptions, _gridflnm, _incrflnm);
-
-    // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufsincr_controller->setup();
+
+    // =================================================================
+    // ADD THIS BLOCK: Embed the hidden viewer widget inside the layout!
+    // =================================================================
+    QWidget* viewerWidget = ufsincr_controller->get_viewer(); 
+    if (viewerWidget != nullptr) {
+        cout << "Embedding UFSINCR2dViewer into active visible layout hierarchy." << endl;
+        
+        // If your BaseTranslator uses a layout manager (like QVBoxLayout):
+        if (this->layout() != nullptr) {
+            this->layout()->addWidget(viewerWidget);
+        } else {
+            // Fallback: Make this translator widget the direct parent canvas
+            viewerWidget->setParent(this);
+        }
+        viewerWidget->show(); // Expose it to the window tracking layer
+    }
+    // =================================================================
 
     _jpgNotSaved = true;
     _startSave = false;
 
     makeCurrent();
-
-    // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-
+    
     _varname = string("T_inc");
-
     ufsincr_controller->set3dvarname(_varname);
+
+    cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     _minval = ufsincr_controller->get_minval();
     _maxval = ufsincr_controller->get_maxval();
@@ -90,7 +103,7 @@ void UFSINCRTranslator::setup()
 
   //_nTimes  = ufsincr_controller->get_ntimes();
     _maxTime = 1;
-  //for(n = 0; n < _maxFile; ++n)
+  //for(int n = 0; n < _maxFile; ++n)
   //    _maxTime += _nTimes[n];
 
     if(_maxTime > 12)
@@ -105,7 +118,7 @@ void UFSINCRTranslator::setup()
 //Show the image
 void UFSINCRTranslator::show()
 {
-    cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //glShadeModel(GL_SMOOTH);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -116,14 +129,11 @@ void UFSINCRTranslator::show()
         _set_current_time();
     }
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    ufsincr_controller->draw();
-
     _varname = ufsincr_controller->get_varname();
 
-    cout << "\t_varname : " << _varname << endl;
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     setLabelColor();
+
+    ufsincr_controller->draw();
 
     make_timeNpositionString();
     writeHeader();
@@ -134,7 +144,7 @@ void UFSINCRTranslator::show()
 
     if(locator->on())
         writeLocatorMsg();
-    cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFSINCRTranslator::createVarInfo()
@@ -405,7 +415,13 @@ void UFSINCRTranslator::writeLocatorMsg()
 
 void UFSINCRTranslator::paintGL()
 {
-    cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // 1. Core driver connection layer setup
+    // initializeOpenGLFunctions();
+
+    // 2. Clear buffers safely
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     set_modelview();
 
     // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
@@ -429,15 +445,15 @@ void UFSINCRTranslator::paintGL()
 
     setBackgroundColor();
 
-    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     show();
 
-    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     drawColorBar();
 
-    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     // if(! nvoptions->get_cb(NV_PIXELON))
     //     drawAxis();
@@ -447,5 +463,5 @@ void UFSINCRTranslator::paintGL()
 
   //Done
     glFlush();
-    cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }

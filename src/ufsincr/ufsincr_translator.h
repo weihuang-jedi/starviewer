@@ -33,7 +33,7 @@ class UFSINCRTranslator : public BaseTranslator
 			  QWidget* parent=0);	//  Constructor
        ~UFSINCRTranslator();				//  Destructor
     
-        void paintGL();
+        void paintGL() override;
         void show();
         void setup();
         void set_light(Light* l);

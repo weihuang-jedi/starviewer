@@ -73,6 +73,7 @@ echo "yamlfile: $yamlfile"
 
 # 1. On the host terminal (e01g01), allow the connection
 xhost +local:$(whoami)
+xhost +
 
 # 2.1 Run Singularity with the auth file mapped to your actual home
 #     on AMD GPU
@@ -84,17 +85,41 @@ xhost +local:$(whoami)
 #   --bind /dev/kfd:/dev/kfd \
 
 singularity exec --rocm --cleanenv \
+  --hostname $(hostname) \
+  --bind ${HOME}/.Xauthority:/root/.Xauthority \
+  -B /scratch3 -B /scratch4 -B /scratch5 -B /tmp \
+  --env XAUTHORITY=/root/.Xauthority \
+  --env DISPLAY=${DISPLAY} \
+  --env XDG_RUNTIME_DIR=$RUNTIME_DIR \
+  --env QT_X11_NO_MITSHM=1 \
+  --env STARVIEWERHOME=${STARVIEWERHOME} \
+  --env QT_QPA_PLATFORM=xcb \
+  --env QT_XCB_GL_INTEGRATION=xcb_glx \
+  --env LIBGL_ALWAYS_SOFTWARE=1 \
+  --env LIBGL_ALWAYS_INDIRECT=1 \
+  --env GALLIUM_DRIVER=llvmpipe \
+  --env DEBIAN_FRONTEND=noninteractive \
+  "${CONTAINER_SIF}" \
+  ${STARVIEWERHOME}/build/main/starviewer -yaml "${yamlfile}"
+
+exit 0
+
+singularity exec --rocm --cleanenv \
     --hostname $(hostname) \
     --bind ${HOME}/.Xauthority:/root/.Xauthority \
     -B /scratch3 -B /scratch4 -B /scratch5 \
     --env XAUTHORITY=/root/.Xauthority \
     --env DISPLAY=${DISPLAY} \
     --env XDG_RUNTIME_DIR=$RUNTIME_DIR \
+    --env QT_XCB_GL_INTEGRATION=xcb_glx \
+    --env LIBGL_ALWAYS_SOFTWARE=1 \
+    --env GALLIUM_DRIVER=llvmpipe \
+    --env LIBGL_ALWAYS_INDIRECT=0 \
     --env QT_X11_NO_MITSHM=1 \
     --env STARVIEWERHOME=${STARVIEWERHOME} \
     "${CONTAINER_SIF}" \
     ${STARVIEWERHOME}/build/main/starviewer \
-    -yaml "${yamlfile}"
+    -yaml "${yamlfile}" -platform offscreen
 
 exit 0
 #   --env LIBGL_ALWAYS_SOFTWARE=1 \

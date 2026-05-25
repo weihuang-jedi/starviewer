@@ -12,6 +12,7 @@
 
 #include <QGLWidget>
 // #include <QOpenGLWidget>
+// #include <QOpenGLFunctions>
 
 #include "coastline.h"
 #include "colorTable.h"
@@ -35,9 +36,9 @@ using namespace std;
 #define NEAR_EAST_BOUNDARY	0.9999
 #define NEAR_WEST_BOUNDARY	-NEAR_EAST_BOUNDARY
 
-class UFSINCR2dViewer : public QGLWidget, protected QOpenGLFunctions
+// class UFSINCR2dViewer : public QGLWidget, protected QOpenGLFunctions
+class UFSINCR2dViewer : public QGLWidget
 {
-
     public:
         UFSINCR2dViewer(ColorTable* ct, NVOptions* opt);
         UFSINCR2dViewer(ColorTable* ct, NVOptions* opt,
@@ -49,14 +50,14 @@ class UFSINCR2dViewer : public QGLWidget, protected QOpenGLFunctions
         void draw_sphere_grids();
         void draw_plane_grids();
 
+	// void initializeGL() override;
+
         void reset();
         void setup(string vn, vector<float*> var);
         void set_geometry(vector<UFSINCRGeometry*> gm);
         void reset_texture1d(ColorTable *ct);
 
         void set_coastline(CoastLine* cl) { coastline = cl; };
-
-        void initializeGL();
 
       //void set_lister(Lister* l) { lister = l; };
 
@@ -68,12 +69,12 @@ class UFSINCR2dViewer : public QGLWidget, protected QOpenGLFunctions
     protected:
         ColorTable* colorTable;
         vector<UFSINCRGeometry*> geometry;
-        CoastLine* coastline;
-        Texture1d* texture1d;
+        CoastLine* coastline = NULL;
+        Texture1d* texture1d = NULL;
         vector<UFSIncrementReader*> ncfile;
-        Earth* earth;
-        Lister* lister;
-        Locator* locator;
+        Earth* earth = NULL;
+        Lister* lister = NULL;
+        Locator* locator = NULL;
         NVOptions* nvoptions;
 
         string _varname;
@@ -142,6 +143,7 @@ class UFSINCR2dViewer : public QGLWidget, protected QOpenGLFunctions
         double _k2r(int k);
 
 	char _bmpflnm[1024];
+	bool _needActivateEarth;
 };
 #endif
 

@@ -34,7 +34,7 @@ void YAMLHandler::read_yaml()
         _name = config["application"]["name"].as<string>();
         _model = config["application"]["model"].as<string>();
         _version = config["application"]["version"].as<string>();
-        cout << "name: " << _name << endl;
+        // cout << "name: " << _name << endl;
         cout << "model: " << _model << endl;
     }
     else
@@ -45,7 +45,7 @@ void YAMLHandler::read_yaml()
     if (config["earth"].IsDefined())
     {
         _earth_bmp = config["earth"]["name"].as<string>();
-        cout << "earth_bmp: " << _earth_bmp << endl;
+        // cout << "earth_bmp: " << _earth_bmp << endl;
     }
     else
     {
@@ -56,8 +56,8 @@ void YAMLHandler::read_yaml()
     {
         _coastline_file = config["coastline"]["name"].as<string>();
         _coastline_resolution = config["coastline"]["resolution"].as<string>();
-        cout << "coastline_file: " << _coastline_file << endl;
-        cout << "coastline_resolution: " << _coastline_resolution << endl;
+        // cout << "coastline_file: " << _coastline_file << endl;
+        // cout << "coastline_resolution: " << _coastline_resolution << endl;
     }
     else
     {
@@ -70,11 +70,11 @@ void YAMLHandler::read_yaml()
 
         _datafiles = config["input"]["data"].as<vector<string>>();
 
-        for (const auto& df : _datafiles)
-	{
-            ++n;
-            cout << "Data file #" << n << ": " << df << endl;
-        }
+        // for (const auto& df : _datafiles)
+	// {
+        //     ++n;
+        //     cout << "Data file #" << n << ": " << df << endl;
+        // }
     }
 
     if (config["grid"].IsDefined())
@@ -83,11 +83,11 @@ void YAMLHandler::read_yaml()
 
         _gridfiles = config["grid"]["data"].as<vector<string>>();
 
-        for (const auto& df : _gridfiles)
-        {
-            ++n;
-            cout << "Grid file #" << n << ": " << df << endl;
-        }
+        // for (const auto& df : _gridfiles)
+        // {
+        //     ++n;
+        //     cout << "Grid file #" << n << ": " << df << endl;
+        // }
     }
 
     if (config["increment"].IsDefined())
@@ -96,11 +96,11 @@ void YAMLHandler::read_yaml()
 
         _incrfiles = config["increment"]["data"].as<vector<string>>();
 
-        for (const auto& df : _incrfiles)
-        {
-            ++n;
-            cout << "Increment file #" << n << ": " << df << endl;
-        }
+        // for (const auto& df : _incrfiles)
+        // {
+        //     ++n;
+        //     cout << "Increment file #" << n << ": " << df << endl;
+        // }
     }
 }
 

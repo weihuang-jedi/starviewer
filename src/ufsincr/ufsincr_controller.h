@@ -1,9 +1,10 @@
 #ifndef _UFSINCR_CONTROLLER_H
 #define _UFSINCR_CONTROLLER_H
 
-#include <QtOpenGL>
-
 #include <iostream>
+
+#include <QWidget>
+#include <QGLWidget>
 
 #include "ufsgridreader.h"
 #include "ufsincrementreader.h"
@@ -63,6 +64,8 @@ class UFSINCRController
         int get_nlev() { return _nlev; };
 
         vector<string> get_ndvNames(int n);
+
+	QWidget* get_viewer() { return dynamic_cast<QWidget*>(ufsincr_viewer); };
 
     protected:
         vector<UFSGridReader*> ncgridfile;
