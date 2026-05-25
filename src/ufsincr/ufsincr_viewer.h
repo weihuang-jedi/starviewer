@@ -37,7 +37,8 @@ using namespace std;
 #define NEAR_WEST_BOUNDARY	-NEAR_EAST_BOUNDARY
 
 // class UFSINCR2dViewer : public QGLWidget, protected QOpenGLFunctions
-class UFSINCR2dViewer : public QGLWidget
+// class UFSINCR2dViewer : public QGLWidget
+class UFSINCR2dViewer : public QObject
 {
     public:
         UFSINCR2dViewer(ColorTable* ct, NVOptions* opt);

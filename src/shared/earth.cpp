@@ -28,13 +28,13 @@ Earth::Earth()
 
 Earth::Earth(const char *flnm)
 {
-    cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\tflnm: <" << flnm << ">" << endl;
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tflnm: <" << flnm << ">" << endl;
     initializeGL();
     strcpy(_bmpflnm, flnm);
-    cout << "\t_bmpflnm: <" << _bmpflnm << ">" << endl;
+    // cout << "\t_bmpflnm: <" << _bmpflnm << ">" << endl;
     _loadTexBMP();
-    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 Earth::Earth(const char *flnm, ncReader* nchandler)

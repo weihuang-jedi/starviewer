@@ -168,36 +168,9 @@ void UFSINCR2dViewer::_initialize()
 
 void UFSINCR2dViewer::draw()
 {
-    cout << "\nEnter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-
-    // FIX TRAP: If the widget has a size of 0x0, it means it is completely
-    // invisible/detached from an active layout. Running OpenGL clear commands
-    // here will cause an immediate crash!
-    if (this->width() <= 0 || this->height() <= 0) {
-        cout << "WARNING: Viewer layout geometry is " << this->width() << "x" << this->height()
-             << ". Deferring glClear rendering passes until layout is active on-screen." << endl;
-        return; // Exit safely, skipping lines 255-257 entirely!
-    }
-
-    // GUARD GATE: If Qt hasn't exposed the frame context yet, back out safely!
-    if (QOpenGLContext::currentContext() == nullptr) {
-        // Explicitly bind this widget's context to the thread manually
-        this->makeCurrent();
-        
-        // Check again. If it's still null, the window isn't ready on screen yet.
-        if (QOpenGLContext::currentContext() == nullptr) {
-            cout << "WARNING: Widget layout not active yet. Deferring draw pass." << endl;
-            return; 
-        }
-    }
-
-    if (earth && earth->get_texture_id() == 0) {
-        cout << "Context active now. Initializing Earth textures..." << endl;
-        // Call your texture loader again now that context is valid!
-        earth->_loadTexBMP();
-    }
-
     size_t nsquare = _nlon * _nlat;
+
+    // cout << "\nEnter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     // Do your options state configurations safely on the CPU
     if(nvoptions->get_cb(NV_RESET))
@@ -223,7 +196,7 @@ void UFSINCR2dViewer::draw()
     if((_nlev <= nvoptions->get_zsec()) && (0 > nvoptions->get_zsec()))
         return;
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 #if 0
     if(nvoptions->get_cb(NV_HASMINMAX))
     {
@@ -237,36 +210,37 @@ void UFSINCR2dViewer::draw()
     }
 #endif
     cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    // cout << "\t" << "current_timelevel: " << current_timelevel << endl;
-    // cout << "\t" << "_nlon: " << _nlon << endl;
-    // cout << "\t" << "_nlat: " << _nlat << endl;
-    // cout << "\t" << "_nlev: " << _nlev << endl;
-    // cout << "\t" << "_ntiles: " << _ntiles << endl;
-    // cout << "\t" << "_var.size(): " << _var.size() << endl;
-    // cout << "\t" << "pltvar.size(): " << pltvar.size() << endl;
+    cout << "\t" << "current_timelevel: " << current_timelevel << endl;
+    cout << "\t" << "_nlon: " << _nlon << endl;
+    cout << "\t" << "_nlat: " << _nlat << endl;
+    cout << "\t" << "_nlev: " << _nlev << endl;
+    cout << "\t" << "_ntiles: " << _ntiles << endl;
+    cout << "\t" << "_var.size(): " << _var.size() << endl;
+    cout << "\t" << "pltvar.size(): " << pltvar.size() << endl;
 
   //pltvar = &_var[current_timelevel * _nlon * _nlat];
     for(int n=0; n<_ntiles; ++n)
     {
-        // cout << "\t" << "_var[" << n << "]: " << _var[n] << endl;
-        // cout << "\t" << "_var[" << n << "][0]: " << _var[n][0] << endl;
         pltvar[n] = &_var[n][current_timelevel * _nlon * _nlat * _nlev];
+        cout << "\t" << "Tile #" << n << "]: " << n << endl;
+        cout << "\t" << "_lon[" << n << "][0]: " << _lon[n][0] << endl;
+        cout << "\t" << "_lat[" << n << "][0]: " << _lat[n][0] << endl;
+        cout << "\t" << "_var[" << n << "][0]: " << _var[n][0] << endl;
+        cout << "\t" << "pltvar[" << n << "][0]: " << pltvar[n][0] << endl;
     }
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     zcl = lister->get_zid(nvoptions->get_zsec());
     ycl = lister->get_yid(nvoptions->get_ysec());
     xcl = lister->get_xid(nvoptions->get_xsec());
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    this->makeCurrent();
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     // Set the color first
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     // Then wipe the buffer canvas
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     if(nvoptions->get_cb(NV_BUMPON))
     {
@@ -352,17 +326,10 @@ void UFSINCR2dViewer::draw()
         }
     }
 
-    // ADD THIS AT THE VERY END OF draw():
-    this->doneCurrent(); // Safely unbinds the viewer context until the next frame tick
+    glFlush();             // Force the command queue to execute
 
-    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
-
-// void UFSINCR2dViewer::initializeGL()
-// {
-//     initializeOpenGLFunctions();
-//     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-// }
 
 void UFSINCR2dViewer::_flatVertex(double x, double y, double z,
                                   double fact)

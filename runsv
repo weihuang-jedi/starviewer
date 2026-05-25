@@ -73,16 +73,6 @@ echo "yamlfile: $yamlfile"
 
 # 1. On the host terminal (e01g01), allow the connection
 xhost +local:$(whoami)
-xhost +
-
-# 2.1 Run Singularity with the auth file mapped to your actual home
-#     on AMD GPU
-#singularity exec --rocm --cleanenv \
-# 2.2 Run Singularity with the auth file mapped to your actual home
-#singularity exec --rocm --cleanenv \
-#   --bind /tmp/.X11-unix:/tmp/.X11-unix \
-#   --bind /dev/dri:/dev/dri \
-#   --bind /dev/kfd:/dev/kfd \
 
 singularity exec --rocm --cleanenv \
   --hostname $(hostname) \
@@ -120,6 +110,22 @@ singularity exec --rocm --cleanenv \
     "${CONTAINER_SIF}" \
     ${STARVIEWERHOME}/build/main/starviewer \
     -yaml "${yamlfile}" -platform offscreen
+
+exit 0
+
+singularity exec --cleanenv \
+  --hostname $(hostname) \
+  -B /scratch3 -B /scratch4 -B /scratch5 -B /tmp \
+  --env QT_QPA_PLATFORM=offscreen \
+  --env QT_OPENGL=software \
+  --env QT_QUICK_BACKEND=software \
+  --env LIBGL_ALWAYS_SOFTWARE=1 \
+  --env GALLIUM_DRIVER=swrast \
+  --env MESA_LOADER_DRIVER_OVERRIDE=swrast \
+  --env STARVIEWERHOME=/scratch3/NAGAPE/epic/Wei.Huang/src/nv/starviewer \
+  /scratch3/NAGAPE/epic/Wei.Huang/src/nv/starviewer/starviewer.sif \
+  /scratch3/NAGAPE/epic/Wei.Huang/src/nv/starviewer/build/main/starviewer \
+  -yaml yamlfiles/ufsincr-config.yaml
 
 exit 0
 #   --env LIBGL_ALWAYS_SOFTWARE=1 \

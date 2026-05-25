@@ -65,24 +65,6 @@ void UFSINCRTranslator::setup()
     ufsincr_controller = new UFSINCRController(colorTable, nvoptions, _gridflnm, _incrflnm);
     ufsincr_controller->setup();
 
-    // =================================================================
-    // ADD THIS BLOCK: Embed the hidden viewer widget inside the layout!
-    // =================================================================
-    QWidget* viewerWidget = ufsincr_controller->get_viewer(); 
-    if (viewerWidget != nullptr) {
-        cout << "Embedding UFSINCR2dViewer into active visible layout hierarchy." << endl;
-        
-        // If your BaseTranslator uses a layout manager (like QVBoxLayout):
-        if (this->layout() != nullptr) {
-            this->layout()->addWidget(viewerWidget);
-        } else {
-            // Fallback: Make this translator widget the direct parent canvas
-            viewerWidget->setParent(this);
-        }
-        viewerWidget->show(); // Expose it to the window tracking layer
-    }
-    // =================================================================
-
     _jpgNotSaved = true;
     _startSave = false;
 
@@ -415,53 +397,29 @@ void UFSINCRTranslator::writeLocatorMsg()
 
 void UFSINCRTranslator::paintGL()
 {
-    // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    // 1. Core driver connection layer setup
-    // initializeOpenGLFunctions();
-
-    // 2. Clear buffers safely
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    // 1. Establish the window camera projections
     set_modelview();
 
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
-  //Clear screen and Z-buffer
+    // 2. Safely clear the active display buffer frames under Qt's authority
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  //Enable Z-buffering in OpenGL
     glEnable(GL_DEPTH_TEST);
 
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
-    // if(!locator)
-    // {
-    //     cout << "WARNING: locator is null. Skipping view configuration until initialized." << endl;
-    //     return; // Exits safely, preventing the segmentation fault!
-    // }
-
     setViewOptions();
-
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
     setBackgroundColor();
 
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
-    show();
-
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // 3. SECURE FORWARDING: Invoke your viewer drawing logic while the
+    // translator's screen context is completely locked and active!
+    show(); 
 
     drawColorBar();
-
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
-    // if(! nvoptions->get_cb(NV_PIXELON))
-    //     drawAxis();
 
     if(nvoptions->get_cb(NV_STATUS_CHANGED))
         save_status();
 
-  //Done
+    // 4. Force a clean pipeline flush
     glFlush();
-    // cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    
+    // Qt will now automatically run its internal swapBuffers() 
+    // on the translator's valid surface window right here!
 }
