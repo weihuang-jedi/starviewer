@@ -45,10 +45,10 @@ class BaseTranslator : public QGLWidget
         QSize sizeHint() const {return QSize(900,600);}   //  Default size of widget
 
         virtual void setup() = 0;
-        virtual void set_light(Light* l) { light = l; };
-        virtual void set_locator(Locator* l) { locator = l; };
         virtual void set_filename(QString flnm);
         virtual void updateSliders();
+        void set_light(Light* l);
+        void set_locator(Locator* l);
 
         void set_sliderX(SliderNSpin *s) { sliderNspinX = s; };
         void set_sliderY(SliderNSpin *s) { sliderNspinY = s; };
@@ -104,7 +104,6 @@ class BaseTranslator : public QGLWidget
         void selectSphere(int f);
         void selectOnMap(int n);
         void selectBump(int f);
-        void selectNCL(int f);
         void selectSaveImage();
         void selectColorBar(int f);
         void selectFlat(int n);
@@ -174,9 +173,9 @@ class BaseTranslator : public QGLWidget
 
         void initializeGL();                   //  Initialize widget
         void resizeGL(int width, int height);  //  Resize widget
-        void paintGL();                //  Draw widget
 
-        virtual void show();                   //  Draw widget
+        virtual void paintGL() = 0;
+        virtual void show() = 0;
 
         NVOptions*  nvoptions;
         ColorTable* colorTable;

@@ -5,12 +5,16 @@ find_library(NETCDF_C_LIB netcdf REQUIRED)
 
 # 1. Remove "OpenGL" from the find_package list
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
 # 2. Create the library FIRST before linking
 add_library(shared STATIC ${SOURCES})
+
+# Link yaml-cpp to the shared library
+target_link_libraries(shared PUBLIC yaml-cpp)
 
 # 3. Allow other modules to find headers
 target_include_directories(shared PUBLIC
@@ -29,5 +33,3 @@ target_link_libraries(shared
         Qt5::Gui
 )
 
-# include_directories(/apps/spack-managed/gcc-11.3.1/mesa-glu-9.0.2-jt4lynuhi3xlsnsm6v77irx4g2dxujui/include)
-include_directories(/scratch4/NAGAPE/epic/Wei.Huang/conda-env/weienv/include)

@@ -342,6 +342,7 @@ void UFS2dViewer::_sphereDisplay()
 
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   //#pragma omp parallel for
     if(k < _nlev || 1 == _nlev) {
@@ -397,6 +398,7 @@ void UFS2dViewer::_flatDisplay()
     glEnable(GL_NORMALIZE);
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glNormal3f(0.0, 0.0, -1.0);
 
     if(k < _nlev || 1 == _nlev) {
@@ -869,7 +871,6 @@ void UFS2dViewer::_sphereBump()
 
     k1 = nvoptions->get_zsec()+1;
     k = _nlev-k1;
-
   //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\t_varname: <" << _varname << ">, lev = " << k << endl;
 
@@ -927,7 +928,7 @@ void UFS2dViewer::_sphereBump()
         _lonlat2xyz(_lon[0], _lat[j-1], radius + magnifier*fact, fact);
         glEnd();
     }
-    coastline->drawOnPlane(0.01);
+    coastline->drawOnSphere(0.01);
     }
 
     glPopMatrix();

@@ -23,13 +23,18 @@ Earth::Earth()
 
     deg2arc = 3.1415926535897932 / 180.0;
 
-    read_terrain();
+    // read_terrain();
 }
 
 Earth::Earth(const char *flnm)
 {
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tflnm: <" << flnm << ">" << endl;
+    initializeGL();
     strcpy(_bmpflnm, flnm);
+    // cout << "\t_bmpflnm: <" << _bmpflnm << ">" << endl;
     _loadTexBMP();
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 Earth::Earth(const char *flnm, ncReader* nchandler)
@@ -98,6 +103,7 @@ Earth::~Earth()
 void Earth::initializeGL() {
     initializeOpenGLFunctions(); // This "activates" the function pointers
     // ...
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 void Earth::_fatal(const char* format , ...)
@@ -131,11 +137,13 @@ void Earth::_loadTexBMP()
 {
     GLuint textureID = 0;
 
-  //cout << "enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tfunctions: _bmpflnm: <" << _bmpflnm << ">" << endl;
+    // cout << "enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\t_bmpflnm: <" << _bmpflnm << ">" << endl;
 
     // Load the image
     QImage b(_bmpflnm);
+
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     if (b.isNull()) {
         qDebug() << "Failed to load image";
@@ -144,22 +152,28 @@ void Earth::_loadTexBMP()
   //    qDebug() << "Image loaded successfully" << b.size();
   //}
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // Guard check: ensures an OpenGL context is bound to this thread
+    if (QOpenGLContext::currentContext() == nullptr) {
+        cerr << "ERROR: Attempted to run OpenGL commands without an active context bound!" << endl;
+        return; // Safely back out instead of segfaulting
+    }
 
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     glEnable(GL_TEXTURE_2D);
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     
     QImage t = QGLWidget::convertToGLFormat( b );
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     glGenTextures(1, &textureID);
 
     // set texture name
     set_texture_id(textureID);
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\tt.width(): " << t.width() << ", t.height(): " << t.height() << endl;
 
     glBindTexture(GL_TEXTURE_2D, textureID);
@@ -170,7 +184,7 @@ void Earth::_loadTexBMP()
     glTexImage2D(GL_TEXTURE_2D, 0, 3, t.width(), t.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, t.bits());
     glGenerateMipmap(GL_TEXTURE_2D);  //Generate mipmaps now!!!
     glDisable(GL_TEXTURE_2D);
-  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 // Draw vertex in polar coordinates
@@ -180,7 +194,10 @@ void Earth::_Vertex(int th, int ph)
    double y = radius*Sin((double)ph);
    double z = radius*Cos((double)th)*Cos((double)ph);
    glNormal3d(x,y,z);
-   glTexCoord2d((double)th/360.0, 0.5+(double)ph/180.0);
+   if(th >= 0)
+       glTexCoord2d(0.5+(double)th/360.0, 0.5+(double)ph/180.0);
+   else
+       glTexCoord2d(0.5+(double)th/360.0, 0.5+(double)ph/180.0);
    glVertex3d(x,y,z);
 }
 
@@ -196,7 +213,9 @@ void Earth::draw(float r)
 // Draw earth
 void Earth::draw()
 {
-    int i,j;
+    int i,j,intv;
+
+    intv = 2;
 
     //  Draw surface of the planet
     //  Set texture
@@ -204,13 +223,13 @@ void Earth::draw()
     glBindTexture(GL_TEXTURE_2D, get_texture_id());
     //  Latitude bands
     glColor3f(1,1,1);
-    for(j = 90; j > -90; j -= 2)
+    for(j = 90; j > -90; j -= intv)
     {
        glBegin(GL_QUAD_STRIP);
-       for(i = 0; i <= 360; i += 2)
+       for(i = -180; i <= 180; i += intv)
        {
            _Vertex(i,j);
-           _Vertex(i,j-5);
+           _Vertex(i,j-intv);
        }
        glEnd();
     }

@@ -1,24 +1,60 @@
+#include "mpidemoparser.h"
+#include "ufsparser.h"
+#include "ufsincrparser.h"
 #include "mainwindow.h"
 
-MainWindow::MainWindow(string flnm, bool isList,
-                       string camse_mfnm, NVOptions* opt)
+MainWindow::MainWindow(string yamlfile)
 {
+    nvoptions = new NVOptions();
     QDesktopWidget *desktop = QApplication::desktop();
 
-  //cout << "\nEnter MainWindow: file: " << __FILE__ << ", line: " << __LINE__ << endl;
-
-    isFileList = isList;
-    fileName = QString(flnm.c_str());
-    camse_mappingFilename = camse_mfnm;
-    nvoptions = opt;
+    ModelType userConfig = ModelType::NOMODEL;
 
     screenWidth = desktop->width();
     screenHeight = desktop->height(); 
 
+    YAMLHandler *yamlHandler = new YAMLHandler(yamlfile.c_str());
+    yamlHandler->read_yaml();
+
+    nvoptions = new NVOptions();
+
+    string tmpstr = yamlHandler->get_model();
+    // cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\ttmpstr: " << tmpstr << endl;
+    if(0 == tmpstr.compare("ufs"))
+    {
+        nvoptions->set_model(UFS);
+        userConfig = ModelType::UFS;
+    }
+    else if(0 == tmpstr.compare("ufsincr"))
+    {
+        nvoptions->set_model(UFSINCR);
+        userConfig = ModelType::UFSINCR;
+    }
+    else if(0 == tmpstr.compare("mpidemo"))
+    {
+        nvoptions->set_model(MPIDEMO);
+        userConfig = ModelType::MPIDEMO;
+    }
+    else if(0 == tmpstr.compare("pop"))
+    {
+        nvoptions->set_model(POP);
+    }
+    else if(0 == tmpstr.compare("mpas"))
+    {
+        nvoptions->set_model(MPAS);
+        userConfig = ModelType::MPAS;
+    }
+    else if(0 == tmpstr.compare("wrf"))
+    {
+        nvoptions->set_model(WRF);
+    }
+
+    // cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
+
     nInstance = 0;
     numberOfWidget = 0;
-
-  //cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     createActions();
     createMenus();
@@ -26,28 +62,43 @@ MainWindow::MainWindow(string flnm, bool isList,
     setMinimumSize(480, 320);
     resize(960, 640);
 
-  //cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-
     light = new Light();
-
-  //cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     locator = new Locator();
 
-  //cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-
     colorTable = new ColorTable();
-
-  //cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     controlPanel = new ControlWidget();
     display = new DisplayWidget();
 
-  //cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+
+    // Use the factory to generate the object
+    myParser = ModelParserFactory::createParser(userConfig);
+
+    if (myParser) {
+        // cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+        // Polymorphism handles execution automatically
+        myParser->parse(yamlHandler, nvoptions, colorTable,
+			controlPanel, locator, light);
+        // cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+        translator = myParser->get_translator();
+        // cout << "\ttranslator: " << translator << endl;
+        // cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    } else {
+        cerr << "Unknown Model." << endl;
+    }
+
+    // cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\ttranslator: " << translator << endl;
+
+    // unordered_map<string, function<unique_ptr<ModelParser>()>> registry;
+
+    // cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     _setup();
 
-  //cout << "Leave MainWindow: file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave MainWindow: file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 MainWindow::~MainWindow()
@@ -58,71 +109,65 @@ MainWindow::~MainWindow()
     delete colorTable;
     delete controlPanel;
     delete display;
+    delete nvoptions;
   //cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::_setup()
 {
-  //cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-
+    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+       cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
+    // cout << "\tMPIDEMO: " << MPIDEMO << endl;
+    // cout << "\tUFS: " << UFS << endl;
+       cout << "\tUFSINCR: " << UFSINCR << endl;
     switch(nvoptions->get_model())
     {
-      //case CAMSE:
-      //    camse();
+        case UFS:
+            // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+            setWindowTitle(tr("UFS MODEL"));
+            ufs();
+            break;
+        case UFSINCR:
+            // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+            setWindowTitle(tr("UFS MODEL"));
+            ufsincr();
+            break;
+        case MPIDEMO:
+            // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+            setWindowTitle(tr("NV to demo MPI"));
+            mpidemo();
+            break;
+      //case MPAS:
+      //    mpas();
       //    break;
       //case POP:
       //    pop();
       //    break;
-      //case MPAS:
-      //    mpas();
-      //    break;
       //case WRF:
-          //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
       //    wrf();
       //    break;
-        case UFS:
-          //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
-            ufs();
-            break;
-      //case RADX:
-      //    radx();
-      //    break;
-      //case VTK:
-      //    vtk();
-      //    break;
-        case TEST:
-            test();
-            break;
-        case MPIDEMO:
+        default:
             mpidemo();
             break;
-      //case HDF:
-      //    hdf();
-      //    break;
-        default:
-            general();
-            break;
     }
-  //cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+
+    // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 {
+    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     QMenu menu(this);
 
-    menu.addAction(generalAct);
   //menu.addAction(wrfAct);
     menu.addAction(ufsAct);
+    menu.addAction(ufsincrAct);
   //menu.addAction(mpasAct);
-  //menu.addAction(camseAct);
   //menu.addAction(popAct);
-  //menu.addAction(hdfAct);
-  //menu.addAction(radxAct);
-  //menu.addAction(vtkAct);
-    menu.addAction(testAct);
     menu.addAction(mpidemoAct);
 
     menu.exec(event->globalPos());
+    // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::newFile()
@@ -131,7 +176,7 @@ void MainWindow::newFile()
 
 void MainWindow::open()
 {
-    fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
                                                     QDir::currentPath());
 
   //fprintf(stderr, "\nFile: %s, line: %d\n", __FILE__, __LINE__);
@@ -156,80 +201,6 @@ void MainWindow::redo()
 
 void MainWindow::_setup_controlPanel()
 {
-    translator->setup();
-    translator->set_light(light);
-    translator->set_locator(locator);
-
-    controlPanel->set_colortable(colorTable);
-    controlPanel->set_translator(translator);
-    controlPanel->setup();
-
-    switch(nvoptions->get_model())
-    {
-        case WRF:
-           //controlPanel->selectNCL();
-           //controlPanel->disable_ncl();
-             break;
-        case UFS:
-           //controlPanel->selectNCL();
-           //controlPanel->disable_ncl();
-             break;
-        case POP:
-           //controlPanel->disable_ncl();
-             controlPanel->disable_bump();
-             controlPanel->disable_onmap();
-             controlPanel->disable_sphere();
-             break;
-        case MPAS:
-           //controlPanel->disable_ncl();
-             controlPanel->disable_bump();
-             controlPanel->disable_onmap();
-             controlPanel->disable_sphere();
-           //controlPanel->disable_surface();
-             controlPanel->disable_x2();
-             controlPanel->disable_y2();
-             controlPanel->disable_z2();
-             controlPanel->disable_t2();
-             break;
-        case CAMSE:
-           //controlPanel->disable_ncl();
-             controlPanel->disable_onmap();
-             controlPanel->disable_sphere();
-           //controlPanel->disable_surface();
-             break;
-        case RADX:
-           //controlPanel->disable_ncl();
-             controlPanel->disable_onmap();
-             controlPanel->disable_sphere();
-             controlPanel->disable_flat();
-             controlPanel->disable_x2();
-             controlPanel->disable_y2();
-             controlPanel->disable_z2();
-             controlPanel->disable_t2();
-             break;
-        case MPIDEMO:
-           //controlPanel->disable_ncl();
-             controlPanel->disable_onmap();
-             controlPanel->disable_sphere();
-             controlPanel->disable_flat();
-             controlPanel->disable_x2();
-             controlPanel->disable_y2();
-             controlPanel->disable_z2();
-             controlPanel->disable_t2();
-             translator->updateSliders();
-             break;
-        case HDF:
-           //controlPanel->disable_ncl();
-             controlPanel->disable_bump();
-             controlPanel->disable_onmap();
-             controlPanel->disable_sphere();
-             break;
-        default:
-           //controlPanel->disable_ncl();
-             controlPanel->disable_flat();
-             break;
-    }
-
     controlPanel->move(0, 0);
     controlPanel->show();
 }
@@ -237,29 +208,22 @@ void MainWindow::_setup_controlPanel()
 void MainWindow::_setup_display()
 {
     int x, y;
+    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     x = screenWidth / 2;
     y = screenHeight / 2;
 
     setCentralWidget(display);
+    // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     display->set_translator(translator);
+    // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     display->setup();
+    // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     display->move(x, y);
+    // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     display->show();
-}
-
-void MainWindow::general()
-{
-    general_translator = new GeneralTranslator(colorTable, nvoptions,
-                                               fileName.toStdString(),
-                                               isFileList);
-    translator = general_translator;
-
-    setWindowTitle(tr("NV"));
-
-    _setup_controlPanel();
-    _setup_display();
+    // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 /*
@@ -278,125 +242,8 @@ void MainWindow::wrf()
 }
 */
 
-void MainWindow::ufs()
-{
-    ufs_translator = new UFSTranslator(colorTable, nvoptions,
-                                       fileName.toStdString(),
-                                       isFileList);
-    translator = ufs_translator;
-
-    setWindowTitle(tr("NV for UFS"));
-
-    _setup_controlPanel();
-
-    _setup_display();
-}
-
-/*
-void MainWindow::mpas()
-{
-    mpas_translator = new MPASTranslator(colorTable, nvoptions,
-                                         fileName.toStdString(),
-                                         isFileList);
-
-    translator = mpas_translator;
-
-    setWindowTitle(tr("NV for MPAS"));
-
-    _setup_controlPanel();
-    _setup_display();
-}
-
-void MainWindow::camse()
-{
-  //cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-
-    camse_translator = new CAMseTranslator(colorTable, nvoptions,
-                                           fileName.toStdString(),
-                                           isFileList,
-                                           camse_mappingFilename);
-    translator = camse_translator;
-
-    setWindowTitle(tr("NV for CAM-SE"));
-
-  //cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    _setup_controlPanel();
-  //cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    _setup_display();
-
-  //cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-}
-
-void MainWindow::pop()
-{
-    pop_translator = new POPTranslator(colorTable, nvoptions,
-                                       fileName.toStdString(),
-                                       isFileList);
-    translator = pop_translator;
-
-    setWindowTitle(tr("NV for POP"));
-
-    _setup_controlPanel();
-    _setup_display();
-}
-*/
-
-#ifdef UseRADX
-void MainWindow::radx()
-{
-    nvoptions->set_zsec(0);
-
-    radx_translator = new RadxTranslator(colorTable, nvoptions,
-                                         fileName.toStdString(),
-                                         isFileList);
-
-    translator = radx_translator;
-
-    setWindowTitle(tr("NV for RADX"));
-
-    _setup_controlPanel();
-    _setup_display();
-}
-#endif
-
-#if 0
-void MainWindow::vtk()
-{
-    vtk_translator = new VTKTranslator(colorTable, nvoptions,
-                                       fileName.toStdString(),
-                                       isFileList);
-    translator = vtk_translator;
-
-    setWindowTitle(tr("NV for VTK"));
-
-    _setup_controlPanel();
-    _setup_display();
-}
-#endif
-
-void MainWindow::test()
-{
-    test_translator = new TestTranslator(colorTable, nvoptions,
-                                         fileName.toStdString(),
-                                         isFileList);
-
-    translator = test_translator;
-
-    setWindowTitle(tr("NV for TEST"));
-
-    _setup_controlPanel();
-
-    _setup_display();
-}
-
 void MainWindow::mpidemo()
 {
-    mpidemo_translator = new MPITranslator(colorTable, nvoptions,
-                                         fileName.toStdString(),
-                                         isFileList);
-
-    translator = mpidemo_translator;
-
     setWindowTitle(tr("NV to demo MPI"));
 
     _setup_controlPanel();
@@ -404,20 +251,23 @@ void MainWindow::mpidemo()
     _setup_display();
 }
 
-/*
-void MainWindow::hdf()
+void MainWindow::ufs()
 {
-    hdf_translator = new HDFTranslator(colorTable, nvoptions,
-                                       fileName.toStdString(),
-                                       isFileList);
-    translator = hdf_translator;
-
-    setWindowTitle(tr("NV for HDF"));
+    setWindowTitle(tr("NV for UFS"));
 
     _setup_controlPanel();
+
     _setup_display();
 }
-*/
+
+void MainWindow::ufsincr()
+{
+    setWindowTitle(tr("NV for UFS Tiled Increment"));
+
+    _setup_controlPanel();
+
+    _setup_display();
+}
 
 void MainWindow::about()
 {
@@ -428,6 +278,7 @@ void MainWindow::about()
 
 void MainWindow::createActions()
 {
+    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     newAct = new QAction(tr("&New"), this);
     newAct->setShortcuts(QKeySequence::New);
     newAct->setStatusTip(tr("Create a new file"));
@@ -462,11 +313,6 @@ void MainWindow::createActions()
     aboutAct->setStatusTip(tr("Show the application's About box"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
-    generalAct = new QAction(tr("&General"), this);
-  //generalAct->setShortcut(QKeySequence::Global);
-    generalAct->setStatusTip(tr("Try to activate 'general' application"));
-    connect(generalAct, SIGNAL(triggered()), this, SLOT(general()));
-
   //wrfAct = new QAction(tr("&WRF"), this);
   //wrfAct->setShortcut(QKeySequence::Global);
   //wrfAct->setStatusTip(tr("Try to activate 'wrf' application"));
@@ -477,49 +323,22 @@ void MainWindow::createActions()
     ufsAct->setStatusTip(tr("Try to activate 'ufs' application"));
     connect(ufsAct, SIGNAL(triggered()), this, SLOT(ufs()));
 
-  //mpasAct = new QAction(tr("&MPAS"), this);
-  //mpasAct->setShortcut(QKeySequence::Global);
-  //mpasAct->setStatusTip(tr("Try to activate 'mpas' application"));
-  //connect(mpasAct, SIGNAL(triggered()), this, SLOT(mpas()));
-
-  //camseAct = new QAction(tr("&CAMse"), this);
-  //camseAct->setShortcut(QKeySequence::Global);
-  //camseAct->setStatusTip(tr("Try to activate 'camse' application"));
-  //connect(camseAct, SIGNAL(triggered()), this, SLOT(camse()));
+    ufsincrAct = new QAction(tr("&UFS"), this);
+  //ufsincrAct->setShortcut(QKeySequence::Global);
+    ufsincrAct->setStatusTip(tr("Try to activate 'ufsincr' application"));
+    connect(ufsincrAct, SIGNAL(triggered()), this, SLOT(ufsincr()));
 
   //popAct = new QAction(tr("&POP"), this);
   //popAct->setShortcut(QKeySequence::Global);
   //popAct->setStatusTip(tr("Try to activate 'pop' application"));
   //connect(popAct, SIGNAL(triggered()), this, SLOT(pop()));
 
-#ifdef UseRADX
-    radxAct = new QAction(tr("&RADX"), this);
-  //radxAct->setShortcut(QKeySequence::Global);
-    radxAct->setStatusTip(tr("Try to activate 'radx' application"));
-    connect(radxAct, SIGNAL(triggered()), this, SLOT(radx()));
-#endif
-
-#if 0
-    vtkAct = new QAction(tr("&VTK"), this);
-  //vtkAct->setShortcut(QKeySequence::Global);
-    vtkAct->setStatusTip(tr("Try to activate 'vtk' application"));
-    connect(vtkAct, SIGNAL(triggered()), this, SLOT(vtk()));
-#endif
-
-    testAct = new QAction(tr("&TEST"), this);
-  //testAct->setShortcut(QKeySequence::Global);
-    testAct->setStatusTip(tr("Try to activate 'test' application"));
-    connect(testAct, SIGNAL(triggered()), this, SLOT(test()));
-
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     mpidemoAct = new QAction(tr("&MPIDEMO"), this);
   //mpidemoAct->setShortcut(QKeySequence::Global);
     mpidemoAct->setStatusTip(tr("Try to activate 'mpidemo' application"));
     connect(mpidemoAct, SIGNAL(triggered()), this, SLOT(mpidemo()));
-
-  //hdfAct = new QAction(tr("&HDF"), this);
-  //hdfAct->setShortcut(QKeySequence::Global);
-  //hdfAct->setStatusTip(tr("Try to activate 'hdf' application"));
-  //connect(hdfAct, SIGNAL(triggered()), this, SLOT(hdf()));
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     animationAct = new QAction(tr("&Animation"), this);
   //animationAct->setShortcut(QKeySequence::Global);
@@ -580,10 +399,12 @@ void MainWindow::createActions()
   //lightAct->setShortcut(QKeySequence::Global);
     lightAct->setStatusTip(tr("Activate light"));
     connect(lightAct, SIGNAL(triggered()), this, SLOT(light_func()));
+    // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::createMenus()
 {
+    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     fileMenu = menuBar()->addMenu(tr("&File"));
   //fileMenu->addAction(newAct);
 
@@ -598,16 +419,11 @@ void MainWindow::createMenus()
     editMenu->addSeparator();
 
     appsMenu = menuBar()->addMenu(tr("&PlotTypes"));
-    appsMenu->addAction(generalAct);
   //appsMenu->addAction(wrfAct);
     appsMenu->addAction(ufsAct);
+    appsMenu->addAction(ufsincrAct);
   //appsMenu->addAction(mpasAct);
-  //appsMenu->addAction(camseAct);
   //appsMenu->addAction(popAct);
-  //appsMenu->addAction(hdfAct);
-  //appsMenu->addAction(radxAct);
-  //appsMenu->addAction(vtkAct);
-    appsMenu->addAction(testAct);
     appsMenu->addAction(mpidemoAct);
     appsMenu->addSeparator();
 
@@ -628,6 +444,7 @@ void MainWindow::createMenus()
 
     helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(aboutAct);
+    // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::animation_func()
@@ -684,7 +501,6 @@ void MainWindow::inspector_func()
     {
         case POP:
         case MPAS:
-        case CAMSE:
              inspectorWidget->set_lon(360);
              inspectorWidget->set_lat(180);
              break;
