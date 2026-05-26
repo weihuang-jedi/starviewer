@@ -97,9 +97,16 @@ UFSINCR2dViewer::~UFSINCR2dViewer()
 
 void UFSINCR2dViewer::set_geometry(vector<UFSINCRGeometry*> gm)
 {
-    geometry = gm;
-
+    int n;
+    // cout << "\nEnter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "gm.size(): " << gm.size() << endl;
+    geometry.resize(gm.size());
+    for(n=0; n<_ntiles; ++n)
+    {
+	geometry[n] = gm[n];
+    }
     _initialize();
+    // cout << "Leave" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFSINCR2dViewer::setup(string vn, vector<float*> var)
@@ -130,16 +137,21 @@ void UFSINCR2dViewer::reset()
 
 void UFSINCR2dViewer::_initialize()
 {
-    int i, j, m, n;
+    int n;
+    double* xs;
+    double* ys;
+    double* zs;
 
-    int positive;
-    int negative;
-
+    // cout << "\nEnter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\t_ntiles: " << _ntiles << endl;
     previoustimelevel = -1;
 
     _nlon = geometry[0]->getNlon();
     _nlat = geometry[0]->getNlat();
     _nlev = ncfile[0]->getNz();
+
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\t_nlon: " << _nlon << ", _nlat: " << _nlat << ", _nlev: " << _nlev << endl;
 
   //lister->reinitialize(361, 181, _nlev);
 
@@ -151,6 +163,7 @@ void UFSINCR2dViewer::_initialize()
     _ySphere.resize(_ntiles);
     _zSphere.resize(_ntiles);
 
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     for(n=0; n<_ntiles; ++n)
     {
         _lon[n] = geometry[n]->get_geolon();
@@ -160,10 +173,24 @@ void UFSINCR2dViewer::_initialize()
         _xFlat[n] = geometry[n]->get_xFlat();
         _yFlat[n] = geometry[n]->get_yFlat();
 
-        _xSphere[n] = geometry[n]->get_xSphere();
-        _ySphere[n] = geometry[n]->get_ySphere();
-        _zSphere[n] = geometry[n]->get_zSphere();
+        // _xSphere[n] = geometry[n]->get_xSphere();
+        // _ySphere[n] = geometry[n]->get_ySphere();
+        // _zSphere[n] = geometry[n]->get_zSphere();
+        xs = geometry[n]->get_xSphere();
+        ys = geometry[n]->get_ySphere();
+        zs = geometry[n]->get_zSphere();
+
+        _xSphere[n] = xs;
+        _ySphere[n] = ys;
+        _zSphere[n] = zs;
+
+        // cout << "\tn = " << n << endl;
+        // cout << "\tlon = " << _lon[n][0] << ", lat = " << _lat[n][0] << endl;
+        // cout << "\txf = " << _xFlat[n][0] << ", yf = " << _yFlat[n][0] << endl;
+        // cout << "\txs = " << _xSphere[n][0] << ", ys = " << _ySphere[n][0] << ", zs = " << _zSphere[n][0] << endl;
+        // cout << "\txs = " << xs[0]<< ", ys = " << ys[0] << ", zs = " << zs[0] << endl;
     }
+    // cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFSINCR2dViewer::draw()
@@ -209,24 +236,19 @@ void UFSINCR2dViewer::draw()
         _valmax = nvoptions->get_truemaximum();
     }
 #endif
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\t" << "current_timelevel: " << current_timelevel << endl;
-    cout << "\t" << "_nlon: " << _nlon << endl;
-    cout << "\t" << "_nlat: " << _nlat << endl;
-    cout << "\t" << "_nlev: " << _nlev << endl;
-    cout << "\t" << "_ntiles: " << _ntiles << endl;
-    cout << "\t" << "_var.size(): " << _var.size() << endl;
-    cout << "\t" << "pltvar.size(): " << pltvar.size() << endl;
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\t" << "current_timelevel: " << current_timelevel << endl;
+    // cout << "\t" << "_nlon: " << _nlon << endl;
+    // cout << "\t" << "_nlat: " << _nlat << endl;
+    // cout << "\t" << "_nlev: " << _nlev << endl;
+    // cout << "\t" << "_ntiles: " << _ntiles << endl;
+    // cout << "\t" << "_var.size(): " << _var.size() << endl;
+    // cout << "\t" << "pltvar.size(): " << pltvar.size() << endl;
 
   //pltvar = &_var[current_timelevel * _nlon * _nlat];
     for(int n=0; n<_ntiles; ++n)
     {
         pltvar[n] = &_var[n][current_timelevel * _nlon * _nlat * _nlev];
-        cout << "\t" << "Tile #" << n << "]: " << n << endl;
-        cout << "\t" << "_lon[" << n << "][0]: " << _lon[n][0] << endl;
-        cout << "\t" << "_lat[" << n << "][0]: " << _lat[n][0] << endl;
-        cout << "\t" << "_var[" << n << "][0]: " << _var[n][0] << endl;
-        cout << "\t" << "pltvar[" << n << "][0]: " << pltvar[n][0] << endl;
     }
 
     // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -244,7 +266,6 @@ void UFSINCR2dViewer::draw()
 
     if(nvoptions->get_cb(NV_BUMPON))
     {
-        cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
         if(nvoptions->get_cb(NV_FLATON))
         {
             if(zcl)
@@ -254,7 +275,6 @@ void UFSINCR2dViewer::draw()
         }
         else
         {
-        cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
             if(zcl)
                 glCallList(zcl);
             else
@@ -263,13 +283,10 @@ void UFSINCR2dViewer::draw()
     }
     else
     {
-        cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
         if(nvoptions->get_cb(NV_FLATON))
         {
             if(nvoptions->get_zsec() < _nlev)
             {
-                cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-                cout << "\t call  _flatDisplay()" << endl;
                 if(zcl)
                     glCallList(zcl);
                 else
@@ -298,8 +315,6 @@ void UFSINCR2dViewer::draw()
         {
             if(nvoptions->get_zsec() < _nlev)
             {
-                cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-                cout << "\t call  _sphereDisplay()" << endl;
                 if(zcl)
                     glCallList(zcl);
                 else
@@ -327,8 +342,6 @@ void UFSINCR2dViewer::draw()
     }
 
     glFlush();             // Force the command queue to execute
-
-    // cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFSINCR2dViewer::_flatVertex(double x, double y, double z,
@@ -340,7 +353,19 @@ void UFSINCR2dViewer::_flatVertex(double x, double y, double z,
     else if(alpha > 1.0)
         alpha = 1.0;
 
-    glColor4d(fact, fact, fact, alpha);
+    // glColor4d(fact, fact, fact, alpha);
+    if(fact > 0.0)
+    {
+        if(fact > 1.0)
+           fact = 1.0;
+        glColor4d(fact, 0.0, 0.0, alpha);
+    }
+    else
+    {
+        if(fact < -1.0)
+           fact = -1.0;
+        glColor4d(0.0, 0.0, -fact, alpha);
+    }
     glNormal3d(x, y, z);
     glVertex3d(x, y, z);
 }
@@ -356,13 +381,25 @@ void UFSINCR2dViewer::_flatVertex_texture(double x, double y, double z,
 void UFSINCR2dViewer::_sphereVertex(double x, double y, double z,
 		                    double radius, double fact)
 {
-    double alpha = 1.05 * fact;
+    double alpha = 1.05 * abs(fact);
     if(alpha < 0.1)
         alpha = 0.0;
     else if(alpha > 1.0)
         alpha = 1.0;
 
-    glColor4d(fact, fact, fact, alpha);
+    // glColor4d(fact, fact, fact, alpha);
+    if(fact > 0.0)
+    {
+	if(fact > 1.0)
+	   fact = 1.0;
+        glColor4d(fact, 0.0, 0.0, alpha);
+    }
+    else
+    {
+	if(fact < -1.0)
+	   fact = -1.0;
+        glColor4d(0.0, 0.0, -fact, alpha);
+    }
     glNormal3d(x, y, z);
     glVertex3d(x * radius, y * radius, z * radius);
 }
@@ -370,6 +407,10 @@ void UFSINCR2dViewer::_sphereVertex(double x, double y, double z,
 void UFSINCR2dViewer::_sphereVertex_texture(double x, double y, double z,
 		                            double radius, double fact)
 {
+    if(fact > 1.0)
+        fact = 1.0;
+    else if(fact < 0.0)
+        fact = 0.0;
     glTexCoord1d(fact);
     glNormal3f(x, y, z);
     glVertex3d(x * radius, y * radius, z * radius);
@@ -379,15 +420,20 @@ void UFSINCR2dViewer::_sphereDisplay()
 {
     int i, j, k, k1, n;
     size_t mpos, npos;
+    size_t mgeo, ngeo;
 
     double sv = 1.0;
     double fact;
     double radius = 1.001;
 
+    float adjust_factor = 8.0;
+    float adjust_minval = _valmin/adjust_factor;
+
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     k1 = nvoptions->get_zsec()+1;
     k = _nlev-k1;
     radius = _k2r(k);
-    sv = 1.0 / (_valmax - _valmin);
+    sv = adjust_factor / (_valmax - _valmin);
 
     zcl = glGenLists(1);
   //glNewList(zcl, GL_COMPILE);
@@ -405,6 +451,9 @@ void UFSINCR2dViewer::_sphereDisplay()
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tk = " << k << ", radius = " << radius << endl;
+    // cout << "\t_valmin = " << _valmin << ", _valmax = " << _valmax << endl;
   //#pragma omp parallel for
     if(k < _nlev || 1 == _nlev)
     {
@@ -414,24 +463,26 @@ void UFSINCR2dViewer::_sphereDisplay()
         {
           mpos = (k*_nlat + (j-1))*_nlon;
           npos = (k*_nlat + j)*_nlon;
+          mgeo = (j-1)*_nlon;
+          ngeo = j*_nlon;
           glBegin(GL_QUAD_STRIP);
           for(i = 0; i < _nlon; ++i)
           {
-            fact = sv * (pltvar[n][npos+i] - _valmin);
-            _sphereVertex_texture(_xSphere[n][npos+i], _ySphere[n][npos+i],
-			          _zSphere[n][npos+i], radius, fact);
+            fact = sv * (pltvar[n][npos+i] - adjust_minval);
+            _sphereVertex_texture(_xSphere[n][ngeo+i], _ySphere[n][ngeo+i],
+			          _zSphere[n][ngeo+i], radius, fact);
 
-            fact = sv * (pltvar[n][mpos+i] - _valmin);
-            _sphereVertex_texture(_xSphere[n][mpos+i], _ySphere[n][mpos+i],
-                                  _zSphere[n][mpos+i], radius, fact);
+            fact = sv * (pltvar[n][mpos+i] - adjust_minval);
+            _sphereVertex_texture(_xSphere[n][mgeo+i], _ySphere[n][mgeo+i],
+                                  _zSphere[n][mgeo+i], radius, fact);
           }
-          fact = sv * (pltvar[n][npos] - _valmin);
-          _sphereVertex_texture(_xSphere[n][npos], _ySphere[n][npos],
-                                _zSphere[n][npos], radius, fact);
+          fact = sv * (pltvar[n][npos] - adjust_minval);
+          _sphereVertex_texture(_xSphere[n][ngeo], _ySphere[n][ngeo],
+                                _zSphere[n][ngeo], radius, fact);
 
-          fact = sv * (pltvar[n][mpos] - _valmin);
-          _sphereVertex_texture(_xSphere[n][mpos], _ySphere[n][mpos],
-                                _zSphere[n][mpos], radius, fact);
+          fact = sv * (pltvar[n][mpos] - adjust_minval);
+          _sphereVertex_texture(_xSphere[n][mgeo], _ySphere[n][mgeo],
+                                _zSphere[n][mgeo], radius, fact);
           glEnd();
         }
       }
@@ -441,20 +492,25 @@ void UFSINCR2dViewer::_sphereDisplay()
     glDisable(GL_TEXTURE_1D);
     glPopMatrix();
     glEndList();
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void UFSINCR2dViewer::_flatDisplay()
 {
     int i, j, k, k1, n;
     size_t mpos, npos;
+    size_t mgeo, ngeo;
     double sv = 1.0;
     double fact;
     double height = 0.0;
 
+    float adjust_factor = 8.0;
+    float adjust_minval = _valmin/adjust_factor;
+
     k1 = nvoptions->get_zsec()+1;
     k = _nlev-k1;
     height = _k2h(k);
-    sv = 1.0 / (_valmax - _valmin);
+    sv = adjust_factor / (_valmax - _valmin);
 
     zcl = glGenLists(1);
   //glNewList(zcl, GL_COMPILE);
@@ -478,15 +534,17 @@ void UFSINCR2dViewer::_flatDisplay()
         {
           mpos = (k*_nlat+(j-1))*_nlon;
           npos = (k*_nlat+j)*_nlon;
+          mgeo = (j-1)*_nlon;
+          ngeo = j*_nlon;
           glBegin(GL_QUAD_STRIP);
           for(i = 0; i < _nlon; ++i)
           {
-            fact = sv * (pltvar[n][npos+i] - _valmin);
-	    _flatVertex_texture(_xFlat[n][npos+i], _yFlat[n][npos+i],
+            fact = sv * (pltvar[n][npos+i] - adjust_minval);
+	    _flatVertex_texture(_xFlat[n][ngeo+i], _yFlat[n][ngeo+i],
 			        height, fact);
 
-            fact = sv * (pltvar[n][mpos+i] - _valmin);
-	    _flatVertex_texture(_xFlat[n][mpos+i], _yFlat[n][mpos+i],
+            fact = sv * (pltvar[n][mpos+i] - adjust_minval);
+	    _flatVertex_texture(_xFlat[n][mgeo+i], _yFlat[n][mgeo+i],
 			        height, fact);
           }
           glEnd();
@@ -711,7 +769,7 @@ void UFSINCR2dViewer::draw_plane_grids()
 void UFSINCR2dViewer::_display_Yflat_plane(int ys)
 {
     int i, k, n;
-    size_t mpos, npos;
+    size_t mpos, npos, ngeo;
     double fact;
     double sv = 1.0;
     vector<double> height(_nlev);
@@ -744,16 +802,17 @@ void UFSINCR2dViewer::_display_Yflat_plane(int ys)
       {
         mpos = ((k-1)*_nlat+j)*_nlon;
         npos = (k*_nlat+j)*_nlon;
+        ngeo = j*_nlon;
 
         glBegin(GL_QUAD_STRIP);
         for(i = 0; i < _nlon; ++i)
         {
             fact = sv * (pltvar[n][mpos+i] - _valmin);
-	    _flatVertex_texture(_xFlat[n][mpos+i], _yFlat[n][mpos+i],
+	    _flatVertex_texture(_xFlat[n][ngeo+i], _yFlat[n][ngeo+i],
 			        height[k-1], fact);
 
             fact = sv * (pltvar[n][npos+i] - _valmin);
-	    _flatVertex_texture(_xFlat[n][npos+i], _yFlat[n][npos+i],
+	    _flatVertex_texture(_xFlat[n][ngeo+i], _yFlat[n][ngeo+i],
 			        height[k], fact);
         }
         glEnd();
@@ -768,7 +827,7 @@ void UFSINCR2dViewer::_display_Yflat_plane(int ys)
 void UFSINCR2dViewer::_sphereXplane(int xs)
 {
     int j, k, n;
-    size_t mpos, npos;
+    size_t mpos, npos, ngeo;
     double fact;
     double sv = 1.0;
     double radius[_nlev];
@@ -805,14 +864,15 @@ void UFSINCR2dViewer::_sphereXplane(int xs)
         {
             mpos = ((k-1)*_nlat + j)*_nlon;
             npos = (k*_nlat + j)*_nlon;
+            ngeo = j*_nlon;
 
             fact = sv * (pltvar[n][mpos+i] - _valmin);
-            _sphereVertex_texture(_xSphere[n][npos+i], _ySphere[n][npos+i],
-                                  _zSphere[n][npos+i], radius[k], fact);
+            _sphereVertex_texture(_xSphere[n][ngeo+i], _ySphere[n][ngeo+i],
+                                  _zSphere[n][ngeo+i], radius[k], fact);
 
             fact = sv * (pltvar[n][npos+i] - _valmin);
-            _sphereVertex_texture(_xSphere[n][mpos+i], _ySphere[n][mpos+i],
-                                  _zSphere[n][mpos+i], radius[k-1], fact);
+            _sphereVertex_texture(_xSphere[n][ngeo+i], _ySphere[n][ngeo+i],
+                                  _zSphere[n][ngeo+i], radius[k-1], fact);
         }
         glEnd();
       }
@@ -826,7 +886,7 @@ void UFSINCR2dViewer::_sphereXplane(int xs)
 void UFSINCR2dViewer::_sphereYplane(int ys)
 {
     int i, k, n;
-    size_t mpos, npos;
+    size_t mpos, npos, ngeo;
     double fact;
     double sv = 1.0;
     double radius[_nlev];
@@ -859,24 +919,25 @@ void UFSINCR2dViewer::_sphereYplane(int ys)
       {
         mpos = ((k-1)*_nlat + j)*_nlon;
         npos = (k*_nlat + j)*_nlon;
+        ngeo = j*_nlon;
         glBegin(GL_QUAD_STRIP);
         for(i = 0; i < _nlon; ++i)
         {
             fact = sv * (pltvar[n][npos+i] - _valmin);
-            _sphereVertex_texture(_xSphere[n][npos+i], _ySphere[n][npos+i],
-                                  _zSphere[n][npos+i], radius[k], fact);
+            _sphereVertex_texture(_xSphere[n][ngeo+i], _ySphere[n][ngeo+i],
+                                  _zSphere[n][ngeo+i], radius[k], fact);
 
             fact = sv * (pltvar[n][mpos+i] - _valmin);
-            _sphereVertex_texture(_xSphere[n][mpos+i], _ySphere[n][mpos+i],
-                                  _zSphere[n][mpos+i], radius[k], fact);
+            _sphereVertex_texture(_xSphere[n][ngeo+i], _ySphere[n][ngeo+i],
+                                  _zSphere[n][ngeo+i], radius[k], fact);
         }
         fact = sv * (pltvar[n][npos] - _valmin);
-        _sphereVertex_texture(_xSphere[n][npos], _ySphere[n][npos],
-                                  _zSphere[n][npos], radius[k], fact);
+        _sphereVertex_texture(_xSphere[n][ngeo], _ySphere[n][ngeo],
+                                  _zSphere[n][ngeo], radius[k], fact);
 
         fact = sv * (pltvar[n][mpos] - _valmin);
-        _sphereVertex_texture(_xSphere[n][mpos], _ySphere[n][mpos],
-                              _zSphere[n][mpos], radius[k], fact);
+        _sphereVertex_texture(_xSphere[n][ngeo], _ySphere[n][ngeo],
+                              _zSphere[n][ngeo], radius[k], fact);
         glEnd();
       }
     }
@@ -890,7 +951,7 @@ void UFSINCR2dViewer::_sphereYplane(int ys)
 void UFSINCR2dViewer::_display_Xflat_plane(int xs)
 {
     int j, k, n;
-    size_t mpos, npos;
+    size_t mpos, npos, ngeo;
     double fact;
     double sv = 1.0;
     vector<double> height(_nlev);
@@ -923,13 +984,14 @@ void UFSINCR2dViewer::_display_Xflat_plane(int xs)
         {
             mpos = ((k-1)*_nlat+j)*_nlon;
             npos = (k*_nlat+j)*_nlon;
+            ngeo = j*_nlon;
 
             fact = sv * (pltvar[n][mpos+i] - _valmin);
-	    _flatVertex_texture(_xFlat[n][mpos+i], _yFlat[n][mpos+i],
+	    _flatVertex_texture(_xFlat[n][ngeo+i], _yFlat[n][ngeo+i],
 			        height[k-1], fact);
 
             fact = sv * (pltvar[n][npos+i] - _valmin);
-	    _flatVertex_texture(_xFlat[n][npos+i], _yFlat[n][npos+i],
+	    _flatVertex_texture(_xFlat[n][ngeo+i], _yFlat[n][ngeo+i],
 			        height[k], fact);
         }
         glEnd();
@@ -944,12 +1006,14 @@ void UFSINCR2dViewer::_display_Xflat_plane(int xs)
 void UFSINCR2dViewer::_sphereBump()
 {
     int i, j, k, k1, n;
-    size_t mpos, npos;
+    size_t mpos, npos, mgeo, ngeo;
     double sv = 1.0;
     double alpha, fact;
     double amp = 1.05;
     double magnifier = 0.125;
     double radius = 1.0;
+
+    float adjust_factor = 16.0;
 
     k1 = nvoptions->get_zsec()+1;
     k = _nlev-k1;
@@ -957,7 +1021,7 @@ void UFSINCR2dViewer::_sphereBump()
   //cout << "\t_varname: <" << _varname << ">, lev = " << k << endl;
 
     // sv = 1.0 / (_valmax - _valmin);
-    sv = 1.0 / (_valmax - _valmin);
+    sv = adjust_factor / _scalelength;
 
     zcl = glGenLists(1);
   //glNewList(zcl, GL_COMPILE);
@@ -998,28 +1062,30 @@ void UFSINCR2dViewer::_sphereBump()
         {
           mpos = (k*_nlat + (j-1))*_nlon;
           npos = (k*_nlat + j)*_nlon;
+          mgeo = (j-1)*_nlon;
+          ngeo = j*_nlon;
           glBegin(GL_QUAD_STRIP);
           for(i = 0; i < _nlon; ++i)
           {
-            fact = sv * (pltvar[n][npos+i] - _valmin);
-            _sphereVertex(_xSphere[n][npos+i], _ySphere[n][npos+i],
-                          _zSphere[n][npos+i], radius, fact);
+            fact = sv * pltvar[n][npos+i];
+            _sphereVertex(_xSphere[n][ngeo+i], _ySphere[n][ngeo+i],
+                          _zSphere[n][ngeo+i], radius, fact);
 
-            fact = sv * (pltvar[n][mpos+i] - _valmin);
-            _sphereVertex(_xSphere[n][mpos+i], _ySphere[n][mpos+i],
-                          _zSphere[n][mpos+i], radius, fact);
+            fact = sv * pltvar[n][mpos+i];
+            _sphereVertex(_xSphere[n][mgeo+i], _ySphere[n][mgeo+i],
+                          _zSphere[n][mgeo+i], radius, fact);
           }
-          fact = sv * (pltvar[n][npos] - _valmin);
-          _sphereVertex(_xSphere[n][npos], _ySphere[n][npos],
-                        _zSphere[n][npos], radius, fact);
+          fact = sv * pltvar[n][npos];
+          _sphereVertex(_xSphere[n][ngeo], _ySphere[n][ngeo],
+                        _zSphere[n][ngeo], radius, fact);
 
-          fact = sv * (pltvar[n][mpos] - _valmin);
-          _sphereVertex(_xSphere[n][mpos], _ySphere[n][mpos],
-                        _zSphere[n][mpos], radius, fact);
+          fact = sv * pltvar[n][mpos];
+          _sphereVertex(_xSphere[n][mgeo], _ySphere[n][mgeo],
+                        _zSphere[n][mgeo], radius, fact);
           glEnd();
         }
       }
-      coastline->drawOnSphere(radius+0.01);
+      // coastline->drawOnSphere(radius+0.01);
     }
 
     glPopMatrix();
@@ -1029,12 +1095,15 @@ void UFSINCR2dViewer::_sphereBump()
 void UFSINCR2dViewer::_flatBump()
 {
     int i, j, k, k1, n;
-    size_t mpos, npos;
+    size_t mpos, npos, mgeo, ngeo;
     double sv = 1.0;
     double alpha, fact;
     double amp = 1.05;
     double magnifier = 0.125;
     double rlat;
+
+    float adjust_factor = 16.0;
+    float adjust_minval = _valmin/adjust_factor;
 
     k1 = nvoptions->get_zsec()+1;
     k = _nlev-k1;
@@ -1043,7 +1112,7 @@ void UFSINCR2dViewer::_flatBump()
   //cout << "\t_varname: <" << _varname << ">, lev = " << k << endl;
 
     // sv = 1.0 / (_valmax - _valmin);
-    sv = 1.0 / (_valmax - _valmin);
+    sv = adjust_factor / (_valmax - _valmin);
 
     zcl = glGenLists(1);
   //glNewList(zcl, GL_COMPILE);
@@ -1084,14 +1153,16 @@ void UFSINCR2dViewer::_flatBump()
         {
           mpos = (k*_nlat+(j-1))*_nlon;
           npos = (k*_nlat+j)*_nlon;
+          mpos = (j-1)*_nlon;
+          npos = j*_nlon;
           glBegin(GL_QUAD_STRIP);
           for(i = 0; i < _nlon; ++i)
           {
-            fact = sv * (pltvar[n][npos+i] - _valmin);
-	    _flatVertex(_xFlat[n][npos+i], _yFlat[n][npos+i], magnifier*fact, fact);
+            fact = sv * pltvar[n][npos+i];
+	    _flatVertex(_xFlat[n][ngeo+i], _yFlat[n][ngeo+i], magnifier*fact, fact);
 
-            fact = sv * (pltvar[n][mpos+i] - _valmin);
-	    _flatVertex(_xFlat[n][mpos+i], _yFlat[n][mpos+i], magnifier*fact, fact);
+            fact = sv * pltvar[n][mpos+i];
+	    _flatVertex(_xFlat[n][mgeo+i], _yFlat[n][mgeo+i], magnifier*fact, fact);
           }
           glEnd();
         }

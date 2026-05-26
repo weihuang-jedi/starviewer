@@ -194,7 +194,10 @@ void Earth::_Vertex(int th, int ph)
    double y = radius*Sin((double)ph);
    double z = radius*Cos((double)th)*Cos((double)ph);
    glNormal3d(x,y,z);
-   glTexCoord2d((double)th/360.0, 0.5+(double)ph/180.0);
+   if(th >= 0)
+       glTexCoord2d(0.5+(double)th/360.0, 0.5+(double)ph/180.0);
+   else
+       glTexCoord2d(0.5+(double)th/360.0, 0.5+(double)ph/180.0);
    glVertex3d(x,y,z);
 }
 
@@ -210,7 +213,9 @@ void Earth::draw(float r)
 // Draw earth
 void Earth::draw()
 {
-    int i,j;
+    int i,j,intv;
+
+    intv = 2;
 
     //  Draw surface of the planet
     //  Set texture
@@ -218,13 +223,13 @@ void Earth::draw()
     glBindTexture(GL_TEXTURE_2D, get_texture_id());
     //  Latitude bands
     glColor3f(1,1,1);
-    for(j = 90; j > -90; j -= 2)
+    for(j = 90; j > -90; j -= intv)
     {
        glBegin(GL_QUAD_STRIP);
-       for(i = 0; i <= 360; i += 2)
+       for(i = -180; i <= 180; i += intv)
        {
            _Vertex(i,j);
-           _Vertex(i,j-5);
+           _Vertex(i,j-intv);
        }
        glEnd();
     }
