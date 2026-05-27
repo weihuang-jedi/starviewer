@@ -1,0 +1,15 @@
+application:
+  name: StarViewer
+  model: ufsmom6
+  version: 0.0.1
+
+earth:
+  name: data/earth.bmp
+
+coastline:
+  name: data/gshhg-shp-2.3.7/GSHHS_shp
+  resolution: c
+
+input:
+  data:
+    - /scratch3/NAGAPE/epic/Wei.Huang/src/nv/data/ocean/history/sfs.t00z.24hr_avg.f024.nc

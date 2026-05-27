@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -x
+
+for item in controller geometry translator viewer
+do
+    for suffix in cpp h
+    do
+        sed -e "s/UFS/MOM6/g" \
+            -e "s/ufs/mom6/g" \
+            ufs_${item}.${suffix} > mom6_${item}.${suffix}
+        rm ufs_${item}.${suffix}
+    done
+done
+

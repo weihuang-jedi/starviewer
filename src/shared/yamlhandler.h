@@ -29,6 +29,7 @@ class YAMLHandler
 	vector<string> get_datafiles() { return _datafiles; };
 	vector<string> get_gridfiles() { return _gridfiles; };
 	vector<string> get_incrfiles() { return _incrfiles; };
+	vector<string> get_mom6files() { return _datafiles; };
 
     private:
         YAML::Node config;

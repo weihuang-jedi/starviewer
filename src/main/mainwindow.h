@@ -30,6 +30,7 @@
 #include "mpitranslator.h"
 #include "ufs_translator.h"
 #include "ufsincr_translator.h"
+#include "mom6_translator.h"
 
 #include "modelparser.h"
 #include "modelparserFactory.h"
@@ -69,6 +70,7 @@ class MainWindow : public QMainWindow
         void mpidemo();
         void ufs();
         void ufsincr();
+        void ufsmom6();
 
         void animation_func();
         void inspector_func();
@@ -141,8 +143,8 @@ class MainWindow : public QMainWindow
       //QAction *wrfAct;
         QAction *ufsAct;
         QAction *ufsincrAct;
+        QAction *ufsmom6Act;
       //QAction *mpasAct;
-      //QAction *popAct;
         QAction *mpidemoAct;
 
         QAction *animationAct;

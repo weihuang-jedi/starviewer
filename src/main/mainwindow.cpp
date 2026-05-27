@@ -1,6 +1,7 @@
 #include "mpidemoparser.h"
 #include "ufsparser.h"
 #include "ufsincrparser.h"
+#include "ufsmom6parser.h"
 #include "mainwindow.h"
 
 MainWindow::MainWindow(string yamlfile)
@@ -31,14 +32,15 @@ MainWindow::MainWindow(string yamlfile)
         nvoptions->set_model(UFSINCR);
         userConfig = ModelType::UFSINCR;
     }
+    else if(0 == tmpstr.compare("ufsmom6"))
+    {
+        nvoptions->set_model(UFSINCR);
+        userConfig = ModelType::UFSMOM6;
+    }
     else if(0 == tmpstr.compare("mpidemo"))
     {
         nvoptions->set_model(MPIDEMO);
         userConfig = ModelType::MPIDEMO;
-    }
-    else if(0 == tmpstr.compare("pop"))
-    {
-        nvoptions->set_model(POP);
     }
     else if(0 == tmpstr.compare("mpas"))
     {
@@ -132,6 +134,11 @@ void MainWindow::_setup()
             setWindowTitle(tr("UFS MODEL"));
             ufsincr();
             break;
+        case UFSMOM6:
+            // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+            setWindowTitle(tr("UFS MOM6 MODEL"));
+            ufsmom6();
+            break;
         case MPIDEMO:
             // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
             setWindowTitle(tr("NV to demo MPI"));
@@ -139,9 +146,6 @@ void MainWindow::_setup()
             break;
       //case MPAS:
       //    mpas();
-      //    break;
-      //case POP:
-      //    pop();
       //    break;
       //case WRF:
       //    wrf();
@@ -162,8 +166,8 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
   //menu.addAction(wrfAct);
     menu.addAction(ufsAct);
     menu.addAction(ufsincrAct);
+    menu.addAction(ufsmom6Act);
   //menu.addAction(mpasAct);
-  //menu.addAction(popAct);
     menu.addAction(mpidemoAct);
 
     menu.exec(event->globalPos());
@@ -269,6 +273,15 @@ void MainWindow::ufsincr()
     _setup_display();
 }
 
+void MainWindow::ufsmom6()
+{
+    setWindowTitle(tr("NV for UFS MOM6"));
+
+    _setup_controlPanel();
+
+    _setup_display();
+}
+
 void MainWindow::about()
 {
     QMessageBox::about(this, tr("About Menu"),
@@ -323,15 +336,15 @@ void MainWindow::createActions()
     ufsAct->setStatusTip(tr("Try to activate 'ufs' application"));
     connect(ufsAct, SIGNAL(triggered()), this, SLOT(ufs()));
 
-    ufsincrAct = new QAction(tr("&UFS"), this);
+    ufsincrAct = new QAction(tr("&UFSINCR"), this);
   //ufsincrAct->setShortcut(QKeySequence::Global);
     ufsincrAct->setStatusTip(tr("Try to activate 'ufsincr' application"));
     connect(ufsincrAct, SIGNAL(triggered()), this, SLOT(ufsincr()));
 
-  //popAct = new QAction(tr("&POP"), this);
-  //popAct->setShortcut(QKeySequence::Global);
-  //popAct->setStatusTip(tr("Try to activate 'pop' application"));
-  //connect(popAct, SIGNAL(triggered()), this, SLOT(pop()));
+    ufsmom6Act = new QAction(tr("&UFSMOM6"), this);
+  //ufsmom6Act->setShortcut(QKeySequence::Global);
+    ufsmom6Act->setStatusTip(tr("Try to activate 'ufsmom6' application"));
+    connect(ufsmom6Act, SIGNAL(triggered()), this, SLOT(ufsmom6()));
 
     // cout << "\t" << __PRETTY_FUNCTION__ << ", in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     mpidemoAct = new QAction(tr("&MPIDEMO"), this);
@@ -422,8 +435,8 @@ void MainWindow::createMenus()
   //appsMenu->addAction(wrfAct);
     appsMenu->addAction(ufsAct);
     appsMenu->addAction(ufsincrAct);
+    appsMenu->addAction(ufsmom6Act);
   //appsMenu->addAction(mpasAct);
-  //appsMenu->addAction(popAct);
     appsMenu->addAction(mpidemoAct);
     appsMenu->addSeparator();
 
@@ -499,7 +512,6 @@ void MainWindow::inspector_func()
 
     switch(nvoptions->get_model())
     {
-        case POP:
         case MPAS:
              inspectorWidget->set_lon(360);
              inspectorWidget->set_lat(180);
