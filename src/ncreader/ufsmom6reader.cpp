@@ -99,12 +99,12 @@ void UFSMOM6Reader::get_var_info() {
 
 	var_names[n] = var_name;
         // cout << "  - " << var_name << " Type: " << var_type << endl;
-        if (2 == var_ndims) {
+        if (3 == var_ndims) {
 	    v2d_names[num_v2ds] = var_name;
             num_v2ds++;
         }
-	else if (3 == var_ndims) {
-	    v3d_names[num_v2ds] = var_name;
+	else if (4 == var_ndims) {
+	    v3d_names[num_v3ds] = var_name;
             num_v3ds++;
         }
     }

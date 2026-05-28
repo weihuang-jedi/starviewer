@@ -17,18 +17,26 @@ ncReader::ncReader(const char* fname) {
  
 // empty deconstructor method
 ncReader::~ncReader() {
-    if (_isUFS) {
+    if (NULL != _grid_xt)
         delete[] _grid_xt;
+    if (NULL != _grid_yt)
         delete[] _grid_yt;
+    if (NULL != _pfull)
         delete[] _pfull;
+    if (NULL != _phalf)
         delete[] _phalf;
+    if (NULL != _time)
         delete[] _time;
+    if (NULL != _time_iso)
         delete[] _time_iso;
+    if (NULL != _lon)
         delete[] _lon;
+    if (NULL != _lat)
         delete[] _lat;
+    if (NULL != _lon2d)
         delete[] _lon2d;
+    if (NULL != _lat2d)
         delete[] _lat2d;
-    }
 
     if (NULL != _dimsize) delete[] _dimsize;
     if (NULL != _ntimes) delete[] _ntimes;
@@ -283,6 +291,25 @@ float* ncReader::getFloat(const char* var_name) {
     status = nc_get_var_float(ncid, var_id, value);
     if (status != NC_NOERR) handle_error(status);
   //cout << "value[0] = " << value[0] << endl;
+ 
+    _has_missing_value = false;
+    // Read the _FillValue attribute
+    // Note: Use the function matching your variable's data type
+    status = nc_get_att_float(ncid, varid, "missing_value", &_missing_value);
+
+    if (status == NC_NOERR) {
+        printf("The missing value is: %f\n", _missing_value);
+	_has_missing_value = true;
+    }
+    else
+    {
+        status = nc_get_att_float(ncid, varid, "_FillValue", &_missing_value);
+
+        if (status == NC_NOERR) {
+            printf("The missing_value is: %f\n", _missing_value);
+            _has_missing_value = true;
+        }
+    }
 
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     return value;

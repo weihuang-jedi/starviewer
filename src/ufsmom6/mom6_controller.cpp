@@ -1,7 +1,7 @@
 #include "mom6_controller.h"
 
 MOM6Controller::MOM6Controller(ColorTable *ct, NVOptions* opt,
-                                 const char *fn, bool isList)
+                                 const char *fn)
 {
     string sfn = string(fn);
 
@@ -62,7 +62,7 @@ void MOM6Controller::setup()
 
   //_ntimes = ncfile->get_ntimes();
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\t_ntimes = " << _ntimes << endl;
 
   //_maxFile = get_nfiles();
@@ -80,11 +80,15 @@ void MOM6Controller::setup()
     geometry->set_nzl(1);
     // geometry->set_ntime(_maxTime);
 
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     geometry->set_geolon(ncfile->getGeolon());
     geometry->set_geolat(ncfile->getGeolat());
     geometry->set_zl(ncfile->getZl());
+
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     geometry->setup();
 
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     geometry->set_has1dLon(false);
     geometry->set_has1dLat(false);
 
@@ -102,11 +106,12 @@ void MOM6Controller::setup()
     _curTime = 0;
     _preFile = _curFile;
 
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     mom6_viewer = new MOM62dViewer(colorTable, nvoptions, bmpflnm, ncfile);
 
   //mom6_viewer->set_lister(&lister[0]);
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tvarname:" << _varname << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tvarname:" << _varname << endl;
 
     _value = ncfile->get_fv(_varname.c_str());
     _title = _varname;
@@ -121,6 +126,7 @@ void MOM6Controller::setup()
     mom6_viewer->setup(_varname, _value);
     _minval = mom6_viewer->get_minval();
     _maxval = mom6_viewer->get_maxval();
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void MOM6Controller::draw()
@@ -150,7 +156,6 @@ void MOM6Controller::set1dvarname(string vn)
   //cout << "setup for <" << vn << ">" << endl;
 
   //mom6_viewer->set_lister(&lister[0]);
-    mom6_viewer->set_geometry(geometry);
     mom6_viewer->setup(vn, _value);
 
     _minval = mom6_viewer->get_minval();
@@ -179,7 +184,6 @@ void MOM6Controller::set2dvarname(string vn)
   //cout << "setup for <" << vn << ">" << endl;
 
   //mom6_viewer->set_lister(&lister[0]);
-    mom6_viewer->set_geometry(geometry);
     mom6_viewer->setup(vn, _value);
 
     _minval = mom6_viewer->get_minval();
@@ -202,16 +206,15 @@ void MOM6Controller::set3dvarname(string vn)
 
     _initialized = true;
 
-    geometry->set_nlon(ncfile->getNlon());
-    geometry->set_nlat(ncfile->getNlat());
-    geometry->set_nlev(ncfile->getNlev());
+    geometry->set_nxh(ncfile->getNxh());
+    geometry->set_nyh(ncfile->getNyh());
+    geometry->set_nzl(ncfile->getNzl());
 
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "setup for <" << vn << ">" << endl;
   //cout << "nvfile->get_dim_size('lev') = " << nvfile->get_dim_size("lev") << endl;
 
   //mom6_viewer->set_lister(&lister[0]);
-    mom6_viewer->set_geometry(geometry);
     mom6_viewer->setup(vn, _value);
 
     _minval = mom6_viewer->get_minval();
@@ -263,7 +266,8 @@ vector<string> MOM6Controller::get_ndvNames(int n)
 
 string MOM6Controller::get_timestring()
 {
-    return ncfile->getTimeString();
+    string ts = " ";
+    return ts;
 }
 
 void MOM6Controller::set_fileNtime(int nf, int nt)

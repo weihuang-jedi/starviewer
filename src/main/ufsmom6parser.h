@@ -20,7 +20,7 @@ class UFSMOM6Parser : public ModelParser
         void cleanup() override;
 
     protected:
-        MOM6Translator* ufsmom6_translator;
+        MOM6Translator* mom6_translator;
 };
 
 #endif

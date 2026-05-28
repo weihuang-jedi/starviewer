@@ -19,7 +19,7 @@ class MOM6Controller
 {
     public:
         MOM6Controller(ColorTable* ct, NVOptions* opt,
-                        const char* fn, bool isList = false);
+                       const char* fn);
        ~MOM6Controller();
 
         void setup();

@@ -30,8 +30,7 @@ class MOM6Translator : public BaseTranslator
     Q_OBJECT                                             //  Qt magic macro
     public:
         MOM6Translator(ColorTable* ct, NVOptions* opt,
-                      string flnm, bool isList=false,
-                      string mfnm = "unknown", QWidget* parent=0);	//  Constructor
+                      vector<string> flnms, QWidget* parent=0);	//  Constructor
        ~MOM6Translator();				//  Destructor
     
         void paintGL();

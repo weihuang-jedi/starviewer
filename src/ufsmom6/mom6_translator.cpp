@@ -25,13 +25,12 @@ string number2string(T n)
 
 //Constructor
 MOM6Translator::MOM6Translator(ColorTable* ct, NVOptions* opt,
-                             string flnm, bool isList, string mfnm, QWidget* parent)
+                               vector<string> flnms, QWidget* parent)
                : BaseTranslator(ct, opt, parent)
 {
   //cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 
-    _filename = flnm;
-    _hasFileList = isList;
+    _filename = flnms[0];
 
     nvoptions->set_xsec(-1);
     nvoptions->set_ysec(-1);
@@ -41,7 +40,6 @@ MOM6Translator::MOM6Translator(ColorTable* ct, NVOptions* opt,
     mom6_controller = NULL;
 
     _timestr = new string[2];
-    _timestr = "  ";
 
   //cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
@@ -59,14 +57,14 @@ void MOM6Translator::setup()
 {
     int n;
 
-    cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if(NULL != mom6_controller)
         delete mom6_controller;
 
-    cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     mom6_controller = new MOM6Controller(colorTable, nvoptions, _filename.c_str());
 
-    cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     mom6_controller->setup();
 
     _jpgNotSaved = true;
@@ -74,7 +72,7 @@ void MOM6Translator::setup()
 
     makeCurrent();
 
-    cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     geometry = mom6_controller->get_geometry();
 
     _varname = string("SST");
@@ -86,9 +84,9 @@ void MOM6Translator::setup()
 
     _title   = mom6_controller->get_title();
     // _timestr[0] = mom6_controller->get_timestring();
-    _timestr[0] = "  ";
+    _timestr[0] = " ";
     // _maxFile = mom6_controller->get_nfiles();
-    _maxFile = 1
+    _maxFile = 1;
 
   //_nTimes  = mom6_controller->get_ntimes();
     _maxTime = 1;
@@ -98,7 +96,7 @@ void MOM6Translator::setup()
     if(_maxTime > 12)
         _maxTime = 12;
 
-    cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 /*******************************************************************/

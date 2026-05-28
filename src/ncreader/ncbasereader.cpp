@@ -72,20 +72,46 @@ float* NCBaseReader::getFloat(const char* var_name) {
     size_t var_length = 1;
     size_t length = 1;
 
-  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     status = nc_inq_varid (ncid, var_name, &var_id);
     if (status != NC_NOERR) handle_error(status);
 
     var_length = getVarSize(var_name);
-  //cout << "var_name: " << var_name << ", ncid = " << ncid << ", var_id = " << var_id << ", var_length = " << var_length << endl;
+    // cout << "var_name: " << var_name << ", ncid = " << ncid << ", var_id = " << var_id << ", var_length = " << var_length << endl;
 
     float* value = new float[var_length];
     
     status = nc_get_var_float(ncid, var_id, value);
     if (status != NC_NOERR) handle_error(status);
-  //cout << "value[0] = " << value[0] << endl;
+    // cout << "value[0] = " << value[0] << endl;
 
-  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    _has_missing_value = false;
+    // Read the _FillValue attribute
+    // Note: Use the function matching your variable's data type
+    status = nc_get_att_float(ncid, varid, "missing_value", &_missing_value);
+
+    if (status == NC_NOERR) {
+        // cout << "The missing value is: " << _missing_value << endl;
+        _has_missing_value = true;
+    }
+    else
+    {
+        // cout << "No missing_value found.\n" << endl;
+        // handle_error(status);
+
+        status = nc_get_att_float(ncid, varid, "_FillValue", &_missing_value);
+
+        if (status == NC_NOERR) {
+            // cout << "The missing_value is: " << _missing_value << endl;
+            _has_missing_value = true;
+        }
+        // else
+        // {
+        //     cout << "No _FillValue found.\n" << endl;
+        // }
+    }
+
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     return value;
 }
 

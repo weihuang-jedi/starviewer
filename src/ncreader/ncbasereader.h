@@ -54,6 +54,9 @@ class NCBaseReader {
 
     void select_file(int nf);
 
+    bool has_missing_value() { return _has_missing_value; };
+    float get_missing_value() { return _missing_value; };
+
   protected:
     // declare field or class variable filename to
     // be used in constructor
@@ -63,6 +66,9 @@ class NCBaseReader {
     int varid;
     int groupid;
     int status;
+
+    float _missing_value;
+    bool _has_missing_value;
 
     int num_grps;
     int num_gatts;

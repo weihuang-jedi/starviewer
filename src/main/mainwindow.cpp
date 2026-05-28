@@ -20,8 +20,8 @@ MainWindow::MainWindow(string yamlfile)
     nvoptions = new NVOptions();
 
     string tmpstr = yamlHandler->get_model();
-    // cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    // cout << "\ttmpstr: " << tmpstr << endl;
+    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\ttmpstr: " << tmpstr << endl;
     if(0 == tmpstr.compare("ufs"))
     {
         nvoptions->set_model(UFS);
@@ -34,7 +34,7 @@ MainWindow::MainWindow(string yamlfile)
     }
     else if(0 == tmpstr.compare("ufsmom6"))
     {
-        nvoptions->set_model(UFSINCR);
+        nvoptions->set_model(UFSMOM6);
         userConfig = ModelType::UFSMOM6;
     }
     else if(0 == tmpstr.compare("mpidemo"))
@@ -52,8 +52,8 @@ MainWindow::MainWindow(string yamlfile)
         nvoptions->set_model(WRF);
     }
 
-    // cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    // cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
+    cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
 
     nInstance = 0;
     numberOfWidget = 0;
@@ -121,26 +121,23 @@ void MainWindow::_setup()
        cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
     // cout << "\tMPIDEMO: " << MPIDEMO << endl;
     // cout << "\tUFS: " << UFS << endl;
-       cout << "\tUFSINCR: " << UFSINCR << endl;
+    // cout << "\tUFSINCR: " << UFSINCR << endl;
+    cout << "\tUFSMOM6: " << UFSMOM6 << endl;
     switch(nvoptions->get_model())
     {
         case UFS:
-            // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
             setWindowTitle(tr("UFS MODEL"));
             ufs();
             break;
         case UFSINCR:
-            // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
             setWindowTitle(tr("UFS MODEL"));
             ufsincr();
             break;
         case UFSMOM6:
-            // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
             setWindowTitle(tr("UFS MOM6 MODEL"));
             ufsmom6();
             break;
         case MPIDEMO:
-            // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
             setWindowTitle(tr("NV to demo MPI"));
             mpidemo();
             break;

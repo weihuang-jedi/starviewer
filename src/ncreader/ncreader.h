@@ -58,9 +58,6 @@ class ncReader {
     void _get_dim_info();
     void _get_var_info();
 
-    bool _isMPAS = false;
-    bool _isUFS = true;
-
     int* _dimsize = NULL;
     int* _ntimes = NULL;
 
@@ -71,6 +68,9 @@ class ncReader {
     int _nfull;
     int _nhalf;
     int _nchars;
+
+    float _missing_value;
+    bool _has_missing_value;
  
   public:
     // declare constructor and deconstructor methods
@@ -78,6 +78,10 @@ class ncReader {
     virtual ~ncReader();
  
     void handle_error(int status);
+
+    bool has_missing_value() { return _has_missing_value; };
+
+    float get_missing_value() { return _missing_value; };
 
     size_t getVarSize(const char* var_name);
 

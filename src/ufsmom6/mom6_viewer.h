@@ -22,7 +22,7 @@
 #include "lister.h"
 #include "locator.h"
 #include "nvoptions.h"
-#include "ncreader.h"
+#include "ufsmom6reader.h"
 
 using namespace std;
 
@@ -40,7 +40,7 @@ class MOM62dViewer : public QGLWidget
 
     public:
         MOM62dViewer(ColorTable* ct, NVOptions* opt);
-        MOM62dViewer(ColorTable* ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler);
+        MOM62dViewer(ColorTable* ct, NVOptions* opt, const char* bmpflnm, UFSMOM6Reader* nchandler);
        ~MOM62dViewer();
 
         void draw();
@@ -66,7 +66,7 @@ class MOM62dViewer : public QGLWidget
         MOM6Geometry* geometry;
         CoastLine* coastline;
         Texture1d* texture1d;
-        ncReader* ncfile;
+        UFSMOM6Reader* ncfile;
         Earth* earth;
         Lister* lister;
         Locator* locator;
@@ -77,14 +77,14 @@ class MOM62dViewer : public QGLWidget
         int previoustimelevel;
         int current_timelevel;
 
-        double* _lon;
-        double* _lat;
-        float* _lev;
+        double* _geolon;
+        double* _geolat;
+        double* _zl;
 
-        int _hlon;
-        int _nlon;
-        int _nlat;
-        int _nlev;
+        int _hxh;
+        int _nxh;
+        int _nyh;
+        int _nzl;
 
         GLuint zcl;
         GLuint ycl;
@@ -103,6 +103,8 @@ class MOM62dViewer : public QGLWidget
         float _valmin;
         float _valavg;
         float _valmax;
+        float _missing_value;
+        float _half_missing_value;
 
         double oneover;
         double deg2rad;
@@ -111,10 +113,13 @@ class MOM62dViewer : public QGLWidget
         void _evaluate(float* var);
         void _adjust_minmax(float* var);
 
-        void _lonlat2xyz(double lon, double lat, double radius,
-                         double fact);
-        void _lonlat2xyz_texture(double lon, double lat,
+        void _sphere2xyz(double x, double y, double z,
+			 double radius, double fact);
+        void _sphere2xyz_texture(double x, double y, double z,
 			         double radius, double fact);
+        void _flat2xyz(double x, double y, double z, double fact);
+        void _flat2xyz_texture(double x, double y, double z,
+			       double fact);
 
         void _flatDisplay();
         void _display_Xflat_plane(int xs);
