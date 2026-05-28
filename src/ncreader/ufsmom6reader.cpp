@@ -21,9 +21,9 @@ void UFSMOM6Reader::get_dim_info() {
     int n = 0;
     char recname[NC_MAX_NAME+1];
     size_t length, recs;
-    cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     // cout << "ncid: " << ncid << endl;
-    cout << "num_dims: " << num_dims << endl;
+    // cout << "num_dims: " << num_dims << endl;
 
     // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     if (NULL == _dimsize) _dimsize = new int[num_dims];
@@ -69,9 +69,9 @@ void UFSMOM6Reader::get_dim_info() {
             _ntime = _dimsize[n];
 	}
 
-        cout << "  - " << dim_names[n] << ": " << dim_length[n] << endl;
+        // cout << "  - " << dim_names[n] << ": " << dim_length[n] << endl;
     }
-    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void UFSMOM6Reader::get_var_info() {

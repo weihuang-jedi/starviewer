@@ -86,6 +86,8 @@ class MOM62dViewer : public QGLWidget
         int _nyh;
         int _nzl;
 
+        vector<int> _nxsp;
+
         GLuint zcl;
         GLuint ycl;
         GLuint xcl;

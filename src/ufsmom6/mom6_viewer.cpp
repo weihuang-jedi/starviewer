@@ -122,7 +122,7 @@ void MOM62dViewer::_initialize()
 
     previoustimelevel = -1;
 
-    // _hlon = geometry->get_hlon();
+    _nxsp = geometry->get_nxsp();
     _nxh = geometry->get_nxh();
     _nyh = geometry->get_nyh();
     _nzl = geometry->get_nzl();
@@ -521,16 +521,95 @@ void MOM62dViewer::_flatDisplay()
         npos = (k*_nyh+j)*_nxh;
         mgeo = (j-1)*_nxh;
         ngeo = j*_nxh;
-        glBegin(GL_QUAD_STRIP);
-        for(i = 0; i < _nxh; ++i)
+        for(i = _nxsp[j]+1; i < _nxh; ++i)
         {
-            fact = sv * (pltvar[npos+i] - _valmin);
-	    _flat2xyz_texture(_xFlat[ngeo+i], _yFlat[ngeo+i], height, fact);
+            if((pltvar[mpos+i-1] > _missing_value) && (pltvar[mpos+i] > _missing_value) &&
+               (pltvar[npos+i-1] > _missing_value) && (pltvar[npos+i] > _missing_value))
+	    {
+                glBegin(GL_QUADS);
+                fact = sv * (pltvar[mpos+i-1] - _valmin);
+	        _flat2xyz_texture(_xFlat[mgeo+i-1], _yFlat[mgeo+i-1], height, fact);
+    
+                fact = sv * (pltvar[mpos+i] - _valmin);
+	        _flat2xyz_texture(_xFlat[mgeo+i], _yFlat[mgeo+i], height, fact);
 
-            fact = sv * (pltvar[mpos+i] - _valmin);
-	    _flat2xyz_texture(_xFlat[mgeo+i], _yFlat[mgeo+i], height, fact);
+                fact = sv * (pltvar[npos+i] - _valmin);
+	        _flat2xyz_texture(_xFlat[ngeo+i], _yFlat[ngeo+i], height, fact);
+    
+                fact = sv * (pltvar[npos+i-1] - _valmin);
+	        _flat2xyz_texture(_xFlat[ngeo+i-1], _yFlat[ngeo+i-1], height, fact);
+                glEnd();
+	    }
+	    else
+	    {
+                glBegin(GL_QUADS);
+                fact = 0.0;
+                _flat2xyz_texture(_xFlat[mgeo+i-1], _yFlat[mgeo+i-1], height, fact);
+                _flat2xyz_texture(_xFlat[mgeo+i], _yFlat[mgeo+i], height, fact);
+                _flat2xyz_texture(_xFlat[ngeo+i], _yFlat[ngeo+i], height, fact);
+                _flat2xyz_texture(_xFlat[ngeo+i-1], _yFlat[ngeo+i-1], height, fact);
+                glEnd();
+	    }
         }
-        glEnd();
+
+	for(i = 1; i < _nxsp[j]; ++i)
+        {
+            if((pltvar[mpos+i-1] > _missing_value) && (pltvar[mpos+i] > _missing_value) &&
+               (pltvar[npos+i-1] > _missing_value) && (pltvar[npos+i] > _missing_value))
+            {
+                glBegin(GL_QUADS);
+                fact = sv * (pltvar[npos+i-1] - _valmin);
+                _flat2xyz_texture(_xFlat[ngeo+i-1], _yFlat[ngeo+i-1], height, fact);
+
+                fact = sv * (pltvar[npos+i] - _valmin);
+                _flat2xyz_texture(_xFlat[ngeo+i], _yFlat[ngeo+i], height, fact);
+
+                fact = sv * (pltvar[mpos+i] - _valmin);
+                _flat2xyz_texture(_xFlat[mgeo+i], _yFlat[mgeo+i], height, fact);
+
+                fact = sv * (pltvar[mpos+i-1] - _valmin);
+                _flat2xyz_texture(_xFlat[mgeo+i-1], _yFlat[mgeo+i-1], height, fact);
+                glEnd();
+            }
+            else
+            {
+                glBegin(GL_QUADS);
+                fact = 0.0;
+                _flat2xyz_texture(_xFlat[ngeo+i-1], _yFlat[ngeo+i-1], height, fact);
+                _flat2xyz_texture(_xFlat[ngeo+i], _yFlat[ngeo+i], height, fact);
+                _flat2xyz_texture(_xFlat[mgeo+i], _yFlat[mgeo+i], height, fact);
+                _flat2xyz_texture(_xFlat[mgeo+i-1], _yFlat[mgeo+i-1], height, fact);
+                glEnd();
+            }
+        }
+
+	if((pltvar[mpos+_nxh-1] > _missing_value) && (pltvar[mpos+i] > _missing_value) &&
+           (pltvar[npos+_nxh-1] > _missing_value) && (pltvar[npos+i] > _missing_value))
+        {
+            glBegin(GL_QUADS);
+            fact = sv * (pltvar[npos+_nxh-1] - _valmin);
+            _flat2xyz_texture(_xFlat[ngeo+_nxh-1], _yFlat[ngeo+_nxh-1], height, fact);
+
+            fact = sv * (pltvar[npos] - _valmin);
+            _flat2xyz_texture(_xFlat[ngeo], _yFlat[ngeo], height, fact);
+
+            fact = sv * (pltvar[mpos] - _valmin);
+            _flat2xyz_texture(_xFlat[mgeo], _yFlat[mgeo], height, fact);
+
+            fact = sv * (pltvar[mpos+_nxh-1] - _valmin);
+            _flat2xyz_texture(_xFlat[mgeo+_nxh-1], _yFlat[mgeo+_nxh-1], height, fact);
+            glEnd();
+        }
+        else
+        {
+            glBegin(GL_QUADS);
+            fact = 0.0;
+            _flat2xyz_texture(_xFlat[ngeo+_nxh-1], _yFlat[ngeo+_nxh-1], height, fact);
+            _flat2xyz_texture(_xFlat[ngeo], _yFlat[ngeo], height, fact);
+            _flat2xyz_texture(_xFlat[mgeo], _yFlat[mgeo], height, fact);
+            _flat2xyz_texture(_xFlat[mgeo+_nxh-1], _yFlat[mgeo+_nxh-1], height, fact);
+            glEnd();
+        }
     }
     coastline->drawOnPlane(height+0.01);
     }

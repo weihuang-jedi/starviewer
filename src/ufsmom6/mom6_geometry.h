@@ -58,7 +58,7 @@ class MOM6Geometry : public Geometry {
 	int get_nyg() { return _nyg; };
 	int get_nzl() { return _nzl; };
 	int get_nzi() { return _nzi; };
-	int get_hlon() { return _hlon; };
+	vector<int> get_nxsp() { return _nxsp; };
 
     protected:
         string name;
@@ -75,7 +75,7 @@ class MOM6Geometry : public Geometry {
         float* _geolon;
         float* _geolat;
 
-	int _hlon;
+	vector<int> _nxsp;
 
     private:
         void _set_default();

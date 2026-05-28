@@ -2,7 +2,6 @@
 
 MOM6Geometry::MOM6Geometry()
 {
-    _hlon = 0;
     _set_default();
 }
 
@@ -82,9 +81,9 @@ void MOM6Geometry::setup()
     size_t n;
     size_t nsquare;
 
-    cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "_nxh = " << _nxh << endl;
-    cout << "_nyh = " << _nyh << endl;
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "_nxh = " << _nxh << endl;
+    // cout << "_nyh = " << _nyh << endl;
     nsquare = _nxh * _nyh;
     _xSphere = new double[nsquare];
     _ySphere = new double[nsquare];
@@ -94,9 +93,9 @@ void MOM6Geometry::setup()
     _xFlat = new double[nsquare];
     _yFlat = new double[nsquare];
 
-    _hlon = 0;
+    _nxsp.resize(_nyh);
     for(j = 0; j < _nyh; ++j) {
-	n = j*_nyh;
+	n = j*_nxh;
         // cout << "_geolat[" << j << ",0] = " << _geolat[n] << endl;
         for(i = 0; i < _nxh; ++i) {
             delt = cos(_geolat[n+i] * arc);
@@ -108,8 +107,9 @@ void MOM6Geometry::setup()
             _xFlat[n+i] = _geolon[n+i]/180.0;
             if(_xFlat[n+i] > 1.0) {
                _xFlat[n+i] -= 2.0;
-	       if(0 == _hlon)
-	            _hlon = i;
+	    }
+	    else if(_xFlat[n+i] < -1.0) {
+               _xFlat[n+i] += 2.0;
 	    }
             // cout << "_geolon[" << n+i << "] = " << _geolon[n+i] << endl;
             // cout << "_geolat[" << n+i << "] = " << _geolat[n+i] << endl;
@@ -119,18 +119,27 @@ void MOM6Geometry::setup()
             // cout << "_xFlat[" << n+i << "] = " << _xFlat[n+i] << endl;
             // cout << "_yFlat[" << n+i << "] = " << _yFlat[n+i] << endl;
 	}
+        i = 0;
+        while(i < _nxh)
+        {
+            _nxsp[j] = i;
+            if(_geolon[n+i] >= -180.0)
+                break;
+	    ++i;
+        }
+        // cout << "_nxsp[" << j << "] = " << _nxsp[j] << ", _geolon[" << n << "] = " << _geolon[n] << endl;
     }
     n = (_nyh-1)*_nxh;
     double mean_lat = 0.0;
     for(i = 0; i < _nxh; ++i)
     {
-	cout << "_geolon[0," << n+i << "] = " << _geolon[n+i] << ", _geolat[0," << n+i << "] = " << _geolat[n+i] << endl;
+	// cout << "_geolon[0," << n+i << "] = " << _geolon[n+i] << ", _geolat[0," << n+i << "] = " << _geolat[n+i] << endl;
 	mean_lat += _geolat[n+i];
     }
 
     mean_lat /= _nxh;
-    cout << "mean_lat = " << mean_lat << endl;
+    // cout << "mean_lat = " << mean_lat << endl;
 
-    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
