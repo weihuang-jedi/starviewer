@@ -122,10 +122,10 @@ void Controller::setup()
     _nt = geometry->get_nt();
     _nm = 1;
 
-    cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: "
-         << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\tvariable name: <" << _varname << ">" << endl;
-    cout << "\ttitle: <" << _title << ">" << endl;
+  //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: "
+  //     << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\tvariable name: <" << _varname << ">" << endl;
+  //cout << "\ttitle: <" << _title << ">" << endl;
 
     glviewer = new GL_Viewer(colorTable, nvoptions);
     glviewer->set_geometry(geometry);

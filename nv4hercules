@@ -18,6 +18,9 @@
     --env QT_X11_NO_MITSHM=1 \
     "${CONTAINER_SIF}" \
     ${STARVIEWERHOME}/build/main/starviewer \
-    -yaml config.yaml
+    -yaml yamlfiles/hercules-ufs-config.yaml
+
+#   -yaml yamlfiles/ufs-config.yaml
+#   -yaml yamlfiles/hercules-ufsincr-config.yaml
 
 #   gdb --args \

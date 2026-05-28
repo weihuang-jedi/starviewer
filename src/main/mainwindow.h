@@ -1,9 +1,6 @@
 #ifndef _MainWindow_H
 #define _MainWindow_H
 
-#define USE_RSL_VARS
-//#include "rsl.h"
-
 #include "yamlhandler.h"
 
 #include "basetranslator.h"
@@ -27,20 +24,17 @@
 #include "subsetWidget.h"
 #include "minmaxWidget.h"
 
-#include "generaltranslator.h"
 //#include "wrftranslator.h"
 #include "ufs_translator.h"
-#include "ufs_incr_translator.h"
+#include "ufsincr_translator.h"
 //#include "mpastranslator.h"
-//#include "camsetranslator.h"
 //#include "poptranslator.h"
-#ifdef UseRADX
-#include "radxtranslator.h"
-#endif
-//#include "vtktranslator.h"
-#include "testtranslator.h"
 #include "mpitranslator.h"
-//#include "hdftranslator.h"
+#include "ufs_translator.h"
+#include "ufsincr_translator.h"
+
+#include "modelparser.h"
+#include "modelparserFactory.h"
 
 #include <QMainWindow>
 QT_BEGIN_NAMESPACE
@@ -50,14 +44,15 @@ class QLabel;
 class QMenu;
 QT_END_NAMESPACE
 
+class MPIDEMOParser;
+class UFSParser;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
     public:
-        MainWindow(string flnm, bool isList,
-                   string camse_mfnm, NVOptions* opt);
-        MainWindow(string yamlfile, NVOptions* opt);
+        MainWindow(string yamlfile);
        ~MainWindow();
 
     private slots:
@@ -70,18 +65,12 @@ class MainWindow : public QMainWindow
         void about();
 
       //Applications
-        void general();
       //void wrf();
-        void ufs();
-        void ufs_incr();
       //void mpas();
-      //void camse();
       //void pop();
-      //void radx();
-      //void vtk();
-        void test();
         void mpidemo();
-      //void hdf();
+        void ufs();
+        void ufsincr();
 
         void animation_func();
         void inspector_func();
@@ -103,18 +92,11 @@ class MainWindow : public QMainWindow
         Light* light;
 
         BaseTranslator* translator;
-        GeneralTranslator* general_translator;
       //WRFTranslator* wrf_translator;
-        UFSTranslator* ufs_translator;
-        UFSincrTranslator* ufs_incr_translator;
+      //UFSTranslator* ufs_translator;
       //POPTranslator* pop_translator;
       //MPASTranslator* mpas_translator;
-      //CAMseTranslator* camse_translator;
-      //RadxTranslator* radx_translator;
-      //VTKTranslator* vtk_translator;
-        TestTranslator* test_translator;
-        MPITranslator* mpidemo_translator;
-      //HDFTranslator* hdf_translator;
+      //MPITranslator* mpidemo_translator;
 
         ControlWidget* controlPanel;
         DisplayWidget* display;
@@ -131,12 +113,10 @@ class MainWindow : public QMainWindow
         SubsetWidget* subsetWidget;
         MinMaxWidget* minmaxWidget;
 
+	unique_ptr<ModelParser> myParser;
+
         int screenWidth;
         int screenHeight;
-
-        QString fileName;
-        string camse_mappingFilename;
-        bool isFileList;
 
         void _setup();
 
@@ -160,18 +140,12 @@ class MainWindow : public QMainWindow
         QAction *redoAct;
         QAction *aboutAct;
 
-        QAction *generalAct;
       //QAction *wrfAct;
         QAction *ufsAct;
-        QAction *ufs_incrAct;
+        QAction *ufsincrAct;
       //QAction *mpasAct;
-      //QAction *camseAct;
       //QAction *popAct;
-        QAction *radxAct;
-      //QAction *vtkAct;
-        QAction *testAct;
         QAction *mpidemoAct;
-      //QAction *hdfAct;
 
         QAction *animationAct;
         QAction *inspectorAct;
@@ -187,15 +161,15 @@ class MainWindow : public QMainWindow
         QAction *minmaxAct;
 
     private:
+	YAMLHandler *yamlHandler;
+
         int nInstance;
         int numberOfWidget;
 
 	string yamlfile;
 
-        void _setup_controlPanel();
-        void _setup_display();
-
-	YAMLHandler *yamlHandler;
+	void _setup_controlPanel();
+	void _setup_display();
 };
 #endif
 

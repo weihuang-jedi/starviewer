@@ -29,6 +29,8 @@ class YAMLHandler
 	string get_atmfile() { return _atmfile; };
 	string get_sfcfile() { return _sfcfile; };
 	vector<string> get_datafiles() { return _datafiles; };
+	vector<string> get_gridfiles() { return _gridfiles; };
+	vector<string> get_incrfiles() { return _incrfiles; };
 
     private:
         YAML::Node config;
@@ -46,6 +48,8 @@ class YAMLHandler
 	string _sfcfile;
 
 	vector<string> _datafiles;
+	vector<string> _gridfiles;
+	vector<string> _incrfiles;
 };
 #endif
 

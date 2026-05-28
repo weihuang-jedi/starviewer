@@ -1,5 +1,5 @@
-#ifndef NCREADER_H
-#define NCREADER_H
+#ifndef _NCREADER_H
+#define _NCREADER_H
  
 #include <iostream>
 #include <fstream>

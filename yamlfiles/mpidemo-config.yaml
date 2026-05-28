@@ -1,6 +1,6 @@
 application:
   name: StarViewer
-  model: ufs
+  model: mpidemo
   version: 0.0.1
 
 earth:
@@ -12,4 +12,4 @@ coastline:
 
 input:
   data:
-    - /work2/noaa/epic/weihuang/nv/data/ufs-atm-history/gfs.t12z.atm.f000.nc
+    - /scratch5/purged/Wei.Huang/src/nv/data/gdas.t00z.atm.f006.nc

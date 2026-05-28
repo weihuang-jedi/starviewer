@@ -1,5 +1,5 @@
-#ifndef _UFS_VIEWER_H
-#define _UFS_VIEWER_H
+#ifndef _UFSINCR_VIEWER_H
+#define _UFSINCR_VIEWER_H
 
 #include <iostream>
 #include <vector>
@@ -12,8 +12,8 @@
 
 #include <QGLWidget>
 // #include <QOpenGLWidget>
+// #include <QOpenGLFunctions>
 
-#include "ufs_geometry.h"
 #include "coastline.h"
 #include "colorTable.h"
 #include "texture1d.h"
@@ -22,7 +22,8 @@
 #include "lister.h"
 #include "locator.h"
 #include "nvoptions.h"
-#include "ncreader.h"
+#include "ufsincr_geometry.h"
+#include "ufsincrementreader.h"
 
 using namespace std;
 
@@ -35,21 +36,26 @@ using namespace std;
 #define NEAR_EAST_BOUNDARY	0.9999
 #define NEAR_WEST_BOUNDARY	-NEAR_EAST_BOUNDARY
 
-class UFS2dViewer : public QOpenGLWidget, protected QOpenGLFunctions
+// class UFSINCR2dViewer : public QGLWidget, protected QOpenGLFunctions
+// class UFSINCR2dViewer : public QGLWidget
+class UFSINCR2dViewer : public QObject
 {
-
     public:
-        UFS2dViewer(ColorTable* ct, NVOptions* opt);
-        UFS2dViewer(ColorTable* ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler);
-       ~UFS2dViewer();
+        UFSINCR2dViewer(ColorTable* ct, NVOptions* opt);
+        UFSINCR2dViewer(ColorTable* ct, NVOptions* opt,
+			const char* bmpflnm,
+			vector<UFSIncrementReader*> nchandler);
+       ~UFSINCR2dViewer();
 
         void draw();
         void draw_sphere_grids();
         void draw_plane_grids();
 
+	// void initializeGL() override;
+
         void reset();
-        void setup(string vn, float* var);
-        void set_geometry(UFSGeometry* gm);
+        void setup(string vn, vector<float*> var);
+        void set_geometry(vector<UFSINCRGeometry*> gm);
         void reset_texture1d(ColorTable *ct);
 
         void set_coastline(CoastLine* cl) { coastline = cl; };
@@ -61,63 +67,67 @@ class UFS2dViewer : public QOpenGLWidget, protected QOpenGLFunctions
         float get_minval() { return _valmin; };
         float get_maxval() { return _valmax; };
 
-        void initializeGL();
-
     protected:
         ColorTable* colorTable;
-        UFSGeometry* geometry;
-        CoastLine* coastline;
-        Texture1d* texture1d;
-        ncReader* ncfile;
-        Earth* earth;
-        Lister* lister;
-        Locator* locator;
+        vector<UFSINCRGeometry*> geometry;
+        CoastLine* coastline = NULL;
+        Texture1d* texture1d = NULL;
+        vector<UFSIncrementReader*> ncfile;
+        Earth* earth = NULL;
+        Lister* lister = NULL;
+        Locator* locator = NULL;
         NVOptions* nvoptions;
 
         string _varname;
-        string _bmpflnm;
 
         int previoustimelevel;
         int current_timelevel;
 
-        double* _lon;
-        double* _lat;
-        float* _lev;
+        vector<float*> _lon;
+        vector<float*> _lat;
+        vector<float*> _lev;
 
         int _hlon;
         int _nlon;
         int _nlat;
         int _nlev;
+        int _ntiles;
 
         GLuint zcl;
         GLuint ycl;
         GLuint xcl;
 
-        double* _xSphere;
-        double* _ySphere;
-        double* _zSphere;
+        vector<double*> _xSphere;
+        vector<double*> _ySphere;
+        vector<double*> _zSphere;
 
-        double* _xFlat;
-        double* _yFlat;
+        vector<double*> _xFlat;
+        vector<double*> _yFlat;
 
-        float* _var;
-        float* pltvar;
+        vector<float*> _var;
+        vector<float*> pltvar;
 
         float _valmin;
         float _valavg;
         float _valmax;
+        float _scalelength;
 
         double oneover;
         double deg2rad;
 
         void _initialize();
-        void _evaluate(float* var);
-        void _adjust_minmax(float* var);
+        void _evaluate(vector<float*> var);
+        void _adjust_minmax(vector<float*> var);
 
-        void _lonlat2xyz(double lon, double lat, double radius,
-                         double fact);
-        void _lonlat2xyz_texture(double lon, double lat,
-			         double radius, double fact);
+        void _sphereVertex(double x, double y, double z,
+			   double radius, double fact);
+        void _sphereVertex_texture(double x, double y, double z,
+			           double radius, double fact);
+
+        void _flatVertex(double x, double y, double z,
+			 double fact);
+        void _flatVertex_texture(double x, double y, double z,
+			         double fact);
 
         void _flatDisplay();
         void _display_Xflat_plane(int xs);
@@ -132,6 +142,9 @@ class UFS2dViewer : public QOpenGLWidget, protected QOpenGLFunctions
         void _draw_cross(double radius);
         double _k2h(int k);
         double _k2r(int k);
+
+	char _bmpflnm[1024];
+	bool _needActivateEarth;
 };
 #endif
 

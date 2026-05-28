@@ -1,0 +1,29 @@
+application:
+  name: StarViewer
+  model: ufsincr
+  version: 0.0.1
+
+earth:
+  name: /scratch3/NAGAPE/epic/Wei.Huang/src/nv/starviewer/data/earth.bmp
+
+coastline:
+  name: /scratch3/NAGAPE/epic/Wei.Huang/src/nv/starviewer/data/gshhg-shp-2.3.7/GSHHS_shp
+  resolution: c
+
+grid:
+  data:
+    - /scratch3/NCEPDEV/global/role.glopara/fix/orog/20240917/C96/C96.mx025_oro_data.tile1.nc
+    - /scratch3/NCEPDEV/global/role.glopara/fix/orog/20240917/C96/C96.mx025_oro_data.tile2.nc
+    - /scratch3/NCEPDEV/global/role.glopara/fix/orog/20240917/C96/C96.mx025_oro_data.tile3.nc
+    - /scratch3/NCEPDEV/global/role.glopara/fix/orog/20240917/C96/C96.mx025_oro_data.tile4.nc
+    - /scratch3/NCEPDEV/global/role.glopara/fix/orog/20240917/C96/C96.mx025_oro_data.tile5.nc
+    - /scratch3/NCEPDEV/global/role.glopara/fix/orog/20240917/C96/C96.mx025_oro_data.tile6.nc
+
+increment:
+  data:
+    - /scratch5/purged/Wei.Huang/src/nv/data/analysis/gdas.t00z.jedi_increment.atm.i006.tile1.nc
+    - /scratch5/purged/Wei.Huang/src/nv/data/analysis/gdas.t00z.jedi_increment.atm.i006.tile2.nc
+    - /scratch5/purged/Wei.Huang/src/nv/data/analysis/gdas.t00z.jedi_increment.atm.i006.tile3.nc
+    - /scratch5/purged/Wei.Huang/src/nv/data/analysis/gdas.t00z.jedi_increment.atm.i006.tile4.nc
+    - /scratch5/purged/Wei.Huang/src/nv/data/analysis/gdas.t00z.jedi_increment.atm.i006.tile5.nc
+    - /scratch5/purged/Wei.Huang/src/nv/data/analysis/gdas.t00z.jedi_increment.atm.i006.tile6.nc

@@ -941,7 +941,7 @@ void UFS2dViewer::_sphereBump()
         _lonlat2xyz(_lon[0], _lat[j-1], radius + magnifier*fact, fact);
         glEnd();
     }
-    coastline->drawOnPlane(0.01);
+    coastline->drawOnSphere(0.01);
     }
 
     glPopMatrix();

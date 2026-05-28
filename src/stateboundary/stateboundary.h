@@ -54,29 +54,6 @@ class StateBoundary
         double deg2rad;
         double oneover;
 
-      //path:   /Users/starviewer/test/ncltest/ncl_qt/data/coastline/WDBII_shp/l/WDBII_border_l_L1.shp
-      //file global attributes:
-      //     layer_name : WDBII_border_l_L1
-      //     geometry_type : polyline
-      //     geom_segIndex : 0
-      //     geom_numSegs : 1
-      //     segs_xyzIndex : 0
-      //     segs_numPnts : 1
-
-      //dimensions:
-      //     geometry = 2
-      //     segments = 2
-      //     num_features = 450  // unlimited
-      //     num_segments = 450
-      //     num_points = 7141
-
-      //variables:
-      //     integer geometry ( num_features, geometry )
-      //     integer segments ( num_segments, segments )
-      //     double x ( num_points )
-      //     double y ( num_points )
-      //     string name ( num_features )
-
         string layer_name[3];
         string geometry_type[3];
 

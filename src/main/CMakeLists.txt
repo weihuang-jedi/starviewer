@@ -2,20 +2,6 @@ file(GLOB_RECURSE SOURCES *.cpp *.h *.ui *.qrc)
 
 set(OpenGL_GL_PREFERENCE GLVND)
 
-# hdfeos fixes: cuErrorOccurred
-#find_library(HDFEOS_LIB NAMES hdfeos PATHS /apps/spack-managed/gcc-11.3.1/*/lib)
-
-# Check if we found them (optional but helpful for debugging)
-#if(NOT UDUNITS_LIB)
-#    message(WARNING "UDUNITS not found. cdRel2Comp errors may persist.")
-#endif()
-
-#find_package(Freetype REQUIRED)
-
-# Find Cairo (usually available on HPC via pkg-config or system paths)
-#find_package(PkgConfig REQUIRED)
-#pkg_check_modules(CAIRO REQUIRED cairo)
-
 # Find OpenMP
 find_package(OpenMP REQUIRED)
 
@@ -36,7 +22,21 @@ find_library(GLU_LIBRARY NAMES GLU glu)
 
 # Create a library for this module
 # add_library(starviewer STATIC ${SOURCES})
-add_executable(starviewer main.cpp mainwindow.cpp)
+add_executable(starviewer
+    main.cpp
+    mainwindow.cpp
+    mpidemoparser.cpp
+    ufsparser.cpp
+    ufsincrparser.cpp
+    # ... other files
+    ../ncreader/ncreader.cpp
+    ../geometry/geometry.cpp
+    ../spreadsheet/spreadsheet.cpp
+    # ADD YOUR NEW NETCDF READERS HERE:
+    ../ncreader/ncbasereader.cpp
+    ../ncreader/ufsgridreader.cpp
+    ../ncreader/ufsincrementreader.cpp
+)
 
 # Allow other modules to find these headers
 target_include_directories(starviewer PUBLIC
@@ -59,42 +59,30 @@ target_include_directories(starviewer PUBLIC
     ${CMAKE_SOURCE_DIR}/trajectory
     ${CMAKE_SOURCE_DIR}/widget
     ${CMAKE_SOURCE_DIR}/lic
-  # ${CMAKE_SOURCE_DIR}/wrf
     ${CMAKE_SOURCE_DIR}/ufs
-    ${CMAKE_SOURCE_DIR}/ufs_incr
-  # ${CMAKE_SOURCE_DIR}/pop
-  # ${CMAKE_SOURCE_DIR}/camse
-  # ${CMAKE_SOURCE_DIR}/hdf
-    ${CMAKE_SOURCE_DIR}/test
+    ${CMAKE_SOURCE_DIR}/ufsincr
     ${CMAKE_SOURCE_DIR}/mpidemo
+  # ${CMAKE_SOURCE_DIR}/mpas
+  # ${CMAKE_SOURCE_DIR}/pop
+  # ${CMAKE_SOURCE_DIR}/wrf
     ${NetCDF_INCLUDE_DIRS}
 )
 
-# message("HLU_LIB: ${HLU_LIB}")
-# message("GKS_LIB: ${GKS_LIB}")
-# message("NCARG_LIB: ${NCARG_LIB}")
-# message("NGMATH_LIB: ${NGMATH_LIB}")
-# message("COMMON_LIB: ${COMMON_LIB}")
-
 target_link_libraries(starviewer PRIVATE
     # 1. High-level UI Modules (Must come before main/executable)
+    ncreader
     control
     translator      # Fixes TestTranslator and MPITranslator
     widget          # Fixes UI components
-    mpidemo         # Fixes mpidemo symbols
 
     # 2. Logic and Data Modules
-    test
   # wrf
-    ufs
-    ufs_incr
   # mpas
-  # camse
   # pop
-  # hdf
-    ncreader
+    mpidemo
+    ufs
+    ufsincr
     view
-    control
     contour
     shared
     geometry
@@ -111,13 +99,13 @@ target_link_libraries(starviewer PRIVATE
     control
     view
     leveler
+
     -Wl,--start-group
     -Wl,--end-group
 
     # 4. System Graphics and Fortran Runtimes
-  # ${FREETYPE_LIBRARIES}
     X11 Xext Xrender
-    gfortran 
+    gfortran
     OpenMP::OpenMP_CXX
 
     # 5. Data Formats and Math
@@ -140,3 +128,4 @@ target_link_libraries(starviewer PRIVATE
 set_target_properties(starviewer PROPERTIES
     LINK_FLAGS "-Wl,--allow-multiple-definition"
 )
+
