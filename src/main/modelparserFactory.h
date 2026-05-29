@@ -5,6 +5,7 @@
 #include "mpidemoparser.h"
 #include "ufsparser.h"
 #include "ufsincrparser.h"
+#include "mpasparser.h"
 #include "ufsmom6parser.h"
 #include <memory>  // Explicitly ensure smart pointers are available
 
@@ -21,8 +22,8 @@ public:
                 return unique_ptr<ModelParser>(new UFSINCRParser());
             case ModelType::UFSMOM6:
                 return unique_ptr<ModelParser>(new UFSMOM6Parser());
-            // case ModelType::MPAS:
-            //     return unique_ptr<ModelParser>(new MPASParser());
+            case ModelType::MPAS:
+                return unique_ptr<ModelParser>(new MPASParser());
             default:
                 return nullptr;
         }

@@ -118,11 +118,12 @@ MainWindow::~MainWindow()
 void MainWindow::_setup()
 {
     // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-       cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
-    // cout << "\tMPIDEMO: " << MPIDEMO << endl;
-    // cout << "\tUFS: " << UFS << endl;
-    // cout << "\tUFSINCR: " << UFSINCR << endl;
+    cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
+    cout << "\tMPIDEMO: " << MPIDEMO << endl;
+    cout << "\tUFS: " << UFS << endl;
+    cout << "\tUFSINCR: " << UFSINCR << endl;
     cout << "\tUFSMOM6: " << UFSMOM6 << endl;
+    cout << "\tMPAS: " << MPAS << endl;
     switch(nvoptions->get_model())
     {
         case UFS:
@@ -137,16 +138,14 @@ void MainWindow::_setup()
             setWindowTitle(tr("UFS MOM6 MODEL"));
             ufsmom6();
             break;
+        case MPAS:
+            setWindowTitle(tr("MPAS MODEL"));
+            mpas();
+            break;
         case MPIDEMO:
             setWindowTitle(tr("NV to demo MPI"));
             mpidemo();
             break;
-      //case MPAS:
-      //    mpas();
-      //    break;
-      //case WRF:
-      //    wrf();
-      //    break;
         default:
             mpidemo();
             break;
@@ -160,11 +159,10 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
     cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     QMenu menu(this);
 
-  //menu.addAction(wrfAct);
     menu.addAction(ufsAct);
     menu.addAction(ufsincrAct);
     menu.addAction(ufsmom6Act);
-  //menu.addAction(mpasAct);
+    menu.addAction(mpasAct);
     menu.addAction(mpidemoAct);
 
     menu.exec(event->globalPos());
@@ -279,6 +277,15 @@ void MainWindow::ufsmom6()
     _setup_display();
 }
 
+void MainWindow::mpas()
+{
+    setWindowTitle(tr("NV for MPAS"));
+
+    _setup_controlPanel();
+
+    _setup_display();
+}
+
 void MainWindow::about()
 {
     QMessageBox::about(this, tr("About Menu"),
@@ -323,10 +330,10 @@ void MainWindow::createActions()
     aboutAct->setStatusTip(tr("Show the application's About box"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
-  //wrfAct = new QAction(tr("&WRF"), this);
+    wrfAct = new QAction(tr("&MPAS"), this);
   //wrfAct->setShortcut(QKeySequence::Global);
-  //wrfAct->setStatusTip(tr("Try to activate 'wrf' application"));
-  //connect(wrfAct, SIGNAL(triggered()), this, SLOT(wrf()));
+    wrfAct->setStatusTip(tr("Try to activate 'mpas' application"));
+    connect(wrfAct, SIGNAL(triggered()), this, SLOT(mpas()));
 
     ufsAct = new QAction(tr("&UFS"), this);
   //ufsAct->setShortcut(QKeySequence::Global);
@@ -429,11 +436,10 @@ void MainWindow::createMenus()
     editMenu->addSeparator();
 
     appsMenu = menuBar()->addMenu(tr("&PlotTypes"));
-  //appsMenu->addAction(wrfAct);
     appsMenu->addAction(ufsAct);
     appsMenu->addAction(ufsincrAct);
     appsMenu->addAction(ufsmom6Act);
-  //appsMenu->addAction(mpasAct);
+    appsMenu->addAction(mpasAct);
     appsMenu->addAction(mpidemoAct);
     appsMenu->addSeparator();
 

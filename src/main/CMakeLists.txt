@@ -29,6 +29,7 @@ add_executable(starviewer
     ufsparser.cpp
     ufsincrparser.cpp
     ufsmom6parser.cpp
+    mpasparser.cpp
     # ... other files
     ../ncreader/ncreader.cpp
     ../geometry/geometry.cpp
@@ -36,6 +37,7 @@ add_executable(starviewer
     # ADD YOUR NEW NETCDF READERS HERE:
     ../ncreader/ncbasereader.cpp
     ../ncreader/ufsmom6reader.cpp
+    ../ncreader/mpasreader.cpp
     ../ncreader/ufsgridreader.cpp
     ../ncreader/ufsincrementreader.cpp
 )
@@ -64,6 +66,7 @@ target_include_directories(starviewer PUBLIC
     ${CMAKE_SOURCE_DIR}/ufs
     ${CMAKE_SOURCE_DIR}/ufsincr
     ${CMAKE_SOURCE_DIR}/ufsmom6
+    ${CMAKE_SOURCE_DIR}/mpas
     ${CMAKE_SOURCE_DIR}/mpidemo
   # ${CMAKE_SOURCE_DIR}/mpas
   # ${CMAKE_SOURCE_DIR}/pop
@@ -86,6 +89,7 @@ target_link_libraries(starviewer PRIVATE
     ufs
     ufsincr
     ufsmom6
+    mpas
     view
     contour
     shared
