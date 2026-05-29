@@ -62,8 +62,18 @@ void UFSTranslator::setup()
     if(NULL != ufs_controller)
         delete ufs_controller;
 
-    cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    ufs_controller = new UFSController(colorTable, nvoptions, _filename.c_str());
+  //if(_hasFileList)
+  //{
+  //  //cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //    ufs_controller = new UFSController(colorTable, nvoptions, _filename.c_str(), _hasFileList);
+  //}
+  //else
+  //{
+        // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+        ufs_controller = new UFSController(colorTable, nvoptions, _filename.c_str());
+  //}
+
+    // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufs_controller->setup();
 
     _jpgNotSaved = true;

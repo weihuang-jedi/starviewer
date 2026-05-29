@@ -25,8 +25,6 @@
 #include "minmaxWidget.h"
 
 //#include "wrftranslator.h"
-#include "ufs_translator.h"
-#include "ufsincr_translator.h"
 //#include "mpastranslator.h"
 //#include "poptranslator.h"
 #include "mpitranslator.h"
@@ -161,8 +159,6 @@ class MainWindow : public QMainWindow
         QAction *minmaxAct;
 
     private:
-	YAMLHandler *yamlHandler;
-
         int nInstance;
         int numberOfWidget;
 

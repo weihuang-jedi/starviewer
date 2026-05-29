@@ -13,8 +13,7 @@ int main(int argc, char *argv[])
     int n = 1;
 
     QSurfaceFormat format;
-    format.setProfile(QSurfaceFormat::CompatibilityProfile);
-    QSurfaceFormat::setDefaultFormat(format);
+    format.setProfile(QSurfaceFormat::CoreProfile);
 
     while(n < argc)
     {

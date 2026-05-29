@@ -13,7 +13,7 @@ MainWindow::MainWindow(string yamlfile)
     screenWidth = desktop->width();
     screenHeight = desktop->height(); 
 
-    yamlHandler = new YAMLHandler(yamlfile.c_str());
+    YAMLHandler *yamlHandler = new YAMLHandler(yamlfile.c_str());
     yamlHandler->read_yaml();
 
     nvoptions = new NVOptions();
@@ -238,35 +238,6 @@ void MainWindow::wrf()
 
     _setup_controlPanel();
 
-    _setup_display();
-}
-*/
-
-/*
-void MainWindow::mpas()
-{
-    mpas_translator = new MPASTranslator(colorTable, nvoptions,
-                                         fileName.toStdString(),
-                                         isFileList);
-
-    translator = mpas_translator;
-
-    setWindowTitle(tr("NV for MPAS"));
-
-    _setup_controlPanel();
-    _setup_display();
-}
-
-void MainWindow::pop()
-{
-    pop_translator = new POPTranslator(colorTable, nvoptions,
-                                       fileName.toStdString(),
-                                       isFileList);
-    translator = pop_translator;
-
-    setWindowTitle(tr("NV for POP"));
-
-    _setup_controlPanel();
     _setup_display();
 }
 */

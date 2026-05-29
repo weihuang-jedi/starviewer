@@ -14,6 +14,8 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt)
     texture1d->set_name(ct->get_name());
 
     _var = NULL;
+ 
+    earth = new Earth();
 
     nvoptions->set_xsec(0);
     nvoptions->set_ysec(0);
@@ -37,7 +39,6 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt)
 
 UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler)
 {
-    cout << "Enter: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     colorTable = ct;
     nvoptions = opt;
 
@@ -47,12 +48,9 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, nc
 
     _var = NULL;
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ncfile = nchandler;
-  //earth = new Earth(bmpflnm, ncfile);
-    earth = new Earth(bmpflnm);
+    earth = new Earth(bmpflnm, ncfile);
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     nvoptions->set_xsec(0);
     nvoptions->set_ysec(0);
     nvoptions->set_zsec(0);
@@ -70,9 +68,6 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, nc
 
     previoustimelevel = -1;
     current_timelevel = 0;
-
-    earth = new Earth(bmpflnm);
-    cout << "Leave: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 UFS2dViewer::~UFS2dViewer()
@@ -89,8 +84,6 @@ void UFS2dViewer::set_geometry(UFSGeometry *gm)
     geometry = gm;
 
     _initialize();
-
-    // initializeGL();
 }
 
 void UFS2dViewer::setup(string vn, float *var)
@@ -117,12 +110,6 @@ void UFS2dViewer::setup(string vn, float *var)
 void UFS2dViewer::reset()
 {
     lister->reinitialize(_nlon+1, _nlat+1, geometry->get_nlev()+1);
-}
-
-void UFS2dViewer::initializeGL()
-{
-    // 1. Initialize OpenGL functions (if using a loader)
-    initializeOpenGLFunctions();
 }
 
 void UFS2dViewer::_initialize()

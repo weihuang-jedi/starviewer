@@ -35,7 +35,7 @@ using namespace std;
 #define NEAR_EAST_BOUNDARY	0.9999
 #define NEAR_WEST_BOUNDARY	-NEAR_EAST_BOUNDARY
 
-class UFS2dViewer : public QOpenGLWidget, protected QOpenGLFunctions
+class UFS2dViewer : public QGLWidget
 {
 
     public:
@@ -61,8 +61,6 @@ class UFS2dViewer : public QOpenGLWidget, protected QOpenGLFunctions
         float get_minval() { return _valmin; };
         float get_maxval() { return _valmax; };
 
-        void initializeGL();
-
     protected:
         ColorTable* colorTable;
         UFSGeometry* geometry;
@@ -75,7 +73,6 @@ class UFS2dViewer : public QOpenGLWidget, protected QOpenGLFunctions
         NVOptions* nvoptions;
 
         string _varname;
-        string _bmpflnm;
 
         int previoustimelevel;
         int current_timelevel;

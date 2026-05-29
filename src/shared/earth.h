@@ -61,13 +61,12 @@ class Earth : public QGLWidget, protected QOpenGLFunctions
         vector<float> ter;
         float  maxhgt;
         float  minhgt;
+        void read_terrain();
 
         void _Vertex(int th, int ph);
         void _bumpVertex(float th, float ph, double radius);
         void _fatal(const char* format , ...);
         void _errCheck(const char *where, const char *fl, int ln);
-
-	bool _bmpLoaded;
 };
 #endif
 

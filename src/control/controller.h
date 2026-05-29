@@ -53,7 +53,6 @@ class Controller
       //int get_nfiles() { return ncfile->get_nfiles(); };
         int get_nfiles() { return 1; };
         int* get_ntimes() { return _ntimes; };
-        int  get_ntiles() { return _ntiles; };
 
         virtual int get_ndv(int n);
         virtual string* get_ndvNames(int n);
@@ -107,7 +106,6 @@ class Controller
         int _nt;
         int _nm;
 
-        int  _ntiles;
         int* _ntimes;
         int* _grdsize;
         int* _varsize;

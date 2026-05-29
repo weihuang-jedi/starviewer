@@ -63,7 +63,6 @@ class ncReader {
 
     int* _dimsize = NULL;
     int* _ntimes = NULL;
-    int* _tile = NULL;
 
     int _nlon;
     int _nlat;
@@ -72,10 +71,6 @@ class ncReader {
     int _nfull;
     int _nhalf;
     int _nchars;
-
-    int _nx;
-    int _ny;
-    int _ntiles;
  
   public:
     // declare constructor and deconstructor methods
@@ -103,7 +98,6 @@ class ncReader {
     // float* getFloat(const string var_name);
     // double* getDouble(const string var_name);
 
-    int* getInt(const char* var_name);
     char* getChar(const char* var_name);
     float* getFloat(const char* var_name);
     double* getDouble(const char* var_name);
@@ -117,10 +111,6 @@ class ncReader {
     int getNlat() { return _nlat; };
     int getNlev() { return _nlev; };
     int getNtim() { return _ntim; };
-
-    int getNx() { return _nx; };
-    int getNy() { return _ny; };
-    int getNtiles() { return _ntiles; };
 
     vector<string> getDimNames() { return dim_names; };
     vector<string> getV2dNames() { return v2d_names; };
@@ -140,14 +130,13 @@ class ncReader {
     float* getPhalf() { return _phalf; };
     float* getLev() { return _pfull; };
 
+    // simulate ncl functions.
     double* get_dv( const char* vn ) { return getDouble(vn); };
     float* get_fv( const char* vn ) { return getFloat(vn); };
     int*   get_grdsize() { return _dimsize; };
     int*   get_varsize();
     int*   get_ntimes() { return _ntimes; };
-    int    get_ntiles() { return _ntiles; };
 
     void select_file(int nf);
-    void CheckIncrement();
 };
 #endif

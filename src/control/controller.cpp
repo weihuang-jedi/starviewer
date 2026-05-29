@@ -25,8 +25,8 @@ Controller::Controller(ColorTable *ct, NVOptions* opt,
     _preTime = -1;
     _curTime = 0;
 
-    ncfile = new ncReader(_flnm.c_str());
     geometry = NULL;
+    ncfile = NULL;
     glviewer = NULL;
     pixelviewer = NULL;
     spreadsheet = NULL;
@@ -51,16 +51,9 @@ void Controller::setup()
   //cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
   //     << ", file: <" << __FILE__ << ">" << endl;
 
-    ncfile->exploreFile();
+    ncfile = new ncReader(_flnm.c_str());
     _grdsize = ncfile->get_grdsize();
     _ntimes = ncfile->get_ntimes();
-    _ntiles = ncfile->get_ntiles();
-
-    cout << "\t" << __PRETTY_FUNCTION__ << ">, line: "
-         << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\t_grdsize[0]: " << _grdsize[0] << endl;
-    cout << "\t_ntimes[0]: " << _ntimes[0] << endl;
-    cout << "\t_ntiles: " << _ntiles << endl;
 
     geometry = new Geometry();
     geometry->set_name(_flnm);
@@ -69,46 +62,31 @@ void Controller::setup()
     geometry->set_mz(_grdsize[1]);
     geometry->set_nt(_ntimes[0]);
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ">, line: "
-         << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
-    if (_ntiles == 0)
-    {
-        geometry->set_has1dLon(true);
-        geometry->set_has1dLat(true);
-        geometry->set_has1dLev(true);
-        geometry->set_lon(ncfile->getLon());
-        geometry->set_lat(ncfile->getLat());
-        geometry->set_lev(ncfile->getLev());
-
-        geometry->set_nx(ncfile->getNlon());
-        geometry->set_ny(ncfile->getNlat());
-        geometry->set_nz(ncfile->getNlev());
-    }
-    else
-    {
-        geometry->set_has1dLon(false);
-        geometry->set_has1dLat(false);
-        geometry->set_has1dLev(true);
-        geometry->set_lev(ncfile->getLev());
-    }
+    geometry->set_has1dLon(true);
+    geometry->set_has1dLat(true);
+    geometry->set_has1dLev(true);
+    geometry->set_lon(ncfile->getLon());
+    geometry->set_lat(ncfile->getLat());
+    geometry->set_lev(ncfile->getLev());
 
     geometry->set_has2dLon(true);
     geometry->set_lon2d(ncfile->getLon2d());
     geometry->set_has2dLat(true);
     geometry->set_lat2d(ncfile->getLat2d());
 
-    cout << "\t<" << __PRETTY_FUNCTION__ << ">, line: "
+    cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: "
          << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\t_varname" << _varname << endl;
 
-    _varname = "pressfc";
     _value = ncfile->getFloat(_varname.c_str());
   //_title = ncfile->get_title();
 
     geometry->set_hasFillValue(false);
   //if(geometry->get_hasFillValue())
   //   geometry->set_fillValue(ncfile->get_fillValue());
+
+    geometry->set_nx(ncfile->getNlon());
+    geometry->set_ny(ncfile->getNlat());
+    geometry->set_nz(ncfile->getNlev());
 
   //geometry->print();
 
@@ -346,11 +324,7 @@ int Controller::get_ndv(int n)
 {
     cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
          << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\t n = " << n << endl;
-    if (n == 2)
-	return ncfile->getNumV2ds();
-    else if (n == 3)
-	return ncfile->getNumV3ds();
+  //return nvfile->get_ndv(n);
     return 1;
 }
 
@@ -358,30 +332,18 @@ string* Controller::get_ndvNames(int n)
 {
     cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
          << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\t n = " << n << endl;
-    if (n == 2)
-    {
-	vector<string> vec = ncfile->getV2dNames();
-	string* strpntr = vec.data();
-	return strpntr;
-    }
-    else if (n == 3)
-    {
-	vector<string> vec = ncfile->getV3dNames();
-	string* strpntr = vec.data();
-	return strpntr;
-    }
     string* vn = new string[2];
     return vn;
+  //return nvfile->get_ndvNames(n);
 }
 
 string* Controller::get_timestring()
 {
     cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
          << ", file: <" << __FILE__ << ">" << endl;
-    string* ts = new string[1];
-    ts[0] = ncfile->getTimeString();
-    return ts;
+    string* vn = new string[2];
+    return vn;
+  //return nvfile->get_timestr();
 } 
 
 void Controller::setup_vector()

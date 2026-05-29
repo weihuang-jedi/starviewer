@@ -57,13 +57,12 @@ void Pixel_Viewer::_setup_shader(NV_FRAG_Type type, const char* name)
     char fragname[1024];
 
     cout << "Enter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tname: " << name << endl;
-    strcpy(fragname, getenv("STARVIEWERHOME"));
+    strcpy(fragname, getenv("NV_HOME"));
     strcat(fragname, "/pixel/");
     strcat(fragname, name);
 
     cout << "\t fragname: " << fragname << endl;
-    // shader[type]  = createShaderProg(NULL, fragname);
+    shader[type]  = createShaderProg(NULL, fragname);
     cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 

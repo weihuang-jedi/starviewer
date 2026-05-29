@@ -11,8 +11,7 @@ ncReader::ncReader(const char* fname) {
     status = nc_inq(ncid, &num_dims, &num_vars, &num_gatts, &unlimdimid);
     if (status != NC_NOERR) handle_error(status);
 
-    _ntiles = 0;
-    // exploreFile();
+    exploreFile();
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 } 
  
@@ -33,7 +32,6 @@ ncReader::~ncReader() {
 
     if (NULL != _dimsize) delete[] _dimsize;
     if (NULL != _ntimes) delete[] _ntimes;
-    if (NULL != _tile) delete[] _tile;
     close();
 }
  
@@ -49,10 +47,8 @@ void ncReader::_get_dim_info() {
     if (NULL == _dimsize) _dimsize = new int[num_dims];
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     if (NULL == _ntimes) _ntimes = new int[2];
-    _ntimes[0] = 1;
-    _ntimes[1] = 1;
-
-    _ntiles = 0;
+     _ntimes[0] = 1;
+     _ntimes[1] = 1;
 
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     // Get Dimensions
@@ -72,12 +68,10 @@ void ncReader::_get_dim_info() {
 
 	if (0 == strcmp(recname, "grid_xt")) {
             _nlon = _dimsize[n];
-            _nx = _dimsize[n];
           //cout << " _nlon " << _nlon << endl;
 	}
 	else if (0 == strcmp(recname, "grid_yt")) {
             _nlat = _dimsize[n];
-            _ny = _dimsize[n];
           //cout << " _nlat " << _nlat << endl;
 	}
 	else if (0 == strcmp(recname, "phalf")) {
@@ -92,10 +86,6 @@ void ncReader::_get_dim_info() {
 	}
 	else if (0 == strcmp(recname, "time")) {
             _ntim = _dimsize[n];
-          //cout << " _ntim " << _ntim << endl;
-	}
-	else if (0 == strcmp(recname, "tile")) {
-            _ntiles = _dimsize[n];
           //cout << " _ntim " << _ntim << endl;
 	}
 	else if (0 == strcmp(recname, "nchars")) {
@@ -123,7 +113,7 @@ void ncReader::_get_var_info() {
     v3d_names.resize(num_vars);
     // Get Variables
     var_names.resize(num_vars);
-    cout << " Variables (" << num_vars << "):" << endl;
+  //cout << " Variables (" << num_vars << "):" << endl;
     for (n = 0; n < num_vars; ++n) {
         status = nc_inq_var (ncid, n, 0, &var_type, &var_ndims, var_dimids, &var_natts);
         if (status != NC_NOERR) handle_error(status);
@@ -132,30 +122,13 @@ void ncReader::_get_var_info() {
         if (status != NC_NOERR) handle_error(status);
 
 	var_names[n] = var_name;
-        cout << "\tVar #" << n << ": " << var_name << " Type: " << var_type << endl;
-        if (_ntiles)
-	{
-        if (4 == var_ndims) {
-	    v2d_names[num_v2ds] = var_name;
-            num_v2ds++;
-            cout << "\t\t2DVar #" << num_v2ds << ": " << var_name << " : " << var_type << endl;
-        } else if (5 == var_ndims) {
-	    v3d_names[num_v3ds] = var_name;
-            num_v3ds++;
-            cout << "\t\t3DVar #" << num_v3ds << ": " << var_name << " : " << var_type << endl;
-        }
-        }
-	else
-	{
+      //cout << "  - " << var_name << " Type: " << var_type << endl;
         if (3 == var_ndims) {
 	    v2d_names[num_v2ds] = var_name;
             num_v2ds++;
-            cout << "\t\t2DVar #" << num_v2ds << ": " << var_name << " : " << var_type << endl;
         } else if (4 == var_ndims) {
 	    v3d_names[num_v3ds] = var_name;
             num_v3ds++;
-            cout << "\t\t3DVar #" << num_v3ds << ": " << var_name << " : " << var_type << endl;
-        }
         }
     }
 
@@ -244,9 +217,6 @@ void ncReader::exploreFile() {
     _time_iso = getChar("time_iso");
     _timestring = _time_iso;
 
-    if (_ntiles)
-        _tile = getInt("tile");
-
   //cout << " _timestring:" << _timestring << endl;
 
     _pfull = getFloat("pfull");
@@ -268,42 +238,6 @@ void ncReader::exploreFile() {
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
  
-// Function to dimensions, and variables
-void ncReader::CheckIncrement() {
-    int n = 0;
-
-  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    num_grps = 1;
-
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    _get_dim_info();
-  //cout << "_nlev:" << _nlev << endl;
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    _get_var_info();
-
-    cout << "Dimensions:" << endl;
-    for (n=0; n<num_dims; ++n) {
-	cout << "dim " << n << " name: <" << dim_names[n] << ">" << endl;
-    }
-
-    cout << "2D vars:" << endl;
-    for (n=0; n<num_v2ds; ++n) {
-	cout << "var " << n << " name: <" << v2d_names[n] << ">" << endl;
-    }
-
-    cout << "3D vars:" << endl;
-    for (n=0; n<num_v3ds; ++n) {
-	cout << "var " << n << " name: <" << v3d_names[n] << ">" << endl;
-    }
-   /*
-    */
-
-    if (_ntiles)
-        _tile = getInt("tile");
-
-  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-}
- 
 /*
 float* ncReader::getFloat(const string var_name) {
     return getFloat(var_name.c_str());
@@ -314,28 +248,6 @@ double* ncReader::getDouble(const string var_name) {
 }
 */
  
-int* ncReader::getInt(const char* var_name) {
-    int var_id;
-    size_t var_length = 1;
-    size_t length = 1;
-
-  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    status = nc_inq_varid (ncid, var_name, &var_id);
-    if (status != NC_NOERR) handle_error(status);
-
-    var_length = getVarSize(var_name);
-  //cout << "var_name: " << var_name << ", ncid = " << ncid << ", var_id = " << var_id << ", var_length = " << var_length << endl;
-
-    int* value = new int[var_length];
-
-    status = nc_get_var_int(ncid, var_id, value);
-    if (status != NC_NOERR) handle_error(status);
-  //cout << "value[0] = " << value[0] << endl;
-
-  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    return value;
-}
-
 char* ncReader::getChar(const char* var_name) {
     int var_id;
     size_t var_length = 1;

@@ -17,9 +17,13 @@ Earth::Earth()
 
     strcat(_bmpflnm, "/data/earth.bmp");
 
+    _loadTexBMP();
+
     radius = 1.0;
 
     deg2arc = 3.1415926535897932 / 180.0;
+
+    // read_terrain();
 }
 
 Earth::Earth(const char *flnm)
@@ -40,9 +44,10 @@ Earth::Earth(const char *flnm, ncReader* nchandler)
     float hgt;
 
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    // initializeGL();
+    initializeGL();
 
     strcpy(_bmpflnm, flnm);
+    _loadTexBMP();
 
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     nlon = nchandler->getNlon();
@@ -169,6 +174,7 @@ void Earth::_loadTexBMP()
     set_texture_id(textureID);
 
     // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+  //cout << "\tt.width(): " << t.width() << ", t.height(): " << t.height() << endl;
 
     glBindTexture(GL_TEXTURE_2D, textureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -345,6 +351,79 @@ void Earth::bump_plane(float z)
     }
 
     glDisable(GL_TEXTURE_2D);
+}
+
+void Earth::read_terrain()
+{
+    netCDF::NcFile* ncfl;
+
+    float hgt = 0.0;
+
+    int i = 0;
+    int j = 0;
+    size_t n = 0;
+
+    const char* path = getenv("STARVIEWERHOME");
+    if (path == nullptr) {
+        cout << "ERROR: STARVIEWERHOME not set!" << endl;
+        throw(errno);
+    }
+    strcpy(_topoflnm, path);
+    strcat(_topoflnm, "/data/GMTED2010_15n060_0250deg.nc");
+    cout << "_topoflnm: " << _topoflnm << endl;
+
+    try {
+        // Use the constructor to re-initialize the ncfl object
+        ncfl = new netCDF::NcFile(_topoflnm, netCDF::NcFile::read);
+
+        cout << "Successfully opened: " << _topoflnm << endl;
+    } catch (netCDF::exceptions::NcException& e) {
+        cerr << "Error opening file: " << e.what() << endl;
+    }
+
+    // Load necessary variables
+    netCDF::NcVar lonVar = ncfl->getVar("longitude");
+    netCDF::NcVar latVar = ncfl->getVar("latitude");
+    netCDF::NcVar terVar = ncfl->getVar("elevation");
+    nlon = lonVar.getDim(0).getSize();
+    nlat = latVar.getDim(0).getSize();
+    size_t nter = nlon*nlat;
+
+    lon.resize(nlon);
+    lat.resize(nlat);
+    ter.resize(nter);
+    vector<short> ster(nter);
+
+    lonVar.getVar(lon.data());
+    latVar.getVar(lat.data());
+    terVar.getVar(ster.data());
+
+    maxhgt = 0.0;
+    minhgt = 0.0;
+
+    n = 0;
+    for(j = 0; j < nlat; ++j)
+    {
+        for(i = 0; i < nlon; ++i)
+        {
+            hgt = ster[n];
+            if(maxhgt < hgt)
+               maxhgt = hgt;
+            if(minhgt > hgt)
+               minhgt = hgt;
+            ter[n] = hgt;
+
+            ++n;
+        }
+    }
+
+    ster.clear();
+    ster.shrink_to_fit();
+
+    free(ncfl);
+
+    cout << "\tmaxhgt = " << maxhgt << endl;
+    cout << "\tminhgt = " << minhgt << endl;
 }
 
 void Earth::bump(float r)

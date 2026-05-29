@@ -26,8 +26,6 @@ class YAMLHandler
 	string get_coastline_file() { return _coastline_file; };
 	string get_coastline_resolution() { return _coastline_resolution; };
 
-	string get_atmfile() { return _atmfile; };
-	string get_sfcfile() { return _sfcfile; };
 	vector<string> get_datafiles() { return _datafiles; };
 	vector<string> get_gridfiles() { return _gridfiles; };
 	vector<string> get_incrfiles() { return _incrfiles; };
@@ -43,9 +41,6 @@ class YAMLHandler
 	string _earth_bmp;
 	string _coastline_file;
 	string _coastline_resolution;
-
-	string _atmfile;
-	string _sfcfile;
 
 	vector<string> _datafiles;
 	vector<string> _gridfiles;
