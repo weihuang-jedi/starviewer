@@ -1,7 +1,5 @@
-#ifndef TestTRANSLATOR_H
-#define TestTRANSLATOR_H
-
-//$Id: testtranslator.h 5315 2015-02-06 21:24:34Z starviewer $
+#ifndef _UFSINCR_TRANSLATOR_H
+#define _UFSINCR_TRANSLATOR_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,36 +7,44 @@
 #include <math.h>
 #include <assert.h>
 
+#include <string>
+#include <vector>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <cerrno>
+
 #include <QtGui/QKeyEvent>
 #include <QtOpenGL/QGLWidget>
 #include <QString>
 #include <QTimer>
 
 #include "sliderNspin.h"
+#include "controlWidget.h"
 #include "basetranslator.h"
-#include "topography.h"
-// #include "coastline2.h"
+#include "ufsincr_controller.h"
 
-class TestTranslator : public BaseTranslator
+class UFSINCRTranslator : public BaseTranslator
 {
     Q_OBJECT                                             //  Qt magic macro
     public:
-        TestTranslator(ColorTable* ct, NVOptions* opt, string flnm,
-                       bool isList = false, QWidget* parent=0);	//  Constructor
-       ~TestTranslator();					//  Destructor
+        UFSINCRTranslator(ColorTable* ct, NVOptions* opt,
+                          vector<string> gridflnm, vector<string> incrflnm,
+			  QWidget* parent=0);	//  Constructor
+       ~UFSINCRTranslator();				//  Destructor
     
+        void paintGL() override;
         void show();
         void setup();
-        void update_sliderNspin();
-        void setfilename(string flnm) { _filename = flnm; };
-
         void set_light(Light* l);
         void set_locator(Locator* l);
 
         int get_ndv(int n);
         string* get_ndvNames(int n);
+        string get_title() { return _title; };
 
     public slots:
+        void select0dVar(const QString& str);
         void select1dVar(const QString& str);
         void select2dVar(const QString& str);
         void select3dVar(const QString& str);
@@ -46,22 +52,25 @@ class TestTranslator : public BaseTranslator
         void selectColorMap(const QString& str);
 
         void update_frame();
+        void nextFrame();
+        void backFrame();
 
     protected:
         void writeVarInfo();
         void writeLocatorMsg();
 
     private:
-        Topography* topography;
-      //CoastLine2* coastline2;
+        UFSINCRController* ufsincr_controller;
 
-        bool _flat;
+	vector<string> _gridflnm;
+	vector<string> _incrflnm;
 
-        void sphereVertex(int i, int j);
+    private:
+        void _initialize();
+
         void createVarInfo();
-        void make_timeNpositionString();
         void writeFrameInfo();
-        void draw();
+        void make_timeNpositionString();
 };
 #endif
 

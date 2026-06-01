@@ -22,19 +22,11 @@ typedef enum
 {
     NOMODEL = 0x0000,
     WRF     = 0x0001,
-    UFS     = 0x0101,
-    CCSM    = 0x0010,
-    CAM     = 0x0020,
-    CAMFV   = 0x0021,
-    CAMSE   = 0x0022,
-    POP     = 0x0030,
-    GLOBAL  = 0x0040,
+    UFS     = 0x0010,
+    UFSINCR = 0x0020,
     MPAS    = 0x0100,
-    RADX    = 0x0200,
-    VTK     = 0x0400,
-    MPIDEMO = 0x1000,
-    HDF     = 0x2000,
-    TEST    = 0xffff
+    POP     = 0x0200,
+    MPIDEMO = 0x1000
 } ModelType;
 
 typedef enum
@@ -42,7 +34,6 @@ typedef enum
     NV_NONE = 0,
     NV_ISPERSPECTIVE,
     NV_AXISON,
-    NV_USENCL,
     NV_BGBLACK,
     NV_BUMPON,
     NV_FLATON,

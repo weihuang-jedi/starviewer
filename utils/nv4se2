@@ -1,5 +1,0 @@
-#!/bin/csh -f
-
- nv -mappingfile $NV_DATA/camse_0.25degree_mapping.nc \
-    -camse /Users/huangwei/test/ncltest/ncl_qt/data/cam_se_jan01.nc
-

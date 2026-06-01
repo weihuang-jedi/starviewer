@@ -19,7 +19,9 @@
 #include <QString>
 #include <QTimer>
 
+#include "yamlhandler.h"
 #include "sliderNspin.h"
+#include "controlWidget.h"
 #include "basetranslator.h"
 #include "ufs_controller.h"
 
@@ -28,10 +30,11 @@ class UFSTranslator : public BaseTranslator
     Q_OBJECT                                             //  Qt magic macro
     public:
         UFSTranslator(ColorTable* ct, NVOptions* opt,
-                        string flnm, bool isList=false,
-                        string mfnm = "unknown", QWidget* parent=0);	//  Constructor
+                      string flnm, bool isList=false,
+                      string mfnm = "unknown", QWidget* parent=0);	//  Constructor
        ~UFSTranslator();				//  Destructor
     
+        void paintGL();
         void show();
         void setup();
         void setfilename(string flnm) { _filename = flnm; };

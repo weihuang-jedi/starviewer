@@ -18,23 +18,25 @@ find_path(GLU_INCLUDE_DIR NAMES GL/glu.h
 )
 
 # Create a library for this module
-add_library(test STATIC ${SOURCES})
+add_library(ufsincr STATIC ${SOURCES})
 
 # Allow other modules to find these headers
-target_include_directories(test PUBLIC
+target_include_directories(ufsincr PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${GLU_INCLUDE_DIR}
     ${GLU_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/geometry
     ${CMAKE_SOURCE_DIR}/shared
+    ${CMAKE_SOURCE_DIR}/leveler
+    ${CMAKE_SOURCE_DIR}/spreadsheet
     ${CMAKE_SOURCE_DIR}/coastline
-  # ${CMAKE_SOURCE_DIR}/coastline2
     ${CMAKE_SOURCE_DIR}/topography
-    ${CMAKE_SOURCE_DIR}/nclapp
+    ${CMAKE_SOURCE_DIR}/widget
     ${CMAKE_SOURCE_DIR}/stateboundary
     ${CMAKE_SOURCE_DIR}/contour
     ${CMAKE_SOURCE_DIR}/control
+    ${CMAKE_SOURCE_DIR}/ncreader
     ${CMAKE_SOURCE_DIR}/view
     ${CMAKE_SOURCE_DIR}/windvector
     ${CMAKE_SOURCE_DIR}/marchingCube
@@ -45,7 +47,7 @@ target_include_directories(test PUBLIC
 )
 
 # Link Qt5
-target_link_libraries(test PUBLIC
+target_link_libraries(ufsincr PUBLIC
     ${OPENGL_LIBRARIES}
     ${NetCDF_LIBRARIES}
     ${GLU_LIBRARY}
