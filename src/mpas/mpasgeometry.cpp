@@ -37,10 +37,10 @@ void MPASGeometry::print()
 
 void MPASGeometry::setup()
 {
-    double xWest = -0.5;
-    double xEast =  0.5;
+    float xWest = -0.5;
+    float xEast =  0.5;
 #ifdef HASZGRID
-    double delt;
+    float delt;
     int i;
     size_t m;
 #endif
@@ -235,7 +235,7 @@ pnt3d MPASGeometry::polar2xyz(int n, int k)
     pnt.y      = _height[m] * sin(_latCell[n]);
 #else
     double delt = cos(_latCell[n]);
-    pnt.y      =  sin(_latCell[n]);
+    pnt.y      = sin(_latCell[n]);
 #endif
 
     pnt.x = delt * sin(_lonCell[n]);

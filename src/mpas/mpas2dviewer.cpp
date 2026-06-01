@@ -65,7 +65,7 @@ void MPAS2dViewer::set_geometry(MPASGeometry *gm)
     _initialize();
 }
 
-void MPAS2dViewer::setup(string vn, double *var)
+void MPAS2dViewer::setup(string vn, float *var)
 {
     size_t gridsize;
 
@@ -258,12 +258,12 @@ void MPAS2dViewer::_sphereDisplay()
 
     double sv = 1.0;
     double fact;
-    double height = 1.001;
+    float radius = 1.001;
 
     pnt3d pnt;
     pnt3d norm;
 
-    double* current_var_ptr;
+    float* current_var_ptr;
 
     k = nvoptions->get_zsec();
 
@@ -280,9 +280,9 @@ void MPAS2dViewer::_sphereDisplay()
     if(0 < zcl)
         return;
 
-    height = 1.001 + 0.5 * (double) k / (double) nVertLevels;
+    radius = 1.001 + 0.5 * (float) k / (float) nVertLevels;
 
-    locator->set_height(height);
+    locator->set_height(radius);
 
     sv = 1.0 / (_workMaxVal - _workMinVal);
 
@@ -294,9 +294,6 @@ void MPAS2dViewer::_sphereDisplay()
   //cout << "\tzcl = " << zcl << endl;
 
     glPushMatrix();
-
-    if(nvoptions->get_cb(NV_COASTLINEON))
-        coastline->draw(height, 1);
 
     glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(1, 1);
@@ -317,9 +314,9 @@ void MPAS2dViewer::_sphereDisplay()
             n = nVertLevels * c + k;
             fact = sv * (current_var_ptr[n] - _workMinVal);
 
-            pnt = geometry->polar2xyz(c, height);
+            pnt = geometry->polar2xyz(c, radius);
 
-            norm = nvop(pnt, height);
+            norm = nvop(pnt, radius);
             glNormal3d(norm.x, norm.y, norm.z);
             glTexCoord1d(fact);
             glVertex3d(pnt.x, pnt.y, pnt.z);
@@ -327,39 +324,23 @@ void MPAS2dViewer::_sphereDisplay()
     }
     glEnd();
 
+    coastline->drawOnSphere(radius+0.01);
+
     glDisable(GL_POLYGON_OFFSET_FILL);
     glDisable(GL_TEXTURE_1D);
 
 #if 0
-    height += 0.010;
-
-    glColor3d(0.0, 1.0, 0.0);
-
-    glBegin(GL_POLYGON);
-    for(v = 0; v < nVertices; ++v)
-    {
-        for(i = 0; i < vertexDegree; i++)
-        {
-            c = cellsOnVertex[i+v*vertexDegree];
-            pnt = geometry->polar2xyz(c, height);
-            norm = nvop(pnt, height);
-            glNormal3d(norm.x, norm.y, norm.z);
-            glVertex3d(pnt.x, pnt.y, pnt.z);
-        }
-    }
-    glEnd();
-#endif
-
     if(locator->on())
     {
       //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
       //cout << "\tlocation = (" << locator->x() << ", " << locator->y() << ")" << endl;
 
-        _draw_cross(height + 0.01);
+        _draw_cross(radius + 0.01);
 
         if((NULL != nvoptions) && nvoptions->get_cb(NV_GRIDON))
-            _draw_triangle(height + 0.01);
+            _draw_triangle(radius + 0.01);
     }
+#endif
 
     glPopMatrix();
 
@@ -379,18 +360,18 @@ void MPAS2dViewer::_flatDisplay()
     int vertexDegree   = geometry->get_vertexDegree();
     int* cellsOnVertex = geometry->get_cellsOnVertex();
 
-    double sv = 1.0;
-    double fact;
-    double height = 0.0;
+    float sv = 1.0;
+    float fact;
+    float height = 0.0;
 
-    double x[5];
-    double y[5];
-  //double z[5];
-    double val[5];
-    double dx;
-  //double dy;
+    float x[5];
+    float y[5];
+  //float z[5];
+    float val[5];
+    float dx;
+  //float dy;
 
-    double* current_var_ptr;
+    float* current_var_ptr;
 
     pnt2d pnt;
     pnt2d pnt0;
@@ -411,7 +392,7 @@ void MPAS2dViewer::_flatDisplay()
     glNewList(zcl, GL_COMPILE_AND_EXECUTE);
 
     if(1 < nVertLevels)
-        height = (double) k / (double) nVertLevels - 0.5;
+        height = (float) k / (float) nVertLevels - 0.5;
     else
         height = 0.0;
 
@@ -430,9 +411,6 @@ void MPAS2dViewer::_flatDisplay()
   //cout << "\t_nBoundaryPoints = " << _nBoundaryPoints << endl;
 
     glPushMatrix();
-
-    if(nvoptions->get_cb(NV_COASTLINEON))
-        coastline->drawONplane2(height, 2);
 
     glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(1, 1);
@@ -693,6 +671,8 @@ void MPAS2dViewer::_flatDisplay()
     }
     glEnd();
 
+    coastline->drawOnPlane(height+0.01);
+
     glDisable(GL_POLYGON_OFFSET_FILL);
     glDisable(GL_TEXTURE_1D);
 
@@ -730,17 +710,17 @@ void MPAS2dViewer::_sphereDisplayXsec()
     double* lon = NULL;
     double* lat = NULL;
 
-    double tlon[3];
-    double tlat[3];
+    float tlon[3];
+    float tlat[3];
 
     double clon = (double) nvoptions->get_xsec();
     double alon = DEG2ARC * clon;
 
     double alat[3];
-    double dx;
+    float dx;
 
-    double val[3][nVertLevels];
-    double cval[3][nVertLevels];
+    float val[3][nVertLevels];
+    float cval[3][nVertLevels];
 
     bool need_shift_low  = false;
     bool need_shift_high = false;
@@ -764,7 +744,7 @@ void MPAS2dViewer::_sphereDisplayXsec()
   //cout << "\tnVertLevels = " << nVertLevels << ", nvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
 
     for(k = 0; k < nVertLevels; ++k)
-        height[k] = 1.001 + 0.5 * (double) k / (double) nVertLevels;
+        height[k] = 1.001 + 0.5 * (float) k / (float) nVertLevels;
 
     if(LOWBOUND > clon)
         need_shift_low = true;
@@ -986,14 +966,14 @@ void MPAS2dViewer::_sphereDisplayYsec()
     double tlon[3];
     double tlat[3];
 
-    double clat = (double) nvoptions->get_ysec();
+    double clat = (float) nvoptions->get_ysec();
     double alat = DEG2ARC * clat;
 
     double alon[3];
-    double dy;
+    float dy;
 
-    double val[3][nVertLevels];
-    double cval[3][nVertLevels];
+    float val[3][nVertLevels];
+    float cval[3][nVertLevels];
 
     pnt3d pnt0;
     pnt3d pnt1;
@@ -1014,7 +994,7 @@ void MPAS2dViewer::_sphereDisplayYsec()
   //cout << "\tnVertLevels = " << nVertLevels << ", nvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
 
     for(k = 0; k < nVertLevels; ++k)
-        height[k] = 1.001 + 0.5 * (double) k / (double) nVertLevels;
+        height[k] = 1.001 + 0.5 * (float) k / (float) nVertLevels;
 
     lon = geometry->get_lonCell();
     lat = geometry->get_latCell();
@@ -1228,14 +1208,14 @@ void MPAS2dViewer::_flatDisplayXsec()
     double tlon[3];
     double tlat[3];
 
-    double clon = (double) nvoptions->get_xsec();
+    double clon = (float) nvoptions->get_xsec();
     double alon = clon;
 
     double alat[3];
-    double dx;
+    float dx;
 
-    double val[3][nVertLevels];
-    double cval[3][nVertLevels];
+    float val[3][nVertLevels];
+    float cval[3][nVertLevels];
 
     bool need_shift_low  = false;
     bool need_shift_high = false;
@@ -1259,7 +1239,7 @@ void MPAS2dViewer::_flatDisplayXsec()
   //cout << "\tnVertLevels = " << nVertLevels << ", nvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
 
     for(k = 0; k < nVertLevels; ++k)
-        height[k] = 0.75 * (double) k / (double) nVertLevels - 0.5;
+        height[k] = 0.75 * (float) k / (float) nVertLevels - 0.5;
 
     if(LOWBOUND > clon)
         need_shift_low = true;
@@ -1472,14 +1452,14 @@ void MPAS2dViewer::_flatDisplayYsec()
     double tlon[3];
     double tlat[3];
 
-    double clat = (double) nvoptions->get_ysec();
+    double clat = (float) nvoptions->get_ysec();
     double alat = clat;
 
     double alon[3];
-    double dy;
+    float dy;
 
-    double val[3][nVertLevels];
-    double cval[3][nVertLevels];
+    float val[3][nVertLevels];
+    float cval[3][nVertLevels];
 
     pnt3d pnt0;
     pnt3d pnt1;
@@ -1500,7 +1480,7 @@ void MPAS2dViewer::_flatDisplayYsec()
   //cout << "\tnVertLevels = " << nVertLevels << ", nvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
 
     for(k = 0; k < nVertLevels; ++k)
-        height[k] = 0.75 * (double) k / (double) nVertLevels - 0.5;
+        height[k] = 0.75 * (float) k / (float) nVertLevels - 0.5;
 
     lon = geometry->get_lonCell();
     lat = geometry->get_latCell();
@@ -1754,11 +1734,11 @@ void MPAS2dViewer::_flatSubset()
     double fact;
     double height = 0.0;
 
-    double* current_var_ptr;
+    float* current_var_ptr;
 
     int nwest, neast, nsouth, nnorth;
-    double west, east, south, north;
-    double xc, yc;
+    float west, east, south, north;
+    float xc, yc;
     pnt2d pnt;
 
     k = nvoptions->get_zsec();
@@ -1775,7 +1755,7 @@ void MPAS2dViewer::_flatSubset()
     glNewList(zcl, GL_COMPILE_AND_EXECUTE);
 
     if(1 < nVertLevels)
-        height = (double) k / (double) nVertLevels - 0.5;
+        height = (float) k / (float) nVertLevels - 0.5;
     else
         height = 0.0;
 
@@ -1901,7 +1881,7 @@ void MPAS2dViewer::_flatSubset()
 
     glDisable(GL_TEXTURE_1D);
 
-    coastline->drawONplane2(height+0.001, 2);
+    coastline->drawOnPlane(height+0.001);
 
     glPopMatrix();
 
@@ -1926,11 +1906,11 @@ void MPAS2dViewer::_sphereSubset()
     double fact;
     double height = 1.001;
 
-    double* current_var_ptr;
+    float* current_var_ptr;
 
     int nwest, neast, nsouth, nnorth;
-    double west, east, south, north;
-    double xc, yc;
+    float west, east, south, north;
+    float xc, yc;
 
     double* lon = geometry->get_lonCell();
     double* lat = geometry->get_latCell();
@@ -1951,7 +1931,7 @@ void MPAS2dViewer::_sphereSubset()
   //glNewList(zcl, GL_COMPILE);
     glNewList(zcl, GL_COMPILE_AND_EXECUTE);
 
-    height = 1.001 + 0.5 * (double) k / (double) nVertLevels;
+    height = 1.001 + 0.5 * (float) k / (float) nVertLevels;
 
     locator->set_height(height);
 
@@ -2086,7 +2066,7 @@ void MPAS2dViewer::_sphereSubset()
 
     glDisable(GL_TEXTURE_1D);
 
-    coastline->drawONplane2(height+0.001, 2);
+    coastline->drawOnPlane(height+0.001);
 
     glPopMatrix();
 
@@ -2105,17 +2085,16 @@ void MPAS2dViewer::draw_sphere_grids()
     int vertexDegree   = geometry->get_vertexDegree();
     int* cellsOnVertex = geometry->get_cellsOnVertex();
 
-    double sv = 1.0;
-    double height = 1.001;
+    float radius;
 
     pnt3d pnt;
     pnt3d norm;
 
     k = nvoptions->get_zsec();
 
-    height = 1.020 + 0.5 * (double) k / (double) nVertLevels;
+    radius = 1.020 + 0.5 * (float) k / (float) nVertLevels;
 
-    locator->set_height(height);
+    locator->set_height(radius);
 
   //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 
@@ -2129,7 +2108,7 @@ void MPAS2dViewer::draw_sphere_grids()
         for(i = 0; i < vertexDegree; i++)
         {
             c = cellsOnVertex[i+v*vertexDegree];
-            pnt = geometry->polar2xyz(c, height);
+            pnt = geometry->polar2xyz(c, radius);
 
           //norm = nvop(pnt, height);
           //glNormal3d(norm.x, norm.y, norm.z);
@@ -2139,7 +2118,7 @@ void MPAS2dViewer::draw_sphere_grids()
     glEnd();
 
 #if 0
-    coastline->draw(height + 0.01, 1);
+    coastline->draw(radius + 0.01);
 
     if(locator->on())
     {
@@ -2149,7 +2128,7 @@ void MPAS2dViewer::draw_sphere_grids()
         _draw_cross(height + 0.01);
 
         if((NULL != nvoptions) && nvoptions->get_cb(NV_GRIDON))
-            _draw_triangle(height + 0.01);
+            _draw_triangle(radius + 0.01);
     }
 #endif
 
@@ -2166,11 +2145,10 @@ void MPAS2dViewer::draw_plane_grids()
     int vertexDegree   = geometry->get_vertexDegree();
     int* cellsOnVertex = geometry->get_cellsOnVertex();
 
-    double height = 0.0;
-
-    double x[5];
-    double y[5];
-    double dx;
+    float x[5];
+    float y[5];
+    float dx;
+    float height;
 
     pnt2d pnt;
     pnt2d pnt0;
@@ -2180,7 +2158,7 @@ void MPAS2dViewer::draw_plane_grids()
     k = nvoptions->get_zsec();
 
     if(1 < nVertLevels)
-        height = (double) k / (double) nVertLevels - 0.5;
+        height = (float) k / (float) nVertLevels - 0.5;
     else
         height = 0.0;
 
@@ -2357,7 +2335,7 @@ void MPAS2dViewer::draw_plane_grids()
         glEnd();
     }
 
-    coastline->drawONplane2(height+0.001, 2);
+    coastline->drawOnPlane(height+0.001);
 
     glPopMatrix();
 }

@@ -1,8 +1,6 @@
 #ifndef MPAS2DVIEWER_H
 #define MPAS2DVIEWER_H
 
-//$Id: mpas2dviewer.h 4833 2013-11-05 15:49:31Z starviewer $
-
 #include <iostream>
 #include <vector>
 
@@ -35,7 +33,7 @@ class MPAS2dViewer
         void draw_plane_grids();
 
         void reset();
-        void setup(string vn, double* var);
+        void setup(string vn, float* var);
         void set_geometry(MPASGeometry* gm);
         void reset_texture1d(ColorTable *ct);
 
@@ -43,8 +41,8 @@ class MPAS2dViewer
 
         void set_locator(Locator* l) { locator = l; };
 
-        double get_minval() { return _minval; };
-        double get_maxval() { return _maxval; };
+        float get_minval() { return _minval; };
+        float get_maxval() { return _maxval; };
 
     protected:
         Locator* locator;
@@ -70,13 +68,13 @@ class MPAS2dViewer
         vector<int> _boundaryPoints;
         vector<int> _subsetVertices;
 
-        double* _var;
+        float* _var;
 
-        double  _minval, _workMinVal;
-        double  _maxval, _workMaxVal;
+        float  _minval, _workMinVal;
+        float  _maxval, _workMaxVal;
 
         void _initialize();
-        void _evaluate(double* var);
+        void _evaluate(float* var);
 
         void _flatSubset();
         void _sphereSubset();

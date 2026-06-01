@@ -5,17 +5,14 @@ void MPASParser::parse(YAMLHandler *yamlHandler, NVOptions* nvoptions,
                       Locator* locator, Light* light)
 {
     vector<string> datafiles = yamlHandler->get_datafiles();
-    bool isList = false;
     string flnm = datafiles[0];
-    string mfnm = "unknown";
 
     // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     // cout << "Parsing MPAS grid..." << endl;
     // cout << "flnm: " << flnm << endl;
     // cout << "nvoptions->get_model(): " << nvoptions->get_model() << endl;
 
-    mpastranslator = new MPASTranslator(colorTable, nvoptions,
-                                       flnm, isList, mfnm);
+    mpastranslator = new MPASTranslator(colorTable, nvoptions, flnm);
 
     // if(locator)
     //     cout << "locator->on(): " << locator->on() << endl;

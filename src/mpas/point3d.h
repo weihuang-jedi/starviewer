@@ -3,9 +3,9 @@
 
 struct _point3d
 {
-    float fX;
-    float fY;
-    float fZ;
+    double x;
+    double y;
+    double z;
 };
 
 typedef struct _point3d pnt3d;

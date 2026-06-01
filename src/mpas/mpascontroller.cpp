@@ -3,7 +3,7 @@
 #include "mpascontroller.h"
 
 MPASController::MPASController(ColorTable *ct, NVOptions* opt,
-                               const char *fn, bool isList)
+                               const char *fn)
 {
     string sfn = string(fn);
 
@@ -12,9 +12,9 @@ MPASController::MPASController(ColorTable *ct, NVOptions* opt,
 
     strcpy(_flnm, fn);
 
-  //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
-  //     << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tOpen file: <" << fn << ">" << endl;
+    cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
+         << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tOpen file: <" << fn << ">" << endl;
 
     _preFile = -1;
     _curFile = 0;
@@ -29,38 +29,42 @@ MPASController::MPASController(ColorTable *ct, NVOptions* opt,
     geometry = new MPASGeometry();
     geometry->set_name(sfn);
 
-    nvfile = new NVFile(fn, isList, true);
-    _ntimes = nvfile->get_ntimes();
+    ncfile = new MPASStaticReader(fn);
+    _ntimes = new int(1);
+    _ntimes[0] = 1;
 
-    geometry->set_nCells(nvfile->get_dim_size("nCells"));
-    geometry->set_nVertices(nvfile->get_dim_size("nVertices"));
-    geometry->set_vertexDegree(nvfile->get_dim_size("vertexDegree"));
-    geometry->set_nVertLevels(nvfile->get_dim_size("nVertLevels"));
-    geometry->set_nTime(nvfile->get_dim_size("Time"));
+    geometry->set_nCells(ncfile->get_nCells());
+    geometry->set_nVertices(ncfile->get_nVertices());
+    geometry->set_vertexDegree(ncfile->get_vertexDegree());
+    // geometry->set_nVertLevels(ncfile->get_nVertLevels());
+    geometry->set_nVertLevels(1);
+    geometry->set_nTime(ncfile->get_nTime());
 
     geometry->set_mx(360);
     geometry->set_my(180);
-    geometry->set_mz(nvfile->get_dim_size("nVertLevels"));
+    // geometry->set_mz(ncfile->get_dim_size("nVertLevels"));
+    geometry->set_mz(1);
 
     geometry->set_nx(360);
     geometry->set_ny(180);
-    geometry->set_nz(nvfile->get_dim_size("nVertLevels"));
-    geometry->set_nt(nvfile->get_dim_size("Time"));
+    // geometry->set_nz(ncfile->get_dim_size("nVertLevels"));
+    geometry->set_nz(1);
+    geometry->set_nt(ncfile->get_nTime());
 
-    geometry->set_lonCell(nvfile->get_dv("lonCell"));
-    geometry->set_latCell(nvfile->get_dv("latCell"));
+    geometry->set_lonCell(ncfile->get_lonCell());
+    geometry->set_latCell(ncfile->get_latCell());
 #ifdef HASZGRID
-    geometry->set_height(nvfile->get_dv("zgrid"));
+    geometry->set_height(ncfile->get_fv("zgrid"));
 #endif
-    geometry->set_cellsOnVertex(nvfile->get_iv("cellsOnVertex"));
+    geometry->set_cellsOnVertex(ncfile->get_cellsOnVertex());
 
     geometry->setup();
 
-  //_varname = string("sst");
-    if(nvoptions->get_cb(NV_MPAS_SUBSET))
-        _varname = string("t2m");
-    else
-        _varname = string("surface_pressure");
+    _varname = string("ter");
+    // if(nvoptions->get_cb(NV_MPAS_SUBSET))
+    //     _varname = string("ter");
+    // else
+    //     _varname = string("surface_pressure");
 
     _setup();
 }
@@ -68,10 +72,13 @@ MPASController::MPASController(ColorTable *ct, NVOptions* opt,
 MPASController::~MPASController()
 {
     delete geometry;
-    delete nvfile;
+    delete ncfile;
 
     if(NULL != _value)
         free(_value);
+
+    if(NULL != _ntimes)
+        free(_ntimes);
 
     if(NULL != mpas2dviewer)
         delete mpas2dviewer;
@@ -93,7 +100,7 @@ void MPASController::_setup()
     mpas2dviewer = new MPAS2dViewer(colorTable, nvoptions);
   //mpas3dviewer = new MPAS3dViewer();
 
-    _value = nvfile->get_dv(_varname);
+    _value = ncfile->get_fv(_varname.c_str());
     geometry->set_nVertLevels(1);
 
     mpas2dviewer->set_geometry(geometry);
@@ -117,7 +124,7 @@ void MPASController::set1dvarname(string vn)
     if(_initialized && (NULL != _value))
         free(_value);
 
-    _value = nvfile->get_dv(vn);
+    _value = ncfile->get_fv(vn.c_str());
 
     _initialized = true;
 
@@ -147,11 +154,11 @@ void MPASController::set2dvarname(string vn)
     if(_initialized && (NULL != _value))
         free(_value);
 
-    _value = nvfile->get_dv(vn);
+    _value = ncfile->get_fv(vn.c_str());
 
     _initialized = true;
 
-    geometry->set_nVertLevels(nvfile->get_dim_size("nVertLevels"));
+    geometry->set_nVertLevels(ncfile->get_nVertLevels());
 
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "setup for <" << vn << ">" << endl;
@@ -176,18 +183,31 @@ void MPASController::set_colorTable(ColorTable *ct)
 
 int MPASController::get_ndv(int n)
 {
-    return nvfile->get_ndv(n);
+    int ndv = 0;
+    if(n == 2)
+        ndv = ncfile->getNumV2ds();
+    else if(n == 3)
+        ndv = ncfile->getNumV3ds();
+    return ndv;
 }
 
-string* MPASController::get_ndvNames(int n)
+vector<string> MPASController::get_ndvNames(int n)
 {
-    string* varnames = nvfile->get_ndvNames(n);
+    vector<string> varnames;
+    if(n == 2)
+        varnames = ncfile->getV2dNames();
+    else if(n == 3)
+        varnames = ncfile->getV3dNames();
     return varnames;
 }
 
 string* MPASController::get_timestring()
 {
-    return nvfile->get_timestr();
+    string tsv = string("Unknown");
+    string* ts = new string[1];
+    ts[0] = tsv;
+    // return string(ncfile->get_timestr());
+    return ts;
 }
 
 void MPASController::set_fileNtime(int nf, int nt)
@@ -205,10 +225,11 @@ void MPASController::set_fileNtime(int nf, int nt)
         if(_initialized && (NULL != _value))
             free(_value);
 
-        nvfile->select_file(nf);
+        ncfile->select_file(nf);
 
-        _value = nvfile->get_dv(_varname);
-        _title = nvfile->get_title();
+        _value = ncfile->get_fv(_varname.c_str());
+        _title = string("MPAS");
+        // _title = ncfile->get_title();
 
         geometry->set_nt(_ntimes[_curFile]);
 

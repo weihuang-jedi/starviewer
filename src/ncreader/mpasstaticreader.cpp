@@ -1,19 +1,50 @@
-#include "mpasridreader.h"
+#include "mpasstaticreader.h"
 #include <cstring>
  
 // implementation of constructor method from ncgridreader.h
 MPASStaticReader::MPASStaticReader(const char* fname)
-	      :NCBaseReader(fname)
+	         :NCBaseReader(fname)
 {
     exploreFile();
 } 
  
 // empty deconstructor method
 MPASStaticReader::~MPASStaticReader() {
-    if (_geolon)
-        delete[] _geolon;
-    if (_geolat)
-        delete[] _geolat;
+    if (_lonCell)
+        delete[] _lonCell;
+    if (_latCell)
+        delete[] _latCell;
+    if (_xCell)
+        delete[] _xCell;
+    if (_yCell)
+        delete[] _yCell;
+    if (_zCell)
+        delete[] _zCell;
+
+    if (_xtime)
+        delete[] _xtime;
+
+    if (_lonVertex)
+        delete[] _lonVertex;
+    if (_latVertex)
+        delete[] _latVertex;
+    if (_xVertex)
+        delete[] _xVertex;
+    if (_yVertex)
+        delete[] _yVertex;
+    if (_zVertex)
+        delete[] _zVertex;
+
+    if (_indexToCellID)
+        delete[] _indexToCellID;
+    if (_indexToVertexID)
+        delete[] _indexToVertexID;
+    if (_cellsOnCell)
+        delete[] _cellsOnCell;
+    if (_verticesOnCell)
+        delete[] _verticesOnCell;
+    if (_cellsOnVertex)
+        delete[] _cellsOnVertex;
     close();
 }
  
@@ -28,6 +59,7 @@ void MPASStaticReader::get_dim_info() {
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     if (NULL == _dimsize) _dimsize = new int[num_dims];
 
+    _nVertLevels = 1;
     cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     // Get Dimensions
     dim_names.resize(num_dims);
@@ -71,9 +103,29 @@ void MPASStaticReader::get_dim_info() {
             _vertexDegree = _dimsize[n];
             cout << " _vertexDegree " << _vertexDegree << endl;
 	}
-	else if (0 == strcmp(recname, "codelen")) {
-            _codelen = _dimsize[n];
-            cout << " _codelen " << _codelen << endl;
+	else if (0 == strcmp(recname, "Strlen")) {
+            _Strlen = _dimsize[n];
+            cout << " _Strlen " << _Strlen << endl;
+	}
+	else if (0 == strcmp(recname, "Time")) {
+            _nTime = _dimsize[n];
+            cout << " _nTime " << _nTime << endl;
+	}
+	else if (0 == strcmp(recname, "R3")) {
+            _R3 = _dimsize[n];
+            cout << " _R3 " << _R3 << endl;
+	}
+	else if (0 == strcmp(recname, "nMonth")) {
+            _nMonth = _dimsize[n];
+            cout << " _nMonth " << _nMonth << endl;
+	}
+	else if (0 == strcmp(recname, "FIFTEEN")) {
+            _FIFTEEN = _dimsize[n];
+            cout << " _FIFTEEN " << _FIFTEEN << endl;
+	}
+	else if (0 == strcmp(recname, "TWENTYONE")) {
+            _TWENTYONE = _dimsize[n];
+            cout << " _TWENTYONE " << _TWENTYONE << endl;
 	}
 
         cout << "  - " << dim_names[n] << ": " << dim_length[n] << endl;
@@ -136,6 +188,7 @@ void MPASStaticReader::exploreFile() {
     _xCell = getDouble("xCell");
     _yCell = getDouble("yCell");
     _zCell = getDouble("zCell");
+
     _lonVertex = getDouble("lonVertex");
     _latVertex = getDouble("latVertex");
     _xVertex = getDouble("xVertex");
@@ -148,6 +201,8 @@ void MPASStaticReader::exploreFile() {
     _cellsOnCell = getInt("cellsOnCell");
     _verticesOnCell = getInt("verticesOnCell");
     _cellsOnVertex = getInt("cellsOnVertex");
+
+    _xtime = getChar("xtime");
 
     // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }

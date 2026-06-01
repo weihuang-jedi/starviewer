@@ -330,10 +330,10 @@ void MainWindow::createActions()
     aboutAct->setStatusTip(tr("Show the application's About box"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
-    wrfAct = new QAction(tr("&MPAS"), this);
-  //wrfAct->setShortcut(QKeySequence::Global);
-    wrfAct->setStatusTip(tr("Try to activate 'mpas' application"));
-    connect(wrfAct, SIGNAL(triggered()), this, SLOT(mpas()));
+    mpasAct = new QAction(tr("&MPAS"), this);
+  //mpasAct->setShortcut(QKeySequence::Global);
+    mpasAct->setStatusTip(tr("Try to activate 'mpas' application"));
+    connect(mpasAct, SIGNAL(triggered()), this, SLOT(mpas()));
 
     ufsAct = new QAction(tr("&UFS"), this);
   //ufsAct->setShortcut(QKeySequence::Global);

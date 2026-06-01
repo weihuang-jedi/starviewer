@@ -7,7 +7,7 @@
 
 #include "colorTable.h"
 #include "coastline.h"
-#include "nvFile.h"
+#include "mpasstaticreader.h"
 #include "mpasgeometry.h"
 #include "mpas2dviewer.h"
 #include "locator.h"
@@ -21,8 +21,7 @@ using namespace std;
 class MPASController
 {
     public:
-        MPASController(ColorTable *ct, NVOptions* opt,
-                       const char *fn, bool isList = false);
+        MPASController(ColorTable *ct, NVOptions* opt, const char *fn);
        ~MPASController();
 
         int get_nCells() { return geometry->get_nCells(); };
@@ -51,17 +50,17 @@ class MPASController
 
         int get_curTime() { return _curTime; };
         int get_ndv(int n);
-        int get_nfils() { return nvfile->get_nfils(); };
+        int get_nfiles() { return 1; };
         int* get_ntimes() { return _ntimes; };
 
-        string* get_ndvNames(int n);
+        vector<string> get_ndvNames(int n);
         void set_fileNtime(int nf, int nt);
 
-        double get_minval() { return _minval; };
-        double get_maxval() { return _maxval; };
+        float get_minval() { return _minval; };
+        float get_maxval() { return _maxval; };
 
     protected:
-        NVFile* nvfile;
+        MPASStaticReader* ncfile;
         Locator* locator;
         ColorTable* colorTable;
         NVOptions* nvoptions;
@@ -88,13 +87,13 @@ class MPASController
 
         bool _initialized;
 
-        int* _ntimes;
         int* _grdsize;
         int* _varsize;
+        int* _ntimes;
 
-        double* _value;
-        double _minval;
-        double _maxval;
+        float* _value;
+        float _minval;
+        float _maxval;
 
         void _setup();
         void _set_glbTime();

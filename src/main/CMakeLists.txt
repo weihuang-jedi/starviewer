@@ -37,7 +37,7 @@ add_executable(starviewer
     # ADD YOUR NEW NETCDF READERS HERE:
     ../ncreader/ncbasereader.cpp
     ../ncreader/ufsmom6reader.cpp
-    ../ncreader/mpasreader.cpp
+    ../ncreader/mpasstaticreader.cpp
     ../ncreader/ufsgridreader.cpp
     ../ncreader/ufsincrementreader.cpp
 )

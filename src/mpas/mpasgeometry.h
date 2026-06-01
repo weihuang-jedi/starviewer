@@ -12,6 +12,7 @@
 #include <assert.h>
 
 #include "geometry.h"
+#include "point3d.h"
 
 using namespace std;
 
@@ -21,14 +22,6 @@ struct _point2d
     double y;
 };
 
-struct _point3d
-{
-    double x;
-    double y;
-    double z;
-};
-
-typedef struct _point3d pnt3d;
 typedef struct _point2d pnt2d;
 
 class MPASGeometry : public Geometry
@@ -50,7 +43,7 @@ class MPASGeometry : public Geometry
         int get_vertexDegree() { return _vertexDegree; };
 
         void set_cellsOnVertex(int* val) { _cellsOnVertex = val; };
-        void set_height(double* val) { _height = val; };
+        void set_height(float* val) { _height = val; };
         void set_lonCell(double* val) { _lonCell = val; };
         void set_latCell(double* val) { _latCell = val; };
 
@@ -95,9 +88,9 @@ class MPASGeometry : public Geometry
         double* _lonCell;
         double* _latCell;
 
-        double* _height;
-        double  _hmax, _hmin;
-        double  pi;
+        float* _height;
+        float  _hmax, _hmin;
+        float  pi;
 
         vector<int> _boundaryType;
         vector<int> _boundaryPoints;
