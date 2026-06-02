@@ -99,7 +99,7 @@ if [[ "${MACHINE_ID}" == "ursa" ]]; then
      "${CONTAINER_SIF}" \
      ${STARVIEWERHOME}/build/main/starviewer -yaml "${yamlfile}"
 elif [[ "${MACHINE_ID}" == "hercules" ]]; then
-    module load apptainer/1.3.3
+    module load apptainer
     export STARVIEWERHOME=/work2/noaa/epic/weihuang/nv/starviewer
     export CONTAINER_DIR=${STARVIEWERHOME}
     export CONTAINER_BINDINGS="-B /work -B /work2"

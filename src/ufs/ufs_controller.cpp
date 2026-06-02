@@ -20,6 +20,7 @@ UFSController::UFSController(ColorTable *ct, NVOptions* opt,
     ncfile = new ncReader(fn);
 
     ufs_viewer = NULL;
+    ufs_3dviewer = NULL;
 }
 
 UFSController::~UFSController()
@@ -30,6 +31,9 @@ UFSController::~UFSController()
     if(NULL != ufs_viewer)
         delete ufs_viewer;
     ufs_viewer = NULL;
+    if(NULL != ufs_3dviewer)
+        delete ufs_3dviewer;
+    ufs_3dviewer = NULL;
     
     delete geometry;
 } 
@@ -105,6 +109,7 @@ void UFSController::setup()
     _preFile = _curFile;
 
     ufs_viewer = new UFS2dViewer(colorTable, nvoptions, bmpflnm, ncfile);
+    ufs_3dviewer = new UFS3dViewer(colorTable, nvoptions, bmpflnm, ncfile);
 
   //ufs_viewer->set_lister(&lister[0]);
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
@@ -118,16 +123,22 @@ void UFSController::setup()
 
     ufs_viewer->set_coastline(coastline);
     ufs_viewer->set_geometry(geometry);
-  //ufs_3dviewer->set_geoufs_(geoufs_);
-
     ufs_viewer->setup(_varname, _value);
+
+    ufs_3dviewer->set_coastline(coastline);
+    ufs_3dviewer->set_geometry(geometry);
+    ufs_3dviewer->setup(_varname, _value);
+
     _minval = ufs_viewer->get_minval();
     _maxval = ufs_viewer->get_maxval();
 }
 
 void UFSController::draw()
 {
-    ufs_viewer->draw();
+    if(nvoptions->get_cb(NV_3DON))
+        ufs_3dviewer->draw();
+    else
+        ufs_viewer->draw();
 }
 
 void UFSController::set1dvarname(string vn)
@@ -151,12 +162,24 @@ void UFSController::set1dvarname(string vn)
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "setup for <" << vn << ">" << endl;
 
-  //ufs_viewer->set_lister(&lister[0]);
-    ufs_viewer->set_geometry(geometry);
-    ufs_viewer->setup(vn, _value);
+    if(nvoptions->get_cb(NV_3DON))
+    {
+        // ufs_3dviewer->set_lister(&lister[0]);
+        ufs_3dviewer->set_geometry(geometry);
+        ufs_3dviewer->setup(vn, _value);
 
-    _minval = ufs_viewer->get_minval();
-    _maxval = ufs_viewer->get_maxval();
+        _minval = ufs_3dviewer->get_minval();
+        _maxval = ufs_3dviewer->get_maxval();
+    }
+    else
+    {
+        // ufs_viewer->set_lister(&lister[0]);
+        ufs_viewer->set_geometry(geometry);
+        ufs_viewer->setup(vn, _value);
+
+        _minval = ufs_viewer->get_minval();
+        _maxval = ufs_viewer->get_maxval();
+    }
 }
 
 void UFSController::set2dvarname(string vn)
@@ -177,15 +200,27 @@ void UFSController::set2dvarname(string vn)
 
     geometry->set_nlev(1);
 
-  //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "setup for <" << vn << ">" << endl;
+    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "setup for <" << vn << ">" << endl;
 
-  //ufs_viewer->set_lister(&lister[0]);
-    ufs_viewer->set_geometry(geometry);
-    ufs_viewer->setup(vn, _value);
+    if(nvoptions->get_cb(NV_3DON))
+    {
+        // ufs_3dviewer->set_lister(&lister[0]);
+        ufs_3dviewer->set_geometry(geometry);
+        ufs_3dviewer->setup(vn, _value);
 
-    _minval = ufs_viewer->get_minval();
-    _maxval = ufs_viewer->get_maxval();
+        _minval = ufs_3dviewer->get_minval();
+        _maxval = ufs_3dviewer->get_maxval();
+    }
+    else
+    {
+        // ufs_viewer->set_lister(&lister[0]);
+        ufs_viewer->set_geometry(geometry);
+        ufs_viewer->setup(vn, _value);
+
+        _minval = ufs_viewer->get_minval();
+        _maxval = ufs_viewer->get_maxval();
+    }
 }
 
 void UFSController::set3dvarname(string vn)
@@ -208,16 +243,28 @@ void UFSController::set3dvarname(string vn)
     geometry->set_nlat(ncfile->getNlat());
     geometry->set_nlev(ncfile->getNlev());
 
-  //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "setup for <" << vn << ">" << endl;
-  //cout << "nvfile->get_dim_size('lev') = " << nvfile->get_dim_size("lev") << endl;
+    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "setup for <" << vn << ">" << endl;
+    cout << "ncfile->getNlev():" << ncfile->getNlev() << endl;
 
-  //ufs_viewer->set_lister(&lister[0]);
-    ufs_viewer->set_geometry(geometry);
-    ufs_viewer->setup(vn, _value);
+    if(nvoptions->get_cb(NV_3DON))
+    {
+        // ufs_3dviewer->set_lister(&lister[0]);
+        ufs_3dviewer->set_geometry(geometry);
+        ufs_3dviewer->setup(vn, _value);
 
-    _minval = ufs_viewer->get_minval();
-    _maxval = ufs_viewer->get_maxval();
+        _minval = ufs_3dviewer->get_minval();
+        _maxval = ufs_3dviewer->get_maxval();
+    }
+    else
+    {
+        // ufs_viewer->set_lister(&lister[0]);
+        ufs_viewer->set_geometry(geometry);
+        ufs_viewer->setup(vn, _value);
+
+        _minval = ufs_viewer->get_minval();
+        _maxval = ufs_viewer->get_maxval();
+    }
 }
 
 void UFSController::set_colorTable(ColorTable *ct)
@@ -272,9 +319,9 @@ void UFSController::set_fileNtime(int nf, int nt)
 {
     size_t gridsize = 1;
 
-  //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tcurFile: " << nf << ", curTime: " << nt << ", varname: <" << _varname << ">" << endl;
-  //cout << "\t_preFile: " << _preFile << ", _curFile: " << _curFile << endl;
+    cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tcurFile: " << nf << ", curTime: " << nt << ", varname: <" << _varname << ">" << endl;
+    cout << "\t_preFile: " << _preFile << ", _curFile: " << _curFile << endl;
 
     _curFile = nf;
     _curTime = nt;
@@ -290,9 +337,6 @@ void UFSController::set_fileNtime(int nf, int nt)
         geometry->set_nlev(1);
         geometry->set_ntim(_ntimes[_curFile]);
 
-        _minval = ufs_viewer->get_minval();
-        _maxval = ufs_viewer->get_maxval();
-
         _initialized = true;
     }
 
@@ -301,8 +345,22 @@ void UFSController::set_fileNtime(int nf, int nt)
     gridsize = _curTime * geometry->get_nlon() * geometry->get_nlat() * geometry->get_nlev();
 
     _set_glbTime();
-  //ufs_viewer->set_lister(&lister[_glbTime]);
-    ufs_viewer->setup(_varname, &_value[gridsize]);
+
+    if(nvoptions->get_cb(NV_3DON))
+    {
+        ufs_3dviewer->setup(_varname, _value);
+
+        _minval = ufs_3dviewer->get_minval();
+        _maxval = ufs_3dviewer->get_maxval();
+    }
+    else
+    {
+        // ufs_viewer->set_lister(&lister[_glbTime]);
+        ufs_viewer->setup(_varname, &_value[gridsize]);
+
+        _minval = ufs_viewer->get_minval();
+        _maxval = ufs_viewer->get_maxval();
+    }
 }
 
 void UFSController::_set_glbTime()

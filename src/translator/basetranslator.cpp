@@ -1022,9 +1022,9 @@ void BaseTranslator::select3D(int f)
     nvoptions->set_cb(NV_STATUS_CHANGED, true);
 
     if(f)
-        nvoptions->set_cb(NV_3DEON, true);
+        nvoptions->set_cb(NV_3DON, true);
     else
-        nvoptions->set_cb(NV_3DEON, false);
+        nvoptions->set_cb(NV_3DON, false);
 
     updateGL();
 }

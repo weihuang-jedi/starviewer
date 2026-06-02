@@ -16,7 +16,7 @@ if [[ "${MACHINE_ID}" == "ursa" ]]; then
     singularity shell -B /scratch3 -B /scratch4 -B /scratch5 \
         /scratch5/purged/Wei.Huang/src/nv/starviewer/starviewer.sif
 elif [[ "${MACHINE_ID}" == "hercules" ]]; then
-    module load apptainer/1.3.3
+    module load apptainer
     singularity shell -B /work -B /work2 \
         /work2/noaa/epic/weihuang/nv/starviewer/starviewer.sif
 else

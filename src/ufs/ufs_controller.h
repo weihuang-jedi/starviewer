@@ -7,6 +7,7 @@
 
 #include "ncreader.h"
 #include "ufs_viewer.h"
+#include "ufs_3dviewer.h"
 #include "locator.h"
 
 using namespace std;
@@ -73,7 +74,7 @@ class UFSController
         char _flnm[NAME_LENG];
 
         UFS2dViewer* ufs_viewer;
-      //UFS3dViewer* ufs_3dviewer;
+        UFS3dViewer* ufs_3dviewer;
 
         int _max_frame;
         int _time_interval;

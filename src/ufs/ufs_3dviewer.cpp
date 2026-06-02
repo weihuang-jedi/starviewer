@@ -9,10 +9,6 @@ UFS3dViewer::UFS3dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, nc
     colorTable = ct;
     nvoptions = opt;
 
-    texture1d = new Texture1d();
-    texture1d->set_colors(ct->get_clen(), ct->get_cmap());
-    texture1d->set_name(ct->get_name());
-
     _var = NULL;
 
     ncfile = nchandler;
@@ -43,7 +39,6 @@ UFS3dViewer::~UFS3dViewer()
 
     delete earth;
     delete lister;
-    delete texture1d;
 }
 
 void UFS3dViewer::set_geometry(UFSGeometry *gm)
@@ -107,15 +102,9 @@ void UFS3dViewer::_initialize()
 
 void UFS3dViewer::draw()
 {
-    size_t nsquare = _nlon * _nlat;
-
     if(nvoptions->get_cb(NV_RESET))
     {
         nvoptions->set_cb(NV_RESET, false);
-        if(nvoptions->get_cb(NV_BUMPON))
-            texture1d->set_gradient_opacity();
-        else
-            texture1d->set_opacity(1.0);
         reset();
     }
 
@@ -144,68 +133,41 @@ void UFS3dViewer::draw()
         _valmax = nvoptions->get_truemaximum();
     }
 #endif
-  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t" <<"current_timelevel: " << current_timelevel << endl;
-  //cout << "\t" <<"_nlev: " << _nlev << endl;
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t" <<"current_timelevel: " << current_timelevel << endl;
+    cout << "\t" <<"_nlev: " << _nlev << endl;
 
   //pltvar = &_var[current_timelevel * _nlon * _nlat];
     pltvar = &_var[current_timelevel * _nlon * _nlat * _nlev];
 
   //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     zcl = lister->get_zid(nvoptions->get_zsec());
-    ycl = lister->get_yid(nvoptions->get_ysec());
-    xcl = lister->get_xid(nvoptions->get_xsec());
 
-  //makeCurrent();
   //Clear screen and Z-buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   //glClearColor(0.0, 0.0, 0.0, 0.0);
 
-    if(nvoptions->get_cb(NV_BUMPON))
+    if(nvoptions->get_cb(NV_FLATON))
     {
-  //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-        if(nvoptions->get_cb(NV_FLATON))
+        if(nvoptions->get_zsec() < _nlev)
         {
+          //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+          //cout << "\t call  _flatDisplay()" << endl;
             if(zcl)
                 glCallList(zcl);
             else
-                _flatBump();
-        }
-        else
-        {
-            if(zcl)
-                glCallList(zcl);
-            else
-                _sphereBump();
+                _flatDisplay();
         }
     }
     else
     {
-        if(nvoptions->get_cb(NV_FLATON))
+        if(nvoptions->get_zsec() < _nlev)
         {
-            if(nvoptions->get_zsec() < _nlev)
-            {
-              //cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-              //cout << "\t call  _flatDisplay()" << endl;
-                if(zcl)
-                    glCallList(zcl);
-                else
-                    _flatDisplay();
-            }
-
-          //draw_plane_grids();
-        }
-        else
-        {
-            if(nvoptions->get_zsec() < _nlev)
-            {
-                if(zcl)
-                    glCallList(zcl);
-                else
-                    _sphereDisplay();
-            }
-          //draw_sphere_grids();
+            if(zcl)
+                glCallList(zcl);
+            else
+                _sphereDisplay();
         }
     }
 }
@@ -220,8 +182,9 @@ void UFS3dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact
     double z = dist * cos(lamda);
     double y = sin(phi);
 
-    double alpha = 1.05 * fact;
-    if(alpha < 0.1)
+    // double alpha = 1.05 * fact;
+    double alpha = 0.55 * fact;
+    if(alpha < 0.01)
         alpha = 0.0;
     else if(alpha > 1.0)
         alpha = 1.0;
@@ -234,25 +197,26 @@ void UFS3dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact
 void UFS3dViewer::_xyVertex(double x, double y, double z, double fact)
 {
     double alpha = 1.05 * fact;
-    if(alpha < 0.1)
+    if(alpha < 0.01)
         alpha = 0.0;
     else if(alpha > 1.0)
         alpha = 1.0;
 
     glColor4d(fact, fact, fact, alpha);
     glNormal3d(x, y, z);
-    glVertex3d(x * radius, y * radius, z * radius);
+    glVertex3d(x, y, z);
 }
 
 void UFS3dViewer::_sphereDisplay()
 {
-    int i, j, k;
+    int i, j, k, k1;
     size_t mpos, npos;
 
     double sv = 1.0;
     double fact;
-    vector<double> radius[_nlev];;
+    vector<double> radius;
 
+    radius.resize(_nlev);
     k1 = nvoptions->get_zsec()+1;
     k = _nlev-k1;
     for(k = 0; k < _nlev; ++k)
@@ -298,14 +262,16 @@ void UFS3dViewer::_sphereDisplay()
         glEnd();
       }
     }
-    coastline->drawOnSphere(radius[0]+0.01);
+
+    earth->draw(0.999);
+    coastline->drawOnSphere(1.001);
 
     for(k1 = 1; k1 < _nlev; ++k1)
     {
       k = _nlev - k1;
       for(j = 0; j < _nlat; ++j)
       {
-        mpos = ((k-1)*_nlat + j))*_nlon;
+        mpos = ((k-1)*_nlat + j)*_nlon;
         npos = (k*_nlat + j)*_nlon;
         glBegin(GL_QUAD_STRIP);
         for(i = 0; i < _nlon; ++i)
@@ -329,7 +295,7 @@ void UFS3dViewer::_sphereDisplay()
         glBegin(GL_QUAD_STRIP);
         for(j = 0; j < _nlat; ++j)
         {
-            mpos = ((k-1)*_nlat + j))*_nlon;
+            mpos = ((k-1)*_nlat + j)*_nlon;
             npos = (k*_nlat + j)*_nlon;
             fact = sv * (pltvar[npos+i] - _valmin);
             _lonlat2xyz(_lon[i], _lat[j], radius[k], fact);
@@ -364,13 +330,23 @@ void UFS3dViewer::_flatDisplay()
     lister->set_zid(k, zcl);
 
     glPushMatrix();
+
     glClearColor(1.0, 1.0, 1.0, 1.0);
+
   //OpenGL should normalize normal vectors
     glEnable(GL_NORMALIZE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glNormal3f(0.0, 0.0, -1.0);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
+    earth->draw(0.999);
+
+    glPopMatrix();
+
+    glPushMatrix();
+
+  //OpenGL should normalize normal vectors
+    glNormal3f(0.0, 0.0, -1.0);
     for(k1 = 1; k1 < _nlev; ++k1)
     {
       k = _nlev - k1;
@@ -382,19 +358,19 @@ void UFS3dViewer::_flatDisplay()
         for(i = _hlon+1; i < _nlon; ++i)
         {
             fact = sv * (pltvar[npos+i] - _valmin);
-            _xyVertex(_xFlat[i], _yFlat[j], height, fact)
+            _xyVertex(_xFlat[i], _yFlat[j], height, fact);
 
             fact = sv * (pltvar[mpos+i] - _valmin);
-            _xyVertex(_xFlat[i], _yFlat[j-1], height, fact)
+            _xyVertex(_xFlat[i], _yFlat[j-1], height, fact);
         }
 
 	for(i = 0; i < _hlon; ++i)
         {
             fact = sv * (pltvar[npos+i] - _valmin);
-            _xyVertex(_xFlat[i], _yFlat[j], height, fact)
+            _xyVertex(_xFlat[i], _yFlat[j], height, fact);
 
             fact = sv * (pltvar[mpos+i] - _valmin);
-            _xyVertex(_xFlat[i], _yFlat[j-1], height, fact)
+            _xyVertex(_xFlat[i], _yFlat[j-1], height, fact);
         }
         glEnd();
     }
@@ -506,62 +482,6 @@ void UFS3dViewer::_adjust_minmax(float *var)
     }
 #endif
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-}
-
-void UFS3dViewer::reset_texture1d(ColorTable *ct)
-{
-    colorTable = ct;
-
-    glDisable(GL_TEXTURE_1D);
-
-    texture1d->reset();
-    texture1d->set_colors(ct->get_clen(), ct->get_cmap());
-    texture1d->set_name(ct->get_name());
-}
-
-void UFS3dViewer::draw_sphere_grids()
-{
-    int i, j, k;
-    size_t npos;
-
-    double radius = 1.001;
-
-    GLfloat line_width = 1.0;
-
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tncenters = " << ncenters << endl;
-
-    _xSphere = geometry->get_xSphere();
-    _ySphere = geometry->get_ySphere();
-    _zSphere = geometry->get_zSphere();
-
-    k = nvoptions->get_zsec();
-    radius = _k2r(k);
-
-    glPushMatrix();
-
-  //earth->draw();
-
-    glColor4f(0.0, 1.0, 1.0, 1.0);
-  //glNormal3f(0.0, 0.0, -1.0);
-
-    glLineWidth(line_width);
-
-  //#pragma omp parallel for
-    for(j = 0; j < _nlat; ++j)
-    {
-        npos = j*_nlon;
-
-        glBegin(GL_LINE_STRIP);
-        for(i = 0; i < _nlon; ++i)
-        {
-            glVertex3d(radius * _xSphere[npos+i], radius * _ySphere[npos+i], radius * _zSphere[npos+i]);
-        }
-        glEnd();
-    }
-    glEnd();
-
-    glPopMatrix();
 }
 
 double UFS3dViewer::_k2h(int k)

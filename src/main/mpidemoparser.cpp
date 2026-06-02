@@ -15,7 +15,7 @@ void MPIDEMOParser::parse(YAMLHandler *yamlHandler, NVOptions* nvoptions,
     controlPanel->setup();
 
     controlPanel->disable_onmap();
-    controlPanel->disable_sphere();
+    controlPanel->disable_3d();
     controlPanel->disable_flat();
     controlPanel->disable_x2();
     controlPanel->disable_y2();

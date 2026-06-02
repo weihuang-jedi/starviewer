@@ -16,7 +16,6 @@
 #include "ufs_geometry.h"
 #include "coastline.h"
 #include "colorTable.h"
-#include "texture1d.h"
 #include "util.h"
 #include "earth.h"
 #include "lister.h"
@@ -48,7 +47,6 @@ class UFS3dViewer : public QGLWidget
         void reset();
         void setup(string vn, float* var);
         void set_geometry(UFSGeometry* gm);
-        void reset_texture1d(ColorTable *ct);
 
         void set_coastline(CoastLine* cl) { coastline = cl; };
 
@@ -63,7 +61,6 @@ class UFS3dViewer : public QGLWidget
         ColorTable* colorTable;
         UFSGeometry* geometry;
         CoastLine* coastline;
-        Texture1d* texture1d;
         ncReader* ncfile;
         Earth* earth;
         Lister* lister;

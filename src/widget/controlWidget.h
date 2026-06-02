@@ -33,7 +33,7 @@ class ControlWidget : public QWidget
         void set_translator(BaseTranslator* t) { translator = t; };
 
         void disable_bump() { bump_cb->setEnabled(false); };
-        void disable_sphere() { sphere_cb->setEnabled(false); };
+        void disable_3d() { threed_cb->setEnabled(false); };
         void disable_flat() { flat_cb->setEnabled(false); };
         void disable_onmap() { onmap_cb->setEnabled(false); };
       //void disable_surface() { surface_cb->setEnabled(false); };
@@ -56,7 +56,7 @@ class ControlWidget : public QWidget
 
         QCheckBox* bump_cb;       // Check box for bump
         QCheckBox* surface_cb;    // Check box for surface
-        QCheckBox* sphere_cb;     // Check box for sphere
+        QCheckBox* threed_cb;     // Check box for 3d
         QCheckBox* flat_cb;       // Check box for flat
         QCheckBox* bgBW_cb;       // Check box for background color
         QCheckBox* onmap_cb;      // Check box for on-map
