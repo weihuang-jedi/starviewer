@@ -1,5 +1,3 @@
-//$Id: nvoptions.h 5314 2015-02-06 20:58:52Z starviewer $
-
 #ifndef _NVOptions_H
 #define _NVOptions_H
 
@@ -37,7 +35,7 @@ typedef enum
     NV_BGBLACK,
     NV_BUMPON,
     NV_FLATON,
-    NV_SPHEREON,
+    NV_3DON,
     NV_COLORBARON,
     NV_TITLEON,
     NV_COASTLINEON,

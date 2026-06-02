@@ -76,7 +76,7 @@ void GL_Viewer::draw()
 
   //glPushMatrix();
 
-    if(nvoptions->get_cb(NV_SPHEREON))
+    if(! nvoptions->get_cb(NV_FLATON))
     {
         if(nvoptions->get_cb(NV_ONMAPON))
         {

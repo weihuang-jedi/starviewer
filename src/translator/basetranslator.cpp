@@ -1016,15 +1016,15 @@ void BaseTranslator::selectFlat(int f)
 }
 
 //sphere on/off
-void BaseTranslator::selectSphere(int f)
+void BaseTranslator::select3D(int f)
 {
     nvoptions->set_cb(NV_RESET, true);
     nvoptions->set_cb(NV_STATUS_CHANGED, true);
 
     if(f)
-        nvoptions->set_cb(NV_SPHEREON, true);
+        nvoptions->set_cb(NV_3DEON, true);
     else
-        nvoptions->set_cb(NV_SPHEREON, false);
+        nvoptions->set_cb(NV_3DEON, false);
 
     updateGL();
 }

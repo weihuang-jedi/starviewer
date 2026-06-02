@@ -1,5 +1,3 @@
-//$Id: nvoptions.cpp 5191 2014-08-15 20:45:14Z starviewer $
-
 #include "nvoptions.h"
 
 NVOptions::NVOptions()

@@ -104,7 +104,7 @@ void ControlWidget::_setup_buttons()
     connect(flat_cb,    SIGNAL(stateChanged(int)), translator, SLOT(selectFlat(int)));
     connect(bgBW_cb,    SIGNAL(stateChanged(int)), translator, SLOT(selectBackground(int)));
     connect(onmap_cb,   SIGNAL(stateChanged(int)), translator, SLOT(selectOnMap(int)));
-    connect(sphere_cb,  SIGNAL(stateChanged(int)), translator, SLOT(selectSphere(int)));
+    connect(sphere_cb,  SIGNAL(stateChanged(int)), translator, SLOT(select3D(int)));
   //connect(title_cb,   SIGNAL(stateChanged(int)), translator, SLOT(selectTitle(int)));
   //connect(surface_cb, SIGNAL(stateChanged(int)), translator, SLOT(selectSurface(int)));
   //connect(shader_cb,  SIGNAL(stateChanged(int)), translator, SLOT(selectShader(int)));
