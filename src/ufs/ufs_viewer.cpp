@@ -286,7 +286,7 @@ void UFS2dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact
     double z = dist * cos(lamda);
     double y = sin(phi);
 
-    double alpha = 1.05 * fact;
+    double alpha = 2.05 * fact;
     if(alpha < 0.1)
         alpha = 0.0;
     else if(alpha > 1.0)
