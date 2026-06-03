@@ -145,6 +145,7 @@ void MPASStaticReader::get_var_info() {
     num_v2ds = 0;
     num_v3ds = 0;
     v2d_names.resize(num_vars);
+    v3d_names.resize(num_vars);
     // Get Variables
     var_names.resize(num_vars);
     // cout << " Variables (" << num_vars << "):" << endl;
@@ -156,14 +157,19 @@ void MPASStaticReader::get_var_info() {
         if (status != NC_NOERR) handle_error(status);
 
 	var_names[n] = var_name;
-        // cout << "  - " << var_name << " Type: " << var_type << endl;
-        if (2 == var_ndims) {
+        cout << "  - " << var_name << " Type: " << var_type << ", ndims: " << var_ndims << endl;
+        if (1 == var_ndims) {
 	    v2d_names[num_v2ds] = var_name;
             num_v2ds++;
+        }
+        if (2 == var_ndims) {
+	    v3d_names[num_v3ds] = var_name;
+            num_v3ds++;
         }
     }
 
     v2d_names.resize(num_v2ds);
+    v3d_names.resize(num_v3ds);
 }
 
 // Function to dimensions, and variables

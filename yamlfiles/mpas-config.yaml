@@ -12,7 +12,7 @@ coastline:
 
 mpas:
   static:
-    - /scratch3/NAGAPE/epic/Wei.Huang/src/nv/data/mpas/x1.2562.static.nc
+    - /lustre/wei/nv/data/mpas/x1.10242.static.nc
 
   data:
-    - /scratch5/purged/Wei.Huang/src/nv/data/gdas.t00z.atm.f006.nc
+    - /lustre/wei/nv/data/mpas/mpasjedi_tutorial2024_testdata/background/2018041418/mpasout.2018-04-15_02.00.00.nc

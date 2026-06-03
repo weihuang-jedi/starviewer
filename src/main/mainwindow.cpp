@@ -117,7 +117,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::_setup()
 {
-    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
     cout << "\tMPIDEMO: " << MPIDEMO << endl;
     cout << "\tUFS: " << UFS << endl;
@@ -151,7 +151,7 @@ void MainWindow::_setup()
             break;
     }
 
-    // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::contextMenuEvent(QContextMenuEvent *event)

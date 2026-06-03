@@ -311,13 +311,27 @@ void MPASTranslator::selectColorMap(const QString& str)
 
 int MPASTranslator::get_ndv(int n)
 {
-    return mpascontroller->get_ndv(n-1);
+    return mpascontroller->get_ndv(n);
 }
 
 string* MPASTranslator::get_ndvNames(int n)
 {
-    string* ts = new string[1];
-    ts[0] = string("Unknown");
+    vector<string> vnlist = mpascontroller->get_ndvNames(n);
+    int ns = vnlist.size();
+    if(0 >= ns)
+        ns = 1;
+
+    string* ts = new string[ns];
+
+    if(0 == vnlist.size())
+    {
+        ts[0] = string("Unknown");
+    }
+    else
+    {
+        for(n = 0; n < ns; ++n)
+	    ts[n] = vnlist[n];
+    }
     return ts;
 }
 
