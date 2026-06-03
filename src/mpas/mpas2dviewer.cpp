@@ -106,6 +106,7 @@ void MPAS2dViewer::_initialize()
 
 void MPAS2dViewer::draw()
 {
+    cout << "\nEnter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     zcl = lister->get_zid(nvoptions->get_zsec());
     ycl = lister->get_yid(nvoptions->get_ysec()+90);
     xcl = lister->get_xid(nvoptions->get_xsec());
@@ -149,7 +150,6 @@ void MPAS2dViewer::draw()
         return;
     }
 
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\t_varname: <" << _varname << ">, zcl = " << zcl << ", xcl = " << xcl << endl;
 
     if(nvoptions->get_cb(NV_FLATON))
@@ -232,6 +232,7 @@ void MPAS2dViewer::draw()
             }
         }
     }
+    cout << "Leave" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 pnt3d MPAS2dViewer::nvop(pnt3d p, double height)
@@ -267,8 +268,8 @@ void MPAS2dViewer::_sphereDisplay()
 
     k = nvoptions->get_zsec();
 
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t_varname: <" << _varname << ">" << endl;
+    cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t_varname: <" << _varname << ">" << endl;
   //cout << "\tnVertLevels = " << nVertLevels << ", nvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
   //cout << "\tnvoptions->get_tsec() = " << nvoptions->get_tsec() << ", vertexDegree = " << vertexDegree << endl;
   //cout << "\tnCells = " << nCells << ", nVertices = " << nVertices << endl;
@@ -347,6 +348,7 @@ void MPAS2dViewer::_sphereDisplay()
     glEndList();
 
     lister->set_zid(k, zcl);
+    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void MPAS2dViewer::_flatDisplay()

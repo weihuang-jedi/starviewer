@@ -90,12 +90,11 @@ void MPASController::_setup()
 
     _tvalue = 0;
 
-  //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tMPASController nCells      : " << geometry->get_nCells() << endl;
-  //cout << "\tMPASController nVertices   : " << geometry->get_nVertices() << endl;
-  //cout << "\tMPASController nVertLevels : " << geometry->get_nVertLevels() << endl;
-  //cout << "\tMPASController Time        : " << geometry->get_nTime() << endl;
-  //cout << "\tMPASController vertexDegree: " << geometry->get_vertexDegree() << endl;
+    cout << "\nEnter <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tMPASController nCells      : " << geometry->get_nCells() << endl;
+    cout << "\tMPASController nVertices   : " << geometry->get_nVertices() << endl;
+    cout << "\tMPASController nVertLevels : " << geometry->get_nVertLevels() << endl;
+    cout << "\tMPASController vertexDegree: " << geometry->get_vertexDegree() << endl;
 
     mpas2dviewer = new MPAS2dViewer(colorTable, nvoptions);
   //mpas3dviewer = new MPAS3dViewer();
@@ -108,6 +107,8 @@ void MPASController::_setup()
 
     _minval = mpas2dviewer->get_minval();
     _maxval = mpas2dviewer->get_maxval();
+    cout << "\t_minval = " << _minval << ", _maxval = " << _maxval << endl;
+    cout << "Leave <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void MPASController::draw()

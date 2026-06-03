@@ -30,6 +30,8 @@ class YAMLHandler
 	vector<string> get_gridfiles() { return _gridfiles; };
 	vector<string> get_incrfiles() { return _incrfiles; };
 	vector<string> get_mom6files() { return _datafiles; };
+	vector<string> get_mpasdatafiles() { return _mpasdatafiles; };
+	vector<string> get_mpasstaticfiles() { return _mpasstaticfiles; };
 
     private:
         YAML::Node config;
@@ -46,6 +48,8 @@ class YAMLHandler
 	vector<string> _datafiles;
 	vector<string> _gridfiles;
 	vector<string> _incrfiles;
+	vector<string> _mpasdatafiles;
+	vector<string> _mpasstaticfiles;
 };
 #endif
 

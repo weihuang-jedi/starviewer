@@ -47,6 +47,7 @@ MPASTranslator::~MPASTranslator()
 
 void MPASTranslator::setup()
 {
+    cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     mpascontroller = new MPASController(colorTable, nvoptions,
                                         _filename.c_str());
 
@@ -65,6 +66,7 @@ void MPASTranslator::setup()
     nvoptions->set_zsec(0);
 
     dim = 0.5;
+    cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 //******************************************************************
@@ -72,10 +74,8 @@ void MPASTranslator::setup()
 //******************************************************************
 void MPASTranslator::paintGL()
 {
-    // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     set_modelview();
-
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
   //Clear screen and Z-buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -92,15 +92,15 @@ void MPASTranslator::paintGL()
 
     setViewOptions();
 
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     setBackgroundColor();
 
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     show();
 
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     drawColorBar();
 
@@ -114,11 +114,12 @@ void MPASTranslator::paintGL()
 
   //Done
     glFlush();
-    // cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 //show the image
 void MPASTranslator::show()
 {
+    cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glShadeModel(GL_SMOOTH);
 
     if(light->on())
@@ -145,6 +146,7 @@ void MPASTranslator::show()
 
     if(locator->on())
         writeLocatorMsg();
+    cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void MPASTranslator::writeFrameInfo()

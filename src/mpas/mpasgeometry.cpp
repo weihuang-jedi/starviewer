@@ -46,6 +46,7 @@ void MPASGeometry::setup()
 #endif
     int n, c, cp1, cp2, v;
 
+    cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     pnt2d pnt0;
     pnt2d pnt1;
     pnt2d pnt2;
@@ -54,6 +55,7 @@ void MPASGeometry::setup()
 
     _hmax = 1.0;
     _hmin = 10000.0;
+#if 0
     for(n = 0; n < _nCells; ++n)
     {
 #ifdef HASZGRID
@@ -68,8 +70,9 @@ void MPASGeometry::setup()
         }
 #endif
     }
+#endif
 
-    cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">" << endl;
+    cout << "\t<" << __PRETTY_FUNCTION__ << ">" << endl;
     cout << "\tline: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     cout << "\t_hmin = " << _hmin << ", _hmax = " << _hmax << endl;
 
@@ -79,6 +82,7 @@ void MPASGeometry::setup()
         _cellsOnVertex[n] = _cellsOnVertex[n] - 1;
     }
 
+#if 0
 #ifdef HASZGRID
   //applys a factor of 0.125 to height, and then divides by _hmax
     delt = 0.125 / _hmax;
@@ -91,6 +95,7 @@ void MPASGeometry::setup()
              _height[m+i] = 1.0 + delt * _height[m+i];
         }
     }
+#endif
 #endif
 
   //Check if triangle across longitude 0.
@@ -222,8 +227,8 @@ void MPASGeometry::setup()
         }
     }
 
-  //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t_nBoundaryPoints = " << _nBoundaryPoints << endl;
+    cout << "\t_nBoundaryPoints = " << _nBoundaryPoints << endl;
+    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 pnt3d MPASGeometry::polar2xyz(int n, int k)
@@ -232,10 +237,10 @@ pnt3d MPASGeometry::polar2xyz(int n, int k)
 #ifdef HASZGRID
     size_t m = n * (_nVertLevels + 1) + k;
     double delt = _height[m] * cos(_latCell[n]);
-    pnt.y      = _height[m] * sin(_latCell[n]);
+    pnt.y       = _height[m] * sin(_latCell[n]);
 #else
     double delt = cos(_latCell[n]);
-    pnt.y      = sin(_latCell[n]);
+    pnt.y       = sin(_latCell[n]);
 #endif
 
     pnt.x = delt * sin(_lonCell[n]);

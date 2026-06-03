@@ -4,8 +4,8 @@ void MPASParser::parse(YAMLHandler *yamlHandler, NVOptions* nvoptions,
                       ColorTable *colorTable, ControlWidget* controlPanel,
                       Locator* locator, Light* light)
 {
-    vector<string> datafiles = yamlHandler->get_datafiles();
-    string flnm = datafiles[0];
+    vector<string> mpasstaticfiles = yamlHandler->get_mpasstaticfiles();
+    string flnm = mpasstaticfiles[0];
 
     // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     // cout << "Parsing MPAS grid..." << endl;

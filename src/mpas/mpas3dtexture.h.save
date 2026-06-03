@@ -10,7 +10,7 @@
 #include <QtOpenGL>
 
 #include "point3d.h"
-#include "geompas.h"
+#include "mpasgeometry.h"
 #include "texture1d.h"
 
 using namespace std;

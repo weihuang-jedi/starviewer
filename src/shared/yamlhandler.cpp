@@ -102,6 +102,27 @@ void YAMLHandler::read_yaml()
         //     cout << "Increment file #" << n << ": " << df << endl;
         // }
     }
+
+    if (config["mpas"].IsDefined())
+    {
+        int n=0;
+
+        _mpasstaticfiles = config["mpas"]["static"].as<vector<string>>();
+
+        // for (const auto& df : _mpasstaticfiles)
+        // {
+        //     ++n;
+        //     cout << "MPAS static file #" << n << ": " << df << endl;
+        // }
+
+        _mpasdatafiles = config["mpas"]["data"].as<vector<string>>();
+
+        // for (const auto& df : _mpasdatafiles)
+        // {
+        //     ++n;
+        //     cout << "MPAS data file #" << n << ": " << df << endl;
+        // }
+    }
 }
 
 void YAMLHandler::write_yaml()
