@@ -21,6 +21,46 @@ YAMLHandler::~YAMLHandler()
 {
 }
 
+vector<string> YAMLHandler::get_files(const char* type, YAML::Node config)
+{
+    // This vector will hold the 6 fully expanded paths
+    vector<string> datafiles;
+
+    if (config[type] && config[type]["data"]) {
+        auto data_node = config[type]["data"];
+
+        // Verify all required template pieces exist
+        if (data_node["dir"] && data_node["prefix"] && data_node["suffix"] && 
+            data_node["range_start"] && data_node["range_end"]) {
+            
+            string dir = data_node["dir"].as<string>();
+            string prefix = data_node["prefix"].as<string>();
+            string suffix = data_node["suffix"].as<string>();
+            int start = data_node["range_start"].as<int>();
+            int end = data_node["range_end"].as<int>();
+
+            // Generate the file paths dynamically from start to end (1 to 6)
+            for (int i = start; i <= end; ++i) {
+                // Construct: /path/to/dir/prefix.tileX.suffix
+                string full_path = dir + "/" + prefix + ".tile" + std::to_string(i) + "." + suffix;
+                
+                // Push into the C++ vector
+                datafiles.push_back(full_path);
+            }
+        } else {
+            cerr << "Error: Missing configuration key: <" << type << "> in increment.data template" << endl;
+        }
+    }
+
+    // Verification: Print out the vector contents and size
+    cout << "Vector Size: " << datafiles.size() << endl;
+    for (const auto& path : datafiles) {
+        std::cout << "Generated Path: " << path << endl;
+    }
+
+    return datafiles;
+}
+
 void YAMLHandler::read_yaml()
 {
     ifstream fin(_flnm.c_str()); // Create a named object (lvalue)
@@ -66,41 +106,17 @@ void YAMLHandler::read_yaml()
 
     if (config["input"].IsDefined())
     {
-        int n=0;
-
-        _datafiles = config["input"]["data"].as<vector<string>>();
-
-        // for (const auto& df : _datafiles)
-	// {
-        //     ++n;
-        //     cout << "Data file #" << n << ": " << df << endl;
-        // }
+        _datafiles = get_files("input", config);
     }
 
     if (config["grid"].IsDefined())
     {
-        int n=0;
-
-        _gridfiles = config["grid"]["data"].as<vector<string>>();
-
-        // for (const auto& df : _gridfiles)
-        // {
-        //     ++n;
-        //     cout << "Grid file #" << n << ": " << df << endl;
-        // }
+        _gridfiles = get_files("grid", config);
     }
 
     if (config["increment"].IsDefined())
     {
-        int n=0;
-
-        _incrfiles = config["increment"]["data"].as<vector<string>>();
-
-        // for (const auto& df : _incrfiles)
-        // {
-        //     ++n;
-        //     cout << "Increment file #" << n << ": " << df << endl;
-        // }
+        _incrfiles = get_files("increment", config);
     }
 }
 
