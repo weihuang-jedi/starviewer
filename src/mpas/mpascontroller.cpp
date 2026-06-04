@@ -65,8 +65,6 @@ MPASController::MPASController(ColorTable *ct, NVOptions* opt,
     //     _varname = string("ter");
     // else
     //     _varname = string("surface_pressure");
-
-    _setup();
 }
 
 MPASController::~MPASController()
@@ -84,7 +82,7 @@ MPASController::~MPASController()
         delete mpas2dviewer;
 } 
 
-void MPASController::_setup()
+void MPASController::setup()
 {
     _initialized = false;
 

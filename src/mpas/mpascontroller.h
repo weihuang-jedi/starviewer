@@ -55,6 +55,7 @@ class MPASController
 
         vector<string> get_ndvNames(int n);
         void set_fileNtime(int nf, int nt);
+        void setup();
 
         float get_minval() { return _minval; };
         float get_maxval() { return _maxval; };
@@ -95,7 +96,6 @@ class MPASController
         float _minval;
         float _maxval;
 
-        void _setup();
         void _set_glbTime();
 };
 #endif

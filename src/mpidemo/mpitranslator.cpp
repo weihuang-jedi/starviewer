@@ -4,24 +4,6 @@
 
 #include "mpitranslator.h"
 
-template<typename T>
-string number2string(T n)
-{
-    string value;
-
-    stringstream stream;
-    stream << n;
-    if(stream.fail())
-    {
-        cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-        cout << "\tFailed convert " << n << " to string." << endl;
-        exit (-1);
-    }
-
-    value = stream.str();
-    return value;
-}
-
 //
 //  Constructor
 //

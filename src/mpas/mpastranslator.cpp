@@ -5,24 +5,6 @@
 #include "colorTable.h"
 #include "util.h"
 
-template<typename T>
-string number2string(T n)
-{
-    string value;
-
-    stringstream stream;
-    stream << n;
-    if(stream.fail())
-    {
-        cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-        cout << "\tFailed convert " << n << " to string." << endl;
-        exit (-1);
-    }
-
-    value = stream.str();
-    return value;
-}
-
 //
 //  Constructor
 //
@@ -50,14 +32,24 @@ void MPASTranslator::setup()
     cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     mpascontroller = new MPASController(colorTable, nvoptions,
                                         _filename.c_str());
+    mpascontroller->setup();
 
     _title = mpascontroller->get_title();
     _timestr = mpascontroller->get_timestring();
  
+    _jpgNotSaved = true;
+    _startSave = false;
+
+    makeCurrent();
+
      geometry = mpascontroller->get_geometry();
    //evaluator = mpascontroller->get_evaluator();
+ 
+    _varname = string("ter");
 
-    _varname = mpascontroller->get_varname();
+    mpascontroller->set2dvarname(_varname);
+
+    // _varname = mpascontroller->get_varname();
     _minval = mpascontroller->get_minval();
     _maxval = mpascontroller->get_maxval();
 
@@ -116,11 +108,13 @@ void MPASTranslator::paintGL()
     glFlush();
     cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
+
 //show the image
 void MPASTranslator::show()
 {
     cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    glShadeModel(GL_SMOOTH);
+    // glShadeModel(GL_SMOOTH);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     if(light->on())
     {

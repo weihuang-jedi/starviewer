@@ -282,9 +282,26 @@ class BaseTranslator : public QGLWidget
         bool _startSave;
 
         bool FileExists(char *filename);
+	template<typename T> string number2string(T n);
 
         void SaveJpg();
         void SaveJpg(int n);
 };
+
+template<typename T>
+string BaseTranslator::number2string(T n)
+{
+    string value;
+    stringstream stream;
+    stream << n;
+    if(stream.fail())
+    {
+        cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+        cout << "\tFailed convert " << n << " to string." << endl;
+        exit (-1);
+    }
+    value = stream.str();
+    return value;
+}
 #endif
 
