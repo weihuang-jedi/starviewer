@@ -1,5 +1,5 @@
-#ifndef _MPASGRIDREADER_H
-#define _MPASGRIDREADER_H
+#ifndef _MPASSTATICREADER_H
+#define _MPASSTATICREADER_H
  
 #include <iostream>
 #include <fstream>

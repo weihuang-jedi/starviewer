@@ -8,7 +8,8 @@
 //
 //  Constructor
 //
-MPASTranslator::MPASTranslator(ColorTable* ct, NVOptions* opt, string flnm, QWidget* parent)
+MPASTranslator::MPASTranslator(ColorTable* ct, NVOptions* opt,
+		               string static_flnm, string data_flnm, QWidget* parent)
               : BaseTranslator(ct, opt, parent)
 {
     _flat = false;
@@ -16,7 +17,8 @@ MPASTranslator::MPASTranslator(ColorTable* ct, NVOptions* opt, string flnm, QWid
     _jpgNotSaved = true;
     _startSave = false;
 
-    _filename = flnm;
+    set_static_flnm(static_flnm);
+    set_data_flnm(data_flnm);
 
     mpascontroller = NULL;
 }
@@ -31,7 +33,7 @@ void MPASTranslator::setup()
 {
     // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     mpascontroller = new MPASController(colorTable, nvoptions,
-                                        _filename.c_str());
+                                        _static_flnm, _data_flnm);
     mpascontroller->setup();
 
     _title = mpascontroller->get_title();

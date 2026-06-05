@@ -22,7 +22,8 @@ class MPASTranslator : public BaseTranslator
 {
     Q_OBJECT                                             //  Qt magic macro
     public:
-        MPASTranslator(ColorTable* ct, NVOptions* opt, string flnm,
+        MPASTranslator(ColorTable* ct, NVOptions* opt,
+		       string static_flnm, string data_flnm,
                        QWidget* parent=0);	//  Constructor
        ~MPASTranslator();					//  Destructor
     
@@ -30,7 +31,8 @@ class MPASTranslator : public BaseTranslator
         void setup();
         void paintGL();
 
-        void setfilename(string flnm) { _filename = flnm; };
+        void set_static_flnm(string s) { _static_flnm = s; };
+        void set_data_flnm(string s) { _data_flnm = s; };
 
         void set_light(Light* l);
         void set_locator(Locator* l);
@@ -59,9 +61,11 @@ class MPASTranslator : public BaseTranslator
         bool _jpgNotSaved;
         bool _startSave;
 
-        void sphereVertex(int i, int j);
-
         bool _flat;
+        string _static_flnm;
+        string _data_flnm;
+
+        void sphereVertex(int i, int j);
 
         void createVarInfo();
         void make_timeNpositionString();

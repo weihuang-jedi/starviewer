@@ -36,8 +36,9 @@ add_executable(starviewer
     ../spreadsheet/spreadsheet.cpp
     # ADD YOUR NEW NETCDF READERS HERE:
     ../ncreader/ncbasereader.cpp
-    ../ncreader/ufsmom6reader.cpp
+    ../ncreader/mpasdatareader.cpp
     ../ncreader/mpasstaticreader.cpp
+    ../ncreader/ufsmom6reader.cpp
     ../ncreader/ufsgridreader.cpp
     ../ncreader/ufsincrementreader.cpp
 )
@@ -68,9 +69,6 @@ target_include_directories(starviewer PUBLIC
     ${CMAKE_SOURCE_DIR}/ufsmom6
     ${CMAKE_SOURCE_DIR}/mpas
     ${CMAKE_SOURCE_DIR}/mpidemo
-  # ${CMAKE_SOURCE_DIR}/mpas
-  # ${CMAKE_SOURCE_DIR}/pop
-  # ${CMAKE_SOURCE_DIR}/wrf
     ${NetCDF_INCLUDE_DIRS}
 )
 
@@ -82,9 +80,6 @@ target_link_libraries(starviewer PRIVATE
     widget          # Fixes UI components
 
     # 2. Logic and Data Modules
-  # wrf
-  # mpas
-  # pop
     mpidemo
     ufs
     ufsincr

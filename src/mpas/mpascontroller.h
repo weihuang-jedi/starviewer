@@ -1,27 +1,23 @@
 #ifndef MPASCONTROLLER_H
 #define MPASCONTROLLER_H
 
-//$Id: mpascontroller.h 4833 2013-11-05 15:49:31Z starviewer $
-
 #include <QtOpenGL>
 
 #include "colorTable.h"
 #include "coastline.h"
 #include "mpasstaticreader.h"
+#include "mpasdatareader.h"
 #include "mpasgeometry.h"
 #include "mpas2dviewer.h"
 #include "locator.h"
 
 using namespace std;
 
-#ifndef NAME_LENG
-#define NAME_LENG	1024
-#endif
-
 class MPASController
 {
     public:
-        MPASController(ColorTable *ct, NVOptions* opt, const char *fn);
+        MPASController(ColorTable *ct, NVOptions* opt,
+		       string static_flnm, string data_flnm);
        ~MPASController();
 
         int get_nCells() { return geometry->get_nCells(); };
@@ -61,15 +57,12 @@ class MPASController
         float get_maxval() { return _maxval; };
 
     protected:
-        MPASStaticReader* ncfile;
+        MPASStaticReader* ncstatic;
+        MPASDataReader* ncdata;
         Locator* locator;
         ColorTable* colorTable;
         NVOptions* nvoptions;
         MPASGeometry* geometry;
-
-      //CoastLine* coastline;
-
-        char _flnm[NAME_LENG];
 
         MPAS2dViewer *mpas2dviewer;
       //MPAS3dViewer *mpas3dviewer;

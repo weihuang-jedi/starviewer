@@ -5,36 +5,16 @@ void MPASParser::parse(YAMLHandler *yamlHandler, NVOptions* nvoptions,
                       Locator* locator, Light* light)
 {
     vector<string> mpasstaticfiles = yamlHandler->get_mpasstaticfiles();
-    string flnm = mpasstaticfiles[0];
+    string static_flnm = mpasstaticfiles[0];
+    vector<string> mpasdatafiles = yamlHandler->get_mpasdatafiles();
+    string data_flnm = mpasdatafiles[0];
 
-    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-    // cout << "Parsing MPAS grid..." << endl;
-    // cout << "flnm: " << flnm << endl;
-    // cout << "nvoptions->get_model(): " << nvoptions->get_model() << endl;
+    mpastranslator = new MPASTranslator(colorTable, nvoptions, static_flnm, data_flnm);
 
-    mpastranslator = new MPASTranslator(colorTable, nvoptions, flnm);
-
-    // if(locator)
-    //     cout << "locator->on(): " << locator->on() << endl;
-    // else
-    //     cout << "locator is null." << endl;
-
-    // if(light)
-    //     cout << "light->on(): " << light->on() << endl;
-    // else
-    //     cout << "light is null." << endl;
-
-    if(mpastranslator)
-        cout << "mpastranslator: " << mpastranslator << endl;
-    else
-        cout << "mpastranslator is null." << endl;
-
-    // cout << "function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     mpastranslator->setup();
     mpastranslator->set_light(light);
     mpastranslator->set_locator(locator);
 
-    // cout << "function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     controlPanel->set_colortable(colorTable);
     controlPanel->set_translator(mpastranslator);
     controlPanel->setup();
@@ -45,7 +25,6 @@ void MPASParser::parse(YAMLHandler *yamlHandler, NVOptions* nvoptions,
     controlPanel->disable_z2();
     controlPanel->disable_t2();
     mpastranslator->updateSliders();
-    // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 BaseTranslator* MPASParser::get_translator()
