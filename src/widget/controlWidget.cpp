@@ -199,30 +199,30 @@ void ControlWidget::_setup_variables()
     QLabel* var3d = new QLabel("3D Vars");
 
     string *names2dvar = translator->get_ndvNames(2);
-    cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
-         << ", file: <" << __FILE__ << ">" << endl;
-    cout << "1d var size: " << translator->get_ndv(1) << endl;
-    cout << "2d var size: " << translator->get_ndv(2) << endl;
-    cout << "3d var size: " << translator->get_ndv(3) << endl;
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
+    //      << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "1d var size: " << translator->get_ndv(1) << endl;
+    // cout << "2d var size: " << translator->get_ndv(2) << endl;
+    // cout << "3d var size: " << translator->get_ndv(3) << endl;
     if(2 > translator->get_ndv(2))
         box2dvar->addItem("dummy");
 
     for(n = 0; n < translator->get_ndv(2); ++n)
     {
-        cout << "2d name " << n << ": " << names2dvar[n] << endl;
+        // cout << "2d name " << n << ": " << names2dvar[n] << endl;
         box2dvar->addItem(names2dvar[n].c_str());
     }
 
     string *names3dvar = translator->get_ndvNames(3);
-    cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
-         << ", file: <" << __FILE__ << ">" << endl;
-    cout << "3d var size: " << translator->get_ndv(3) << endl;
+    // cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
+    //      << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "3d var size: " << translator->get_ndv(3) << endl;
     if(2 > translator->get_ndv(3))
         box3dvar->addItem("dummy");
 
     for(n = 0; n < translator->get_ndv(3); ++n)
     {
-        cout << "3d name " << n << ": " << names3dvar[n] << endl;
+        // cout << "3d name " << n << ": " << names3dvar[n] << endl;
         box3dvar->addItem(names3dvar[n].c_str());
     }
 
@@ -239,8 +239,8 @@ void ControlWidget::_setup_variables()
 
     var_box->setLayout(var_lay);
     layout->addWidget(var_box,2,0);
-    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
-         << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
+    //      << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void ControlWidget::_setup_sliderNspin()

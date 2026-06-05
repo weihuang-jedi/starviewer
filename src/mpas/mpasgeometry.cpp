@@ -46,7 +46,7 @@ void MPASGeometry::setup()
 #endif
     int n, c, cp1, cp2, v;
 
-    cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     pnt2d pnt0;
     pnt2d pnt1;
     pnt2d pnt2;
@@ -72,9 +72,9 @@ void MPASGeometry::setup()
     }
 #endif
 
-    cout << "\t<" << __PRETTY_FUNCTION__ << ">" << endl;
-    cout << "\tline: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\t_hmin = " << _hmin << ", _hmax = " << _hmax << endl;
+    // cout << "\t<" << __PRETTY_FUNCTION__ << ">" << endl;
+    // cout << "\tline: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\t_hmin = " << _hmin << ", _hmax = " << _hmax << endl;
 
   //CELLSONVERTEX is 1 based.  Fix that.
     for(n = 0; n < _vertexDegree * _nVertices; ++n)
@@ -227,8 +227,8 @@ void MPASGeometry::setup()
         }
     }
 
-    cout << "\t_nBoundaryPoints = " << _nBoundaryPoints << endl;
-    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\t_nBoundaryPoints = " << _nBoundaryPoints << endl;
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 pnt3d MPASGeometry::polar2xyz(int n, int k)

@@ -29,7 +29,7 @@ MPASTranslator::~MPASTranslator()
 
 void MPASTranslator::setup()
 {
-    cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     mpascontroller = new MPASController(colorTable, nvoptions,
                                         _filename.c_str());
     mpascontroller->setup();
@@ -58,7 +58,7 @@ void MPASTranslator::setup()
     nvoptions->set_zsec(0);
 
     dim = 0.5;
-    cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 //******************************************************************

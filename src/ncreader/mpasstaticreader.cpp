@@ -52,15 +52,15 @@ void MPASStaticReader::get_dim_info() {
     int n = 0;
     char recname[NC_MAX_NAME+1];
     size_t length, recs;
-    cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "ncid: " << ncid << endl;
-    cout << "num_dims: " << num_dims << endl;
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "ncid: " << ncid << endl;
+    // cout << "num_dims: " << num_dims << endl;
 
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     if (NULL == _dimsize) _dimsize = new int[num_dims];
 
     _nVertLevels = 1;
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     // Get Dimensions
     dim_names.resize(num_dims);
     dim_length.resize(num_dims);
@@ -75,62 +75,14 @@ void MPASStaticReader::get_dim_info() {
         if (status != NC_NOERR) handle_error(status);
 	dim_names[n] = recname;
 
-	if (0 == strcmp(recname, "nCells")) {
-            _nCells = _dimsize[n];
-            cout << " _nCells " << _nCells << endl;
-	}
-	else if (0 == strcmp(recname, "nVertices")) {
-            _nVertices = _dimsize[n];
-            cout << " _nVertices " << _nVertices << endl;
-	}
-	else if (0 == strcmp(recname, "nEdges")) {
-            _nEdges = _dimsize[n];
-            cout << " _nEdges " << _nEdges << endl;
-	}
-	else if (0 == strcmp(recname, "maxEdges")) {
-            _maxEdges = _dimsize[n];
-            cout << " _maxEdges " << _maxEdges << endl;
-	}
-	else if (0 == strcmp(recname, "maxEdges2")) {
-            _maxEdges2 = _dimsize[n];
-            cout << " _maxEdges2 " << _maxEdges2 << endl;
-	}
-	else if (0 == strcmp(recname, "TWO")) {
-            _TWO = _dimsize[n];
-            cout << " _TWO " << _TWO << endl;
-	}
-	else if (0 == strcmp(recname, "vertexDegree")) {
-            _vertexDegree = _dimsize[n];
-            cout << " _vertexDegree " << _vertexDegree << endl;
-	}
-	else if (0 == strcmp(recname, "Strlen")) {
-            _Strlen = _dimsize[n];
-            cout << " _Strlen " << _Strlen << endl;
-	}
-	else if (0 == strcmp(recname, "Time")) {
-            _nTime = _dimsize[n];
-            cout << " _nTime " << _nTime << endl;
-	}
-	else if (0 == strcmp(recname, "R3")) {
-            _R3 = _dimsize[n];
-            cout << " _R3 " << _R3 << endl;
-	}
-	else if (0 == strcmp(recname, "nMonth")) {
-            _nMonth = _dimsize[n];
-            cout << " _nMonth " << _nMonth << endl;
-	}
-	else if (0 == strcmp(recname, "FIFTEEN")) {
-            _FIFTEEN = _dimsize[n];
-            cout << " _FIFTEEN " << _FIFTEEN << endl;
-	}
-	else if (0 == strcmp(recname, "TWENTYONE")) {
-            _TWENTYONE = _dimsize[n];
-            cout << " _TWENTYONE " << _TWENTYONE << endl;
-	}
+	auto it = dimMap.find(recname);
+        if (it != dimMap.end()) {
+            *(it->second) = _dimsize[n]; // Dereference the variable pointer and assign the size!
+        }
 
-        cout << "  - " << dim_names[n] << ": " << dim_length[n] << endl;
+        // cout << "  - " << dim_names[n] << ": " << dim_length[n] << endl;
     }
-    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void MPASStaticReader::get_var_info() {
@@ -157,7 +109,7 @@ void MPASStaticReader::get_var_info() {
         if (status != NC_NOERR) handle_error(status);
 
 	var_names[n] = var_name;
-        cout << "  - " << var_name << " Type: " << var_type << ", ndims: " << var_ndims << endl;
+        // cout << "  - " << var_name << " Type: " << var_type << ", ndims: " << var_ndims << endl;
         if (1 == var_ndims) {
 	    v2d_names[num_v2ds] = var_name;
             num_v2ds++;

@@ -20,8 +20,8 @@ MainWindow::MainWindow(string yamlfile)
     nvoptions = new NVOptions();
 
     string tmpstr = yamlHandler->get_model();
-    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\ttmpstr: " << tmpstr << endl;
+    // cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\ttmpstr: " << tmpstr << endl;
     if(0 == tmpstr.compare("ufs"))
     {
         nvoptions->set_model(UFS);
@@ -52,8 +52,8 @@ MainWindow::MainWindow(string yamlfile)
         nvoptions->set_model(WRF);
     }
 
-    cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
+    // cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
 
     nInstance = 0;
     numberOfWidget = 0;
@@ -117,13 +117,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::_setup()
 {
-    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-    cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
-    cout << "\tMPIDEMO: " << MPIDEMO << endl;
-    cout << "\tUFS: " << UFS << endl;
-    cout << "\tUFSINCR: " << UFSINCR << endl;
-    cout << "\tUFSMOM6: " << UFSMOM6 << endl;
-    cout << "\tMPAS: " << MPAS << endl;
+    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
+    // cout << "\tMPIDEMO: " << MPIDEMO << endl;
+    // cout << "\tUFS: " << UFS << endl;
+    // cout << "\tUFSINCR: " << UFSINCR << endl;
+    // cout << "\tUFSMOM6: " << UFSMOM6 << endl;
+    // cout << "\tMPAS: " << MPAS << endl;
     switch(nvoptions->get_model())
     {
         case UFS:
@@ -151,12 +151,12 @@ void MainWindow::_setup()
             break;
     }
 
-    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 {
-    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     QMenu menu(this);
 
     menu.addAction(ufsAct);
@@ -200,31 +200,31 @@ void MainWindow::redo()
 
 void MainWindow::_setup_controlPanel()
 {
-    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     controlPanel->move(0, 0);
     controlPanel->show();
-    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::_setup_display()
 {
     int x, y;
-    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     x = screenWidth / 2;
     y = screenHeight / 2;
 
     setCentralWidget(display);
-    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     display->set_translator(translator);
-    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     display->setup();
-    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     display->move(x, y);
-    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     display->show();
-    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::mpidemo()
@@ -265,15 +265,15 @@ void MainWindow::ufsmom6()
 
 void MainWindow::mpas()
 {
-    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     setWindowTitle(tr("NV for MPAS"));
 
-    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     _setup_controlPanel();
 
-    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     _setup_display();
-    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 void MainWindow::about()
