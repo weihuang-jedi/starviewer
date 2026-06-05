@@ -34,21 +34,27 @@ void MPASTranslator::setup()
     // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     mpascontroller = new MPASController(colorTable, nvoptions,
                                         _static_flnm, _data_flnm);
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     mpascontroller->setup();
 
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     _title = mpascontroller->get_title();
     _timestr = mpascontroller->get_timestring();
  
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     _jpgNotSaved = true;
     _startSave = false;
 
     makeCurrent();
 
-     geometry = mpascontroller->get_geometry();
-   //evaluator = mpascontroller->get_evaluator();
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    geometry = mpascontroller->get_geometry();
+    // evaluator = mpascontroller->get_evaluator();
  
-    _varname = string("ter");
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    _varname = string("surface_pressure");
 
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     mpascontroller->set2dvarname(_varname);
 
     // _varname = mpascontroller->get_varname();
@@ -68,7 +74,7 @@ void MPASTranslator::setup()
 //******************************************************************
 void MPASTranslator::paintGL()
 {
-    cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     set_modelview();
 
   //Clear screen and Z-buffer
@@ -86,15 +92,15 @@ void MPASTranslator::paintGL()
 
     setViewOptions();
 
-    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     setBackgroundColor();
 
-    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     show();
 
-    cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     drawColorBar();
 
@@ -108,13 +114,13 @@ void MPASTranslator::paintGL()
 
   //Done
     glFlush();
-    cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 //show the image
 void MPASTranslator::show()
 {
-    cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     // glShadeModel(GL_SMOOTH);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -142,7 +148,7 @@ void MPASTranslator::show()
 
     if(locator->on())
         writeLocatorMsg();
-    cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void MPASTranslator::writeFrameInfo()
@@ -243,7 +249,7 @@ void MPASTranslator::select3dVar(const QString& str)
 {
     _varname = str.toStdString();
 
-    mpascontroller->set2dvarname(_varname);
+    mpascontroller->set3dvarname(_varname);
     _title = mpascontroller->get_title();
     _timestr = mpascontroller->get_timestring();
 

@@ -264,7 +264,10 @@ pnt3d MPASGeometry::polar2xyz(int n, double r)
 pnt2d MPASGeometry::latlon2xy(int n)
 {
     pnt2d pnt;
-    pnt.x = _lonCell[n]/pi - 1.0;
+    // pnt.x = _lonCell[n]/pi - 1.0;
+    pnt.x = _lonCell[n]/pi;
+    if(pnt.x > 1.0)
+       pnt.x -= 2.0;
     pnt.y = _latCell[n]/pi;
 
     return pnt;

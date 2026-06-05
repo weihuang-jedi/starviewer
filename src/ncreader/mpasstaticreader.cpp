@@ -5,6 +5,24 @@
 MPASStaticReader::MPASStaticReader(const char* fname)
 	         :NCBaseReader(fname)
 {
+    _dimMap =
+    {
+        {"nCells",        &_nCells},
+        {"nVertices",     &_nVertices},
+        {"nEdges",        &_nEdges},
+        {"maxEdges",      &_maxEdges},
+        {"maxEdges2",     &_maxEdges2},
+        {"TWO",           &_TWO},
+        {"vertexDegree",  &_vertexDegree},
+        {"Strlen",        &_Strlen},
+        {"Time",          &_nTime},
+        {"R3",            &_R3},
+        {"nMonth",        &_nMonth},
+        {"FIFTEEN",       &_FIFTEEN},
+        {"TWENTYONE",     &_TWENTYONE},
+        {"nVertLevels",   &_nVertLevels}
+    };
+
     exploreFile();
 } 
  
@@ -75,8 +93,8 @@ void MPASStaticReader::get_dim_info() {
         if (status != NC_NOERR) handle_error(status);
 	dim_names[n] = recname;
 
-	auto it = dimMap.find(recname);
-        if (it != dimMap.end()) {
+	auto it = _dimMap.find(recname);
+        if (it != _dimMap.end()) {
             *(it->second) = _dimsize[n]; // Dereference the variable pointer and assign the size!
         }
 

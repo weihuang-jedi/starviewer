@@ -94,21 +94,6 @@ class MPASStaticReader : public NCBaseReader
     int _nVertLevels;
 
     // Inside your Viewer/Reader class definition or constructor:
-    unordered_map<std::string, int*> dimMap = {
-        {"nCells",        &_nCells},
-        {"nVertices",     &_nVertices},
-        {"nEdges",        &_nEdges},
-        {"maxEdges",      &_maxEdges},
-        {"maxEdges2",     &_maxEdges2},
-        {"TWO",           &_TWO},
-        {"vertexDegree",  &_vertexDegree},
-        {"Strlen",        &_Strlen},
-        {"Time",          &_nTime},
-        {"R3",            &_R3},
-        {"nMonth",        &_nMonth},
-        {"FIFTEEN",       &_FIFTEEN},
-        {"TWENTYONE",     &_TWENTYONE},
-        {"nVertLevels",   &_nVertLevels}
-    };
+    unordered_map<std::string, int*> _dimMap;
 };
 #endif

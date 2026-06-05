@@ -32,6 +32,7 @@ class MPASController
 
         void set1dvarname(string vn);
         void set2dvarname(string vn);
+        void set3dvarname(string vn);
 
         void draw();
 
@@ -56,6 +57,9 @@ class MPASController
         float get_minval() { return _minval; };
         float get_maxval() { return _maxval; };
 
+	bool is2d(string vn);
+	bool is3d(string vn);
+
     protected:
         MPASStaticReader* ncstatic;
         MPASDataReader* ncdata;
@@ -68,6 +72,9 @@ class MPASController
       //MPAS3dViewer *mpas3dviewer;
 
         int _max_frame;
+
+        vector<string> _list2dvars;
+        vector<string> _list3dvars;
 
         string _varname;
         string _timestr;

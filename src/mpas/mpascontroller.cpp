@@ -29,10 +29,12 @@ MPASController::MPASController(ColorTable *ct, NVOptions* opt,
     _ntimes = new int(1);
     _ntimes[0] = 1;
 
+    _list2dvars = ncdata->getV2dNames();
+    _list3dvars = ncdata->getV3dNames();
+
     geometry->set_nCells(ncstatic->get_nCells());
     geometry->set_nVertices(ncstatic->get_nVertices());
     geometry->set_vertexDegree(ncstatic->get_vertexDegree());
-    // geometry->set_nVertLevels(ncstatic->get_nVertLevels());
     geometry->set_nVertLevels(1);
     geometry->set_nTime(ncstatic->get_nTime());
 
@@ -107,6 +109,34 @@ void MPASController::draw()
     mpas2dviewer->draw();
 }
 
+bool MPASController::is2d(string vn)
+{
+    bool is2d = false;
+    for(int n =0; n < _list2dvars.size(); ++n)
+    {
+	if(vn == _list2dvars[n])
+	{
+            is2d = true;
+	    break;
+	}
+    }
+    return is2d;
+}
+
+bool MPASController::is3d(string vn)
+{
+    bool is3d = false;
+    for(int n =0; n < _list3dvars.size(); ++n)
+    {
+        if(vn == _list3dvars[n])
+        {
+            is3d = true;
+            break;
+        }
+    }
+    return is3d;
+}
+
 void MPASController::set1dvarname(string vn)
 {
     _varname = vn;
@@ -139,6 +169,8 @@ void MPASController::set1dvarname(string vn)
 
 void MPASController::set2dvarname(string vn)
 {
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "setup for <" << vn << ">" << endl;
     _varname = vn;
 
     _tvalue = 0;
@@ -146,26 +178,85 @@ void MPASController::set2dvarname(string vn)
     if(_initialized && (NULL != _value))
         free(_value);
 
+    // cout << "\t" << __PRETTY_FUNCTION__ << ": line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     _value = ncdata->get_fv(vn.c_str());
 
     _initialized = true;
 
-    geometry->set_nVertLevels(ncdata->get_nVertLevels());
+    // cout << "\t" << __PRETTY_FUNCTION__ << ": line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tnis2d(" << vn << ") = " << is2d(vn) << endl;
+    // cout << "\tnis3d(" << vn << ") = " << is3d(vn) << endl;
+    // cout << "\tnVertLevels: <" << ncdata->get_nVertLevels() << ">" << endl;
 
-  //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "setup for <" << vn << ">" << endl;
+    if(is3d(vn))
+        geometry->set_nVertLevels(ncdata->get_nVertLevels());
+    else if(is2d(vn))
+        geometry->set_nVertLevels(1);
+
+    // cout << "\t" << __PRETTY_FUNCTION__ << ": line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     mpas2dviewer->set_geometry(geometry);
+    // cout << "\t" << __PRETTY_FUNCTION__ << ": line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     mpas2dviewer->setup(vn, _value);
   //mpas3dviewer->setup(vn, _value);
 
+    // cout << "\t" << __PRETTY_FUNCTION__ << ": line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     _curFile = 0;
     _curTime = 0;
     _glbTime = 0;
     geometry->set_nt(_ntimes[_curFile]);
 
+    // cout << "\t" << __PRETTY_FUNCTION__ << ": line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     _minval = mpas2dviewer->get_minval();
     _maxval = mpas2dviewer->get_maxval();
+
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+}
+
+void MPASController::set3dvarname(string vn)
+{
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "setup for <" << vn << ">" << endl;
+    _varname = vn;
+
+    _tvalue = 0;
+
+    if(_initialized && (NULL != _value))
+        free(_value);
+
+    // cout << "\t" << __PRETTY_FUNCTION__ << ": line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    _value = ncdata->get_fv(vn.c_str());
+
+    _initialized = true;
+
+    // cout << "\t" << __PRETTY_FUNCTION__ << ": line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tnis2d(" << vn << ") = " << is2d(vn) << endl;
+    // cout << "\tnis3d(" << vn << ") = " << is3d(vn) << endl;
+    // cout << "\tnVertLevels: <" << ncdata->get_nVertLevels() << ">" << endl;
+
+    if(is3d(vn))
+        geometry->set_nVertLevels(ncdata->get_nVertLevels());
+    else if(is2d(vn))
+        geometry->set_nVertLevels(1);
+
+    // cout << "\t" << __PRETTY_FUNCTION__ << ": line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+    mpas2dviewer->set_geometry(geometry);
+    // cout << "\t" << __PRETTY_FUNCTION__ << ": line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    mpas2dviewer->setup(vn, _value);
+  //mpas3dviewer->setup(vn, _value);
+
+    // cout << "\t" << __PRETTY_FUNCTION__ << ": line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    _curFile = 0;
+    _curTime = 0;
+    _glbTime = 0;
+    geometry->set_nt(_ntimes[_curFile]);
+
+    // cout << "\t" << __PRETTY_FUNCTION__ << ": line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    _minval = mpas2dviewer->get_minval();
+    _maxval = mpas2dviewer->get_maxval();
+
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void MPASController::set_colorTable(ColorTable *ct)

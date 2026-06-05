@@ -46,14 +46,6 @@ class MPASDataReader : public NCBaseReader
     int _nVertLevelsP1;
 
     // Inside your Viewer/Reader class definition or constructor:
-    unordered_map<std::string, int*> dimMap = {
-        {"nCells",        &_nCells},
-        {"nVertLevels",   &_nVertLevels},
-        {"Time",          &_nTime},
-        {"Strlen",        &_Strlen},
-        {"nEdges",        &_nEdges},
-        {"nVertLevelsP1", &_nVertLevelsP1},
-        {"nSoilLevels",   &_nSoilLevels}
-    };
+    unordered_map<std::string, int*> _dimMap;
 };
 #endif

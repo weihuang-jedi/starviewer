@@ -5,6 +5,16 @@
 MPASDataReader::MPASDataReader(const char* fname)
 	         :NCBaseReader(fname)
 {
+    _dimMap =
+    {
+        {"nCells",        &_nCells},
+        {"nVertLevels",   &_nVertLevels},
+        {"Time",          &_nTime},
+        {"Strlen",        &_Strlen},
+        {"nEdges",        &_nEdges},
+        {"nVertLevelsP1", &_nVertLevelsP1},
+        {"nSoilLevels",   &_nSoilLevels}
+    };
     exploreFile();
 } 
  
@@ -44,8 +54,8 @@ void MPASDataReader::get_dim_info() {
         if (status != NC_NOERR) handle_error(status);
 	dim_names[n] = recname;
 
-	auto it = dimMap.find(recname);
-        if (it != dimMap.end()) {
+	auto it = _dimMap.find(recname);
+        if (it != _dimMap.end()) {
             *(it->second) = _dimsize[n]; // Dereference the variable pointer and assign the size!
         }
 
@@ -79,11 +89,11 @@ void MPASDataReader::get_var_info() {
 
 	var_names[n] = var_name;
         // cout << "  - " << var_name << " Type: " << var_type << ", ndims: " << var_ndims << endl;
-        if (1 == var_ndims) {
+        if (2 == var_ndims) {
 	    v2d_names[num_v2ds] = var_name;
             num_v2ds++;
         }
-        if (2 == var_ndims) {
+        if (3 == var_ndims) {
 	    v3d_names[num_v3ds] = var_name;
             num_v3ds++;
         }

@@ -150,16 +150,22 @@ void MPAS2dViewer::draw()
         return;
     }
 
-  //cout << "\t_varname: <" << _varname << ">, zcl = " << zcl << ", xcl = " << xcl << endl;
+    cout << "\t_varname: <" << _varname << ">, zcl = " << zcl << ", xcl = " << xcl << endl;
+    cout << "\tnvoptions->get_cb(NV_FLATON) = " << nvoptions->get_cb(NV_FLATON) << endl;
 
     if(nvoptions->get_cb(NV_FLATON))
     {
+        cout << "\t_varname: <" << _varname << ">, zcl = " << zcl << ", xcl = " << xcl << endl;
+        cout << "\tgeometry->get_nVertLevels() = " << geometry->get_nVertLevels() << endl;
+        cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
         if((geometry->get_nVertLevels() > nvoptions->get_zsec()) && (0 <= nvoptions->get_zsec()))
         {
             if(zcl)
                 glCallList(zcl);
             else
             {
+                  cout << "\t_varname: <" << _varname << ">, zcl = " << zcl << ", xcl = " << xcl << endl;
+                  cout << "\tnvoptions->get_cb(NV_SUBSET) = " << nvoptions->get_cb(NV_SUBSET) << endl;
                 if(nvoptions->get_cb(NV_SUBSET))
                     _flatSubset();
                 else
@@ -232,7 +238,7 @@ void MPAS2dViewer::draw()
             }
         }
     }
-    cout << "Leave" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 pnt3d MPAS2dViewer::nvop(pnt3d p, double height)
@@ -268,11 +274,11 @@ void MPAS2dViewer::_sphereDisplay()
 
     k = nvoptions->get_zsec();
 
-    cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\t_varname: <" << _varname << ">" << endl;
-  //cout << "\tnVertLevels = " << nVertLevels << ", nvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
-  //cout << "\tnvoptions->get_tsec() = " << nvoptions->get_tsec() << ", vertexDegree = " << vertexDegree << endl;
-  //cout << "\tnCells = " << nCells << ", nVertices = " << nVertices << endl;
+    // cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\t_varname: <" << _varname << ">" << endl;
+    // cout << "\tnVertLevels = " << nVertLevels << ", nvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
+    // cout << "\tnvoptions->get_tsec() = " << nvoptions->get_tsec() << ", vertexDegree = " << vertexDegree << endl;
+    // cout << "\tnCells = " << nCells << ", nVertices = " << nVertices << endl;
 
     current_var_ptr = &_var[nCells * nVertLevels * nvoptions->get_tsec()];
 
@@ -291,8 +297,8 @@ void MPAS2dViewer::_sphereDisplay()
   //glNewList(zcl, GL_COMPILE);
     glNewList(zcl, GL_COMPILE_AND_EXECUTE);
 
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tzcl = " << zcl << endl;
+    // cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\tzcl = " << zcl << endl;
 
     glPushMatrix();
 
@@ -348,12 +354,11 @@ void MPAS2dViewer::_sphereDisplay()
     glEndList();
 
     lister->set_zid(k, zcl);
-    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void MPAS2dViewer::_flatDisplay()
 {
-    zcl = 0;
     int c, v, i, k, n, cp1, cp2;
 
     int nVertLevels    = geometry->get_nVertLevels();
@@ -380,6 +385,8 @@ void MPAS2dViewer::_flatDisplay()
     pnt2d pnt1;
     pnt2d pnt2;
 
+    cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    zcl = 0;
     k = nvoptions->get_zsec();
 
     current_var_ptr = &_var[nCells * nVertLevels * nvoptions->get_tsec()];
@@ -407,23 +414,24 @@ void MPAS2dViewer::_flatDisplay()
 
     sv = 1.0 / (_workMaxVal - _workMinVal);
 
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t_varname: <" << _varname << ">" << endl;
-  //cout << "\tnVertices = " << nVertices << ", nvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
-  //cout << "\t_nBoundaryPoints = " << _nBoundaryPoints << endl;
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t_varname: <" << _varname << ">" << endl;
+    cout << "\tnVertices = " << nVertices << ", nvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
+    cout << "\t_nBoundaryPoints = " << _nBoundaryPoints << endl;
 
     glPushMatrix();
 
     glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(1, 1);
 
-    glColor3f(1.0, 1.0, 1.0);
+    glColor3d(1.0, 1.0, 1.0);
 
-    glNormal3f(0.0, 0.0, 1.0);
+    glNormal3d(0.0, 0.0, 1.0);
 
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     glBegin(GL_TRIANGLES);
     for(v = 0; v < nVertices; ++v)
     {
@@ -461,6 +469,7 @@ void MPAS2dViewer::_flatDisplay()
   //    2                         1
   //         east                        east
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     for(v = 0; v < _nBoundaryPoints; ++v)
     {
         c = _boundaryPoints[3*v];
@@ -673,6 +682,7 @@ void MPAS2dViewer::_flatDisplay()
     }
     glEnd();
 
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     coastline->drawOnPlane(height+0.01);
 
     glDisable(GL_POLYGON_OFFSET_FILL);
@@ -683,6 +693,7 @@ void MPAS2dViewer::_flatDisplay()
     glEndList();
 
     lister->set_zid(k, zcl);
+    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void MPAS2dViewer::reset_texture1d(ColorTable *ct)
