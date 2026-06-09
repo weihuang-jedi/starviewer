@@ -1,5 +1,3 @@
-//$Id
-
 #include <QtOpenGL>
 
 #include "ufsincr_translator.h"
@@ -422,7 +420,7 @@ void UFSINCRTranslator::paintGL()
 
     // 4. Execute your viewer drawing logic safely inside the projected matrix space
     show();
-    drawColorBar();
+    // drawColorBar();
 
     if(nvoptions->get_cb(NV_STATUS_CHANGED))
         save_status();
@@ -451,6 +449,8 @@ void UFSINCRTranslator::paintGL()
 
     QString frameLabel = _varname.c_str();
     painter.drawText(20, 40, frameLabel);
+
+    drawColorBar(painter);
 
     // 6. Explicitly terminate the painter
     painter.end();

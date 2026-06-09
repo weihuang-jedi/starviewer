@@ -1,9 +1,5 @@
 #include <QtOpenGL>
 
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glx.h> // Ensure this header is included
-
 #include "basetranslator.h"
 
 #if 0
@@ -582,11 +578,11 @@ void BaseTranslator::_set_current_time()
 }
 
 //Draw color bar
-void BaseTranslator::drawColorBar()
+void BaseTranslator::drawColorBar(QPainter& painter)
 {
     if(nvoptions->get_cb(NV_COLORBARON))
     {
-        _displayColorBar();
+        _displayColorBar(painter);
     }
 }
 
@@ -1109,19 +1105,6 @@ void BaseTranslator::writeHeader()
       //cout << "and timeinfo:" << _timeinfo << endl;
       //renderText(30, 30, _varname.c_str(), QFont("DejaVu", 16));
       //renderText(30, 60, _timeinfo.c_str(), QFont("DejaVu", 16));
-
-      //QPainter painter(this);
-      //painter.setPen(Qt::blue);
-      //painter.setFont(QFont("Time", 16));
-      //painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
-      //painter.drawText(30, 30, _varname.c_str());
-      //painter.drawText(30, 60, _timeinfo.c_str());
-      //painter.end();
-
-      //renderText(30.0, 30.0, 0.0, _varname.c_str());
-      //renderText(30.0, 60.0, 0.0, _timeinfo.c_str());
-      //renderText(30.0, 30.0, 0.0, _title.c_str());
-      //renderText(30.0, 90.0,0.0,  _position.c_str());
     }
 }
 
@@ -1287,10 +1270,10 @@ void BaseTranslator::_restoreStatus()
     zFar = cur_zFar;
 }
 
-void BaseTranslator::_displayColorBar()
+void BaseTranslator::_displayColorBar(QPainter& painter)
 {
     int maxLev = 5;
-    int n, mstep;
+    int ix, iy, n, mstep;
     double a, d, s, v;
     double x, y, x1, x2, y1, y2;
     char buf[12];
@@ -1389,7 +1372,11 @@ void BaseTranslator::_displayColorBar()
 
         x = a * (s * n - 0.55);
       //renderText(x, y, 0.0, buf, QFont("Times", 15, QFont::Bold));
-        renderText(x, y, 0.0, buf);
+      //renderText(x, y, 0.0, buf);
+        ix = 1000*int(x);
+        iy = 1000*int(abs(y));
+        QString colorLabel = buf;
+        painter.drawText(ix, iy, colorLabel);
 
       //cout << "\tNo " << n << ": x = " << x << ", y = " << y << ", buf = " << buf << endl;
     }

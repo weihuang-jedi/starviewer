@@ -312,7 +312,7 @@ void MPITranslator::paintGL()
 
     // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
-    drawColorBar();
+    // drawColorBar();
 
     // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 

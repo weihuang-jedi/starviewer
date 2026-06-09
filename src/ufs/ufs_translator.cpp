@@ -434,47 +434,69 @@ void UFSTranslator::writeLocatorMsg()
 
 void UFSTranslator::paintGL()
 {
-    // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    set_modelview();
+    // 1. Initialize the painter context FIRST at the very top of the function
+    QPainter painter;
+    if (!painter.begin(this)) {
+        qWarning("CRITICAL: Failed to open QPainter context on this widget surface.");
+        return;
+    }
 
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
-  //Clear screen and Z-buffer
+    // 2. Clear the canvas using Qt/OpenGL native handles before entering the native block
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  //Enable Z-buffering in OpenGL
+
+    // ================================================================
+    // STEP A: Enter Native OpenGL Mode
+    // ================================================================
+    painter.beginNativePainting();
+
+    // 3. MOVE MATRIX & CAMERA SETUP HERE
+    // This guarantees your modelview projections apply directly to your show() geometry!
+
+    set_modelview();
     glEnable(GL_DEPTH_TEST);
-
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
-    // if(!locator)
-    // {
-    //     cout << "WARNING: locator is null. Skipping view configuration until initialized." << endl;
-    //     return; // Exits safely, preventing the segmentation fault!
-    // }
-
     setViewOptions();
-
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
     setBackgroundColor();
 
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
+    // 4. Execute your viewer drawing logic safely inside the projected matrix space
     show();
+    // drawColorBar();
 
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
-    drawColorBar();
-
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
-    // if(! nvoptions->get_cb(NV_PIXELON))
-    //     drawAxis();
+    glFlush();
 
     if(nvoptions->get_cb(NV_STATUS_CHANGED))
         save_status();
 
-  //Done
+    // Force a clean pipeline flush
     glFlush();
-    // cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+
+    // Clean up fixed-function states before exiting the native mode
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+    // ================================================================
+    // STEP B: Exit Native OpenGL Mode
+    // ================================================================
+    painter.endNativePainting();
+
+    // 5. DRAW YOUR LABELS SAFELY ON TOP
+    painter.setRenderHint(QPainter::TextAntialiasing, true);
+
+    QFont font("Arial", 12);
+    font.setStyleStrategy(QFont::PreferAntialias);
+    painter.setFont(font);
+
+    painter.setPen(Qt::white);
+
+    QString frameLabel = _varname.c_str();
+    painter.drawText(20, 40, frameLabel);
+
+    drawColorBar(painter);
+
+    // 6. Explicitly terminate the painter
+    painter.end();
+
+    // Re-enable states for subsequent Qt internal paint cycles
+    glEnable(GL_DEPTH_TEST);
 }
