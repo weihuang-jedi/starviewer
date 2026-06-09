@@ -11,8 +11,9 @@
 #include <assert.h>
 
 #include <QGLWidget>
-// #include <QOpenGLWidget>
-// #include <QOpenGLFunctions>
+#include <QtOpenGL>
+#include <QOpenGLWidget>
+#include <vector>
 
 #include "coastline.h"
 #include "colorTable.h"
@@ -57,12 +58,13 @@ class UFSINCR2dViewer : public QObject
         void setup(string vn, vector<float*> var);
         void set_geometry(vector<UFSINCRGeometry*> gm);
         void reset_texture1d(ColorTable *ct);
-
         void set_coastline(CoastLine* cl) { coastline = cl; };
 
       //void set_lister(Lister* l) { lister = l; };
 
         void set_locator(Locator* l) { locator = l; };
+
+        // void renderBitmapString(float x, float y, void *font, const string &str);
 
         float get_minval() { return _valmin; };
         float get_maxval() { return _valmax; };
