@@ -22,6 +22,7 @@
 #include <QImage>
 #include <QGLWidget>
 #include <QString>
+#include <QPainter>
 #include <QTimer>
 
 #include "util.h"
@@ -138,11 +139,12 @@ class BaseTranslator : public QGLWidget
         void locator_msg(QString text);    //  Signal for locator info
 
     protected:
+        QPoint   pos;	//  Mouse position
+
         int    xRot;	//  Display angles
         int    yRot;	//  Display angles
         int    zRot;	//  Display angles
         bool   mouse;	//  Mouse pressed
-        QPoint pos;	//  Mouse position
         double dim;	//  Display size
         double m_d_left_plane, m_d_right_plane, m_d_bottom_plane, m_d_top_plane, m_d_near_plane, m_d_far_plane;
 
@@ -249,7 +251,7 @@ class BaseTranslator : public QGLWidget
         vector<string> _names4dvar;
 
       //Unified methods:
-        void _displayColorBar();
+        void _displayColorBar(QPainter& painter);
 
         void writeHeader();
 
@@ -258,7 +260,7 @@ class BaseTranslator : public QGLWidget
         void setViewOptions();
 
         void drawAxis();
-        void drawColorBar();
+        void drawColorBar(QPainter& painter);
 
         QString _varinfo;
         QString _frameinfo;

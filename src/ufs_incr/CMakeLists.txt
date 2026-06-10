@@ -18,21 +18,24 @@ find_path(GLU_INCLUDE_DIR NAMES GL/glu.h
 )
 
 # Create a library for this module
-add_library(mpidemo STATIC ${SOURCES})
+add_library(ufs_incr STATIC ${SOURCES})
 
 # Allow other modules to find these headers
-target_include_directories(mpidemo PUBLIC
+target_include_directories(ufs_incr PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${GLU_INCLUDE_DIR}
     ${GLU_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/geometry
     ${CMAKE_SOURCE_DIR}/shared
+    ${CMAKE_SOURCE_DIR}/leveler
+    ${CMAKE_SOURCE_DIR}/spreadsheet
     ${CMAKE_SOURCE_DIR}/coastline
     ${CMAKE_SOURCE_DIR}/topography
     ${CMAKE_SOURCE_DIR}/stateboundary
     ${CMAKE_SOURCE_DIR}/contour
     ${CMAKE_SOURCE_DIR}/control
+    ${CMAKE_SOURCE_DIR}/ncreader
     ${CMAKE_SOURCE_DIR}/view
     ${CMAKE_SOURCE_DIR}/windvector
     ${CMAKE_SOURCE_DIR}/marchingCube
@@ -43,7 +46,7 @@ target_include_directories(mpidemo PUBLIC
 )
 
 # Link Qt5
-target_link_libraries(mpidemo PUBLIC
+target_link_libraries(ufs_incr PUBLIC
     ${OPENGL_LIBRARIES}
     ${NetCDF_LIBRARIES}
     ${GLU_LIBRARY}

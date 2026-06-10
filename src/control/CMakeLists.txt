@@ -15,11 +15,9 @@ target_include_directories(control PUBLIC
     ${CMAKE_SOURCE_DIR}/spreadsheet
     ${CMAKE_SOURCE_DIR}/coastline
     ${CMAKE_SOURCE_DIR}/marchingCube
-    ${CMAKE_SOURCE_DIR}/nclapp
     ${CMAKE_SOURCE_DIR}/ncreader
     ${CMAKE_SOURCE_DIR}/contour
     ${CMAKE_SOURCE_DIR}/view
-    ${NetCDF_INCLUDE_DIRS}
 )
 
 # Link Qt5
