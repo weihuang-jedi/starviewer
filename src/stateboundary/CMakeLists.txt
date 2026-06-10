@@ -12,7 +12,6 @@ target_include_directories(stateboundary PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/shared
     ${NetCDF_INCLUDE_DIRS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/../nclapp
 )
 
 # 4. Link the Qt5 OpenGL library

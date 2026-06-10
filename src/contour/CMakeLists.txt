@@ -12,7 +12,6 @@ target_include_directories(contour PUBLIC
     ${NetCDF_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/geometry
     ${CMAKE_SOURCE_DIR}/shared
-    ${CMAKE_SOURCE_DIR}/nclapp
 )
 
 # Link Qt5
