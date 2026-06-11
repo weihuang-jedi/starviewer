@@ -1,5 +1,5 @@
-#ifndef _UFSincrTRANSLATOR_H
-#define _UFSincrTRANSLATOR_H
+#ifndef _EAGLETRANSLATOR_H
+#define _EAGLETRANSLATOR_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,22 +19,21 @@
 #include <QString>
 #include <QTimer>
 
+#include "yamlhandler.h"
 #include "sliderNspin.h"
+#include "controlWidget.h"
 #include "basetranslator.h"
-#include "ufs_incr_controller.h"
+#include "eagle_controller.h"
 
-class UFSincrTranslator : public BaseTranslator
+class EAGLETranslator : public BaseTranslator
 {
     Q_OBJECT                                             //  Qt magic macro
     public:
-        UFSincrTranslator(ColorTable* ct, NVOptions* opt,
-                          string flnm, bool isList=false,
-                          string mfnm = "unknown", QWidget* parent=0);	//  Constructor
-        UFSincrTranslator(ColorTable* ct, NVOptions* opt,
-                          string atmfile, string sfcfile,
-                          vector<string> datafiles, QWidget* parent=0);
-       ~UFSincrTranslator();				//  Destructor
+        EAGLETranslator(ColorTable* ct, NVOptions* opt,
+                        string flnm, QWidget* parent=0);	//  Constructor
+       ~EAGLETranslator();				//  Destructor
     
+        void paintGL();
         void show();
         void setup();
         void setfilename(string flnm) { _filename = flnm; };
@@ -62,12 +61,8 @@ class UFSincrTranslator : public BaseTranslator
         void writeLocatorMsg();
 
     private:
-        UFSincrController* ufs_controller;
-        UFSincrGeometry* incr_geometry;
-
-	string _atmfile;
-       	string _sfcfile;
-        vector<string> _datafiles;
+        EAGLEController* eagle_controller;
+        EAGLEGeometry* geometry;
 
     private:
 #if 0

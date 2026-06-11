@@ -36,18 +36,14 @@ MainWindow::MainWindow(string yamlfile)
         nvoptions->set_model(MPIDEMO);
         userConfig = ModelType::MPIDEMO;
     }
-    else if(0 == tmpstr.compare("pop"))
+    else if(0 == tmpstr.compare("eagle"))
     {
-        nvoptions->set_model(POP);
+        nvoptions->set_model(EAGLE);
     }
     else if(0 == tmpstr.compare("mpas"))
     {
         nvoptions->set_model(MPAS);
         userConfig = ModelType::MPAS;
-    }
-    else if(0 == tmpstr.compare("wrf"))
-    {
-        nvoptions->set_model(WRF);
     }
 
     // cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -123,7 +119,6 @@ void MainWindow::_setup()
     switch(nvoptions->get_model())
     {
         case UFS:
-            // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
             setWindowTitle(tr("UFS MODEL"));
             ufs();
             break;
@@ -136,6 +131,10 @@ void MainWindow::_setup()
             // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
             setWindowTitle(tr("NV to demo MPI"));
             mpidemo();
+            break;
+        case EAGLE:
+            setWindowTitle(tr("EAGLE MODEL"));
+            eagle();
             break;
       //case MPAS:
       //    mpas();
@@ -269,6 +268,15 @@ void MainWindow::ufsincr()
     _setup_display();
 }
 
+void MainWindow::eagle()
+{
+    setWindowTitle(tr("NV for EAGLE"));
+
+    _setup_controlPanel();
+
+    _setup_display();
+}
+
 void MainWindow::about()
 {
     QMessageBox::about(this, tr("About Menu"),
@@ -313,17 +321,17 @@ void MainWindow::createActions()
     aboutAct->setStatusTip(tr("Show the application's About box"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
-  //wrfAct = new QAction(tr("&WRF"), this);
-  //wrfAct->setShortcut(QKeySequence::Global);
-  //wrfAct->setStatusTip(tr("Try to activate 'wrf' application"));
-  //connect(wrfAct, SIGNAL(triggered()), this, SLOT(wrf()));
+    eagleAct = new QAction(tr("&EAGLE"), this);
+    eagleAct->setShortcut(QKeySequence::Global);
+  //eagleAct->setStatusTip(tr("Try to activate 'eagle' application"));
+    connect(eagleAct, SIGNAL(triggered()), this, SLOT(eagle()));
 
     ufsAct = new QAction(tr("&UFS"), this);
   //ufsAct->setShortcut(QKeySequence::Global);
     ufsAct->setStatusTip(tr("Try to activate 'ufs' application"));
     connect(ufsAct, SIGNAL(triggered()), this, SLOT(ufs()));
 
-    ufsincrAct = new QAction(tr("&UFS"), this);
+    ufsincrAct = new QAction(tr("&UFSINCR"), this);
   //ufsincrAct->setShortcut(QKeySequence::Global);
     ufsincrAct->setStatusTip(tr("Try to activate 'ufsincr' application"));
     connect(ufsincrAct, SIGNAL(triggered()), this, SLOT(ufsincr()));

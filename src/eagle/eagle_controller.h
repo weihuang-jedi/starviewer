@@ -1,13 +1,13 @@
-#ifndef _UFSincrCONTROLLER_H
-#define _UFSincrCONTROLLER_H
+#ifndef _EAGLECONTROLLER_H
+#define _EAGLECONTROLLER_H
 
 #include <QtOpenGL>
 
 #include <iostream>
 
 #include "ncreader.h"
+#include "eagle_viewer.h"
 #include "locator.h"
-#include "ufs_incr_viewer.h"
 
 using namespace std;
 
@@ -15,26 +15,17 @@ using namespace std;
 #define NAME_LENG	1024
 #endif
 
-class UFSincrGeometry;
-class UFSincr2dViewer;
-
-class UFSincrController
+class EAGLEController
 {
     public:
-        UFSincrController(ColorTable* ct, NVOptions* opt,
-                          string atmfile, string sfcfile,
-                          vector<string> datafiles);
-       ~UFSincrController();
+        EAGLEController(ColorTable* ct, NVOptions* opt, const char* fn);
+       ~EAGLEController();
 
         void setup();
 
-        int getNx();
-        int getNy();
-        int getNlev();
-        int getNtiles();
-
-        int getNtims() { return _ntim; };
-        int get_tl() { return _tvalue; };
+        int getNx() { return geometry->get_nx(); };
+        int getNy() { return geometry->get_nx(); };
+        int getNtime() { return _ntime; };
 
         void set_colorTable(ColorTable* ct);
         void set_locator(Locator* l);
@@ -50,7 +41,7 @@ class UFSincrController
         string get_timestring();
 
       //Evaluator* get_evaluator() { return evaluator; };
-        UFSincrGeometry* get_incr_geometry() { return incr_geometry; };
+        EAGLEGeometry* get_geometry() { return geometry; };
 
         float get_minval() { return _minval; };
         float get_maxval() { return _maxval; };
@@ -69,7 +60,7 @@ class UFSincrController
 
     protected:
         ncReader* ncfile;
-        UFSincrGeometry* incr_geometry;
+        EAGLEGeometry* geometry;
         ColorTable* colorTable;
         NVOptions* nvoptions;
         CoastLine* coastline;
@@ -78,8 +69,7 @@ class UFSincrController
 
         char _flnm[NAME_LENG];
 
-        UFSincr2dViewer* ufs_incr_viewer;
-      //UFSincr3dViewer* ufs_3dviewer;
+        EAGLE2dViewer* eagle_viewer;
 
         int _max_frame;
         int _time_interval;
@@ -92,10 +82,12 @@ class UFSincrController
         int _curFile;
         int _maxFile;
 
+        int _nx;
+        int _ny;
+        int _ntime;
         int _glbTime;
         int _curTime;
         int _maxTime;
-        int _ntim;
 
         int _tvalue;
 
@@ -114,10 +106,6 @@ class UFSincrController
         void _set_glbTime();
         template<typename T>
         void _print1d(T* var, int nl);
-
-        string _atmfile;
-        string _sfcfile;
-        vector<string> _datafiles;
 };
 #endif
 

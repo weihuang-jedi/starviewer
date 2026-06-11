@@ -18,10 +18,10 @@ find_path(GLU_INCLUDE_DIR NAMES GL/glu.h
 )
 
 # Create a library for this module
-add_library(ufs_incr STATIC ${SOURCES})
+add_library(eagle STATIC ${SOURCES})
 
 # Allow other modules to find these headers
-target_include_directories(ufs_incr PUBLIC
+target_include_directories(eagle PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${GLU_INCLUDE_DIR}
@@ -32,6 +32,7 @@ target_include_directories(ufs_incr PUBLIC
     ${CMAKE_SOURCE_DIR}/spreadsheet
     ${CMAKE_SOURCE_DIR}/coastline
     ${CMAKE_SOURCE_DIR}/topography
+    ${CMAKE_SOURCE_DIR}/widget
     ${CMAKE_SOURCE_DIR}/stateboundary
     ${CMAKE_SOURCE_DIR}/contour
     ${CMAKE_SOURCE_DIR}/control
@@ -46,7 +47,7 @@ target_include_directories(ufs_incr PUBLIC
 )
 
 # Link Qt5
-target_link_libraries(ufs_incr PUBLIC
+target_link_libraries(eagle PUBLIC
     ${OPENGL_LIBRARIES}
     ${NetCDF_LIBRARIES}
     ${GLU_LIBRARY}

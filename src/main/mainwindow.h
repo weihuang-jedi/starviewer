@@ -24,12 +24,12 @@
 #include "subsetWidget.h"
 #include "minmaxWidget.h"
 
-//#include "wrftranslator.h"
 //#include "mpastranslator.h"
 //#include "poptranslator.h"
 #include "mpitranslator.h"
 #include "ufs_translator.h"
 #include "ufsincr_translator.h"
+#include "eagle_translator.h"
 
 #include "modelparser.h"
 #include "modelparserFactory.h"
@@ -44,6 +44,8 @@ QT_END_NAMESPACE
 
 class MPIDEMOParser;
 class UFSParser;
+class UFSINCRParser;
+class EagleParser;
 
 class MainWindow : public QMainWindow
 {
@@ -63,12 +65,11 @@ class MainWindow : public QMainWindow
         void about();
 
       //Applications
-      //void wrf();
       //void mpas();
-      //void pop();
         void mpidemo();
         void ufs();
         void ufsincr();
+        void eagle();
 
         void animation_func();
         void inspector_func();
@@ -90,11 +91,6 @@ class MainWindow : public QMainWindow
         Light* light;
 
         BaseTranslator* translator;
-      //WRFTranslator* wrf_translator;
-      //UFSTranslator* ufs_translator;
-      //POPTranslator* pop_translator;
-      //MPASTranslator* mpas_translator;
-      //MPITranslator* mpidemo_translator;
 
         ControlWidget* controlPanel;
         DisplayWidget* display;
@@ -138,11 +134,10 @@ class MainWindow : public QMainWindow
         QAction *redoAct;
         QAction *aboutAct;
 
-      //QAction *wrfAct;
         QAction *ufsAct;
         QAction *ufsincrAct;
       //QAction *mpasAct;
-      //QAction *popAct;
+        QAction *eagleAct;
         QAction *mpidemoAct;
 
         QAction *animationAct;

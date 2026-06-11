@@ -1,5 +1,5 @@
-#ifndef _UFSincrGeometry_H
-#define _UFSincrGeometry_H
+#ifndef _EAGLEGeometry_H
+#define _EAGLEGeometry_H
 
 #include <QtOpenGL>
 
@@ -13,10 +13,10 @@
 
 using namespace std;
 
-class UFSincrGeometry : public Geometry {
+class EAGLEGeometry : public Geometry {
     public:
-        UFSincrGeometry();
-       ~UFSincrGeometry();
+        EAGLEGeometry();
+       ~EAGLEGeometry();
 
 
         string get_name() { return name; };
@@ -34,23 +34,11 @@ class UFSincrGeometry : public Geometry {
         double* get_xFlat() { return _xFlat; };
         double* get_yFlat() { return _yFlat; };
 
-        int* get_tile() { return _tile; };
-
-      //UFSincr
+      //EAGLE
         void setup();
 
-	void set_nx(int v) { _nx = v; };
-	void set_ny(int v) { _ny = v; };
-	int get_nx() { return _nx; };
-	int get_ny() { return _ny; };
-
-	void set_nlev(int v) { _nlev = v; };
-	void set_ntim(int v) { _ntim = v; };
-	int get_nlev() { return _nlev; };
-	int get_ntim() { return _ntim; };
-
-	void set_ntiles(int v) { _ntiles = v; };
-	int get_ntiles() { return _ntiles; };
+	void set_ntime(int v) { _ntime = v; };
+	int get_ntime() { return _ntime; };
 
     protected:
         string name;
@@ -62,23 +50,12 @@ class UFSincrGeometry : public Geometry {
         double* _xFlat;
         double* _yFlat;
 
-        double* _lon2d;
-        double* _lat2d;
-        double* _time;
-
-        float* _pfull;
-        float* _phalf;
-
     private:
         void _set_default();
 
 	int _nx;
 	int _ny;
-	int _nlev;
-	int _ntim;
-	int _ntiles;
-
-	int* _tile;
+	int _ntime;
 };
 #endif
 

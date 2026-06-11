@@ -2,9 +2,9 @@
 
 #include <vector>
 
-#include "ufs_incr_viewer.h"
+#include "eagle_viewer.h"
 
-UFSincr2dViewer::UFSincr2dViewer(ColorTable *ct, NVOptions* opt)
+EAGLE2dViewer::EAGLE2dViewer(ColorTable *ct, NVOptions* opt)
 {
     colorTable = ct;
     nvoptions = opt;
@@ -14,6 +14,8 @@ UFSincr2dViewer::UFSincr2dViewer(ColorTable *ct, NVOptions* opt)
     texture1d->set_name(ct->get_name());
 
     _var = NULL;
+ 
+    earth = new Earth();
 
     nvoptions->set_xsec(0);
     nvoptions->set_ysec(0);
@@ -22,7 +24,6 @@ UFSincr2dViewer::UFSincr2dViewer(ColorTable *ct, NVOptions* opt)
     _nlon = 360;
     _nlat = 180;
     _nlev = 1;
-    _ntiles = 0;
 
     oneover = 1.0 / 180.0;
     deg2rad = 3.1415926535897932 * oneover;
@@ -36,9 +37,8 @@ UFSincr2dViewer::UFSincr2dViewer(ColorTable *ct, NVOptions* opt)
     current_timelevel = 0;
 }
 
-UFSincr2dViewer::UFSincr2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm)
+EAGLE2dViewer::EAGLE2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler)
 {
-    cout << "Enter: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     colorTable = ct;
     nvoptions = opt;
 
@@ -48,18 +48,15 @@ UFSincr2dViewer::UFSincr2dViewer(ColorTable *ct, NVOptions* opt, const char* bmp
 
     _var = NULL;
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    earth = new Earth(bmpflnm);
+    ncfile = nchandler;
+    earth = new Earth(bmpflnm, ncfile);
 
-    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     nvoptions->set_xsec(0);
     nvoptions->set_ysec(0);
     nvoptions->set_zsec(0);
 
     _nlon = 360;
     _nlat = 180;
-    _nlev = 1;
-    _ntiles = 0;
 
     oneover = 1.0 / 180.0;
     deg2rad = 3.1415926535897932 * oneover;
@@ -71,12 +68,9 @@ UFSincr2dViewer::UFSincr2dViewer(ColorTable *ct, NVOptions* opt, const char* bmp
 
     previoustimelevel = -1;
     current_timelevel = 0;
-
-    earth = new Earth(bmpflnm);
-    cout << "Leave: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
-UFSincr2dViewer::~UFSincr2dViewer()
+EAGLE2dViewer::~EAGLE2dViewer()
 {
     locator->turnOff();
 
@@ -85,22 +79,20 @@ UFSincr2dViewer::~UFSincr2dViewer()
     delete texture1d;
 }
 
-void UFSincr2dViewer::set_incr_geometry(UFSincrGeometry *gm)
+void EAGLE2dViewer::set_geometry(EAGLEGeometry *gm)
 {
-    incr_geometry = gm;
+    geometry = gm;
 
     _initialize();
-
-    // initializeGL();
 }
 
-void UFSincr2dViewer::setup(string vn, float *var)
+void EAGLE2dViewer::setup(string vn, float *var)
 {
     reset();
 
     _varname  = vn;
     _var = var;
-    _nlev = incr_geometry->get_nlev();
+    _nlev = geometry->get_nlev();
 
   //nvoptions->set_xsec(_nlon);
   //nvoptions->set_ysec(_nlat);
@@ -115,18 +107,12 @@ void UFSincr2dViewer::setup(string vn, float *var)
     previoustimelevel = -1;
 }
 
-void UFSincr2dViewer::reset()
+void EAGLE2dViewer::reset()
 {
-    lister->reinitialize(_nlon+1, _nlat+1, incr_geometry->get_nlev()+1);
+    lister->reinitialize(_nlon+1, _nlat+1, geometry->get_nlev()+1);
 }
 
-void UFSincr2dViewer::initializeGL()
-{
-    // 1. Initialize OpenGL functions (if using a loader)
-    initializeOpenGLFunctions();
-}
-
-void UFSincr2dViewer::_initialize()
+void EAGLE2dViewer::_initialize()
 {
     int i, j, m, n;
 
@@ -135,30 +121,24 @@ void UFSincr2dViewer::_initialize()
 
     previoustimelevel = -1;
 
-    _nx = incr_geometry->get_nx();
-    _ny = incr_geometry->get_ny();
-    _nlev = incr_geometry->get_nlev();
-    _ntiles = incr_geometry->get_ntiles();
+    _nx = geometry->get_nx();
+    _ny = geometry->get_ny();
 
-    _lon2d = incr_geometry->get_lon2d();
-    _lat2d = incr_geometry->get_lat2d();
-    _lev = incr_geometry->get_lev();
-    _tile = incr_geometry->get_tile();
+    _lon2d = geometry->get_lon();
+    _lat2d = geometry->get_lat();
 
   //lister->reinitialize(361, 181, _nlev);
 
-    _xFlat = incr_geometry->get_xFlat();
-    _yFlat = incr_geometry->get_yFlat();
+    _xFlat = geometry->get_xFlat();
+    _yFlat = geometry->get_yFlat();
 
-    _xSphere = incr_geometry->get_xSphere();
-    _ySphere = incr_geometry->get_ySphere();
-    _zSphere = incr_geometry->get_zSphere();
-
-    incr_geometry->set_ntim(1);
+    geometry->set_ntime(1);
 }
 
-void UFSincr2dViewer::draw()
+void EAGLE2dViewer::draw()
 {
+    size_t nsquare = _nlon * _nlat;
+
     if(nvoptions->get_cb(NV_RESET))
     {
         nvoptions->set_cb(NV_RESET, false);
@@ -176,10 +156,10 @@ void UFSincr2dViewer::draw()
     if(current_timelevel != previoustimelevel)
         reset();
     previoustimelevel = current_timelevel;
-    if(current_timelevel >= incr_geometry->get_nt())
+    if(current_timelevel >= geometry->get_nt())
         return;
 
-    if((incr_geometry->get_nlev() <= nvoptions->get_zsec()) && (0 > nvoptions->get_zsec()))
+    if((geometry->get_nlev() <= nvoptions->get_zsec()) && (0 > nvoptions->get_zsec()))
         return;
 
 #if 0
@@ -293,7 +273,7 @@ void UFSincr2dViewer::draw()
     }
 }
 
-void UFSincr2dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact)
+void EAGLE2dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact)
 {
     double phi = lat * deg2rad;
     double dist = cos(phi);
@@ -314,7 +294,7 @@ void UFSincr2dViewer::_lonlat2xyz(double lon, double lat, double radius, double 
     glVertex3d(x * radius, y * radius, z * radius);
 }
 
-void UFSincr2dViewer::_lonlat2xyz_texture(double lon, double lat,
+void EAGLE2dViewer::_lonlat2xyz_texture(double lon, double lat,
 		                      double radius, double fact)
 {
     double phi = lat * deg2rad;
@@ -331,11 +311,10 @@ void UFSincr2dViewer::_lonlat2xyz_texture(double lon, double lat,
     glVertex3d(x * radius, y * radius, z * radius);
 }
 
-void UFSincr2dViewer::_sphereDisplay()
+void EAGLE2dViewer::_sphereDisplay()
 {
-    int i, j, k, k1, n;
+    int i, j, k, k1;
     size_t mpos, npos;
-    size_t lpos, upos;
 
     double sv = 1.0;
     double fact;
@@ -360,33 +339,29 @@ void UFSincr2dViewer::_sphereDisplay()
 
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   //#pragma omp parallel for
     if(k < _nlev || 1 == _nlev) {
-    for(n = 0; n < _ntiles; ++n)
+    for(j = 1; j < _nlat; ++j)
     {
-    for(j = 1; j < _ny; ++j)
-    {
-        mpos = ((n*_nlev+k)*_ny+(j-1))*_nx;
-        npos = ((n*_nlev+k)*_ny+j)*_nx;
-        upos = (n*_ny+(j-1))*_nx;
-        lpos = (n*_ny+j)*_nx;
+        mpos = (k*_nlat + (j-1))*_nlon;
+        npos = (k*_nlat + j)*_nlon;
         glBegin(GL_QUAD_STRIP);
-        for(i = 0; i < _nx; ++i)
+        for(i = 0; i < _nlon; ++i)
         {
             fact = sv * (pltvar[npos+i] - _valmin);
-            _lonlat2xyz_texture(_lon2d[lpos+i], _lat2d[lpos+i], radius, fact);
+            _lonlat2xyz_texture(_lon[i], _lat[j], radius, fact);
 
             fact = sv * (pltvar[mpos+i] - _valmin);
-            _lonlat2xyz_texture(_lon2d[upos+i], _lat2d[upos+i], radius, fact);
+            _lonlat2xyz_texture(_lon[i], _lat[j-1], radius, fact);
         }
         fact = sv * (pltvar[npos] - _valmin);
-        _lonlat2xyz_texture(_lon2d[lpos], _lat2d[lpos], radius, fact);
+        _lonlat2xyz_texture(_lon[0], _lat[j], radius, fact);
 
         fact = sv * (pltvar[mpos] - _valmin);
-        _lonlat2xyz_texture(_lon2d[upos], _lat2d[upos], radius, fact);
+        _lonlat2xyz_texture(_lon[0], _lat[j-1], radius, fact);
         glEnd();
-    }
     }
     coastline->drawOnSphere(radius+0.01);
     }
@@ -396,7 +371,7 @@ void UFSincr2dViewer::_sphereDisplay()
     glEndList();
 }
 
-void UFSincr2dViewer::_flatDisplay()
+void EAGLE2dViewer::_flatDisplay()
 {
     int i, j, k, k1;
     size_t mpos, npos;
@@ -420,6 +395,7 @@ void UFSincr2dViewer::_flatDisplay()
     glEnable(GL_NORMALIZE);
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glNormal3f(0.0, 0.0, -1.0);
 
     if(k < _nlev || 1 == _nlev) {
@@ -429,7 +405,18 @@ void UFSincr2dViewer::_flatDisplay()
         mpos = (k*_nlat+(j-1))*_nlon;
         npos = (k*_nlat+j)*_nlon;
         glBegin(GL_QUAD_STRIP);
-	for(i = 0; i < _nlon; ++i)
+        for(i = _hlon; i < _nlon; ++i)
+        {
+            fact = sv * (pltvar[npos+i] - _valmin);
+            glTexCoord1d(fact);
+            glVertex3d(_xFlat[i], _yFlat[j], height);
+
+            fact = sv * (pltvar[mpos+i] - _valmin);
+            glTexCoord1d(fact);
+            glVertex3d(_xFlat[i], _yFlat[j-1], height);
+        }
+
+	for(i = 0; i < _hlon; ++i)
         {
             fact = sv * (pltvar[npos+i] - _valmin);
             glTexCoord1d(fact);
@@ -449,7 +436,7 @@ void UFSincr2dViewer::_flatDisplay()
     glEndList();
 }
 
-void UFSincr2dViewer::_evaluate(float *var)
+void EAGLE2dViewer::_evaluate(float *var)
 {
     size_t varsize;
     size_t n = 0;
@@ -458,8 +445,8 @@ void UFSincr2dViewer::_evaluate(float *var)
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\t _varname: " << _varname << endl;
 
-    varsize = incr_geometry->get_nlon() * incr_geometry->get_nlat() * incr_geometry->get_nlev();
-  //varsize = incr_geometry->get_nlon() * incr_geometry->get_nlat();
+    varsize = geometry->get_nlon() * geometry->get_nlat() * geometry->get_nlev();
+  //varsize = geometry->get_nlon() * geometry->get_nlat();
 
   //cout << "\tin <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\t_nlon =" << _nlon << endl;
@@ -498,7 +485,7 @@ void UFSincr2dViewer::_evaluate(float *var)
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
-void UFSincr2dViewer::_adjust_minmax(float *var)
+void EAGLE2dViewer::_adjust_minmax(float *var)
 {
     size_t varsize;
     size_t n = 0;
@@ -506,7 +493,7 @@ void UFSincr2dViewer::_adjust_minmax(float *var)
 
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
-    varsize = incr_geometry->get_nlon() * incr_geometry->get_nlat();
+    varsize = geometry->get_nlon() * geometry->get_nlat();
 
     _valmax = var[0];
     _valmin = var[0];
@@ -552,7 +539,7 @@ void UFSincr2dViewer::_adjust_minmax(float *var)
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
-void UFSincr2dViewer::reset_texture1d(ColorTable *ct)
+void EAGLE2dViewer::reset_texture1d(ColorTable *ct)
 {
     colorTable = ct;
 
@@ -563,7 +550,7 @@ void UFSincr2dViewer::reset_texture1d(ColorTable *ct)
     texture1d->set_name(ct->get_name());
 }
 
-void UFSincr2dViewer::draw_sphere_grids()
+void EAGLE2dViewer::draw_sphere_grids()
 {
     int i, j, k;
     size_t npos;
@@ -573,6 +560,11 @@ void UFSincr2dViewer::draw_sphere_grids()
     GLfloat line_width = 1.0;
 
   //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //cout << "\tncenters = " << ncenters << endl;
+
+    _xSphere = geometry->get_xSphere();
+    _ySphere = geometry->get_ySphere();
+    _zSphere = geometry->get_zSphere();
 
     k = nvoptions->get_zsec();
     radius = _k2r(k);
@@ -603,7 +595,7 @@ void UFSincr2dViewer::draw_sphere_grids()
     glPopMatrix();
 }
 
-void UFSincr2dViewer::draw_plane_grids()
+void EAGLE2dViewer::draw_plane_grids()
 {
     int i, j;
     size_t npos;
@@ -638,7 +630,7 @@ void UFSincr2dViewer::draw_plane_grids()
     glPopMatrix();
 }
 
-void UFSincr2dViewer::_display_Yflat_plane(int ys)
+void EAGLE2dViewer::_display_Yflat_plane(int ys)
 {
     int i, k;
     size_t mpos, npos;
@@ -647,7 +639,6 @@ void UFSincr2dViewer::_display_Yflat_plane(int ys)
     vector<double> height(_nlev);
     int j = ys-1;
 
-#if 0
     if((-85.0 > _lat[j]) || (85.0 < _lat[j]))
        return;
 
@@ -675,7 +666,18 @@ void UFSincr2dViewer::_display_Yflat_plane(int ys)
         npos = (k*_nlat+j)*_nlon;
 
         glBegin(GL_QUAD_STRIP);
-	for(i = 0; i < _nlon; ++i)
+        for(i = _hlon; i < _nlon; ++i)
+        {
+            fact = sv * (pltvar[mpos+i] - _valmin);
+            glTexCoord1d(fact);
+            glVertex3d(_xFlat[i], _yFlat[j], height[k-1]);
+
+            fact = sv * (pltvar[npos+i] - _valmin);
+            glTexCoord1d(fact);
+            glVertex3d(_xFlat[i], _yFlat[j], height[k]);
+        }
+
+	for(i = 0; i < _hlon; ++i)
         {
             fact = sv * (pltvar[mpos+i] - _valmin);
             glTexCoord1d(fact);
@@ -691,10 +693,9 @@ void UFSincr2dViewer::_display_Yflat_plane(int ys)
     glDisable(GL_TEXTURE_1D);
     glPopMatrix();
     glEndList();
-#endif
 }
 
-void UFSincr2dViewer::_sphereXplane(int xs)
+void EAGLE2dViewer::_sphereXplane(int xs)
 {
     int j, k;
     size_t mpos, npos;
@@ -725,7 +726,6 @@ void UFSincr2dViewer::_sphereXplane(int xs)
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
   //#pragma omp parallel for
-#if 0
     for(k = 1; k < _nlev; ++k)
     {
         glBegin(GL_QUAD_STRIP);
@@ -742,14 +742,13 @@ void UFSincr2dViewer::_sphereXplane(int xs)
         }
         glEnd();
     }
-#endif
 
     glDisable(GL_TEXTURE_1D);
     glPopMatrix();
     glEndList();
 }
 
-void UFSincr2dViewer::_sphereYplane(int ys)
+void EAGLE2dViewer::_sphereYplane(int ys)
 {
     int i, k;
     size_t mpos, npos;
@@ -779,7 +778,6 @@ void UFSincr2dViewer::_sphereYplane(int ys)
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
   //#pragma omp parallel for
-#if 0
     for(k = 1; k < _nlev; ++k)
     {
         mpos = ((k-1)*_nlat + j)*_nlon;
@@ -800,7 +798,6 @@ void UFSincr2dViewer::_sphereYplane(int ys)
         _lonlat2xyz_texture(_lon[0], _lat[j], radius[k], fact);
         glEnd();
     }
-#endif
 
     glDisable(GL_TEXTURE_1D);
     glPopMatrix();
@@ -808,7 +805,7 @@ void UFSincr2dViewer::_sphereYplane(int ys)
 }
 
 
-void UFSincr2dViewer::_display_Xflat_plane(int xs)
+void EAGLE2dViewer::_display_Xflat_plane(int xs)
 {
     int j, k;
     size_t mpos, npos;
@@ -835,7 +832,6 @@ void UFSincr2dViewer::_display_Xflat_plane(int xs)
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
     glNormal3f(0.0, 0.0, -1.0);
 
-#if 0
     for(k = 1; k < _nlev; ++k)
     {
         glBegin(GL_QUAD_STRIP);
@@ -854,18 +850,16 @@ void UFSincr2dViewer::_display_Xflat_plane(int xs)
         }
         glEnd();
     }
-#endif
 
     glDisable(GL_TEXTURE_1D);
     glPopMatrix();
     glEndList();
 }
 
-void UFSincr2dViewer::_sphereBump()
+void EAGLE2dViewer::_sphereBump()
 {
-    int i, j, k, k1, n;
+    int i, j, k, k1;
     size_t mpos, npos;
-    size_t upos, lpos;
     double sv = 1.0;
     double alpha, fact;
     double amp = 1.05;
@@ -874,7 +868,6 @@ void UFSincr2dViewer::_sphereBump()
 
     k1 = nvoptions->get_zsec()+1;
     k = _nlev-k1;
-
   //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\t_varname: <" << _varname << ">, lev = " << k << endl;
 
@@ -912,43 +905,37 @@ void UFSincr2dViewer::_sphereBump()
 
     glNormal3f(0.0, 0.0, -1.0);
     if(k < _nlev || 1 == _nlev) {
-    for(n = 0; n < _ntiles; ++n)
+    for(j = 1; j < _nlat; ++j)
     {
-    for(j = 1; j < _ny; ++j)
-    {
-        mpos = ((n*_nlev+k)*_ny+(j-1))*_nx;
-        npos = ((n*_nlev+k)*_ny+j)*_nx;
-        upos = (n*_ny+(j-1))*_nx;
-        lpos = (n*_ny+j)*_nx;
+        mpos = (k*_nlat + (j-1))*_nlon;
+        npos = (k*_nlat + j)*_nlon;
         glBegin(GL_QUAD_STRIP);
-        for(i = 0; i < _nx; ++i)
+        for(i = 0; i < _nlon; ++i)
         {
             fact = sv * (pltvar[npos+i] - _valmin);
-            _lonlat2xyz(_lon2d[lpos+i], _lat2d[lpos+i], radius + magnifier*fact, fact);
+            _lonlat2xyz(_lon[i], _lat[j], radius + magnifier*fact, fact);
 
             fact = sv * (pltvar[mpos+i] - _valmin);
-            _lonlat2xyz(_lon2d[upos+i], _lat2d[upos+i], radius + magnifier*fact, fact);
+            _lonlat2xyz(_lon[i], _lat[j-1], radius + magnifier*fact, fact);
         }
         fact = sv * (pltvar[npos] - _valmin);
-        _lonlat2xyz(_lon2d[lpos], _lat2d[lpos], radius + magnifier*fact, fact);
+        _lonlat2xyz(_lon[0], _lat[j], radius + magnifier*fact, fact);
 
         fact = sv * (pltvar[mpos] - _valmin);
-        _lonlat2xyz(_lon2d[upos], _lat2d[upos], radius + magnifier*fact, fact);
+        _lonlat2xyz(_lon[0], _lat[j-1], radius + magnifier*fact, fact);
         glEnd();
     }
-    }
-    coastline->drawOnPlane(0.01);
+    coastline->drawOnSphere(0.01);
     }
 
     glPopMatrix();
     glEndList();
 }
 
-void UFSincr2dViewer::_flatBump()
+void EAGLE2dViewer::_flatBump()
 {
-    int i, j, k, k1, n;
+    int i, j, k, k1;
     size_t mpos, npos;
-    size_t upos, lpos;
     double sv = 1.0;
     double alpha, fact;
     double amp = 1.05;
@@ -996,16 +983,12 @@ void UFSincr2dViewer::_flatBump()
 
     glNormal3f(0.0, 0.0, -1.0);
     if(k < _nlev || 1 == _nlev) {
-    for(n = 0; n < _ntiles; ++n)
+    for(j = 1; j < _nlat; ++j)
     {
-    for(j = 1; j < _ny; ++j)
-    {
-        mpos = ((n*_nlev+k)*_ny+(j-1))*_nx;
-        npos = ((n*_nlev+k)*_ny+j)*_nx;
-        upos = (n*_ny+(j-1))*_nx;
-        lpos = (n*_ny+j)*_nx;
+        mpos = (k*_nlat+(j-1))*_nlon;
+        npos = (k*_nlat+j)*_nlon;
         glBegin(GL_QUAD_STRIP);
-        for(i = 0; i < _nx; ++i)
+        for(i = _hlon; i < _nlon; ++i)
         {
             fact = sv * (pltvar[npos+i] - _valmin);
             alpha = amp * fact;
@@ -1015,8 +998,8 @@ void UFSincr2dViewer::_flatBump()
                 alpha = 1.0;
 
             glColor4d(fact, fact, fact, alpha);
-            glNormal3d(_xFlat[lpos+i], _yFlat[lpos+i], magnifier*fact);
-            glVertex3d(_xFlat[lpos+i], _yFlat[lpos+i], magnifier*fact);
+            glNormal3d(0.0, _yFlat[j], magnifier*fact);
+            glVertex3d(_xFlat[i], _yFlat[j], magnifier*fact);
 
             fact = sv * (pltvar[mpos+i] - _valmin);
             alpha = amp * fact;
@@ -1026,11 +1009,37 @@ void UFSincr2dViewer::_flatBump()
                 alpha = 1.0;
 
             glColor4d(fact, fact, fact, alpha);
-            glNormal3d(_xFlat[upos+i], _yFlat[upos+i], magnifier*fact);
-            glVertex3d(_xFlat[upos+i], _yFlat[upos+i],  magnifier*fact);
+            glNormal3d(0.0, _yFlat[j-1], magnifier*fact);
+            glVertex3d(_xFlat[i], _yFlat[j-1],  magnifier*fact);
+        }
+        // glEnd();
+
+        // glBegin(GL_QUAD_STRIP);
+        for(i = 0; i < _hlon; ++i)
+        {
+            fact = sv * (pltvar[npos+i] - _valmin);
+            alpha = amp * fact;
+            if(alpha < 0.0001)
+                alpha = 0.0;
+            else if(alpha > 1.0)
+                alpha = 1.0;
+
+            glColor4d(fact, fact, fact, alpha);
+            glNormal3d(0.0, _yFlat[j], magnifier*fact);
+            glVertex3d(_xFlat[i], _yFlat[j], magnifier*fact);
+
+            fact = sv * (pltvar[mpos+i] - _valmin);
+            alpha = amp * fact;
+            if(alpha < 0.0001)
+                alpha = 0.0;
+            else if(alpha > 1.0)
+                alpha = 1.0;
+
+            glColor4d(fact, fact, fact, alpha);
+            glNormal3d(0.0, _yFlat[j-1], magnifier*fact);
+            glVertex3d(_xFlat[i], _yFlat[j-1],  magnifier*fact);
         }
         glEnd();
-    }
     }
     coastline->drawOnPlane(0.01);
     }
@@ -1039,7 +1048,7 @@ void UFSincr2dViewer::_flatBump()
     glEndList();
 }
 
-void UFSincr2dViewer::_draw_cross(double radius)
+void EAGLE2dViewer::_draw_cross(double radius)
 {
     int m, n;
     double x, y, z;
@@ -1077,13 +1086,13 @@ void UFSincr2dViewer::_draw_cross(double radius)
     glEnd();
 }
 
-double UFSincr2dViewer::_k2h(int k)
+double EAGLE2dViewer::_k2h(int k)
 {
     double height = 0.5 * ((double) (_nlev-k) / _nlev);
     return height;
 }
 
-double UFSincr2dViewer::_k2r(int k)
+double EAGLE2dViewer::_k2r(int k)
 {
     double radius = 1.0 + _k2h(k);
     return radius;

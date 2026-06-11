@@ -1,5 +1,5 @@
-#ifndef _VIEWER_H
-#define _VIEWER_H
+#ifndef _EAGLE_VIEWER_H
+#define _EAGLE_VIEWER_H
 
 #include <iostream>
 #include <vector>
@@ -13,6 +13,7 @@
 #include <QGLWidget>
 // #include <QOpenGLWidget>
 
+#include "eagle_geometry.h"
 #include "coastline.h"
 #include "colorTable.h"
 #include "texture1d.h"
@@ -22,7 +23,6 @@
 #include "locator.h"
 #include "nvoptions.h"
 #include "ncreader.h"
-#include "ufs_incr_geometry.h"
 
 using namespace std;
 
@@ -35,13 +35,13 @@ using namespace std;
 #define NEAR_EAST_BOUNDARY	0.9999
 #define NEAR_WEST_BOUNDARY	-NEAR_EAST_BOUNDARY
 
-class UFSincr2dViewer : public QOpenGLWidget, protected QOpenGLFunctions
+class EAGLE2dViewer : public QGLWidget
 {
 
     public:
-        UFSincr2dViewer(ColorTable* ct, NVOptions* opt);
-        UFSincr2dViewer(ColorTable* ct, NVOptions* opt, const char* bmpflnm);
-       ~UFSincr2dViewer();
+        EAGLE2dViewer(ColorTable* ct, NVOptions* opt);
+        EAGLE2dViewer(ColorTable* ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler);
+       ~EAGLE2dViewer();
 
         void draw();
         void draw_sphere_grids();
@@ -49,7 +49,7 @@ class UFSincr2dViewer : public QOpenGLWidget, protected QOpenGLFunctions
 
         void reset();
         void setup(string vn, float* var);
-        void set_incr_geometry(UFSincrGeometry* gm);
+        void set_geometry(EAGLEGeometry* gm);
         void reset_texture1d(ColorTable *ct);
 
         void set_coastline(CoastLine* cl) { coastline = cl; };
@@ -61,11 +61,9 @@ class UFSincr2dViewer : public QOpenGLWidget, protected QOpenGLFunctions
         float get_minval() { return _valmin; };
         float get_maxval() { return _valmax; };
 
-        void initializeGL();
-
     protected:
         ColorTable* colorTable;
-        UFSincrGeometry* incr_geometry;
+        EAGLEGeometry* geometry;
         CoastLine* coastline;
         Texture1d* texture1d;
         ncReader* ncfile;
@@ -75,22 +73,18 @@ class UFSincr2dViewer : public QOpenGLWidget, protected QOpenGLFunctions
         NVOptions* nvoptions;
 
         string _varname;
-        string _bmpflnm;
 
         int previoustimelevel;
         int current_timelevel;
 
-        double* _lon2d;
-        double* _lat2d;
+        double* _lon;
+        double* _lat;
         float* _lev;
-        int* _tile;
 
-        int _nx;
-        int _ny;
-	int _nlon;
-	int _nlat;
+        int _hlon;
+        int _nlon;
+        int _nlat;
         int _nlev;
-        int _ntiles;
 
         GLuint zcl;
         GLuint ycl;
