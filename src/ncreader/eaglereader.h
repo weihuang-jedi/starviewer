@@ -29,10 +29,6 @@ class EagleReader {
     vector<string> dim_names;
     vector<size_t> dim_length;
 
-    long int forecast_reference_time;
-    long int time;
-    long int CRS;
-
     double* _x;
     double* _y;
     float* _longitude;
@@ -42,7 +38,9 @@ class EagleReader {
     void _get_var_info();
 
     int* _dimsize = NULL;
-    long int* _time = NULL;
+    long long int* _time = NULL;
+    long long int forecast_reference_time;
+    long long int CRS;
 
     int _nx;
     int _ny;
@@ -91,7 +89,7 @@ class EagleReader {
     float* get_fv( const char* vn ) { return getFloat(vn); };
     int*   get_grdsize() { return _dimsize; };
     int*   get_varsize();
-    int*   get_ntimes() { return (int)_time; };
+    long long int* get_ntimes() { return _time; };
 
     void select_file(int nf);
 };

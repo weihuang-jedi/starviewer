@@ -21,11 +21,10 @@ using namespace std;
 typedef enum
 {
     NOMODEL = 0x0000,
-    WRF     = 0x0001,
-    UFS     = 0x0010,
-    UFSINCR = 0x0020,
+    UFS     = 0x0001,
+    UFSINCR = 0x0010,
     MPAS    = 0x0100,
-    POP     = 0x0200,
+    EAGLE   = 0x0200,
     MPIDEMO = 0x1000
 } ModelType;
 

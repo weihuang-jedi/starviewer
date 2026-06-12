@@ -82,15 +82,9 @@ void EAGLEController::setup()
     geometry->set_nlev(1);
     geometry->set_ntime(_ntime);
 
-    geometry->set_lon2d(ncfile->getLongitude());
-    geometry->set_lat2d(ncfile->getLatitude());
+    geometry->set_longitude(ncfile->getLongitude());
+    geometry->set_latitude(ncfile->getLatitude());
     geometry->setup();
-
-    geometry->set_has1dLon(false);
-    geometry->set_has1dLat(false);
-
-    geometry->set_has2dLon(true);
-    geometry->set_has2dLat(true);
 
     _varname = string("Longitude");
 
@@ -129,36 +123,7 @@ void EAGLEController::draw()
     eagle_viewer->draw();
 }
 
-void EAGLEController::set1dvarname(string vn)
-{
-    _varname = vn;
-    _sphere = true;
-    _ball = false;
-
-    _tvalue = 0;
-
-    if(_initialized)
-        free(_value);
-
-    _value = ncfile->get_fv(vn.c_str());
-    _title = vn;
-
-    _initialized = true;
-
-    geometry->set_nlev(1);
-
-  //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "setup for <" << vn << ">" << endl;
-
-  //eagle_viewer->set_lister(&lister[0]);
-    eagle_viewer->set_geometry(geometry);
-    eagle_viewer->setup(vn, _value);
-
-    _minval = eagle_viewer->get_minval();
-    _maxval = eagle_viewer->get_maxval();
-}
-
-void EAGLEController::set2dvarname(string vn)
+void EAGLEController::setvarname(string vn)
 {
     _varname = vn;
     _sphere = false;
@@ -178,38 +143,6 @@ void EAGLEController::set2dvarname(string vn)
 
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "setup for <" << vn << ">" << endl;
-
-  //eagle_viewer->set_lister(&lister[0]);
-    eagle_viewer->set_geometry(geometry);
-    eagle_viewer->setup(vn, _value);
-
-    _minval = eagle_viewer->get_minval();
-    _maxval = eagle_viewer->get_maxval();
-}
-
-void EAGLEController::set3dvarname(string vn)
-{
-    _varname = vn;
-    _sphere = false;
-    _ball = true;
-
-    _tvalue = 0;
-
-    if(_initialized)
-        free(_value);
-
-    _value = ncfile->get_fv(vn.c_str());
-    _title = vn;
-
-    _initialized = true;
-
-    geometry->set_nx(ncfile->getNy());
-    geometry->set_ny(ncfile->getNx());
-    geometry->set_nlev(1);
-
-  //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "setup for <" << vn << ">" << endl;
-  //cout << "nvfile->get_dim_size('lev') = " << nvfile->get_dim_size("lev") << endl;
 
   //eagle_viewer->set_lister(&lister[0]);
     eagle_viewer->set_geometry(geometry);
@@ -243,12 +176,7 @@ void EAGLEController::update_file(const char* fn)
 int EAGLEController::get_ndv(int n)
 {
     int ndv = 0;
-    if (1 == n)
-        ndv = 4;
-    else if (2 == n)
-        ndv = ncfile->getNumV2ds();
-    else if (3 == n)
-        ndv = ncfile->getNumV3ds();
+    ndv = ncfile->getNumVars();
     return ndv;
 }
 

@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-#include "ncreader.h"
+#include "eaglereader.h"
 #include "eagle_viewer.h"
 #include "locator.h"
 
@@ -30,9 +30,7 @@ class EAGLEController
         void set_colorTable(ColorTable* ct);
         void set_locator(Locator* l);
 
-        void set1dvarname(string vn);
-        void set2dvarname(string vn);
-        void set3dvarname(string vn);
+        void setvarname(string vn);
 
         void draw();
 
@@ -59,7 +57,7 @@ class EAGLEController
         void set_fileNtime(int nf, int nt);
 
     protected:
-        ncReader* ncfile;
+        EagleReader* ncfile;
         EAGLEGeometry* geometry;
         ColorTable* colorTable;
         NVOptions* nvoptions;

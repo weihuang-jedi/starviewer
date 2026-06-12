@@ -22,7 +22,7 @@
 #include "lister.h"
 #include "locator.h"
 #include "nvoptions.h"
-#include "ncreader.h"
+#include "eaglereader.h"
 
 using namespace std;
 
@@ -40,7 +40,7 @@ class EAGLE2dViewer : public QGLWidget
 
     public:
         EAGLE2dViewer(ColorTable* ct, NVOptions* opt);
-        EAGLE2dViewer(ColorTable* ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler);
+        EAGLE2dViewer(ColorTable* ct, NVOptions* opt, const char* bmpflnm, EagleReader* nchandler);
        ~EAGLE2dViewer();
 
         void draw();
@@ -66,7 +66,7 @@ class EAGLE2dViewer : public QGLWidget
         EAGLEGeometry* geometry;
         CoastLine* coastline;
         Texture1d* texture1d;
-        ncReader* ncfile;
+        EagleReader* ncfile;
         Earth* earth;
         Lister* lister;
         Locator* locator;
@@ -77,11 +77,13 @@ class EAGLE2dViewer : public QGLWidget
         int previoustimelevel;
         int current_timelevel;
 
-        double* _lon;
-        double* _lat;
-        float* _lev;
+        float* _longitude;
+        float* _latitude;
 
-        int _hlon;
+        int _nx;
+        int _ny;
+        int _ntime;
+
         int _nlon;
         int _nlat;
         int _nlev;
@@ -111,18 +113,13 @@ class EAGLE2dViewer : public QGLWidget
         void _evaluate(float* var);
         void _adjust_minmax(float* var);
 
-        void _lonlat2xyz(double lon, double lat, double radius,
+        void _lonlat2xyz(float lon, float lat, double radius,
                          double fact);
-        void _lonlat2xyz_texture(double lon, double lat,
+        void _lonlat2xyz_texture(float lon, float lat,
 			         double radius, double fact);
 
         void _flatDisplay();
-        void _display_Xflat_plane(int xs);
-        void _display_Yflat_plane(int ys);
-
         void _sphereDisplay();
-        void _sphereXplane(int xs);
-        void _sphereYplane(int ys);
 
         void _flatBump();
         void _sphereBump();

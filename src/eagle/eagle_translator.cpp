@@ -74,7 +74,7 @@ void EAGLETranslator::setup()
 
     _varname = string("t");
 
-    eagle_controller->set2dvarname(_varname);
+    eagle_controller->setvarname(_varname);
 
     _minval = eagle_controller->get_minval();
     _maxval = eagle_controller->get_maxval();
@@ -222,7 +222,7 @@ void EAGLETranslator::select2dVar(const QString& str)
  
     _varname = str.toStdString();
 
-    eagle_controller->set1dvarname(_varname);
+    eagle_controller->setvarname(_varname);
 
     sliderNspinX->set_max(geometry->get_nlon());
     sliderNspinX->setValue(0);
@@ -251,7 +251,7 @@ void EAGLETranslator::select3dVar(const QString& str)
  
     _varname = str.toStdString();
 
-    eagle_controller->set3dvarname(_varname);
+    eagle_controller->setvarname(_varname);
 
     sliderNspinX->set_max(geometry->get_nlon());
     sliderNspinX->setValue(0);

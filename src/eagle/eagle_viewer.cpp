@@ -37,7 +37,7 @@ EAGLE2dViewer::EAGLE2dViewer(ColorTable *ct, NVOptions* opt)
     current_timelevel = 0;
 }
 
-EAGLE2dViewer::EAGLE2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler)
+EAGLE2dViewer::EAGLE2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, EagleReader* nchandler)
 {
     colorTable = ct;
     nvoptions = opt;
@@ -49,7 +49,7 @@ EAGLE2dViewer::EAGLE2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm
     _var = NULL;
 
     ncfile = nchandler;
-    earth = new Earth(bmpflnm, ncfile);
+    earth = new Earth(bmpflnm);
 
     nvoptions->set_xsec(0);
     nvoptions->set_ysec(0);
@@ -94,9 +94,9 @@ void EAGLE2dViewer::setup(string vn, float *var)
     _var = var;
     _nlev = geometry->get_nlev();
 
-  //nvoptions->set_xsec(_nlon);
-  //nvoptions->set_ysec(_nlat);
-  //nvoptions->set_zsec(_nlev);
+    nvoptions->set_xsec(_nlon);
+    nvoptions->set_ysec(_nlat);
+    nvoptions->set_zsec(_nlev);
 
     nvoptions->set_xsec(0);
     nvoptions->set_ysec(0);
@@ -124,8 +124,8 @@ void EAGLE2dViewer::_initialize()
     _nx = geometry->get_nx();
     _ny = geometry->get_ny();
 
-    _lon2d = geometry->get_lon();
-    _lat2d = geometry->get_lat();
+    _longitude = geometry->get_longitude();
+    _latitude = geometry->get_latitude();
 
   //lister->reinitialize(361, 181, _nlev);
 
@@ -137,8 +137,6 @@ void EAGLE2dViewer::_initialize()
 
 void EAGLE2dViewer::draw()
 {
-    size_t nsquare = _nlon * _nlat;
-
     if(nvoptions->get_cb(NV_RESET))
     {
         nvoptions->set_cb(NV_RESET, false);
@@ -223,24 +221,7 @@ void EAGLE2dViewer::draw()
                 else
                     _flatDisplay();
             }
-
           //draw_plane_grids();
-
-            if(nvoptions->get_xsec() < _nlon && nvoptions->get_xsec() > 0)
-            {
-                if(xcl)
-                    glCallList(xcl);
-                else
-                    _display_Xflat_plane(nvoptions->get_xsec());
-            }
-
-            if((nvoptions->get_ysec() > 5) && (nvoptions->get_ysec() < (_nlat-5)))
-            {
-                if(ycl)
-                    glCallList(ycl);
-                else
-                    _display_Yflat_plane(nvoptions->get_ysec());
-            }
         }
         else
         {
@@ -251,29 +232,12 @@ void EAGLE2dViewer::draw()
                 else
                     _sphereDisplay();
             }
-    
-            if(nvoptions->get_xsec() < _nlon && nvoptions->get_xsec() > 0)
-            {
-                if(xcl)
-                    glCallList(xcl);
-                else
-                    _sphereXplane(nvoptions->get_xsec());
-            }
-    
-            if((nvoptions->get_ysec() > 5) && (nvoptions->get_ysec() < (_nlat-5)))
-            {
-                if(ycl)
-                    glCallList(ycl);
-                else
-                    _sphereYplane(nvoptions->get_ysec());
-            }
-    
           //draw_sphere_grids();
         }
     }
 }
 
-void EAGLE2dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact)
+void EAGLE2dViewer::_lonlat2xyz(float lon, float lat, double radius, double fact)
 {
     double phi = lat * deg2rad;
     double dist = cos(phi);
@@ -294,8 +258,8 @@ void EAGLE2dViewer::_lonlat2xyz(double lon, double lat, double radius, double fa
     glVertex3d(x * radius, y * radius, z * radius);
 }
 
-void EAGLE2dViewer::_lonlat2xyz_texture(double lon, double lat,
-		                      double radius, double fact)
+void EAGLE2dViewer::_lonlat2xyz_texture(float lon, float lat,
+		                        double radius, double fact)
 {
     double phi = lat * deg2rad;
     double dist = cos(phi);
@@ -343,24 +307,19 @@ void EAGLE2dViewer::_sphereDisplay()
 
   //#pragma omp parallel for
     if(k < _nlev || 1 == _nlev) {
-    for(j = 1; j < _nlat; ++j)
+    for(j = 1; j < _ny; ++j)
     {
-        mpos = (k*_nlat + (j-1))*_nlon;
-        npos = (k*_nlat + j)*_nlon;
+        mpos = (k*_ny + (j-1))*_nx;
+        npos = (k*_ny + j)*_nx;
         glBegin(GL_QUAD_STRIP);
-        for(i = 0; i < _nlon; ++i)
+        for(i = 0; i < _nx; ++i)
         {
             fact = sv * (pltvar[npos+i] - _valmin);
-            _lonlat2xyz_texture(_lon[i], _lat[j], radius, fact);
+            _lonlat2xyz_texture(_longitude[npos+i], _latitude[npos+i], radius, fact);
 
             fact = sv * (pltvar[mpos+i] - _valmin);
-            _lonlat2xyz_texture(_lon[i], _lat[j-1], radius, fact);
+            _lonlat2xyz_texture(_longitude[mpos+i], _latitude[mpos+i], radius, fact);
         }
-        fact = sv * (pltvar[npos] - _valmin);
-        _lonlat2xyz_texture(_lon[0], _lat[j], radius, fact);
-
-        fact = sv * (pltvar[mpos] - _valmin);
-        _lonlat2xyz_texture(_lon[0], _lat[j-1], radius, fact);
         glEnd();
     }
     coastline->drawOnSphere(radius+0.01);
@@ -399,32 +358,21 @@ void EAGLE2dViewer::_flatDisplay()
     glNormal3f(0.0, 0.0, -1.0);
 
     if(k < _nlev || 1 == _nlev) {
-    for(j = 1; j < _nlat; ++j)
+    for(j = 1; j < _ny; ++j)
     {
       //cout << "\t_yFlat[" << j << "] = " << _yFlat[j] << endl;
-        mpos = (k*_nlat+(j-1))*_nlon;
-        npos = (k*_nlat+j)*_nlon;
+        mpos = (k*_ny+(j-1))*_nx;
+        npos = (k*_ny+j)*_nx;
         glBegin(GL_QUAD_STRIP);
-        for(i = _hlon; i < _nlon; ++i)
+        for(i = 0; i < _nx; ++i)
         {
             fact = sv * (pltvar[npos+i] - _valmin);
             glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height);
+            glVertex3d(_xFlat[npos+i], _yFlat[npos+i], height);
 
             fact = sv * (pltvar[mpos+i] - _valmin);
             glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j-1], height);
-        }
-
-	for(i = 0; i < _hlon; ++i)
-        {
-            fact = sv * (pltvar[npos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height);
-
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j-1], height);
+            glVertex3d(_xFlat[mpos+i], _yFlat[mpos+i], height);
         }
         glEnd();
     }
@@ -630,232 +578,6 @@ void EAGLE2dViewer::draw_plane_grids()
     glPopMatrix();
 }
 
-void EAGLE2dViewer::_display_Yflat_plane(int ys)
-{
-    int i, k;
-    size_t mpos, npos;
-    double fact;
-    double sv = 1.0;
-    vector<double> height(_nlev);
-    int j = ys-1;
-
-    if((-85.0 > _lat[j]) || (85.0 < _lat[j]))
-       return;
-
-    for(k = 0; k < _nlev; ++k)
-        height[k] = _k2h(k);
-
-    sv = 1.0 / (_valmax - _valmin);
-
-    ycl = glGenLists(1);
-  //glNewList(ycl, GL_COMPILE);
-    glNewList(ycl, GL_COMPILE_AND_EXECUTE);
-    lister->set_yid(j, ycl);
-
-    glPushMatrix();
-    glClearColor(1.0, 1.0, 1.0, 1.0);
-  //OpenGL should normalize normal vectors
-    glEnable(GL_NORMALIZE);
-    glEnable(GL_TEXTURE_1D);
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-    glNormal3f(0.0, 0.0, -1.0);
-
-    for(k = 1; k < _nlev; ++k)
-    {
-        mpos = ((k-1)*_nlat+j)*_nlon;
-        npos = (k*_nlat+j)*_nlon;
-
-        glBegin(GL_QUAD_STRIP);
-        for(i = _hlon; i < _nlon; ++i)
-        {
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height[k-1]);
-
-            fact = sv * (pltvar[npos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height[k]);
-        }
-
-	for(i = 0; i < _hlon; ++i)
-        {
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height[k-1]);
-
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height[k]);
-        }
-        glEnd();
-    }
-
-    glDisable(GL_TEXTURE_1D);
-    glPopMatrix();
-    glEndList();
-}
-
-void EAGLE2dViewer::_sphereXplane(int xs)
-{
-    int j, k;
-    size_t mpos, npos;
-    double fact;
-    double sv = 1.0;
-    double radius[_nlev];
-
-    int i = xs - 1;
-
-    for(k = 0; k < _nlev; ++k)
-        radius[k] = _k2r(k);
-
-    sv = 1.0 / (_valmax - _valmin);
-
-    xcl = glGenLists(1);
-  //glNewList(xcl, GL_COMPILE);
-    glNewList(xcl, GL_COMPILE_AND_EXECUTE);
-    lister->set_xid(i, xcl);
-
-  //OpenGL should normalize normal vectors
-    glEnable(GL_NORMALIZE);
-    glPushMatrix();
-    glDisable(GL_LIGHTING);
-    glColor4f(1.0, 1.0, 1.0, 1.0);
-  //glColor4f(0.0, 0.0, 0.0, 0.0);
-
-    glEnable(GL_TEXTURE_1D);
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
-  //#pragma omp parallel for
-    for(k = 1; k < _nlev; ++k)
-    {
-        glBegin(GL_QUAD_STRIP);
-        for(j = 0; j < _nlat; ++j)
-        {
-            mpos = ((k-1)*_nlat + j)*_nlon;
-            npos = (k*_nlat + j)*_nlon;
-
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            _lonlat2xyz_texture(_lon[i], _lat[j], radius[k-1], fact);
-
-            fact = sv * (pltvar[npos+i] - _valmin);
-            _lonlat2xyz_texture(_lon[i], _lat[j], radius[k], fact);
-        }
-        glEnd();
-    }
-
-    glDisable(GL_TEXTURE_1D);
-    glPopMatrix();
-    glEndList();
-}
-
-void EAGLE2dViewer::_sphereYplane(int ys)
-{
-    int i, k;
-    size_t mpos, npos;
-    double fact;
-    double sv = 1.0;
-    double radius[_nlev];
-    int j = ys - 1;
-
-    for(k = 0; k < _nlev; ++k)
-        radius[k] = _k2r(k);
-
-    sv = 1.0 / (_valmax - _valmin);
-
-    ycl = glGenLists(1);
-  //glNewList(ycl, GL_COMPILE);
-    glNewList(ycl, GL_COMPILE_AND_EXECUTE);
-    lister->set_yid(j, ycl);
-
-  //OpenGL should normalize normal vectors
-    glEnable(GL_NORMALIZE);
-    glPushMatrix();
-    glDisable(GL_LIGHTING);
-    glColor4f(1.0, 1.0, 1.0, 1.0);
-  //glColor4f(0.0, 0.0, 0.0, 0.0);
-
-    glEnable(GL_TEXTURE_1D);
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
-  //#pragma omp parallel for
-    for(k = 1; k < _nlev; ++k)
-    {
-        mpos = ((k-1)*_nlat + j)*_nlon;
-        npos = (k*_nlat + j)*_nlon;
-        glBegin(GL_QUAD_STRIP);
-        for(i = 0; i < _nlon; ++i)
-        {
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            _lonlat2xyz_texture(_lon[i], _lat[j], radius[k-1], fact);
-
-            fact = sv * (pltvar[npos+i] - _valmin);
-            _lonlat2xyz_texture(_lon[i], _lat[j], radius[k], fact);
-        }
-        fact = sv * (pltvar[mpos] - _valmin);
-        _lonlat2xyz_texture(_lon[0], _lat[j], radius[k-1], fact);
-
-        fact = sv * (pltvar[npos] - _valmin);
-        _lonlat2xyz_texture(_lon[0], _lat[j], radius[k], fact);
-        glEnd();
-    }
-
-    glDisable(GL_TEXTURE_1D);
-    glPopMatrix();
-    glEndList();
-}
-
-
-void EAGLE2dViewer::_display_Xflat_plane(int xs)
-{
-    int j, k;
-    size_t mpos, npos;
-    double fact;
-    double sv = 1.0;
-    vector<double> height(_nlev);
-    int i = xs-1;
-
-    for(k = 0; k < _nlev; ++k)
-        height[k] = _k2h(k);
-
-    sv = 1.0 / (_valmax - _valmin);
-
-    xcl = glGenLists(1);
-  //glNewList(xcl, GL_COMPILE);
-    glNewList(xcl, GL_COMPILE_AND_EXECUTE);
-    lister->set_xid(i, xcl);
-
-    glPushMatrix();
-    glClearColor(1.0, 1.0, 1.0, 1.0);
-  //OpenGL should normalize normal vectors
-    glEnable(GL_NORMALIZE);
-    glEnable(GL_TEXTURE_1D);
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-    glNormal3f(0.0, 0.0, -1.0);
-
-    for(k = 1; k < _nlev; ++k)
-    {
-        glBegin(GL_QUAD_STRIP);
-        for(j = 0; j < _nlat; ++j)
-        {
-            mpos = ((k-1)*_nlat+j)*_nlon;
-            npos = (k*_nlat+j)*_nlon;
-
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height[k-1]);
-
-            fact = sv * (pltvar[npos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height[k]);
-        }
-        glEnd();
-    }
-
-    glDisable(GL_TEXTURE_1D);
-    glPopMatrix();
-    glEndList();
-}
-
 void EAGLE2dViewer::_sphereBump()
 {
     int i, j, k, k1;
@@ -905,25 +627,19 @@ void EAGLE2dViewer::_sphereBump()
 
     glNormal3f(0.0, 0.0, -1.0);
     if(k < _nlev || 1 == _nlev) {
-    for(j = 1; j < _nlat; ++j)
+    for(j = 1; j < _ny; ++j)
     {
-        mpos = (k*_nlat + (j-1))*_nlon;
-        npos = (k*_nlat + j)*_nlon;
+        mpos = (k*_ny + (j-1))*_nx;
+        npos = (k*_ny + j)*_nx;
         glBegin(GL_QUAD_STRIP);
-        for(i = 0; i < _nlon; ++i)
+        for(i = 0; i < _nx; ++i)
         {
             fact = sv * (pltvar[npos+i] - _valmin);
-            _lonlat2xyz(_lon[i], _lat[j], radius + magnifier*fact, fact);
+            _lonlat2xyz(_longitude[npos+i], _latitude[npos+i], radius + magnifier*fact, fact);
 
             fact = sv * (pltvar[mpos+i] - _valmin);
-            _lonlat2xyz(_lon[i], _lat[j-1], radius + magnifier*fact, fact);
+            _lonlat2xyz(_longitude[mpos+i], _latitude[mpos+i], radius + magnifier*fact, fact);
         }
-        fact = sv * (pltvar[npos] - _valmin);
-        _lonlat2xyz(_lon[0], _lat[j], radius + magnifier*fact, fact);
-
-        fact = sv * (pltvar[mpos] - _valmin);
-        _lonlat2xyz(_lon[0], _lat[j-1], radius + magnifier*fact, fact);
-        glEnd();
     }
     coastline->drawOnSphere(0.01);
     }
@@ -983,12 +699,12 @@ void EAGLE2dViewer::_flatBump()
 
     glNormal3f(0.0, 0.0, -1.0);
     if(k < _nlev || 1 == _nlev) {
-    for(j = 1; j < _nlat; ++j)
+    for(j = 1; j < _ny; ++j)
     {
-        mpos = (k*_nlat+(j-1))*_nlon;
-        npos = (k*_nlat+j)*_nlon;
+        mpos = (k*_ny+(j-1))*_nx;
+        npos = (k*_ny+j)*_nx;
         glBegin(GL_QUAD_STRIP);
-        for(i = _hlon; i < _nlon; ++i)
+        for(i = 0; i < _nx; ++i)
         {
             fact = sv * (pltvar[npos+i] - _valmin);
             alpha = amp * fact;
@@ -998,8 +714,8 @@ void EAGLE2dViewer::_flatBump()
                 alpha = 1.0;
 
             glColor4d(fact, fact, fact, alpha);
-            glNormal3d(0.0, _yFlat[j], magnifier*fact);
-            glVertex3d(_xFlat[i], _yFlat[j], magnifier*fact);
+            glNormal3d(_xFlat[npos+i], _yFlat[npos+i], magnifier*fact);
+            glVertex3d(_xFlat[npos+i], _yFlat[npos+i], magnifier*fact);
 
             fact = sv * (pltvar[mpos+i] - _valmin);
             alpha = amp * fact;
@@ -1009,35 +725,8 @@ void EAGLE2dViewer::_flatBump()
                 alpha = 1.0;
 
             glColor4d(fact, fact, fact, alpha);
-            glNormal3d(0.0, _yFlat[j-1], magnifier*fact);
-            glVertex3d(_xFlat[i], _yFlat[j-1],  magnifier*fact);
-        }
-        // glEnd();
-
-        // glBegin(GL_QUAD_STRIP);
-        for(i = 0; i < _hlon; ++i)
-        {
-            fact = sv * (pltvar[npos+i] - _valmin);
-            alpha = amp * fact;
-            if(alpha < 0.0001)
-                alpha = 0.0;
-            else if(alpha > 1.0)
-                alpha = 1.0;
-
-            glColor4d(fact, fact, fact, alpha);
-            glNormal3d(0.0, _yFlat[j], magnifier*fact);
-            glVertex3d(_xFlat[i], _yFlat[j], magnifier*fact);
-
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            alpha = amp * fact;
-            if(alpha < 0.0001)
-                alpha = 0.0;
-            else if(alpha > 1.0)
-                alpha = 1.0;
-
-            glColor4d(fact, fact, fact, alpha);
-            glNormal3d(0.0, _yFlat[j-1], magnifier*fact);
-            glVertex3d(_xFlat[i], _yFlat[j-1],  magnifier*fact);
+            glNormal3d(_xFlat[mpos+i], _yFlat[mpos+i], magnifier*fact);
+            glVertex3d(_xFlat[mpos+i], _yFlat[mpos+i],  magnifier*fact);
         }
         glEnd();
     }

@@ -1,6 +1,7 @@
 #include "mpidemoparser.h"
 #include "ufsparser.h"
 #include "ufsincrparser.h"
+#include "eagleparser.h"
 #include "mainwindow.h"
 
 MainWindow::MainWindow(string yamlfile)
@@ -322,17 +323,14 @@ void MainWindow::createActions()
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
     eagleAct = new QAction(tr("&EAGLE"), this);
-    eagleAct->setShortcut(QKeySequence::Global);
-  //eagleAct->setStatusTip(tr("Try to activate 'eagle' application"));
+    eagleAct->setStatusTip(tr("Try to activate 'eagle' application"));
     connect(eagleAct, SIGNAL(triggered()), this, SLOT(eagle()));
 
     ufsAct = new QAction(tr("&UFS"), this);
-  //ufsAct->setShortcut(QKeySequence::Global);
     ufsAct->setStatusTip(tr("Try to activate 'ufs' application"));
     connect(ufsAct, SIGNAL(triggered()), this, SLOT(ufs()));
 
     ufsincrAct = new QAction(tr("&UFSINCR"), this);
-  //ufsincrAct->setShortcut(QKeySequence::Global);
     ufsincrAct->setStatusTip(tr("Try to activate 'ufsincr' application"));
     connect(ufsincrAct, SIGNAL(triggered()), this, SLOT(ufsincr()));
 
@@ -507,7 +505,7 @@ void MainWindow::inspector_func()
 
     switch(nvoptions->get_model())
     {
-        case POP:
+        case UFS:
         case MPAS:
              inspectorWidget->set_lon(360);
              inspectorWidget->set_lat(180);

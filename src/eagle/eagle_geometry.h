@@ -34,10 +34,19 @@ class EAGLEGeometry : public Geometry {
         double* get_xFlat() { return _xFlat; };
         double* get_yFlat() { return _yFlat; };
 
+        float* get_longitude() { return _longitude; };
+        float* get_latitude() { return _latitude; };
+
+	void set_longitude(float *v) { _longitude = v; };
+	void set_latitude(float *v) { _latitude = v; };
+
       //EAGLE
         void setup();
 
 	void set_ntime(int v) { _ntime = v; };
+
+	int get_nx() { return _nx; };
+	int get_ny() { return _ny; };
 	int get_ntime() { return _ntime; };
 
     protected:
@@ -49,6 +58,9 @@ class EAGLEGeometry : public Geometry {
 
         double* _xFlat;
         double* _yFlat;
+
+        float* _longitude;
+        float* _latitude;
 
     private:
         void _set_default();

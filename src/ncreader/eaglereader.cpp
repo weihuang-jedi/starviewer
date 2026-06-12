@@ -24,10 +24,10 @@ EagleReader::~EagleReader() {
     delete[] _latitude;
 
     if (NULL != _dimsize) delete[] _dimsize;
-    if (NULL != _ntimes) delete[] _ntimes;
+    if (NULL != _time) delete[] _time;
 
-    if (NULL != _dim_names) delete[] _dim_names;
-    if (NULL != _var_names) delete[] _var_names;
+    dim_names.clear();
+    var_names.clear();
 
     close();
 }
