@@ -40,6 +40,7 @@ MainWindow::MainWindow(string yamlfile)
     else if(0 == tmpstr.compare("eagle"))
     {
         nvoptions->set_model(EAGLE);
+        userConfig = ModelType::EAGLE;
     }
     else if(0 == tmpstr.compare("mpas"))
     {
@@ -91,8 +92,6 @@ MainWindow::MainWindow(string yamlfile)
 
     // unordered_map<string, function<unique_ptr<ModelParser>()>> registry;
 
-    // cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-
     _setup();
 
     // cout << "Leave MainWindow: file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -113,10 +112,10 @@ MainWindow::~MainWindow()
 void MainWindow::_setup()
 {
     // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-       cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
+    // cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
     // cout << "\tMPIDEMO: " << MPIDEMO << endl;
     // cout << "\tUFS: " << UFS << endl;
-       cout << "\tUFSINCR: " << UFSINCR << endl;
+    // cout << "\tUFSINCR: " << UFSINCR << endl;
     switch(nvoptions->get_model())
     {
         case UFS:
@@ -156,7 +155,7 @@ void MainWindow::_setup()
 
 void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 {
-    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     QMenu menu(this);
 
   //menu.addAction(wrfAct);

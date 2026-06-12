@@ -53,16 +53,17 @@ vector<string> YAMLHandler::get_files(const char* type, YAML::Node config)
     }
 
     // Verification: Print out the vector contents and size
-    cout << "Vector Size: " << datafiles.size() << endl;
-    for (const auto& path : datafiles) {
-        std::cout << "Generated Path: " << path << endl;
-    }
+    // cout << "Vector Size: " << datafiles.size() << endl;
+    // for (const auto& path : datafiles) {
+    //     cout << "Generated Path: " << path << endl;
+    // }
 
     return datafiles;
 }
 
 void YAMLHandler::read_yaml()
 {
+    // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ifstream fin(_flnm.c_str()); // Create a named object (lvalue)
     if (fin.is_open())
     {
@@ -75,13 +76,14 @@ void YAMLHandler::read_yaml()
         _model = config["application"]["model"].as<string>();
         _version = config["application"]["version"].as<string>();
         // cout << "name: " << _name << endl;
-        cout << "model: " << _model << endl;
+        // cout << "model: " << _model << endl;
     }
     else
     {
         cerr << "Warning: application is not defined." << endl;
     }
 
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if (config["earth"].IsDefined())
     {
         _earth_bmp = config["earth"]["name"].as<string>();
@@ -92,6 +94,7 @@ void YAMLHandler::read_yaml()
         cerr << "Warning: earch bmp is not defined." << endl;
     }
 
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if (config["coastline"].IsDefined())
     {
         _coastline_file = config["coastline"]["name"].as<string>();
@@ -104,20 +107,27 @@ void YAMLHandler::read_yaml()
         cerr << "Warning: coastline_file is not defined." << endl;
     }
 
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if (config["input"].IsDefined())
     {
-        _datafiles = get_files("input", config);
+	if(_model == string("ufsincr"))
+            _datafiles = get_files("input", config);
+        else
+            _datafiles = config["input"]["data"].as<vector<string>>();
     }
 
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if (config["grid"].IsDefined())
     {
         _gridfiles = get_files("grid", config);
     }
 
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if (config["increment"].IsDefined())
     {
         _incrfiles = get_files("increment", config);
     }
+    // cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void YAMLHandler::write_yaml()

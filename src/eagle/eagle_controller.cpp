@@ -77,6 +77,10 @@ void EAGLEController::setup()
     _nx = ncfile->getNx();
     _ny = ncfile->getNy();
     _ntime = ncfile->getNtime();
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\t_nx: " << _nx << endl;
+    cout << "\t_ny: " << _ny << endl;
+    cout << "\t_ntime: " << _ntime << endl;
     geometry->set_nx(_nx);
     geometry->set_ny(_ny);
     geometry->set_nlev(1);
@@ -86,7 +90,12 @@ void EAGLEController::setup()
     geometry->set_latitude(ncfile->getLatitude());
     geometry->setup();
 
-    _varname = string("Longitude");
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\t_nx: " << geometry->get_nx() << endl;
+    cout << "\t_ny: " << geometry->get_ny() << endl;
+    cout << "\t_ntime: " << geometry->get_ntime() << endl;
+
+    _varname = string("longitude");
 
     _sphere = false;
     _ball = false;
@@ -100,13 +109,14 @@ void EAGLEController::setup()
     eagle_viewer = new EAGLE2dViewer(colorTable, nvoptions, bmpflnm, ncfile);
 
   //eagle_viewer->set_lister(&lister[0]);
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tvarname:" << _varname << endl;
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tvarname: " << _varname << endl;
 
     _value = ncfile->get_fv(_varname.c_str());
     _title = _varname;
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\t_value[0] = " << _value[0] << endl;
   //geometry->print();
 
     eagle_viewer->set_coastline(coastline);
@@ -134,15 +144,18 @@ void EAGLEController::setvarname(string vn)
     if(_initialized)
         free(_value);
 
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tvarname: " << vn << endl;
+
     _value = ncfile->get_fv(vn.c_str());
     _title = vn;
+
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\t_value[0] = " << _value[0] << endl;
 
     _initialized = true;
 
     geometry->set_nlev(1);
-
-  //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "setup for <" << vn << ">" << endl;
 
   //eagle_viewer->set_lister(&lister[0]);
     eagle_viewer->set_geometry(geometry);
@@ -208,8 +221,14 @@ void EAGLEController::set_fileNtime(int nf, int nt)
         if(_initialized)
             free(_value);
 
+        cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+        cout << "\tvarname: " << _varname << endl;
+
         _value = ncfile->get_fv(_varname.c_str());
         _title = _varname;
+
+        cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+        cout << "\t_value[0] = " << _value[0] << endl;
 
         geometry->set_nlev(1);
         geometry->set_ntim(_ntimes[_curFile]);

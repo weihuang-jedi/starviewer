@@ -83,6 +83,11 @@ void EAGLE2dViewer::set_geometry(EAGLEGeometry *gm)
 {
     geometry = gm;
 
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\t_nx: " << geometry->get_nx() << endl;
+    cout << "\t_ny: " << geometry->get_ny() << endl;
+    cout << "\t_ntime: " << geometry->get_ntime() << endl;
+
     _initialize();
 }
 
@@ -123,6 +128,12 @@ void EAGLE2dViewer::_initialize()
 
     _nx = geometry->get_nx();
     _ny = geometry->get_ny();
+
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\t_nx: " << geometry->get_nx() << endl;
+    cout << "\t_ny: " << geometry->get_ny() << endl;
+    cout << "\t_ntime: " << geometry->get_ntime() << endl;
+
 
     _longitude = geometry->get_longitude();
     _latitude = geometry->get_latitude();
@@ -284,6 +295,8 @@ void EAGLE2dViewer::_sphereDisplay()
     double fact;
     double radius = 1.001;
 
+    cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+
     k1 = nvoptions->get_zsec()+1;
     k = _nlev-k1;
     radius = _k2r(k);
@@ -304,6 +317,11 @@ void EAGLE2dViewer::_sphereDisplay()
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t_nx = " << _nx << ", _ny = " << _ny << ", _nlev " << _nlev << endl;
+    cout << "\tpltvar[0] = " << pltvar[0] << endl;
+    cout << "\t_valmin = " << _valmin << endl;
 
   //#pragma omp parallel for
     if(k < _nlev || 1 == _nlev) {
@@ -328,6 +346,8 @@ void EAGLE2dViewer::_sphereDisplay()
     glDisable(GL_TEXTURE_1D);
     glPopMatrix();
     glEndList();
+
+    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void EAGLE2dViewer::_flatDisplay()
@@ -390,17 +410,20 @@ void EAGLE2dViewer::_evaluate(float *var)
     size_t n = 0;
     float total;
 
-  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\t _varname: " << _varname << endl;
+    cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\t _varname: " << _varname << endl;
+    cout << "\t geometry->get_nx(): " << geometry->get_nx() << endl;
+    cout << "\t geometry->get_ny(): " << geometry->get_ny() << endl;
+    cout << "\t geometry->get_nlev(): " << geometry->get_nlev() << endl;
 
-    varsize = geometry->get_nlon() * geometry->get_nlat() * geometry->get_nlev();
-  //varsize = geometry->get_nlon() * geometry->get_nlat();
+    varsize = geometry->get_nx() * geometry->get_ny() * geometry->get_nlev();
+  //varsize = geometry->get_nx() * geometry->get_ny();
 
-  //cout << "\tin <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\t_nlon =" << _nlon << endl;
-  //cout << "\t_nlat =" << _nlat << endl;
-  //cout << "\t_nlev =" << _nlev << endl;
-  //cout << "\tvarsize =" << varsize << ", _nlon*_nlat=" << _nlon*_nlat << endl;
+    cout << "\tin <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\t_nx =" << _nx << endl;
+    cout << "\t_ny =" << _ny << endl;
+    cout << "\t_nlev =" << _nlev << endl;
+    cout << "\tvarsize =" << varsize << ", _nx*_ny=" << _nx*_ny << endl;
 
     _valmax = var[0];
     _valmin = var[0];
@@ -424,13 +447,13 @@ void EAGLE2dViewer::_evaluate(float *var)
 
     _valavg = total / varsize;
 
-  //cout << "\t_valmin = " << _valmin << ", _valavg = " << _valavg << ", _valmax = " << _valmax << endl;
+    cout << "\t_valmin = " << _valmin << ", _valavg = " << _valavg << ", _valmax = " << _valmax << endl;
 
 #if 0
     nvoptions->set_trueminimum(_valmin);
     nvoptions->set_truemaximum(_valmax);
 #endif
-  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void EAGLE2dViewer::_adjust_minmax(float *var)

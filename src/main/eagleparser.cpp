@@ -4,10 +4,10 @@ void EagleParser::parse(YAMLHandler *yamlHandler, NVOptions* nvoptions,
                       ColorTable *colorTable, ControlWidget* controlPanel,
                       Locator* locator, Light* light)
 {
+    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     vector<string> datafiles = yamlHandler->get_datafiles();
     string flnm = datafiles[0];
 
-    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     // cout << "Parsing Eagle lon-lat grid..." << endl;
     // cout << "flnm: " << flnm << endl;
     // cout << "nvoptions->get_model(): " << nvoptions->get_model() << endl;
@@ -24,10 +24,10 @@ void EagleParser::parse(YAMLHandler *yamlHandler, NVOptions* nvoptions,
     // else
     //     cout << "light is null." << endl;
 
-    if(eagle_translator)
-        cout << "eagle_translator: " << eagle_translator << endl;
-    else
-        cout << "eagle_translator is null." << endl;
+    // if(eagle_translator)
+    //     cout << "eagle_translator: " << eagle_translator << endl;
+    // else
+    //     cout << "eagle_translator is null." << endl;
 
     // cout << "function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     eagle_translator->setup();

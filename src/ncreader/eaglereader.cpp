@@ -36,11 +36,11 @@ void EagleReader::_get_dim_info() {
     int n = 0;
     char recname[NC_MAX_NAME+1];
     size_t length, recs;
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     if (NULL == _dimsize) _dimsize = new int[num_dims];
     // Get Dimensions
-    cout << " Dimensions (" << num_dims << "):" << endl;
+    // cout << " Dimensions (" << num_dims << "):" << endl;
     dim_names.resize(num_dims);
     dim_length.resize(num_dims);
     for (n = 0; n < num_dims; ++n) {
@@ -66,7 +66,7 @@ void EagleReader::_get_dim_info() {
 	else if (0 == strcmp(recname, "forecast_reference_time")) {
             _nforecast_reference_time = _dimsize[n];
 	}
-        cout << "  - " << dim_names[n] << ": " << dim_length[n] << endl;
+        // cout << "  - " << dim_names[n] << ": " << dim_length[n] << endl;
     }
 }
 
@@ -81,7 +81,7 @@ void EagleReader::_get_var_info() {
 
     var_names.resize(num_vars);
     // Get Variables
-    cout << " Variables (" << num_vars << "):" << endl;
+    // cout << " Variables (" << num_vars << "):" << endl;
     for (n = 0; n < num_vars; ++n) {
         status = nc_inq_var (ncid, n, 0, &var_type, &var_ndims, var_dimids, &var_natts);
         if (status != NC_NOERR) handle_error(status);
@@ -118,17 +118,12 @@ void EagleReader::exploreFile() {
     int n = 0;
     size_t attr_len;
 
-    cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    status = nc_inq_attlen(ncid, NC_GLOBAL, "ak", &attr_len);
-    if (status != NC_NOERR) handle_error(status);
-
-    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\tattr_len = " << attr_len << endl;
+    // cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     _get_dim_info();
-    cout << "_nx:" << _nx << endl;
-    cout << "_ny:" << _ny << endl;
-    cout << "_ntime:" << _ntime << endl;
+    // cout << "_nx:" << _nx << endl;
+    // cout << "_ny:" << _ny << endl;
+    // cout << "_ntime:" << _ntime << endl;
 
     _get_var_info();
 
@@ -139,7 +134,7 @@ void EagleReader::exploreFile() {
     }
 
     cout << "Vars:" << endl;
-    for (n=0; n<num_v2ds; ++n) {
+    for (n=0; n<num_vars; ++n) {
 	cout << "var " << n << " name: <" << var_names[n] << ">" << endl;
     }
     */
@@ -152,7 +147,7 @@ void EagleReader::exploreFile() {
     _latitude = getFloat("latitude");
     _time = getInt64("time");
 
-  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
  
 long long int* EagleReader::getInt64(const char* var_name) {

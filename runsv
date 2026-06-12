@@ -67,7 +67,8 @@ case $(hostname -f) in
 esac
 
 if [[ "${MACHINE_ID}" == "ursa" ]]; then
-    export STARVIEWERHOME=/scratch3/NAGAPE/epic/Wei.Huang/src/nv/starviewer
+   #export STARVIEWERHOME=/scratch3/NAGAPE/epic/Wei.Huang/src/nv/starviewer
+    export STARVIEWERHOME=/scratch5/purged/Wei.Huang/src/nv/starviewer
     export CONTAINER_DIR=${STARVIEWERHOME}
     export CONTAINER_BINDINGS="-B /scratch3 -B /scratch4 -B /scratch5"
     export RUNTIME_DIR=/scratch5/purged/Wei.Huang/tmp/runtime-dir

@@ -44,9 +44,6 @@ class EAGLEGeometry : public Geometry {
         void setup();
 
 	void set_ntime(int v) { _ntime = v; };
-
-	int get_nx() { return _nx; };
-	int get_ny() { return _ny; };
 	int get_ntime() { return _ntime; };
 
     protected:
@@ -65,8 +62,6 @@ class EAGLEGeometry : public Geometry {
     private:
         void _set_default();
 
-	int _nx;
-	int _ny;
 	int _ntime;
 };
 #endif
