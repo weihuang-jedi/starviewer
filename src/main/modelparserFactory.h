@@ -6,6 +6,7 @@
 #include "ufsparser.h"
 #include "ufsincrparser.h"
 #include "eagleparser.h"
+#include "eagleglobalparser.h"
 #include <memory>  // Explicitly ensure smart pointers are available
 
 class ModelParserFactory {
@@ -21,6 +22,8 @@ public:
                 return unique_ptr<ModelParser>(new UFSINCRParser());
             case ModelType::EAGLE:
                 return unique_ptr<ModelParser>(new EagleParser());
+            case ModelType::EAGLEGLOBAL:
+                return unique_ptr<ModelParser>(new EagleGlobalParser());
             default:
                 return nullptr;
         }

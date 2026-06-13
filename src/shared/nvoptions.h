@@ -25,6 +25,7 @@ typedef enum
     UFSINCR = 0x0010,
     MPAS    = 0x0100,
     EAGLE   = 0x0200,
+    EAGLEGLOBAL = 0x0201,
     MPIDEMO = 0x1000
 } ModelType;
 

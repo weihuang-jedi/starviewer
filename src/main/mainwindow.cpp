@@ -2,6 +2,7 @@
 #include "ufsparser.h"
 #include "ufsincrparser.h"
 #include "eagleparser.h"
+#include "eagleglobalparser.h"
 #include "mainwindow.h"
 
 MainWindow::MainWindow(string yamlfile)
@@ -41,6 +42,11 @@ MainWindow::MainWindow(string yamlfile)
     {
         nvoptions->set_model(EAGLE);
         userConfig = ModelType::EAGLE;
+    }
+    else if(0 == tmpstr.compare("eagleglobal"))
+    {
+        nvoptions->set_model(EAGLEGLOBAL);
+        userConfig = ModelType::EAGLEGLOBAL;
     }
     else if(0 == tmpstr.compare("mpas"))
     {
@@ -119,31 +125,25 @@ void MainWindow::_setup()
     switch(nvoptions->get_model())
     {
         case UFS:
-            setWindowTitle(tr("UFS MODEL"));
             ufs();
             break;
         case UFSINCR:
-            // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-            setWindowTitle(tr("UFS MODEL"));
             ufsincr();
             break;
         case MPIDEMO:
-            // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-            setWindowTitle(tr("NV to demo MPI"));
             mpidemo();
             break;
         case EAGLE:
-            setWindowTitle(tr("EAGLE MODEL"));
             eagle();
+            break;
+	case EAGLEGLOBAL:
+            eagleglobal();
             break;
       //case MPAS:
       //    mpas();
       //    break;
       //case POP:
       //    pop();
-      //    break;
-      //case WRF:
-      //    wrf();
       //    break;
         default:
             mpidemo();
@@ -277,6 +277,15 @@ void MainWindow::eagle()
     _setup_display();
 }
 
+void MainWindow::eagleglobal()
+{
+    setWindowTitle(tr("NV for EAGLEGLOBAL"));
+
+    _setup_controlPanel();
+
+    _setup_display();
+}
+
 void MainWindow::about()
 {
     QMessageBox::about(this, tr("About Menu"),
@@ -324,6 +333,10 @@ void MainWindow::createActions()
     eagleAct = new QAction(tr("&EAGLE"), this);
     eagleAct->setStatusTip(tr("Try to activate 'eagle' application"));
     connect(eagleAct, SIGNAL(triggered()), this, SLOT(eagle()));
+
+    eagleglobalAct = new QAction(tr("&EAGLEGLOBAL"), this);
+    eagleglobalAct->setStatusTip(tr("Try to activate 'eagleglobal' application"));
+    connect(eagleglobalAct, SIGNAL(triggered()), this, SLOT(eagleglobal()));
 
     ufsAct = new QAction(tr("&UFS"), this);
     ufsAct->setStatusTip(tr("Try to activate 'ufs' application"));
