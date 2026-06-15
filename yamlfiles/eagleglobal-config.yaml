@@ -12,8 +12,8 @@ coastline:
 
 input:
   data:
-    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/global/gh-isobaricInhPa-0500.nc
     - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/global/t-isobaricInhPa-0850.nc
+    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/global/gh-isobaricInhPa-0500.nc
     - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/global/10u-heightAboveGround-0010.nc
     - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/global/10v-heightAboveGround-0010.nc
     - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/global/2t-heightAboveGround-0002.nc

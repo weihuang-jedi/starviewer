@@ -452,7 +452,6 @@ void UFSTranslator::paintGL()
 
     // 3. MOVE MATRIX & CAMERA SETUP HERE
     // This guarantees your modelview projections apply directly to your show() geometry!
-
     set_modelview();
     glEnable(GL_DEPTH_TEST);
     setViewOptions();
@@ -460,9 +459,10 @@ void UFSTranslator::paintGL()
 
     // 4. Execute your viewer drawing logic safely inside the projected matrix space
     show();
-    // drawColorBar();
 
-    glFlush();
+    if(nvoptions->get_cb(NV_COLORBARON)) {
+        this->drawColorBarGeometryOnly();
+    }
 
     if(nvoptions->get_cb(NV_STATUS_CHANGED))
         save_status();
@@ -486,13 +486,17 @@ void UFSTranslator::paintGL()
     QFont font("Arial", 12);
     font.setStyleStrategy(QFont::PreferAntialias);
     painter.setFont(font);
-
-    painter.setPen(Qt::white);
+    painter.setPen(Qt::blue);
 
     QString frameLabel = _varname.c_str();
     painter.drawText(20, 40, frameLabel);
 
-    drawColorBar(painter);
+    cout << "\t: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tBefore drawColorBar(painter)" << endl;
+
+    if(nvoptions->get_cb(NV_COLORBARON)) {
+        this->drawColorBarLabelsOnly(painter);
+    }
 
     // 6. Explicitly terminate the painter
     painter.end();

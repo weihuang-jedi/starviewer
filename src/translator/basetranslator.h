@@ -261,6 +261,8 @@ class BaseTranslator : public QGLWidget
 
         void drawAxis();
         void drawColorBar(QPainter& painter);
+        void drawColorBarGeometryOnly();
+	void drawColorBarLabelsOnly(QPainter& painter);
 
         QString _varinfo;
         QString _frameinfo;

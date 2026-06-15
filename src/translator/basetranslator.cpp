@@ -580,10 +580,12 @@ void BaseTranslator::_set_current_time()
 //Draw color bar
 void BaseTranslator::drawColorBar(QPainter& painter)
 {
+    cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if(nvoptions->get_cb(NV_COLORBARON))
     {
         _displayColorBar(painter);
     }
+    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void BaseTranslator::setBackgroundColor()
@@ -1281,6 +1283,7 @@ void BaseTranslator::_displayColorBar(QPainter& painter)
 
     int clen = colorTable->get_clen() - 2;
     float* cmap = colorTable->get_cmap();
+    cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     _backupStatus();
 
@@ -1291,18 +1294,16 @@ void BaseTranslator::_displayColorBar(QPainter& painter)
     s = 1.0 / clen;
     d = (_maxval - _minval) * s;
 
-  //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__
-  //     << ", function: " << __PRETTY_FUNCTION__ << endl;
-  //cout << "\t_minval = " << _minval << ", _maxval = " << _maxval << endl;
-  //cout << "\tclen = " << clen << ", maxLev = " << maxLev << endl;
+    cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << ", function: " << __PRETTY_FUNCTION__ << endl;
+    cout << "\t_minval = " << _minval << ", _maxval = " << _maxval << endl;
+    cout << "\tclen = " << clen << ", maxLev = " << maxLev << endl;
 
     glPushMatrix();
 
     glNormal3d(0.0, 0.0, -1.0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__
-  //     << ", function: " << __PRETTY_FUNCTION__ << endl;
+    cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << ", function: " << __PRETTY_FUNCTION__ << endl;
 
     if(_maxval > 100.0)
         strcpy(format, "%11.0f");
@@ -1338,10 +1339,10 @@ void BaseTranslator::_displayColorBar(QPainter& painter)
             glVertex2d(x1, y2);
         glEnd();
 
-      //cout << "\tNo " << n << ": x1 = " << x1 << ", y1 = " << y1;
-      //cout << "\tcolor: " << n << " = (" << cmap[3*(n+2)];
-      //cout << ", " << cmap[3*(n+2)+1];
-      //cout << ", " << cmap[3*(n+2)+2] << ")" << endl;
+        cout << "\tNo " << n << ": x1 = " << x1 << ", y1 = " << y1;
+        cout << "\tcolor: " << n << " = (" << cmap[3*(n+2)];
+        cout << ", " << cmap[3*(n+2)+1];
+        cout << ", " << cmap[3*(n+2)+2] << ")" << endl;
     }
 
     if(nvoptions->get_cb(NV_BGBLACK))
@@ -1359,10 +1360,11 @@ void BaseTranslator::_displayColorBar(QPainter& painter)
 
   //QFont font("Times", 12, QFont::Bold);
   //QFont font("DejaVu Sans", 12, QFont::Bold);
-    QFont font("DejaVu", 12, QFont::Bold);
+    QFont font("Arial", 12, QFont::Bold);
 
     a *= 0.95;
-    y = -0.975;
+    y = 0.975;
+    iy = 1000*int(y);
     for(n = 0; n <= clen; n += mstep)
     {
         memset(buf, 0, 12);
@@ -1370,20 +1372,21 @@ void BaseTranslator::_displayColorBar(QPainter& painter)
         v = _minval + n * d;
         sprintf(buf, format, v);
 
-        x = a * (s * n - 0.55);
+        // x = a * (s * n - 0.55);
+        x = a * s * n;
       //renderText(x, y, 0.0, buf, QFont("Times", 15, QFont::Bold));
       //renderText(x, y, 0.0, buf);
-        ix = 1000*int(x);
-        iy = 1000*int(abs(y));
+        ix = 500*int(x);
         QString colorLabel = buf;
         painter.drawText(ix, iy, colorLabel);
 
-      //cout << "\tNo " << n << ": x = " << x << ", y = " << y << ", buf = " << buf << endl;
+        cout << "\tNo " << n << ": ix = " << ix << ", iy = " << iy << ", buf = " << buf << endl;
     }
 
     glPopMatrix();
 
     _restoreStatus();
+    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void BaseTranslator::updateSliders()
@@ -1462,5 +1465,98 @@ void BaseTranslator::set_locator(Locator* l)
 void BaseTranslator::set_light(Light* l)
 {
     light = l;
+}
+
+void BaseTranslator::drawColorBarGeometryOnly()
+{
+    int clen = colorTable->get_clen() - 2;
+    float* cmap = colorTable->get_cmap();
+
+    _backupStatus();
+    glLoadIdentity();
+
+    double a = 1.90;
+    double s = 1.0 / clen;
+    glPushMatrix();
+    glNormal3d(0.0, 0.0, -1.0);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    double y1 = -0.900;
+    double y2 = -0.850;
+
+    for(int n = 0; n < clen; ++n)
+    {
+        double x1 = a * (s * n - 0.5);
+        double x2 = a * (s * (n + 1) - 0.5);
+
+        glColor4f(cmap[3*(n+2)], cmap[3*(n+2)+1], cmap[3*(n+2)+2], 1.0);
+        glBegin(GL_QUADS);
+            glVertex2d(x1, y1);
+            glVertex2d(x2, y1);
+            glVertex2d(x2, y2);
+            glVertex2d(x1, y2);
+        glEnd();
+    }
+
+    glPopMatrix();
+    _restoreStatus();
+}
+
+void BaseTranslator::drawColorBarLabelsOnly(QPainter& painter)
+{
+    int maxLev = 5;
+    char buf[12];
+    char format[8];
+    int clen = colorTable->get_clen() - 2;
+    int mstep = clen / (maxLev - 1);
+
+    // cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // Format determination setup
+    if(_maxval > 100.0)       strcpy(format, "%11.0f");
+    else if(_maxval > 10.0)   strcpy(format, "%11.1f");
+    else if(_maxval > 1.0)    strcpy(format, "%11.2f");
+    else if(_maxval > 0.1)    strcpy(format, "%11.3f");
+    else                      strcpy(format, "%g");
+
+    // Configure text painter state
+    QFont font("Arial", 10, QFont::Bold);
+    painter.setFont(font);
+
+    if(nvoptions->get_cb(NV_BGBLACK))
+        painter.setPen(Qt::white);
+    else
+        painter.setPen(Qt::red);
+
+    // Calculate Screen Pixel Positions:
+    // In your OpenGL pass, the colorbar runs horizontally along the bottom
+    // from roughly X = -0.95 to X = +0.95. Let's map that to real widget pixels:
+    int widgetW = this->width();
+    int widgetH = this->height();
+
+    // Map y2 = -0.850 from OpenGL space to Window Pixel space
+    // OpenGL bottom is -1.0, top is 1.0. Qt Window Top is 0, bottom is widgetH.
+    // int labelY = widgetH - static_cast<int>(widgetH * 0.06); // Placed slightly under the bar
+    int labelY = widgetH - static_cast<int>(widgetH * 0.055); // Placed slightly under the bar
+
+    double a = 1.90;
+    double s = 1.0 / clen;
+
+    for(int n = 0; n <= clen; n += mstep)
+    {
+        memset(buf, 0, 12);
+        double v = _minval + n * ((_maxval - _minval) * s);
+        sprintf(buf, format, v);
+
+        // Convert the structural loop index 'n' directly into horizontal screen pixels
+        // Normalizing the horizontal colorbar run directly across the widget display panel
+        double glX = (a * 0.95) * (s * n - 0.5); // Ranges from roughly -0.90 to +0.90
+
+        // Convert GL coordinate (-1.0 to 1.0) to Screen Pixels (0 to widgetW)
+        int labelX = static_cast<int>(((glX + 1.0) / 2.0) * widgetW);
+
+        // Center align text over calculated horizontal mark tick point
+        painter.drawText(labelX - 25, labelY, 50, 20, Qt::AlignCenter, QString(buf).trimmed());
+    }
+    // cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
