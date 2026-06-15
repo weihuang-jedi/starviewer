@@ -72,7 +72,8 @@ void EagleGlobalTranslator::setup()
     // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     geometry = eagleglobal_controller->get_geometry();
 
-    _varname = string("t");
+    // _varname = string("t");
+    _varname = eagleglobal_controller->get_varname();
 
     eagleglobal_controller->setvarname(_varname);
 

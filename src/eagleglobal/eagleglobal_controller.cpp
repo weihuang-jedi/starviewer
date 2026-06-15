@@ -1,8 +1,11 @@
+#include <set>
+
 #include "eagleglobal_controller.h"
 
 EagleGlobalController::EagleGlobalController(ColorTable *ct, NVOptions* opt,
                                  const char *fn)
 {
+    int n;
     string sfn = string(fn);
 
     colorTable = ct;
@@ -19,6 +22,20 @@ EagleGlobalController::EagleGlobalController(ColorTable *ct, NVOptions* opt,
 
     ncfile = new EagleGlobalReader(fn);
 
+    set<string> nc1dvars = {"forecast_reference_time", "time",
+                            "latitude", "longitude", "CRS"};
+
+    vector<string> varnames = ncfile->getVarNames();
+    _varname = varnames[0];
+    for(n=0; n<varnames.size(); ++n)
+    {
+	if (nc1dvars.find(varnames[n]) == nc1dvars.end())
+	{
+            _varname = varnames[n];
+	    break;
+        }
+    }
+    cout << "Select varname: " << _varname << endl;
     eagleglobal_viewer = NULL;
 }
 
@@ -94,8 +111,6 @@ void EagleGlobalController::setup()
     // cout << "\t_nlon: " << geometry->get_nlon() << endl;
     // cout << "\t_nlat: " << geometry->get_nlat() << endl;
     // cout << "\t_ntime: " << geometry->get_ntime() << endl;
-
-    _varname = string("longitude");
 
     _sphere = false;
     _ball = false;
