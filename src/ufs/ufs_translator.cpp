@@ -432,75 +432,52 @@ void UFSTranslator::writeLocatorMsg()
     emit locator_msg(_locatorinfo);
 }
 
-void UFSTranslator::paintGL()
+#if 0
+void UFSTranslator::initializeGL()
 {
-    // 1. Initialize the painter context FIRST at the very top of the function
-    QPainter painter;
-    if (!painter.begin(this)) {
-        qWarning("CRITICAL: Failed to open QPainter context on this widget surface.");
-        return;
-    }
-
-    // 2. Clear the canvas using Qt/OpenGL native handles before entering the native block
+    initializeOpenGLFunctions(); // Sets up core 3.3 function hooks
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // ================================================================
-    // STEP A: Enter Native OpenGL Mode
-    // ================================================================
-    painter.beginNativePainting();
+    // 1. Compile and link the shader source code files
+    m_shaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vertex_shader.glsl");
+    m_shaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fragment_shader.glsl");
+    m_shaderProgram.link();
 
-    // 3. MOVE MATRIX & CAMERA SETUP HERE
-    // This guarantees your modelview projections apply directly to your show() geometry!
-    set_modelview();
-    glEnable(GL_DEPTH_TEST);
-    setViewOptions();
-    setBackgroundColor();
+    // 2. Prepare mock spatial data: Triangle matching [X, Y, Z, R, G, B] formatting
+    float triangleData[] = {
+        -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, // Left point (Red)
+         0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, // Right point (Green)
+         0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f  // Top point (Blue)
+    };
 
-    // 4. Execute your viewer drawing logic safely inside the projected matrix space
-    show();
+    // 3. Bind VAO (stores structural description states)
+    m_vao.create();
+    m_vao.bind();
 
-    if(nvoptions->get_cb(NV_COLORBARON)) {
-        this->drawColorBarGeometryOnly();
-    }
+    // 4. Send geometry layout straight up to GPU memory
+    m_vbo.create();
+    m_vbo.bind();
+    m_vbo.allocate(triangleData, sizeof(triangleData));
 
-    if(nvoptions->get_cb(NV_STATUS_CHANGED))
-        save_status();
+    // 5. Describe how memory is aligned within the buffer block
+    // Attribute 0 -> Position (3 floats)
+    m_shaderProgram.enableAttributeArray(0);
+    m_shaderProgram.setAttributeBuffer(0, GL_FLOAT, 0, 3, 6 * sizeof(float));
 
-    // Force a clean pipeline flush
-    glFlush();
+    // Attribute 1 -> Color (3 floats, starting offset after 3 positional floats)
+    m_shaderProgram.enableAttributeArray(1);
+    m_shaderProgram.setAttributeBuffer(1, GL_FLOAT, 3 * sizeof(float), 3, 6 * sizeof(float));
 
-    // Clean up fixed-function states before exiting the native mode
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-
-    // ================================================================
-    // STEP B: Exit Native OpenGL Mode
-    // ================================================================
-    painter.endNativePainting();
-
-    // 5. DRAW YOUR LABELS SAFELY ON TOP
-    painter.setRenderHint(QPainter::TextAntialiasing, true);
-
-    QFont font("Arial", 12);
-    font.setStyleStrategy(QFont::PreferAntialias);
-    painter.setFont(font);
-    painter.setPen(Qt::blue);
-
-    QString frameLabel = _varname.c_str();
-    painter.drawText(20, 40, frameLabel);
-
-    cout << "\t: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tBefore drawColorBar(painter)" << endl;
-
-    if(nvoptions->get_cb(NV_COLORBARON)) {
-        this->drawColorBarLabelsOnly(painter);
-    }
-
-    // 6. Explicitly terminate the painter
-    painter.end();
-
-    // Re-enable states for subsequent Qt internal paint cycles
-    glEnable(GL_DEPTH_TEST);
+    m_vao.release(); // Unbind safely
+    m_vbo.release();
 }
+
+void UFSTranslator::resizeGL(int w, int h)
+{
+    glViewport(0, 0, w, h);
+
+    // Replaces legacy gluPerspective or glOrtho calculations
+    m_projectionMatrix.setToIdentity();
+    m_projectionMatrix.perspective(45.0f, static_cast<float>(w) / h, 0.1f, 100.0f);
+}
+#endif

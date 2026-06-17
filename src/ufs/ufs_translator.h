@@ -16,6 +16,12 @@
 
 #include <QtGui/QKeyEvent>
 #include <QtOpenGL/QGLWidget>
+#include <QOpenGLWidget>
+#include <QOpenGLFunctions_3_3_Core> // Use Core profile structures
+#include <QOpenGLShaderProgram>
+#include <QOpenGLBuffer>
+#include <QOpenGLVertexArrayObject>
+#include <QMatrix4x4>
 #include <QString>
 #include <QTimer>
 
@@ -34,7 +40,6 @@ class UFSTranslator : public BaseTranslator
                       string mfnm = "unknown", QWidget* parent=0);	//  Constructor
        ~UFSTranslator();				//  Destructor
     
-        void paintGL();
         void show();
         void setup();
         void setfilename(string flnm) { _filename = flnm; };
@@ -65,7 +70,14 @@ class UFSTranslator : public BaseTranslator
         UFSController* ufs_controller;
         UFSGeometry* geometry;
 
-    private:
+        QOpenGLShaderProgram m_shaderProgram;
+        QOpenGLVertexArrayObject m_vao;
+        QOpenGLBuffer m_vbo; // Vertex Buffer Object
+
+        // Matrices to replace legacy matrix operations
+        QMatrix4x4 m_projectionMatrix;
+        QMatrix4x4 m_modelViewMatrix;
+
 #if 0
         bool _jpgNotSaved;
         bool _startSave;

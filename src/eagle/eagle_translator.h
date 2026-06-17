@@ -33,7 +33,6 @@ class EAGLETranslator : public BaseTranslator
                         string flnm, QWidget* parent=0);	//  Constructor
        ~EAGLETranslator();				//  Destructor
     
-        void paintGL();
         void show();
         void setup();
         void setfilename(string flnm) { _filename = flnm; };
