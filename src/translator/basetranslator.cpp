@@ -580,12 +580,10 @@ void BaseTranslator::_set_current_time()
 //Draw color bar
 void BaseTranslator::drawColorBar(QPainter& painter)
 {
-    cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if(nvoptions->get_cb(NV_COLORBARON))
     {
         _displayColorBar(painter);
     }
-    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void BaseTranslator::setBackgroundColor()
@@ -1283,7 +1281,6 @@ void BaseTranslator::_displayColorBar(QPainter& painter)
 
     int clen = colorTable->get_clen() - 2;
     float* cmap = colorTable->get_cmap();
-    cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     _backupStatus();
 
@@ -1294,16 +1291,10 @@ void BaseTranslator::_displayColorBar(QPainter& painter)
     s = 1.0 / clen;
     d = (_maxval - _minval) * s;
 
-    cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << ", function: " << __PRETTY_FUNCTION__ << endl;
-    cout << "\t_minval = " << _minval << ", _maxval = " << _maxval << endl;
-    cout << "\tclen = " << clen << ", maxLev = " << maxLev << endl;
-
     glPushMatrix();
 
     glNormal3d(0.0, 0.0, -1.0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << ", function: " << __PRETTY_FUNCTION__ << endl;
 
     if(_maxval > 100.0)
         strcpy(format, "%11.0f");
@@ -1338,11 +1329,6 @@ void BaseTranslator::_displayColorBar(QPainter& painter)
             glVertex2d(x2, y2);
             glVertex2d(x1, y2);
         glEnd();
-
-        cout << "\tNo " << n << ": x1 = " << x1 << ", y1 = " << y1;
-        cout << "\tcolor: " << n << " = (" << cmap[3*(n+2)];
-        cout << ", " << cmap[3*(n+2)+1];
-        cout << ", " << cmap[3*(n+2)+2] << ")" << endl;
     }
 
     if(nvoptions->get_cb(NV_BGBLACK))
@@ -1379,14 +1365,11 @@ void BaseTranslator::_displayColorBar(QPainter& painter)
         ix = 500*int(x);
         QString colorLabel = buf;
         painter.drawText(ix, iy, colorLabel);
-
-        cout << "\tNo " << n << ": ix = " << ix << ", iy = " << iy << ", buf = " << buf << endl;
     }
 
     glPopMatrix();
 
     _restoreStatus();
-    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void BaseTranslator::updateSliders()
@@ -1618,9 +1601,6 @@ void BaseTranslator::paintGL()
 
     QString frameLabel = _varname.c_str();
     painter.drawText(20, 40, frameLabel);
-
-    cout << "\t: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tBefore drawColorBar(painter)" << endl;
 
     if(nvoptions->get_cb(NV_COLORBARON)) {
         this->drawColorBarLabelsOnly(painter);
