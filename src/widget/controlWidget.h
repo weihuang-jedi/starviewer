@@ -32,7 +32,6 @@ class ControlWidget : public QWidget
         void set_colortable(ColorTable* ct) { colorTable = ct; };
         void set_translator(BaseTranslator* t) { translator = t; };
 
-      //void disable_ncl() { ncl_cb->setEnabled(false); };
         void disable_bump() { bump_cb->setEnabled(false); };
         void disable_vector() { vector_cb->setEnabled(false); };
         void disable_flat() { flat_cb->setEnabled(false); };
@@ -45,8 +44,6 @@ class ControlWidget : public QWidget
         void disable_z2() { z2_cb->setEnabled(false); };
         void disable_t2() { t2_cb->setEnabled(false); };
 
-      //void selectNCL();
-
     protected:
         BaseTranslator* translator;
         ColorTable* colorTable;
@@ -56,7 +53,6 @@ class ControlWidget : public QWidget
 
         QCheckBox* proj_cb;  // Check box for projection
         QCheckBox* axis_cb;  // Check box for axis
-      //QCheckBox* ncl_cb;   // Check box for NCL
 
         QCheckBox* bump_cb;       // Check box for bump
         QCheckBox* surface_cb;    // Check box for surface

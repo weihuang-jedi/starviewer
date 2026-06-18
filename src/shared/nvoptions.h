@@ -28,6 +28,7 @@ typedef enum
     EAGLEGLOBAL = 0x1201,
     MPIDEMO = 0x8888,
     TEST    = 0xffff
+>>>>>>> origin/develop
 } ModelType;
 
 typedef enum
@@ -35,7 +36,6 @@ typedef enum
     NV_NONE = 0,
     NV_ISPERSPECTIVE,
     NV_AXISON,
-    NV_USENCL,
     NV_BGBLACK,
     NV_BUMPON,
     NV_FLATON,

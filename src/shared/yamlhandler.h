@@ -26,7 +26,11 @@ class YAMLHandler
 	string get_coastline_file() { return _coastline_file; };
 	string get_coastline_resolution() { return _coastline_resolution; };
 
+	vector<string> get_files(const char* type, YAML::Node config);
+
 	vector<string> get_datafiles() { return _datafiles; };
+	vector<string> get_gridfiles() { return _gridfiles; };
+	vector<string> get_incrfiles() { return _incrfiles; };
 
     private:
         YAML::Node config;
@@ -41,6 +45,8 @@ class YAMLHandler
 	string _coastline_resolution;
 
 	vector<string> _datafiles;
+	vector<string> _gridfiles;
+	vector<string> _incrfiles;
 };
 #endif
 

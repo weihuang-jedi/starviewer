@@ -1,9 +1,5 @@
 #include <QtOpenGL>
 
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glx.h> // Ensure this header is included
-
 #include "basetranslator.h"
 
 #if 0
@@ -65,11 +61,12 @@ BaseTranslator::BaseTranslator(ColorTable* ct, NVOptions* opt, QWidget* parent)
     }
 #endif
 
-#if 1
     _jpgNotSaved = true;
     _saveJpg = false;
     _startSave = false;
-#endif
+
+    locator = nullptr;
+    light = nullptr;
 
   //cout << "\tLeave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
@@ -312,44 +309,6 @@ void BaseTranslator::resizeGL(int width, int height)
 
   //Set projection
   //project();
-}
-
-void BaseTranslator::paintGL()
-{
-  //cout << "Functions: <" << __PRETTY_FUNCTION__
-  //     << ">, line: " << __LINE__
-  //     << ", file: <" << __FILE__ << ">" << endl;
-
-    set_modelview();
-
-  //Clear screen and Z-buffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  //Enable Z-buffering in OpenGL
-    glEnable(GL_DEPTH_TEST);
-
-    setViewOptions();
-
-    setBackgroundColor();
-
-    show();
-
-    drawColorBar();
-
-    if(! nvoptions->get_cb(NV_PIXELON))
-        drawAxis();
-
-    if(nvoptions->get_cb(NV_STATUS_CHANGED))
-        save_status();
-
-  //Done
-    glFlush();
-}
-
-void BaseTranslator::show()
-{
-    cout << "Functions: <" << __PRETTY_FUNCTION__
-         << ">, line: " << __LINE__
-         << ", file: <" << __FILE__ << ">" << endl;
 }
 
 //Set projection
@@ -619,11 +578,11 @@ void BaseTranslator::_set_current_time()
 }
 
 //Draw color bar
-void BaseTranslator::drawColorBar()
+void BaseTranslator::drawColorBar(QPainter& painter)
 {
-    if(nvoptions->get_cb(NV_COLORBARON) && (! nvoptions->get_cb(NV_USENCL)))
+    if(nvoptions->get_cb(NV_COLORBARON))
     {
-        _displayColorBar();
+        _displayColorBar(painter);
     }
 }
 
@@ -662,8 +621,14 @@ void BaseTranslator::setViewOptions()
     float eZ = 7.5;
     double dimsize = 1.0;
 
-    if(locator->on())
+    // cout << "Enter Functions: <" << __PRETTY_FUNCTION__
+    //      << ">, line: " << __LINE__
+    //      << ", file: <" << __FILE__ << ">" << endl;
+
+    if(locator && locator->on())
     {
+        // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
         if(nvoptions->get_cb(NV_ISPERSPECTIVE))
         {
             fovy = pow(0.9525, (double) locator->z()) * locator->get_fovy();
@@ -679,7 +644,11 @@ void BaseTranslator::setViewOptions()
             m_d_top_plane = dimsize;
         }
 
+        // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
         project();
+
+        // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
       //eZ = (0.99 * locator->z() + 1.0) * locator->get_height();
       //eZ = 4.0 * locator->get_height();
@@ -707,9 +676,13 @@ void BaseTranslator::setViewOptions()
              glRotated(eY, 1,0,0);
              glRotated(-eX, 0,1,0);
         }
+
+        // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     }
     else
     {
+        // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
         project();
 
         if(nvoptions->get_cb(NV_ISPERSPECTIVE))
@@ -719,13 +692,21 @@ void BaseTranslator::setViewOptions()
                       0.0, 1.0, 0.0);
         }
 
+        // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
         if(! nvoptions->get_cb(NV_PIXELON))
         {
           //Set rotation
             glRotated(xRot, 1,0,0);
             glRotated(zRot, 0,1,0);
         }
+
+        // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     }
+
+    // cout << "Leave Functions: <" << __PRETTY_FUNCTION__
+    //      << ">, line: " << __LINE__
+    //      << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void BaseTranslator::drawAxis()
@@ -739,17 +720,6 @@ void BaseTranslator::drawAxis()
         y_axis(len, 0.05*len, 30.0);
         z_axis(len, 0.05*len, 30.0);
     }
-}
-
-void BaseTranslator::selectNCL(int n)
-{
-    nvoptions->set_cb(NV_STATUS_CHANGED, true);
-    if(n)
-        nvoptions->set_cb(NV_USENCL, true);
-    else
-        nvoptions->set_cb(NV_USENCL, false);
-
-   updateGL();   //  Request redisplay
 }
 
 void BaseTranslator::selectX2(int n)
@@ -1123,19 +1093,6 @@ void BaseTranslator::writeHeader()
       //cout << "and timeinfo:" << _timeinfo << endl;
       //renderText(30, 30, _varname.c_str(), QFont("DejaVu", 16));
       //renderText(30, 60, _timeinfo.c_str(), QFont("DejaVu", 16));
-
-      //QPainter painter(this);
-      //painter.setPen(Qt::blue);
-      //painter.setFont(QFont("Time", 16));
-      //painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
-      //painter.drawText(30, 30, _varname.c_str());
-      //painter.drawText(30, 60, _timeinfo.c_str());
-      //painter.end();
-
-      //renderText(30.0, 30.0, 0.0, _varname.c_str());
-      //renderText(30.0, 60.0, 0.0, _timeinfo.c_str());
-      //renderText(30.0, 30.0, 0.0, _title.c_str());
-      //renderText(30.0, 90.0,0.0,  _position.c_str());
     }
 }
 
@@ -1301,10 +1258,10 @@ void BaseTranslator::_restoreStatus()
     zFar = cur_zFar;
 }
 
-void BaseTranslator::_displayColorBar()
+void BaseTranslator::_displayColorBar(QPainter& painter)
 {
     int maxLev = 5;
-    int n, mstep;
+    int ix, iy, n, mstep;
     double a, d, s, v;
     double x, y, x1, x2, y1, y2;
     char buf[12];
@@ -1322,18 +1279,10 @@ void BaseTranslator::_displayColorBar()
     s = 1.0 / clen;
     d = (_maxval - _minval) * s;
 
-  //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__
-  //     << ", function: " << __PRETTY_FUNCTION__ << endl;
-  //cout << "\t_minval = " << _minval << ", _maxval = " << _maxval << endl;
-  //cout << "\tclen = " << clen << ", maxLev = " << maxLev << endl;
-
     glPushMatrix();
 
     glNormal3d(0.0, 0.0, -1.0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__
-  //     << ", function: " << __PRETTY_FUNCTION__ << endl;
 
     if(_maxval > 100.0)
         strcpy(format, "%11.0f");
@@ -1368,11 +1317,6 @@ void BaseTranslator::_displayColorBar()
             glVertex2d(x2, y2);
             glVertex2d(x1, y2);
         glEnd();
-
-      //cout << "\tNo " << n << ": x1 = " << x1 << ", y1 = " << y1;
-      //cout << "\tcolor: " << n << " = (" << cmap[3*(n+2)];
-      //cout << ", " << cmap[3*(n+2)+1];
-      //cout << ", " << cmap[3*(n+2)+2] << ")" << endl;
     }
 
     if(nvoptions->get_cb(NV_BGBLACK))
@@ -1390,10 +1334,11 @@ void BaseTranslator::_displayColorBar()
 
   //QFont font("Times", 12, QFont::Bold);
   //QFont font("DejaVu Sans", 12, QFont::Bold);
-    QFont font("DejaVu", 12, QFont::Bold);
+    QFont font("Arial", 12, QFont::Bold);
 
     a *= 0.95;
-    y = -0.975;
+    y = 0.975;
+    iy = 1000*int(y);
     for(n = 0; n <= clen; n += mstep)
     {
         memset(buf, 0, 12);
@@ -1401,11 +1346,13 @@ void BaseTranslator::_displayColorBar()
         v = _minval + n * d;
         sprintf(buf, format, v);
 
-        x = a * (s * n - 0.55);
+        // x = a * (s * n - 0.55);
+        x = a * s * n;
       //renderText(x, y, 0.0, buf, QFont("Times", 15, QFont::Bold));
-        renderText(x, y, 0.0, buf);
-
-      //cout << "\tNo " << n << ": x = " << x << ", y = " << y << ", buf = " << buf << endl;
+      //renderText(x, y, 0.0, buf);
+        ix = 500*int(x);
+        QString colorLabel = buf;
+        painter.drawText(ix, iy, colorLabel);
     }
 
     glPopMatrix();
@@ -1473,3 +1420,183 @@ void BaseTranslator::SaveJpg(int n)
     SaveImage(flnm);
 }
 
+void BaseTranslator::set_locator(Locator* l)
+{
+    locator = l;
+
+    if(locator)
+    {
+        locator->set_dim(dim);
+        locator->set_fovy(fovy);
+        locator->set_zfar(zFar);
+        locator->set_znear(zNear);
+    }
+}
+
+void BaseTranslator::set_light(Light* l)
+{
+    light = l;
+}
+
+void BaseTranslator::drawColorBarGeometryOnly()
+{
+    int clen = colorTable->get_clen() - 2;
+    float* cmap = colorTable->get_cmap();
+
+    _backupStatus();
+    glLoadIdentity();
+
+    double a = 1.90;
+    double s = 1.0 / clen;
+    glPushMatrix();
+    glNormal3d(0.0, 0.0, -1.0);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    double y1 = -0.900;
+    double y2 = -0.850;
+
+    for(int n = 0; n < clen; ++n)
+    {
+        double x1 = a * (s * n - 0.5);
+        double x2 = a * (s * (n + 1) - 0.5);
+
+        glColor4f(cmap[3*(n+2)], cmap[3*(n+2)+1], cmap[3*(n+2)+2], 1.0);
+        glBegin(GL_QUADS);
+            glVertex2d(x1, y1);
+            glVertex2d(x2, y1);
+            glVertex2d(x2, y2);
+            glVertex2d(x1, y2);
+        glEnd();
+    }
+
+    glPopMatrix();
+    _restoreStatus();
+}
+
+void BaseTranslator::drawColorBarLabelsOnly(QPainter& painter)
+{
+    int maxLev = 5;
+    char buf[12];
+    char format[8];
+    int clen = colorTable->get_clen() - 2;
+    int mstep = clen / (maxLev - 1);
+
+    // cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // Format determination setup
+    if(_maxval > 100.0)       strcpy(format, "%11.0f");
+    else if(_maxval > 10.0)   strcpy(format, "%11.1f");
+    else if(_maxval > 1.0)    strcpy(format, "%11.2f");
+    else if(_maxval > 0.1)    strcpy(format, "%11.3f");
+    else                      strcpy(format, "%g");
+
+    // Configure text painter state
+    QFont font("Arial", 10, QFont::Bold);
+    painter.setFont(font);
+
+    if(nvoptions->get_cb(NV_BGBLACK))
+        painter.setPen(Qt::white);
+    else
+        painter.setPen(Qt::red);
+
+    // Calculate Screen Pixel Positions:
+    // In your OpenGL pass, the colorbar runs horizontally along the bottom
+    // from roughly X = -0.95 to X = +0.95. Let's map that to real widget pixels:
+    int widgetW = this->width();
+    int widgetH = this->height();
+
+    // Map y2 = -0.850 from OpenGL space to Window Pixel space
+    // OpenGL bottom is -1.0, top is 1.0. Qt Window Top is 0, bottom is widgetH.
+    // int labelY = widgetH - static_cast<int>(widgetH * 0.06); // Placed slightly under the bar
+    int labelY = widgetH - static_cast<int>(widgetH * 0.055); // Placed slightly under the bar
+
+    double a = 1.90;
+    double s = 1.0 / clen;
+
+    for(int n = 0; n <= clen; n += mstep)
+    {
+        memset(buf, 0, 12);
+        double v = _minval + n * ((_maxval - _minval) * s);
+        sprintf(buf, format, v);
+
+        // Convert the structural loop index 'n' directly into horizontal screen pixels
+        // Normalizing the horizontal colorbar run directly across the widget display panel
+        double glX = (a * 0.95) * (s * n - 0.5); // Ranges from roughly -0.90 to +0.90
+
+        // Convert GL coordinate (-1.0 to 1.0) to Screen Pixels (0 to widgetW)
+        int labelX = static_cast<int>(((glX + 1.0) / 2.0) * widgetW);
+
+        // Center align text over calculated horizontal mark tick point
+        painter.drawText(labelX - 25, labelY, 50, 20, Qt::AlignCenter, QString(buf).trimmed());
+    }
+    // cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+}
+
+void BaseTranslator::paintGL()
+{
+    // 1. Initialize the painter context FIRST at the very top of the function
+    QPainter painter;
+    if (!painter.begin(this)) {
+        qWarning("CRITICAL: Failed to open QPainter context on this widget surface.");
+        return;
+    }
+
+    // 2. Clear the canvas using Qt/OpenGL native handles before entering the native block
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // ================================================================
+    // STEP A: Enter Native OpenGL Mode
+    // ================================================================
+    painter.beginNativePainting();
+
+    // 3. MOVE MATRIX & CAMERA SETUP HERE
+    // This guarantees your modelview projections apply directly to your show() geometry!
+    set_modelview();
+    glEnable(GL_DEPTH_TEST);
+    setViewOptions();
+    setBackgroundColor();
+
+    // 4. Execute your viewer drawing logic safely inside the projected matrix space
+    show();
+
+    if(nvoptions->get_cb(NV_COLORBARON)) {
+        this->drawColorBarGeometryOnly();
+    }
+
+    if(nvoptions->get_cb(NV_STATUS_CHANGED))
+        save_status();
+
+    // Force a clean pipeline flush
+    glFlush();
+
+    // Clean up fixed-function states before exiting the native mode
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+    // ================================================================
+    // STEP B: Exit Native OpenGL Mode
+    // ================================================================
+    painter.endNativePainting();
+
+    // 5. DRAW YOUR LABELS SAFELY ON TOP
+    painter.setRenderHint(QPainter::TextAntialiasing, true);
+
+    QFont font("Arial", 12);
+    font.setStyleStrategy(QFont::PreferAntialias);
+    painter.setFont(font);
+    painter.setPen(Qt::blue);
+
+    QString frameLabel = _varname.c_str();
+    painter.drawText(20, 40, frameLabel);
+
+    if(nvoptions->get_cb(NV_COLORBARON)) {
+        this->drawColorBarLabelsOnly(painter);
+    }
+
+    // 6. Explicitly terminate the painter
+    painter.end();
+
+    // Re-enable states for subsequent Qt internal paint cycles
+    glEnable(GL_DEPTH_TEST);
+}

@@ -1,4 +1,0 @@
-#!/bin/csh -f
-
- nv -pop data/g.b29.01.pop.h.0277-03.nc
-

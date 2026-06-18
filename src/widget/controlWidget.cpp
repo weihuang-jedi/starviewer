@@ -46,7 +46,6 @@ void ControlWidget::_setup_buttons()
 {
     proj_cb    = new QCheckBox("Perspective");
     axis_cb    = new QCheckBox("Axis");
-  //ncl_cb     = new QCheckBox("NCL");
 
     bump_cb    = new QCheckBox("Bump");
     colorbar_cb= new QCheckBox("ColorBar");
@@ -68,8 +67,6 @@ void ControlWidget::_setup_buttons()
     proj_cb->setChecked(true);
     axis_cb->setChecked(false);
     axis_cb->setCheckState(Qt::Unchecked);
-  //ncl_cb->setChecked(false);
-  //ncl_cb->setCheckState(Qt::Unchecked);
     bump_cb->setChecked(false);
     bump_cb->setCheckState(Qt::Unchecked);
     colorbar_cb->setChecked(false);
@@ -109,7 +106,6 @@ void ControlWidget::_setup_buttons()
     connect(onmap_cb,   SIGNAL(stateChanged(int)), translator, SLOT(selectOnMap(int)));
     connect(vector_cb,  SIGNAL(stateChanged(int)), translator, SLOT(selectVector(int)));
   //connect(title_cb,   SIGNAL(stateChanged(int)), translator, SLOT(selectTitle(int)));
-  //connect(ncl_cb,     SIGNAL(stateChanged(int)), translator, SLOT(selectNCL(int)));
   //connect(surface_cb, SIGNAL(stateChanged(int)), translator, SLOT(selectSurface(int)));
   //connect(shader_cb,  SIGNAL(stateChanged(int)), translator, SLOT(selectShader(int)));
   //connect(volume_cb,  SIGNAL(stateChanged(int)), translator, SLOT(selectVolume(int)));
@@ -136,7 +132,6 @@ void ControlWidget::_setup_buttons()
     button_lay->addWidget(vector_cb,  2, 2);
 
   //button_lay->addWidget(title_cb,   3, 0);
-  //button_lay->addWidget(ncl_cb,     3, 1);
 
     button_box->setLayout(button_lay);
     layout->addWidget(button_box,0,0);
@@ -344,13 +339,5 @@ void ControlWidget::_setup_message()
   //Overall layout
     setLayout(layout);
 }
-
-#if 0
-void ControlWidget::selectNCL()
-{
-    ncl_cb->setChecked(true);
-    translator->selectNCL(2);
-}
-#endif
 
 #include "controlWidget.moc"

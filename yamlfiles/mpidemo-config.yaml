@@ -1,0 +1,15 @@
+application:
+  name: StarViewer
+  model: mpidemo
+  version: 0.0.1
+
+earth:
+  name: data/earth.bmp
+
+coastline:
+  name: data/gshhg-shp-2.3.7/GSHHS_shp
+  resolution: c
+
+input:
+  data:
+    - /scratch5/purged/Wei.Huang/src/nv/data/gdas.t00z.atm.f006.nc

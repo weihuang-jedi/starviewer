@@ -25,12 +25,10 @@ string number2string(T n)
 
 //Constructor
 UFSTranslator::UFSTranslator(ColorTable* ct, NVOptions* opt,
-                                 string flnm, bool isList, string mfnm, QWidget* parent)
+                             string flnm, bool isList, string mfnm, QWidget* parent)
                : BaseTranslator(ct, opt, parent)
 {
-  //cout << "\tEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t\tCAM-SE file: " << flnm << endl;
-  //cout << "\t\tCAM-SE mapping file: " << mfnm << endl;
+  //cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     _filename = flnm;
     _hasFileList = isList;
@@ -60,22 +58,22 @@ void UFSTranslator::setup()
 {
     int n;
 
-  //cout << "\tEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if(NULL != ufs_controller)
         delete ufs_controller;
 
   //if(_hasFileList)
   //{
-  //  //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+  //  //cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //    ufs_controller = new UFSController(colorTable, nvoptions, _filename.c_str(), _hasFileList);
   //}
   //else
   //{
-      //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+        // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
         ufs_controller = new UFSController(colorTable, nvoptions, _filename.c_str());
   //}
 
-  //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufs_controller->setup();
 
     _jpgNotSaved = true;
@@ -83,7 +81,7 @@ void UFSTranslator::setup()
 
     makeCurrent();
 
-  //cout << "\t\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     geometry = ufs_controller->get_geometry();
 
     _varname = string("pressfc");
@@ -107,7 +105,7 @@ void UFSTranslator::setup()
 
   //cout << "\t_maxFile = " << _maxFile << endl;
   //cout << "\t_maxTime = " << _maxTime << endl;
-  //cout << "\tLeave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 /*******************************************************************/
@@ -116,6 +114,7 @@ void UFSTranslator::setup()
 //Show the image
 void UFSTranslator::show()
 {
+    // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //glShadeModel(GL_SMOOTH);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -146,6 +145,7 @@ void UFSTranslator::show()
 
     if(locator->on())
         writeLocatorMsg();
+    // cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFSTranslator::createVarInfo()
@@ -238,8 +238,8 @@ void UFSTranslator::select1dVar(const QString& str)
 
 void UFSTranslator::select2dVar(const QString& str)
 {
-    cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "1d var: <" << str.toStdString() << "> is selected." << endl;
+    // cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "1d var: <" << str.toStdString() << "> is selected." << endl;
  
     _varname = str.toStdString();
 
@@ -432,3 +432,52 @@ void UFSTranslator::writeLocatorMsg()
     emit locator_msg(_locatorinfo);
 }
 
+#if 0
+void UFSTranslator::initializeGL()
+{
+    initializeOpenGLFunctions(); // Sets up core 3.3 function hooks
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+    // 1. Compile and link the shader source code files
+    m_shaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vertex_shader.glsl");
+    m_shaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fragment_shader.glsl");
+    m_shaderProgram.link();
+
+    // 2. Prepare mock spatial data: Triangle matching [X, Y, Z, R, G, B] formatting
+    float triangleData[] = {
+        -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, // Left point (Red)
+         0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, // Right point (Green)
+         0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f  // Top point (Blue)
+    };
+
+    // 3. Bind VAO (stores structural description states)
+    m_vao.create();
+    m_vao.bind();
+
+    // 4. Send geometry layout straight up to GPU memory
+    m_vbo.create();
+    m_vbo.bind();
+    m_vbo.allocate(triangleData, sizeof(triangleData));
+
+    // 5. Describe how memory is aligned within the buffer block
+    // Attribute 0 -> Position (3 floats)
+    m_shaderProgram.enableAttributeArray(0);
+    m_shaderProgram.setAttributeBuffer(0, GL_FLOAT, 0, 3, 6 * sizeof(float));
+
+    // Attribute 1 -> Color (3 floats, starting offset after 3 positional floats)
+    m_shaderProgram.enableAttributeArray(1);
+    m_shaderProgram.setAttributeBuffer(1, GL_FLOAT, 3 * sizeof(float), 3, 6 * sizeof(float));
+
+    m_vao.release(); // Unbind safely
+    m_vbo.release();
+}
+
+void UFSTranslator::resizeGL(int w, int h)
+{
+    glViewport(0, 0, w, h);
+
+    // Replaces legacy gluPerspective or glOrtho calculations
+    m_projectionMatrix.setToIdentity();
+    m_projectionMatrix.perspective(45.0f, static_cast<float>(w) / h, 0.1f, 100.0f);
+}
+#endif

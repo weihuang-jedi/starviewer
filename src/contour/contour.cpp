@@ -4,10 +4,6 @@
 #undef debug
 #endif
 
-// #include <ncarg/hlu/MapPlot.h>
-// #include "nclInterface.h"
-
-
 //Constructor
 Contour::Contour(ColorTable *ct)
 {
@@ -80,37 +76,6 @@ void Contour::initialize()
 
     clen[0] = colorTable->get_clen();;
     clen[1] = 3;
-
-    /*
-#ifdef USENCL
-  //Initialize the high level utility library
-    guiNhlInitialize();
-
-    surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, (float)iwidth, (float)iheight);
-
-    setCairoQtSurface(surface);
-    setCairoQtWinSize(iwidth, iheight);
-
-  //Create an application context. Set the app dir to the current directory
-  //so the application looks for a resource file in the working directory.
-  //In this example the resource file supplies the plot title only.
-    srlist = guiNhlRLCreate(NhlSETRL);
-    guiNhlRLClear(srlist);
-    guiNhlRLSetString(srlist,(char *)NhlNappUsrDir,"./");
-    guiNhlCreate(&appid,"contour",NhlappClass,NhlDEFAULT_APP,srlist);
-
-    guiNhlRLClear(srlist);
-    guiNhlRLSetString(srlist,(char *)NhlNwkFormat,"qt");
-    guiNhlCreate(&wksid,"workstation",NhlcairoQtWorkstationClass,appid,srlist);
-
-    guiNhlRLClear(srlist);
-    guiNhlRLSetMDFloatArray(srlist,NhlNwkColorMap,cmap,2,clen);
-    guiNhlSetValues(wksid,srlist);
-
-    guiNhlSetColor(wksid, 0, 1.0, 1.0, 1.0);
-    guiNhlSetColor(wksid, 1, 0.0, 0.0, 1.0);
-#endif
-    */
 }
 
 void Contour::update_colormap()
@@ -119,32 +84,10 @@ void Contour::update_colormap()
 
     clen[0] = colorTable->get_clen();;
     clen[1] = 3;
-
-    /*
-#ifdef USENCL
-    guiNhlRLClear(srlist);
-    guiNhlRLSetMDFloatArray(srlist,NhlNwkColorMap,cmap,2,clen);
-    guiNhlSetValues(wksid,srlist);
-
-    reinitialize();
-#endif
-    */
 }
 
 void Contour::finalize()
 {
-    /*
-#ifdef USENCL
-  //Destroy the objects created, close the HLU library and exit.
-    guiNhlDestroy(wksid);
-    guiNhlDestroy(appid);
-
-  //Destroy the surface
-    cairo_surface_destroy(surface);
-
-    guiNhlClose();
-#endif
-    */
 }
 
 void Contour::reinitialize()
@@ -353,65 +296,10 @@ void Contour::_viewportYsetup()
 
 void Contour::initialize_context()
 {
-   /*
-#ifdef USENCL
-  //Set surface to translucent color (r, g, b, a) without disturbing graphics state.
-    context = getCairoQtContext();
-    cairo_set_source_rgba(context, 1.0, 1.0, 1.0, 1.0);
-  //cairo_fill(context);
-    cairo_save(context);
-    cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
-  //cairo_set_operator(context, CAIRO_OPERATOR_CLEAR);
-    cairo_paint(context);
-    cairo_restore(context);
-#endif
-    */
 }
 
 unsigned int Contour::get_textureID(unsigned int textureID)
 {
-   /*
-#ifdef USENCL
-    unsigned char *pixels;
-    unsigned int   width;
-    unsigned int   height;
-    unsigned int   newTextureID;
-
-    pixels = static_cast<unsigned char *>(cairo_image_surface_get_data(surface));
-    width  = cairo_image_surface_get_width(surface);
-    height = cairo_image_surface_get_height(surface);
-
-    if(textureID)
-    {
-        if(glIsTexture(textureID))
-            glDeleteTextures(1, &textureID);
-    }
-
-    glEnable(GL_TEXTURE_2D);
-
-  //Set pixel storage mode 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        
-  //Generate a texture name
-    glGenTextures(1, &newTextureID);
-
-  //cout << "Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
-  //     << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tnewTextureID  = " << newTextureID << endl;
-
-    glBindTexture(GL_TEXTURE_2D, newTextureID);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
-
-    glDisable(GL_TEXTURE_2D);
-
-    return newTextureID;
-#else
-    return 0;
-#endif
-    */
     return 0;
 }
 
@@ -572,99 +460,6 @@ unsigned int Contour::get_xid(int n)
     if(0 < _x_id[n])
         return _x_id[n];
 
-    /*
-#ifdef USENCL
-    initialize_context();
-
-    if(n < _nx)
-    {
-        flat = new float[_ny];
-        flev = new float[_nz];
-        if(hasGeoInfo)
-        {
-            lat = geometry->get_lat();
-            lev = geometry->get_lev();
-
-            for(j = 0; j < _ny; ++j)
-            {
-                flat[j] = (float)lat[j];
-            }
-
-            lev = geometry->get_lev();
-
-            for(k = 0; k < _nz; ++k)
-            {
-                flev[k] = (float)lev[k];
-            }
-        }
-
-        pltvar = new float[_nz * _ny];
-
-        for(k = 0; k < _nz; ++k)
-        {
-            for(j = 0; j < _ny; ++j)
-            {
-                m = n + (j + k * _ny) * _nx;
-                pltvar[j + k * _ny] = (float) _value[m];
-            }
-        }
-
-      //cout << "\tpltvar[0] = " << pltvar[0] << endl;
-
-      //Create a ScalarField data object using the data set defined above.
-        guiNhlRLClear(srlist);
-        dims[0] = _nz;
-        dims[1] = _ny;
-        guiNhlRLSetMDFloatArray(srlist,(char *)NhlNsfDataArray,pltvar,2,dims);
-
-        if(hasGeoInfo)
-        {
-          //cout << "\tlev[0] = " << lev[0] << endl;
-          //cout << "\tlev[_nz-1] = " << lev[_nz-1] << endl;
-
-            guiNhlRLSetFloat(srlist,NhlNtmYLDataTopF,flev[0]);
-            guiNhlRLSetFloat(srlist,NhlNtmYLDataBottomF,flev[_nz-1]);
-            guiNhlRLSetFloat(srlist,NhlNtmXBDataRightF,flat[_ny-1]);
-            guiNhlRLSetFloat(srlist,NhlNtmXBDataLeftF,flat[0]);
-            guiNhlRLSetInteger(srlist,NhlNtmYLStyle,NhlIRREGULAR);
-            guiNhlRLSetInteger(srlist,NhlNtmXBMode,NhlEXPLICIT);
-            guiNhlRLSetInteger(srlist,NhlNtmXBMinorOn,False);
-            guiNhlRLSetFloatArray(srlist,NhlNtmXBValues,geometry->get_ylvalues(),geometry->get_nlabels());
-        }
-
-        guiNhlCreate(&dataid,"x_plane",NhlscalarFieldClass,appid,srlist);
-
-      //Create a ContourPlot object, supplying the ScalarField object as data
-        guiNhlRLClear(srlist);
-        guiNhlRLSetInteger(srlist,(char *)NhlNcnScalarFieldData,dataid);
-        guiNhlCreate(&cnid, "ContourPlot", NhlcontourPlotClass, wksid, srlist);
-
-        _general_setup();
-
-        guiNhlSetValues(cnid,srlist);
-
-      //Draw the contour
-        guiNhlDraw(cnid);
-
-        _get_viewportXinfo();
-
-        guiNhlFrame(wksid);
-
-        delete [] pltvar;
-        delete [] flat;
-        delete [] flev;
-    }
-
-    _x_id[n] = get_textureID(_x_id[n]);
-
-  //Destroy the objects created, close the HLU library and exit.
-    guiNhlDestroy(dataid);
-    guiNhlDestroy(cnid);
-#else
-    _y_id[n] = 0;
-#endif
-    */
-
     return _x_id[n];
 }
 
@@ -676,97 +471,6 @@ unsigned int Contour::get_yid(int n)
 
     if(0 < _y_id[n])
         return _y_id[n];
-
-    /*
-#ifdef USENCL
-    initialize_context();
-
-    if(n < _ny)
-    {
-        flon = new float[_nx];
-        flev = new float[_nz];
-        if(hasGeoInfo)
-        {
-            lon = geometry->get_lon();
-
-            for(i = 0; i < _nx; ++i)
-            {
-                flon[i] = (float)lon[i];
-            }
-
-            lev = geometry->get_lev();
-
-            for(k = 0; k < _nz; ++k)
-            {
-                flev[k] = (float)lev[k];
-            }
-        }
-        pltvar = new float[_nz * _nx];
-
-        for(k = 0; k < _nz; ++k)
-        {
-            for(i = 0; i < _nx; ++i)
-            {
-                m = i + (n + k * _ny) * _nx;
-                pltvar[i + k * _nx] = (float) _value[m];
-            }
-        }
-
-      //cout << "\tpltvar[0] = " << pltvar[0] << endl;
-
-      //Create a ScalarField data object using the data set defined above.
-        guiNhlRLClear(srlist);
-        dims[0] = _nz;
-        dims[1] = _nx;
-        guiNhlRLSetMDFloatArray(srlist,(char *)NhlNsfDataArray,pltvar,2,dims);
-
-        if(hasGeoInfo)
-        {
-          //cout << "\tlev[0] = " << lev[0] << endl;
-          //cout << "\tlev[_nz-1] = " << lev[_nz-1] << endl;
-
-            guiNhlRLSetFloat(srlist,NhlNtmYLDataTopF,flev[0]);
-            guiNhlRLSetFloat(srlist,NhlNtmYLDataBottomF,flev[_nz-1]);
-            guiNhlRLSetFloat(srlist,NhlNtmXBDataRightF,flon[0]);
-            guiNhlRLSetFloat(srlist,NhlNtmXBDataLeftF,flon[_nx - 1]);
-            guiNhlRLSetInteger(srlist,NhlNtmYLStyle,NhlIRREGULAR);
-            guiNhlRLSetInteger(srlist,NhlNtmXBMode,NhlEXPLICIT);
-            guiNhlRLSetInteger(srlist,NhlNtmXBMinorOn,False);
-            guiNhlRLSetFloatArray(srlist,NhlNtmXBValues,geometry->get_xbvalues(),geometry->get_nlabels());
-        }
-
-        guiNhlCreate(&dataid,"x_plane",NhlscalarFieldClass,appid,srlist);
-
-      //Create a ContourPlot object, supplying the ScalarField object as data
-        guiNhlRLClear(srlist);
-        guiNhlRLSetInteger(srlist,(char *)NhlNcnScalarFieldData,dataid);
-        guiNhlCreate(&cnid, "ContourPlot", NhlcontourPlotClass, wksid, srlist);
-
-        _general_setup();
-
-        guiNhlSetValues(cnid,srlist);
-
-      //Draw the contour
-        guiNhlDraw(cnid);
-
-        _get_viewportYinfo();
-
-        guiNhlFrame(wksid);
-
-        delete [] pltvar;
-        delete [] flon;
-        delete [] flev;
-    }
-
-    _y_id[n] = get_textureID(_y_id[n]);
-
-  //Destroy the objects created, close the HLU library and exit.
-    guiNhlDestroy(dataid);
-    guiNhlDestroy(cnid);
-#else
-    _y_id[n] = 0;
-#endif
-    */
 
     return _y_id[n];
 }
@@ -780,116 +484,6 @@ unsigned int Contour::get_zid(int n)
     if(0 < _z_id[n])
         return _z_id[n];
 
-    /*
-#ifdef USENCL
-  //cout << "\tAt Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
-  //     << ", file: <" << __FILE__ << ">" << endl << endl;
-  //cout << "\tn = " << n << endl;
-  //cout << "\t_nx = " << _nx << endl;
-  //cout << "\t_ny = " << _ny << endl;
-  //cout << "\t_nz = " << _nz << endl;
-
-    if(n >= _nz)
-        return 0;
-
-    initialize_context();
-
-    flon = new float[_nx];
-    flat = new float[_ny];
-    if(hasGeoInfo)
-    {
-        lon = geometry->get_lon();
-        lat = geometry->get_lat();
-
-        for(i = 0; i < _nx; ++i)
-        {
-            flon[i] = (float)lon[i];
-        }
-
-        lat = geometry->get_lat();
-
-        for(j = 0; j < _ny; ++j)
-        {
-            flat[j] = (float)lat[j];
-        }
-    }
-
-    pltvar = new float[_ny * _nx];
-
-    for(j = 0; j < _ny; ++j)
-    {
-        m = j * _nx;
-        for(i = 0; i < _nx; ++i)
-        {
-            pltvar[m + i] = (float) _value[n * _ny * _nx + m + i];
-        }
-    }
-  //cout << "\tAt Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
-  //     << ", file: <" << __FILE__ << ">" << endl << endl;
-  //cout << "\tpltvar[0] = " << pltvar[0] << endl;
-  //cout << "\tpltvar[" << _ny * _nx - 1 << "] = " << pltvar[_ny * _nx - 1] << endl;
-
-  //Create a ScalarField data object using the data set defined above.
-    guiNhlRLClear(srlist);
-    dims[0] = _ny;
-    dims[1] = _nx;
-    guiNhlRLSetMDFloatArray(srlist,(char *)NhlNsfDataArray,pltvar,2,dims);
-
-    if(hasGeoInfo)
-    {
-        guiNhlRLSetFloat(srlist,NhlNsfXCStartV,flon[0]);
-        guiNhlRLSetFloat(srlist,NhlNsfXCEndV,flon[_nx-1]);
-        guiNhlRLSetFloat(srlist,NhlNsfYCStartV,flat[0]);
-        guiNhlRLSetFloat(srlist,NhlNsfYCEndV,flat[_ny-1]);
-    }
-
-    guiNhlCreate(&dataid,"z_plane",NhlscalarFieldClass,appid,srlist);
-
-  //Create a ContourPlot object, supplying the ScalarField object as data
-    guiNhlRLClear(srlist);
-    guiNhlRLSetInteger(srlist,(char *)NhlNcnScalarFieldData,dataid);
-    guiNhlCreate(&cnid, "ContourPlot", NhlcontourPlotClass, wksid, srlist);
-
-    _general_setup();
-    _tick_setup();
-
-    guiNhlSetValues(cnid,srlist);
-
-    if(hasGeoInfo)
-    {
-        _map_setup();
-
-      //Draw the contour & map
-        guiNhlAddOverlay(mapid, cnid, -1);
-
-        _get_viewport_info();
-
-        guiNhlDraw(mapid);
-    }
-    else
-    {
-        _get_viewport_info();
-
-        guiNhlDraw(cnid);
-    }
-
-    guiNhlFrame(wksid);
-
-    delete [] pltvar;
-    delete [] flon;
-    delete [] flat;
-
-    _z_id[n] = get_textureID(_z_id[n]);
-
-  //Destroy the objects created, close the HLU library and exit.
-    guiNhlDestroy(dataid);
-    guiNhlDestroy(cnid);
-    if(0 < mapid)
-        guiNhlDestroy(mapid);
-#else
-    _z_id[n] = 0;
-#endif
-    */
     return _z_id[n];
 }
 

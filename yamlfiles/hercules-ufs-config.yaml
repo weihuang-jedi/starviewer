@@ -1,0 +1,15 @@
+application:
+  name: StarViewer
+  model: ufs
+  version: 0.0.1
+
+earth:
+  name: data/earth.bmp
+
+coastline:
+  name: data/gshhg-shp-2.3.7/GSHHS_shp
+  resolution: c
+
+input:
+  data:
+    - /work2/noaa/epic/weihuang/nv/data/ufs-atm-history/gfs.t12z.atm.f000.nc

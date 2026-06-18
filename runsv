@@ -1,0 +1,127 @@
+#!/bin/bash
+
+############################################################
+# Help                                                     #
+############################################################
+Help()
+{
+   # Display Help
+   echo "Syntax: scriptName [-m|h|v|V]"
+   echo "options:"
+   echo "h     Print this Help."
+   echo "m     model."
+   echo "v     Verbose mode."
+   echo "V     Print software version and exit."
+   echo
+}
+
+# Set default model
+model=ufs
+
+############################################################
+# Process the input options. Add options as needed.        #
+############################################################
+# Get the options
+while getopts "h:m:vV" option; do
+   case $option in
+      h) # display Help
+         Help
+         exit 0;;
+      m) # Enter a name
+         model=$OPTARG
+	 ;;
+      v) # set verbose
+         set -x
+         ;;
+      V) # print software version
+         echo "StarViwer 0.0.1"
+         exit 0;;
+     \?) # Invalid option
+         echo "Error: Invalid option"
+         exit -1;;
+   esac
+done
+
+echo "model: $model"
+
+yamlfile="yamlfiles/${model}-config.yaml"
+
+echo "yamlfile: $yamlfile"
+
+# Create a temporary wildcard cookie file
+ touch /scratch5/purged/Wei.Huang/tmp/xauth_wildcard
+ xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | xauth -f /scratch5/purged/Wei.Huang/tmp/xauth_wildcard nmerge -
+
+#!/bin/bash
+
+set -x
+
+# First detect w/ hostname
+case $(hostname -f) in
+    ufe0[1-9]) MACHINE_ID=ursa ;; ### ursa01-09
+    ufe1[0-6]) MACHINE_ID=ursa ;; ### ursa10-16
+    uecflow01) MACHINE_ID=ursa ;; ### ursaecflow01
+
+    [Hh]ercules-login-[1-4].[Hh][Pp][Cc].[Mm]s[Ss]tate.[Ee]du) MACHINE_ID=hercules ;; ### hercules1-4
+    *) MACHINE_ID=UNKNOWN ;;                        # Unknown platform
+esac
+
+if [[ "${MACHINE_ID}" == "ursa" ]]; then
+   #export STARVIEWERHOME=/scratch3/NAGAPE/epic/Wei.Huang/src/nv/starviewer
+    export STARVIEWERHOME=/scratch5/purged/Wei.Huang/src/nv/starviewer
+    export CONTAINER_DIR=${STARVIEWERHOME}
+    export CONTAINER_BINDINGS="-B /scratch3 -B /scratch4 -B /scratch5"
+    export RUNTIME_DIR=/scratch5/purged/Wei.Huang/tmp/runtime-dir
+    export CONTAINER_SIF=${CONTAINER_DIR}/starviewer.sif
+
+    if [ ! -d $RUNTIME_DIR ]; then
+        mkdir -p $RUNTIME_DIR
+        chmod 700 $RUNTIME_DIR
+    fi
+
+   # 1. On the host terminal (e01g01), allow the connection
+   xhost +local:$(whoami)
+
+   singularity exec --rocm --cleanenv \
+     --hostname $(hostname) \
+     --bind ${HOME}/.Xauthority:/root/.Xauthority \
+     -B /scratch3 -B /scratch4 -B /scratch5 -B /tmp \
+     --env XAUTHORITY=/root/.Xauthority \
+     --env DISPLAY=${DISPLAY} \
+     --env XDG_RUNTIME_DIR=$RUNTIME_DIR \
+     --env QT_X11_NO_MITSHM=1 \
+     --env STARVIEWERHOME=${STARVIEWERHOME} \
+     --env QT_QPA_PLATFORM=xcb \
+     --env QT_XCB_GL_INTEGRATION=xcb_glx \
+     --env LIBGL_ALWAYS_SOFTWARE=1 \
+     --env LIBGL_ALWAYS_INDIRECT=1 \
+     --env GALLIUM_DRIVER=llvmpipe \
+     --env DEBIAN_FRONTEND=noninteractive \
+     "${CONTAINER_SIF}" \
+     ${STARVIEWERHOME}/build/main/starviewer -yaml "${yamlfile}"
+elif [[ "${MACHINE_ID}" == "hercules" ]]; then
+    module load apptainer
+    export STARVIEWERHOME=/work2/noaa/epic/weihuang/nv/starviewer
+    export CONTAINER_DIR=${STARVIEWERHOME}
+    export CONTAINER_BINDINGS="-B /work -B /work2"
+    export RUNTIME_DIR=/work2/noaa/epic/weihuang/tmp/runtime-dir
+    export CONTAINER_SIF=${CONTAINER_DIR}/starviewer.sif
+
+    singularity exec --cleanenv \
+       --bind $HOME/.Xauthority:/root/.Xauthority \
+       ${CONTAINER_BINDINGS} \
+       --env STARVIEWERHOME=${STARVIEWERHOME} \
+       --env XAUTHORITY=/root/.Xauthority \
+       --env DISPLAY=$DISPLAY \
+       --env XDG_RUNTIME_DIR=$RUNTIME_DIR \
+       --env QT_X11_NO_MITSHM=1 \
+       "${CONTAINER_SIF}" \
+       ${STARVIEWERHOME}/build/main/starviewer \
+       -yaml yamlfiles/hercules-${model}-config.yaml
+else
+    echo "Run on unknown machine."
+fi
+
+exit 0
+
+ xdg-open img_0015.png
