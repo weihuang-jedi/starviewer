@@ -28,6 +28,8 @@ add_executable(starviewer
     mpidemoparser.cpp
     ufsparser.cpp
     ufsincrparser.cpp
+    eagleparser.cpp
+    eagleglobalparser.cpp
     # ... other files
     ../ncreader/ncreader.cpp
     ../geometry/geometry.cpp
@@ -36,6 +38,8 @@ add_executable(starviewer
     ../ncreader/ncbasereader.cpp
     ../ncreader/ufsgridreader.cpp
     ../ncreader/ufsincrementreader.cpp
+    ../ncreader/eaglereader.cpp
+    ../ncreader/eagleglobalreader.cpp
 )
 
 # Allow other modules to find these headers
@@ -61,10 +65,9 @@ target_include_directories(starviewer PUBLIC
     ${CMAKE_SOURCE_DIR}/lic
     ${CMAKE_SOURCE_DIR}/ufs
     ${CMAKE_SOURCE_DIR}/ufsincr
+    ${CMAKE_SOURCE_DIR}/eagle
+    ${CMAKE_SOURCE_DIR}/eagleglobal
     ${CMAKE_SOURCE_DIR}/mpidemo
-  # ${CMAKE_SOURCE_DIR}/mpas
-  # ${CMAKE_SOURCE_DIR}/pop
-  # ${CMAKE_SOURCE_DIR}/wrf
     ${NetCDF_INCLUDE_DIRS}
 )
 
@@ -82,6 +85,8 @@ target_link_libraries(starviewer PRIVATE
     mpidemo
     ufs
     ufsincr
+    eagle
+    eagleglobal
     view
     contour
     shared

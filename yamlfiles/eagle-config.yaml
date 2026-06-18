@@ -1,0 +1,22 @@
+application:
+  name: StarViewer
+  model: eagle
+  version: 0.0.1
+
+earth:
+  name: data/earth.bmp
+
+coastline:
+  name: data/gshhg-shp-2.3.7/GSHHS_shp
+  resolution: c
+
+input:
+  data:
+    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/t-isobaricInhPa-0850.nc
+    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/10u-heightAboveGround-0010.nc
+    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/10v-heightAboveGround-0010.nc
+    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/2t-heightAboveGround-0002.nc
+    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/gh-isobaricInhPa-0500.nc
+    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/sp-surface.nc
+    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/u-isobaricInhPa-0250.nc
+    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/v-isobaricInhPa-0250.nc

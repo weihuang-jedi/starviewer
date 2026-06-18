@@ -1,6 +1,8 @@
 #include "mpidemoparser.h"
 #include "ufsparser.h"
 #include "ufsincrparser.h"
+#include "eagleparser.h"
+#include "eagleglobalparser.h"
 #include "mainwindow.h"
 
 MainWindow::MainWindow(string yamlfile)
@@ -36,18 +38,20 @@ MainWindow::MainWindow(string yamlfile)
         nvoptions->set_model(MPIDEMO);
         userConfig = ModelType::MPIDEMO;
     }
-    else if(0 == tmpstr.compare("pop"))
+    else if(0 == tmpstr.compare("eagle"))
     {
-        nvoptions->set_model(POP);
+        nvoptions->set_model(EAGLE);
+        userConfig = ModelType::EAGLE;
+    }
+    else if(0 == tmpstr.compare("eagleglobal"))
+    {
+        nvoptions->set_model(EAGLEGLOBAL);
+        userConfig = ModelType::EAGLEGLOBAL;
     }
     else if(0 == tmpstr.compare("mpas"))
     {
         nvoptions->set_model(MPAS);
         userConfig = ModelType::MPAS;
-    }
-    else if(0 == tmpstr.compare("wrf"))
-    {
-        nvoptions->set_model(WRF);
     }
 
     // cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -94,8 +98,6 @@ MainWindow::MainWindow(string yamlfile)
 
     // unordered_map<string, function<unique_ptr<ModelParser>()>> registry;
 
-    // cout << "\t\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-
     _setup();
 
     // cout << "Leave MainWindow: file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -116,35 +118,32 @@ MainWindow::~MainWindow()
 void MainWindow::_setup()
 {
     // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-       cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
+    // cout << "\tnvoptions->get_model(): " << nvoptions->get_model() << endl;
     // cout << "\tMPIDEMO: " << MPIDEMO << endl;
     // cout << "\tUFS: " << UFS << endl;
-       cout << "\tUFSINCR: " << UFSINCR << endl;
+    // cout << "\tUFSINCR: " << UFSINCR << endl;
     switch(nvoptions->get_model())
     {
         case UFS:
-            // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-            setWindowTitle(tr("UFS MODEL"));
             ufs();
             break;
         case UFSINCR:
-            // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-            setWindowTitle(tr("UFS MODEL"));
             ufsincr();
             break;
         case MPIDEMO:
-            // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-            setWindowTitle(tr("NV to demo MPI"));
             mpidemo();
+            break;
+        case EAGLE:
+            eagle();
+            break;
+	case EAGLEGLOBAL:
+            eagleglobal();
             break;
       //case MPAS:
       //    mpas();
       //    break;
       //case POP:
       //    pop();
-      //    break;
-      //case WRF:
-      //    wrf();
       //    break;
         default:
             mpidemo();
@@ -156,7 +155,7 @@ void MainWindow::_setup()
 
 void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 {
-    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     QMenu menu(this);
 
   //menu.addAction(wrfAct);
@@ -269,6 +268,24 @@ void MainWindow::ufsincr()
     _setup_display();
 }
 
+void MainWindow::eagle()
+{
+    setWindowTitle(tr("NV for EAGLE"));
+
+    _setup_controlPanel();
+
+    _setup_display();
+}
+
+void MainWindow::eagleglobal()
+{
+    setWindowTitle(tr("NV for EAGLEGLOBAL"));
+
+    _setup_controlPanel();
+
+    _setup_display();
+}
+
 void MainWindow::about()
 {
     QMessageBox::about(this, tr("About Menu"),
@@ -313,18 +330,19 @@ void MainWindow::createActions()
     aboutAct->setStatusTip(tr("Show the application's About box"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
-  //wrfAct = new QAction(tr("&WRF"), this);
-  //wrfAct->setShortcut(QKeySequence::Global);
-  //wrfAct->setStatusTip(tr("Try to activate 'wrf' application"));
-  //connect(wrfAct, SIGNAL(triggered()), this, SLOT(wrf()));
+    eagleAct = new QAction(tr("&EAGLE"), this);
+    eagleAct->setStatusTip(tr("Try to activate 'eagle' application"));
+    connect(eagleAct, SIGNAL(triggered()), this, SLOT(eagle()));
+
+    eagleglobalAct = new QAction(tr("&EAGLEGLOBAL"), this);
+    eagleglobalAct->setStatusTip(tr("Try to activate 'eagleglobal' application"));
+    connect(eagleglobalAct, SIGNAL(triggered()), this, SLOT(eagleglobal()));
 
     ufsAct = new QAction(tr("&UFS"), this);
-  //ufsAct->setShortcut(QKeySequence::Global);
     ufsAct->setStatusTip(tr("Try to activate 'ufs' application"));
     connect(ufsAct, SIGNAL(triggered()), this, SLOT(ufs()));
 
-    ufsincrAct = new QAction(tr("&UFS"), this);
-  //ufsincrAct->setShortcut(QKeySequence::Global);
+    ufsincrAct = new QAction(tr("&UFSINCR"), this);
     ufsincrAct->setStatusTip(tr("Try to activate 'ufsincr' application"));
     connect(ufsincrAct, SIGNAL(triggered()), this, SLOT(ufsincr()));
 
@@ -499,7 +517,7 @@ void MainWindow::inspector_func()
 
     switch(nvoptions->get_model())
     {
-        case POP:
+        case UFS:
         case MPAS:
              inspectorWidget->set_lon(360);
              inspectorWidget->set_lat(180);

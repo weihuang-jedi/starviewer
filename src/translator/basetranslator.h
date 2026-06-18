@@ -176,7 +176,8 @@ class BaseTranslator : public QGLWidget
         void initializeGL();                   //  Initialize widget
         void resizeGL(int width, int height);  //  Resize widget
 
-        virtual void paintGL() = 0;
+        // virtual void paintGL() = 0;
+        void paintGL();
         virtual void show() = 0;
 
         NVOptions*  nvoptions;
@@ -261,6 +262,8 @@ class BaseTranslator : public QGLWidget
 
         void drawAxis();
         void drawColorBar(QPainter& painter);
+        void drawColorBarGeometryOnly();
+	void drawColorBarLabelsOnly(QPainter& painter);
 
         QString _varinfo;
         QString _frameinfo;
