@@ -232,63 +232,33 @@ void MainWindow::_setup_controlPanel()
 
     switch(nvoptions->get_model())
     {
-        case WRF:
-           //controlPanel->selectNCL();
-           //controlPanel->disable_ncl();
-             break;
         case UFS:
            //controlPanel->selectNCL();
            //controlPanel->disable_ncl();
              break;
         case POP:
-           //controlPanel->disable_ncl();
              controlPanel->disable_bump();
              controlPanel->disable_onmap();
-             controlPanel->disable_sphere();
+             controlPanel->disable_vector();
              break;
         case MPAS:
-           //controlPanel->disable_ncl();
              controlPanel->disable_bump();
              controlPanel->disable_onmap();
-             controlPanel->disable_sphere();
-           //controlPanel->disable_surface();
-             controlPanel->disable_x2();
-             controlPanel->disable_y2();
-             controlPanel->disable_z2();
-             controlPanel->disable_t2();
-             break;
-        case CAMSE:
-           //controlPanel->disable_ncl();
-             controlPanel->disable_onmap();
-             controlPanel->disable_sphere();
-           //controlPanel->disable_surface();
-             break;
-        case RADX:
-           //controlPanel->disable_ncl();
-             controlPanel->disable_onmap();
-             controlPanel->disable_sphere();
-             controlPanel->disable_flat();
+             controlPanel->disable_vector();
              controlPanel->disable_x2();
              controlPanel->disable_y2();
              controlPanel->disable_z2();
              controlPanel->disable_t2();
              break;
         case MPIDEMO:
-           //controlPanel->disable_ncl();
              controlPanel->disable_onmap();
-             controlPanel->disable_sphere();
+             controlPanel->disable_vector();
              controlPanel->disable_flat();
              controlPanel->disable_x2();
              controlPanel->disable_y2();
              controlPanel->disable_z2();
              controlPanel->disable_t2();
              translator->updateSliders();
-             break;
-        case HDF:
-           //controlPanel->disable_ncl();
-             controlPanel->disable_bump();
-             controlPanel->disable_onmap();
-             controlPanel->disable_sphere();
              break;
         default:
            //controlPanel->disable_ncl();

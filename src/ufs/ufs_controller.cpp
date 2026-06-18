@@ -96,7 +96,6 @@ void UFSController::setup()
     _varname = string("hgtsfc");
 
     _sphere = false;
-    _ball = false;
     _initialized = false;
     _tvalue = 0;
     _time_interval = 128;
@@ -134,7 +133,6 @@ void UFSController::set1dvarname(string vn)
 {
     _varname = vn;
     _sphere = true;
-    _ball = false;
 
     _tvalue = 0;
 
@@ -163,7 +161,6 @@ void UFSController::set2dvarname(string vn)
 {
     _varname = vn;
     _sphere = false;
-    _ball = true;
 
     _tvalue = 0;
 
@@ -192,7 +189,6 @@ void UFSController::set3dvarname(string vn)
 {
     _varname = vn;
     _sphere = false;
-    _ball = true;
 
     _tvalue = 0;
 
@@ -218,6 +214,13 @@ void UFSController::set3dvarname(string vn)
 
     _minval = ufs_viewer->get_minval();
     _maxval = ufs_viewer->get_maxval();
+
+    if(nvoptions->get_cb(NV_VECTORON))
+    {
+	float* u = ncfile->get_fv("ugrd");
+	float* v = ncfile->get_fv("vgrd");
+	ufs_viewer->setup_wind(u, v);
+    }
 }
 
 void UFSController::set_colorTable(ColorTable *ct)

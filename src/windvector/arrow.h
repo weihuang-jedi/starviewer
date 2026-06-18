@@ -50,6 +50,8 @@ class Arrow
 
         void setup(float x, float y, float z,
                    float u, float v, float w);
+        void setup(float x, float y, float z,
+                   float u, float v);
 
         void set_maxspeed(double d) { _maxspeed = d; };
 

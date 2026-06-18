@@ -94,7 +94,6 @@ class UFSController
         int _tvalue;
 
         bool _sphere;
-        bool _ball;
         bool _initialized;
 
         int* _ntimes;

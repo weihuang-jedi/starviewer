@@ -14,8 +14,6 @@
 #include "evaluator.h"
 #include "arrow.h"
 #include "nvoptions.h"
-//#include "earth.h"
-#include "topography.h"
 
 //axes:
 #define X_DIRECTION	1
@@ -31,23 +29,24 @@ class WindVector
        ~WindVector();
 
         void draw();
-        void draw_earth_image(float z);
 
         void setup(int nx, int ny, int nz,
                    float* u, float* v, float*w);
-        void setup_position(double* lon, double* lat);
+        void setup(int nx, int ny, int nz,
+                   float* u, float* v);
+        void setup_lonlat(double* lon, double* lat);
 
         void set_colorTable(ColorTable *ct) { colorTable = ct; };
 
         void set_stepsize(int n) { _stepsize = n; };
         void set_maxspeed(float s) { _maxspeed = s; };
 
+	bool has_w() { return _has_w; };
+
     protected:
         ColorTable* colorTable;
         NVOptions* nvoptions;
         Arrow* arrow;
-      //Earth* earth;
-        Topography* topography;
 
         string _varname;
 
@@ -68,6 +67,7 @@ class WindVector
 
         int _nx, _ny, _nz;
         int _stepsize, _local_stepsize;
+	bool _has_w;
 
         int    _colorlen;
         float* _colormap;
@@ -85,6 +85,8 @@ class WindVector
 
         void _draw_arrow(float x, float y, float z,
                          float u, float v, float w);
+        void _draw_arrow(float x, float y, float z,
+                         float u, float v);
         void _arrow(float tail[3], float head[3], float w[3]);
         void _cross(float v1[3], float v2[3], float vout[3]);
 

@@ -33,9 +33,9 @@ void NCL_Viewer::draw()
 
     glPushMatrix();
 
-    if(nvoptions->get_cb(NV_SPHEREON))
+    if(nvoptions->get_cb(NV_FLATON))
     {
-        _display_on_sphere();
+        _display_all();
     }
     else if(nvoptions->get_cb(NV_BUMPON))
     {
@@ -47,7 +47,7 @@ void NCL_Viewer::draw()
     }
     else
     {
-        _display_all();
+        _display_on_sphere();
     }
 
     glPopMatrix();

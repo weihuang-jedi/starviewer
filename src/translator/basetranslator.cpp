@@ -883,18 +883,6 @@ void BaseTranslator::selectIsoSurface(int n)
     updateGL();
 }
 
-//vector on/off
-void BaseTranslator::selectVector(int n)
-{
-    nvoptions->set_cb(NV_STATUS_CHANGED, true);
-    if(n)
-        nvoptions->set_cb(NV_VECTORON, true);
-    else
-        nvoptions->set_cb(NV_VECTORON, false);
-
-    updateGL();
-}
-
 //LIC on/off
 void BaseTranslator::selectLIC(int n)
 {
@@ -1041,16 +1029,16 @@ void BaseTranslator::selectFlat(int f)
     updateGL();
 }
 
-//sphere on/off
-void BaseTranslator::selectSphere(int f)
+//vector on/off
+void BaseTranslator::selectVector(int n)
 {
     nvoptions->set_cb(NV_RESET, true);
     nvoptions->set_cb(NV_STATUS_CHANGED, true);
 
-    if(f)
-        nvoptions->set_cb(NV_SPHEREON, true);
+    if(n)
+        nvoptions->set_cb(NV_VECTORON, true);
     else
-        nvoptions->set_cb(NV_SPHEREON, false);
+        nvoptions->set_cb(NV_VECTORON, false);
 
     updateGL();
 }

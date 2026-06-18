@@ -30,15 +30,11 @@ WindVector::WindVector(ColorTable *ct, NVOptions* opt)
     azz[0] = 0.0;
     azz[1] = 0.0;
     azz[2] = 1.0;
-
-    topography = new Topography();
-    topography->set_nvoptions(opt);
 }
 
 WindVector::~WindVector()
 {
     delete arrow;
-    delete topography;
 }
 
 void WindVector::setup(int nx, int ny, int nz,
@@ -51,6 +47,27 @@ void WindVector::setup(int nx, int ny, int nz,
     _u = u;
     _v = v;
     _w = w;
+
+    _has_w = true;
+
+    _parameter_setup();
+
+    nvoptions->set_xsec(_nx + 1);
+    nvoptions->set_ysec(_ny + 1);
+    nvoptions->set_zsec(0);
+}
+
+void WindVector::setup(int nx, int ny, int nz,
+                       float* u, float* v)
+{
+    _nx = nx;
+    _ny = ny;
+    _nz = nz;
+
+    _u = u;
+    _v = v;
+
+    _has_w = false;
 
     _parameter_setup();
 
@@ -195,7 +212,6 @@ void WindVector::_display_all()
         if(nvoptions->get_cb(NV_VECTORONLY))
         {
            float z = nvoptions->get_zsec() * _zDelt;
-           draw_earth_image(z-0.01);
         }
 
       //_display_Zplane();
@@ -250,8 +266,10 @@ void WindVector::_display_Zplane()
 
     z = nvoptions->get_zsec() * _zDelt;
 
-    for(j = _stepsize/2; j < _ny; j += _stepsize)
+    if(has_w())
     {
+      for(j = _stepsize/2; j < _ny; j += _stepsize)
+      {
         y = _yStart + _xyDelt * j;
         n = (nvoptions->get_zsec() * _ny + j) * _nx;
 
@@ -261,6 +279,22 @@ void WindVector::_display_Zplane()
 
             _draw_arrow(x, y, z, _u[n+i], _v[n+i], _w[n+i]);
         }
+      }
+    }
+    else
+    {
+      for(j = _stepsize/2; j < _ny; j += _stepsize)
+      {
+        y = _yStart + _xyDelt * j;
+        n = (nvoptions->get_zsec() * _ny + j) * _nx;
+
+        for(i = _stepsize/2; i < _nx; i += _stepsize)
+        {
+            x = _xStart + _xyDelt * i;
+
+            _draw_arrow(x, y, z, _u[n+i], _v[n+i]);
+        }
+      }
     }
 }
 
@@ -305,6 +339,33 @@ void WindVector::_draw_arrow(float x, float y, float z,
     head[0] = x + suvw[0];
     head[1] = y + suvw[1];
     head[2] = z + suvw[2];
+
+    _arrow(tail, head, suvw);
+}
+
+void WindVector::_draw_arrow(float x, float y, float z,
+                             float u, float v)
+{
+    float color[3];
+    float tail[3];
+    float head[3];
+    float suvw[3];
+    float dist = sqrt(u*u + v*v);
+
+    _set_color(dist, color);
+    glColor3fv(color);
+
+    tail[0] = x;
+    tail[1] = y;
+    tail[2] = z;
+
+    suvw[0] = _scale * u;
+    suvw[1] = _scale * v;
+    suvw[2] = 0.0;
+
+    head[0] = x + suvw[0];
+    head[1] = y + suvw[1];
+    head[2] = z;
 
     _arrow(tail, head, suvw);
 }
@@ -462,60 +523,9 @@ void WindVector::_display_arrow_onZplane()
     }
 }
 
-void WindVector::setup_position(double* lon, double* lat)
+void WindVector::setup_lonlat(double* lon, double* lat)
 {
     _lon = lon;
     _lat = lat;
-#if 0
-    size_t n;
-
-    for(n = 0; n < _nx * _ny; ++n)
-    {
-        if(0.0 > _lon[n])
-            _lon[n] = 360.0 + _lon[n];
-        else
-            _lon[n] = _lon[n];
-    }
-#endif
-}
-
-void WindVector::draw_earth_image(float z)
-{
-    int i, j, n;
-    float x, y0, y1;
-    float s0, s1, t0, t1;
-
-  //Set texture
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, topography->get_tid(0));
-
-  //Latitude bands
-    glColor3f(1.0, 1.0, 1.0);
-    glNormal3d(0.0, 0.0, 1.0);
-    for(j = 0; j < _ny - 1; ++j)
-    {
-       n = j * _nx;
-       y1 = _yStart + _xyDelt * (j + 1);
-       y0 = _yStart + _xyDelt * j;
-
-       glBegin(GL_QUAD_STRIP);
-       for(i = 0; i < _nx; ++i)
-       {
-           x = _xStart + _xyDelt * i;
-
-           s0 = _lon[n + i] / 360.0;
-           t0 = _lat[n + i] / 180.0;
-           glTexCoord2d(0.5 + s0, 0.5 + t0);
-           glVertex3d(x, y0, z);
-
-           s1 = _lon[n + _nx + i] / 360.0;
-           t1 = _lat[n + _nx + i] / 180.0;
-           glTexCoord2d(0.5 + s1, 0.5 + t1);
-           glVertex3d(x, y1, z);
-       }
-       glEnd();
-    }
-
-    glDisable(GL_TEXTURE_2D);
 }
 

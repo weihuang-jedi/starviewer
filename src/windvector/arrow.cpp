@@ -76,6 +76,46 @@ void Arrow::setup(float x, float y, float z,
   //cout << "\tspeed = " << _speed << ", _length = " << _length << ", _width = " << _width << endl;
 }
 
+void Arrow::setup(float x, float y, float z,
+                  float u, float v)
+{
+    _u = u;
+    _v = v;
+    _speed = sqrt(u*u + v*v);
+
+    _dx = _sh * u;
+    _dy = _sh * v;
+
+    _length = sqrt(_dx*_dx + _dy*_dy);
+    _width = _sw * _length;
+
+#if 0
+    _x1 = x;
+    _y1 = y;
+    _z1 = z;
+
+    _x2 = x + _dx;
+    _y2 = y + _dy;
+    _z2 = z + _dz;
+#else
+    _x2 = x;
+    _y2 = y;
+    _z2 = z;
+
+    _x1 = x - _dx;
+    _y1 = y - _dy;
+    _z1 = z;
+#endif
+
+  //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">";
+  //cout << "\tline: " << __LINE__;
+  //cout << "\tfile: <" << __FILE__ << ">" << endl;
+  //cout << "\tu = " << u << ", v = " << v << endl;
+  //cout << "\tx = " << x << ", y = " << y << ", z = " << z << endl;
+  //cout << "\tdx = " << _dx << ", dy = " << _dy << ", _dz = " << _dz << endl;
+  //cout << "\tspeed = " << _speed << ", _length = " << _length << ", _width = " << _width << endl;
+}
+
 void Arrow::_set_color(double spd)
 {
     int idx = (int) (((float)(spd * _colorlen)) / _maxspeed);

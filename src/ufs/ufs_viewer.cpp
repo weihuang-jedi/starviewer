@@ -32,6 +32,7 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt)
     lister->setup(361, 181, 121);
 
     locator = NULL;
+    windvector = new WindVector(ct, opt);;
 
     previoustimelevel = -1;
     current_timelevel = 0;
@@ -77,6 +78,7 @@ UFS2dViewer::~UFS2dViewer()
     delete earth;
     delete lister;
     delete texture1d;
+    delete windvector;
 }
 
 void UFS2dViewer::set_geometry(UFSGeometry *gm)
@@ -136,6 +138,8 @@ void UFS2dViewer::_initialize()
     _yFlat = geometry->get_yFlat();
 
     geometry->set_ntim(1);
+
+    windvector->setup_lonlat(_lon, _lat);
 }
 
 void UFS2dViewer::draw()
@@ -1099,5 +1103,12 @@ double UFS2dViewer::_k2r(int k)
 {
     double radius = 1.0 + _k2h(k);
     return radius;
+}
+
+void UFS2dViewer::setup_wind(float* u, float* v)
+{
+    _u = u;
+    _v = v;
+    windvector->setup(_nlon, _nlat, _nlev, _u, _v);
 }
 
