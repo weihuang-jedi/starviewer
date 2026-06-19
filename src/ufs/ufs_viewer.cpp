@@ -444,14 +444,15 @@ void UFS2dViewer::_flatDisplay()
         }
         glEnd();
       }
-      coastline->drawOnPlane(height+0.01);
 
       cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
       cout << "\tnvoptions->get_cb(NV_VECTORON): " << nvoptions->get_cb(NV_VECTORON) << endl;
       if(nvoptions->get_cb(NV_VECTORON))
       {
-        windvector->draw(k);
+        windvector->draw(k, height);
       }
+
+      coastline->drawOnPlane(height+0.01);
     }
 
     glDisable(GL_TEXTURE_1D);

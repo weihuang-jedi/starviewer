@@ -14,12 +14,16 @@ Arrow::Arrow(ColorTable *ct)
 
   //_sh = 0.1;
   //_sv = 0.1;
-  //_sh = 0.001;
-  //_sv = 0.01;
-    _sh = 0.005;
-    _sv = 0.02;
+  //_sw = 0.01;
+
+  //_sh = 0.005;
+  //_sv = 0.02;
+ 
+    _sh = 0.01;
+    _sv = 0.01;
     _sw = 0.01;
-    _maxspeed = 50.0;
+
+    _maxspeed = 10.0;
 
     _colorlen = colorTable->get_clen() - 3;
     _colormap = colorTable->get_cmap();
@@ -120,8 +124,6 @@ void Arrow::draw()
   //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">";
   //cout << "\tline: " << __LINE__;
   //cout << "\tfile: <" << __FILE__ << ">" << endl;
-
-    glPushMatrix();
 
     _set_color(_speed);
   //glColor4fv(color);
@@ -226,8 +228,6 @@ void Arrow::draw()
             cone->draw();
         }
     }
-
-    glPopMatrix();
 }
 
 vector_struct get_normalized_vector(vector_struct &vec)

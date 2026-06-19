@@ -28,7 +28,7 @@ class WindVector
         WindVector(ColorTable* ct, NVOptions* opt);
        ~WindVector();
 
-        void draw(int k);
+        void draw(int k, double z);
 
         void setup(int nx, int ny, int nz,
                    float* u, float* v, float*w);
@@ -61,13 +61,13 @@ class WindVector
         double* _xFlat;
         double* _yFlat;
 
-        void _display_all(int k);
+        void _display_all(int k, double z);
 
     private:
         void _display_Xplane();
         void _display_Yplane();
-        void _display_Zplane(int k);
-        void _display_arrow_onZplane(int k);
+        void _display_Zplane(int k, double z);
+        void _display_arrow_onZplane(int k, double z);
 
         int _nx, _ny, _nz;
         int _stepsize, _local_stepsize;

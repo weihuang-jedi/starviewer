@@ -15,13 +15,14 @@ WindVector::WindVector(ColorTable *ct, NVOptions* opt)
 
     arrow = new Arrow(ct);
 
-    _scale = 0.50;
+    // _scale = 0.50;
+    _scale = 5000.0;
     _zScale = 0.50;
     _wings = 1000.0;
-    _stepsize = 1;
-    _local_stepsize = 1;
+    _stepsize = 2;
+    _local_stepsize = 2;
   //_maxspeed = 100.0;
-    _maxspeed = 50.0;
+    _maxspeed = 5.0;
 
     axx[0] = 1.0;
     axx[1] = 0.0;
@@ -80,7 +81,7 @@ void WindVector::setup(int nx, int ny, int nz,
     nvoptions->set_zsec(0);
 }
 
-void WindVector::draw(int k)
+void WindVector::draw(int k, double z)
 {
     if(nvoptions->get_cb(NV_VECTOR_LONGER))
     {
@@ -120,24 +121,16 @@ void WindVector::draw(int k)
         nvoptions->set_cb(NV_VECTOR_LESS, false);
     }
 
-    glPushMatrix();
+    // glPushMatrix();
 
-  //glDisable(GL_DEPTH_TEST);
+    // glEnable(GL_BLEND);
+    // glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-    glEnable(GL_BLEND);
-  //glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    _display_all(k, z);
 
-  //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // glDisable(GL_BLEND);
 
-    _display_all(k);
-
-    glDisable(GL_BLEND);
-
-  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  //glEnable(GL_DEPTH_TEST);
-
-    glPopMatrix();
+    // glPopMatrix();
 }
 
 void WindVector::_parameter_setup()
@@ -164,18 +157,22 @@ void WindVector::_parameter_setup()
     else
         _zDelt = 1.0;
 
+    // _scale = 5.0 * _xyDelt / _maxspeed;
+    // _zScale = 50.0 * _zDelt / _maxspeed;
+
     _scale = 5.0 * _xyDelt / _maxspeed;
     _zScale = 50.0 * _zDelt / _maxspeed;
 
-  //cout << "Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
-  //     << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\t_nx = " << _nx << ", _ny = " << _ny << ", _nz = " << _nz << endl;
+    cout << "Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
+         << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\t_nx = " << _nx << ", _ny = " << _ny << ", _nz = " << _nz << endl;
+    cout << "\t_scale = " << _scale << ", _zScale = " << _zScale << endl;
 
     if(_stepsize < _local_stepsize)
        _stepsize = _local_stepsize;
 }
 
-void WindVector::_display_all(int k)
+void WindVector::_display_all(int k, double z)
 {
     cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     cout << "\t_nx = " << _nx << ", _ny = " << _ny << ", _nz = " << _nz << endl;
@@ -215,13 +212,8 @@ void WindVector::_display_all(int k)
 
     if(_nz > nvoptions->get_zsec())
     {
-        if(nvoptions->get_cb(NV_VECTORONLY))
-        {
-           double z = nvoptions->get_zsec() * _zDelt;
-        }
-
-      //_display_Zplane();
-        _display_arrow_onZplane(k);
+        _display_Zplane(k, z);
+        // _display_arrow_onZplane(k, z);
     }
 }
 
@@ -265,12 +257,10 @@ void WindVector::_display_Yplane()
     }
 }
 
-void WindVector::_display_Zplane(int k)
+void WindVector::_display_Zplane(int k, double z)
 {
     int i, j, n;
-    double x, y, z;
-
-    z = nvoptions->get_zsec() * _zDelt;
+    double x, y;
 
     if(has_w())
     {
@@ -289,16 +279,14 @@ void WindVector::_display_Zplane(int k)
     }
     else
     {
+      double zp = z + 0.25;
       for(j = _stepsize/2; j < _ny; j += _stepsize)
       {
-        y = _yStart + _xyDelt * j;
         n = (k * _ny + j) * _nx;
 
         for(i = _stepsize/2; i < _nx; i += _stepsize)
         {
-            x = _xStart + _xyDelt * i;
-
-            _draw_arrow(x, y, z, _u[n+i], _v[n+i]);
+            _draw_arrow(_xFlat[i], _yFlat[j], zp, _u[n+i], _v[n+i]);
         }
       }
     }
@@ -398,8 +386,11 @@ void WindVector::_arrow(double tail[3], double head[3], double w[3])
   //set size of wings and turn w into a Unit vector:
     double d = _wings * _dist(w);
 
-    if(d > 0.125)
-       d = 0.125;
+  //if(d > 0.125)
+  //   d = 0.125;
+
+    if(d > 1.25)
+       d = 1.25;
 
   //cout << "Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
   //     << ", file: <" << __FILE__ << ">" << endl;
@@ -503,26 +494,22 @@ double WindVector::_dist(double v[3])
     return dist;
 }
 
-void WindVector::_display_arrow_onZplane(int k)
+void WindVector::_display_arrow_onZplane(int k, double z)
 {
     int i, j, n;
-    double x, y, z;
-
-    // z = nvoptions->get_zsec() * _zDelt + 1.0;
-    // z = nvoptions->get_zsec() * _zDelt + 0.075;
-    z = double(k) + 0.5;
+    double x, y;
 
     cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\t k = " << k << ", _nz = " << _nz << endl;
-    cout << "\t _xStart = " << _xStart << ", _yStart = " << _yStart << ", _xyDelt = " << _xyDelt << endl;
+    cout << "\t k = " << k << ", _nx = " << _nx << ", _ny = " << _ny << ", _nz = " << _nz << endl;
     cout << "\t has_w() = " << has_w() << endl;
 
     if(has_w())
     {
+      cout << "\t _xStart = " << _xStart << ", _yStart = " << _yStart << ", _xyDelt = " << _xyDelt << endl;
       for(j = _stepsize/2; j < _ny; j += _stepsize)
       {
         y = _yStart + _xyDelt * j;
-        n = ((_nz-k-1) * _ny + j) * _nx;
+        n = (k * _ny + j) * _nx;
 
         for(i = _stepsize/2; i < _nx; i += _stepsize)
         {
@@ -535,16 +522,21 @@ void WindVector::_display_arrow_onZplane(int k)
     }
     else
     {
+      cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+      cout << "\t k = " << k << ", _nz = " << _nz << endl;
+      cout << "\t has_w() = " << has_w() << endl;
       for(j = _stepsize/2; j < _ny; j += _stepsize)
       {
         // y = _yStart + _xyDelt * j;
         y = _yFlat[j];
-        n = ((_nz-k-1) * _ny + j) * _nx;
+        n = (k * _ny + j) * _nx;
+
+        cout << "\t_u[n] = " << _u[n] << ", _v[n] = " << _v[n]<< endl;
 
         for(i = _stepsize/2; i < _nx; i += _stepsize)
         {
             // x = _xStart + _xyDelt * i;
-            x = _xFlat[j];
+            x = _xFlat[i];
 
             arrow->setup(x, y, z, _u[n+i], _v[n+i]);
             arrow->draw();
