@@ -28,18 +28,19 @@ class WindVector
         WindVector(ColorTable* ct, NVOptions* opt);
        ~WindVector();
 
-        void draw();
+        void draw(int k);
 
         void setup(int nx, int ny, int nz,
                    float* u, float* v, float*w);
         void setup(int nx, int ny, int nz,
                    float* u, float* v);
         void setup_lonlat(double* lon, double* lat);
+        void setup_xyFlat(double* xFlat, double* yFlat);
 
         void set_colorTable(ColorTable *ct) { colorTable = ct; };
 
         void set_stepsize(int n) { _stepsize = n; };
-        void set_maxspeed(float s) { _maxspeed = s; };
+        void set_maxspeed(double s) { _maxspeed = s; };
 
 	bool has_w() { return _has_w; };
 
@@ -57,13 +58,16 @@ class WindVector
         double* _lon;
         double* _lat;
 
-        void _display_all();
+        double* _xFlat;
+        double* _yFlat;
+
+        void _display_all(int k);
 
     private:
         void _display_Xplane();
         void _display_Yplane();
-        void _display_Zplane();
-        void _display_arrow_onZplane();
+        void _display_Zplane(int k);
+        void _display_arrow_onZplane(int k);
 
         int _nx, _ny, _nz;
         int _stepsize, _local_stepsize;
@@ -71,28 +75,28 @@ class WindVector
 
         int    _colorlen;
         float* _colormap;
-        float _wings;
-        float _maxspeed;
-        float _scale, _zScale;
-        float _xStart, _yStart;
-        float _xyDelt, _zDelt;
+        double _wings;
+        double _maxspeed;
+        double _scale, _zScale;
+        double _xStart, _yStart;
+        double _xyDelt, _zDelt;
 
-        float axx[3];
-        float ayy[3];
-        float azz[3];
+        double axx[3];
+        double ayy[3];
+        double azz[3];
 
         void _parameter_setup();
 
-        void _draw_arrow(float x, float y, float z,
+        void _draw_arrow(double x, double y, double z,
                          float u, float v, float w);
-        void _draw_arrow(float x, float y, float z,
+        void _draw_arrow(double x, double y, double z,
                          float u, float v);
-        void _arrow(float tail[3], float head[3], float w[3]);
-        void _cross(float v1[3], float v2[3], float vout[3]);
+        void _arrow(double tail[3], double head[3], double w[3]);
+        void _cross(double v1[3], double v2[3], double vout[3]);
 
-        float _dist(float vin[3]);
+        double _dist(double vin[3]);
 
-        void _set_color(float spd, float* color);
+        void _set_color(double spd, float* color);
 };
 #endif
 

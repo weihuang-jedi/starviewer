@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <memory>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -73,7 +74,8 @@ class UFS2dViewer : public QGLWidget
         Lister* lister;
         Locator* locator;
         NVOptions* nvoptions;
-	WindVector* windvector;
+	// WindVector* windvector;
+	unique_ptr<WindVector> windvector;
 
         string _varname;
 

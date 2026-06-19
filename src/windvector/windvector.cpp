@@ -7,6 +7,10 @@
 WindVector::WindVector(ColorTable *ct, NVOptions* opt)
 {
     colorTable = ct;
+    // colorTable = new ColorTable();
+    // string vecmap = "vector";
+    // colorTable->set_colorMap(vecmap);
+
     nvoptions = opt;
 
     arrow = new Arrow(ct);
@@ -76,7 +80,7 @@ void WindVector::setup(int nx, int ny, int nz,
     nvoptions->set_zsec(0);
 }
 
-void WindVector::draw()
+void WindVector::draw(int k)
 {
     if(nvoptions->get_cb(NV_VECTOR_LONGER))
     {
@@ -126,7 +130,7 @@ void WindVector::draw()
 
   //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
-    _display_all();
+    _display_all(k);
 
     glDisable(GL_BLEND);
 
@@ -171,13 +175,13 @@ void WindVector::_parameter_setup()
        _stepsize = _local_stepsize;
 }
 
-void WindVector::_display_all()
+void WindVector::_display_all(int k)
 {
-  //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\t_nx = " << _nx << ", _ny = " << _ny << ", _nz = " << _nz << endl;
+    cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\t_nx = " << _nx << ", _ny = " << _ny << ", _nz = " << _nz << endl;
   //cout << "\tnvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
   //cout << "\tnvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
-  //cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
+    cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
 
     _colorlen = colorTable->get_clen() - 3;
     _colormap = colorTable->get_cmap();
@@ -185,6 +189,7 @@ void WindVector::_display_all()
     if(_stepsize < _local_stepsize)
        _stepsize = _local_stepsize;
 
+#if 0
     glLineWidth(1.5);
 
     glScalef(1.0, 1.0, 0.4);
@@ -206,23 +211,24 @@ void WindVector::_display_all()
     {
         _display_Yplane();
     }
+#endif
 
     if(_nz > nvoptions->get_zsec())
     {
         if(nvoptions->get_cb(NV_VECTORONLY))
         {
-           float z = nvoptions->get_zsec() * _zDelt;
+           double z = nvoptions->get_zsec() * _zDelt;
         }
 
       //_display_Zplane();
-        _display_arrow_onZplane();
+        _display_arrow_onZplane(k);
     }
 }
 
 void WindVector::_display_Xplane()
 {
     int j, k, n;
-    float x, y, z;
+    double x, y, z;
 
     x = _xStart + nvoptions->get_xsec() * _xyDelt;
 
@@ -242,7 +248,7 @@ void WindVector::_display_Xplane()
 void WindVector::_display_Yplane()
 {
     int i, k, n;
-    float x, y, z;
+    double x, y, z;
 
     y = _yStart + nvoptions->get_ysec() * _xyDelt;
 
@@ -259,10 +265,10 @@ void WindVector::_display_Yplane()
     }
 }
 
-void WindVector::_display_Zplane()
+void WindVector::_display_Zplane(int k)
 {
     int i, j, n;
-    float x, y, z;
+    double x, y, z;
 
     z = nvoptions->get_zsec() * _zDelt;
 
@@ -271,7 +277,7 @@ void WindVector::_display_Zplane()
       for(j = _stepsize/2; j < _ny; j += _stepsize)
       {
         y = _yStart + _xyDelt * j;
-        n = (nvoptions->get_zsec() * _ny + j) * _nx;
+        n = (k * _ny + j) * _nx;
 
         for(i = _stepsize/2; i < _nx; i += _stepsize)
         {
@@ -286,7 +292,7 @@ void WindVector::_display_Zplane()
       for(j = _stepsize/2; j < _ny; j += _stepsize)
       {
         y = _yStart + _xyDelt * j;
-        n = (nvoptions->get_zsec() * _ny + j) * _nx;
+        n = (k * _ny + j) * _nx;
 
         for(i = _stepsize/2; i < _nx; i += _stepsize)
         {
@@ -298,7 +304,7 @@ void WindVector::_display_Zplane()
     }
 }
 
-void WindVector::_set_color(float spd, float* color)
+void WindVector::_set_color(double spd, float* color)
 {
 #if 1
     color[0]  = 1.0;
@@ -316,14 +322,14 @@ void WindVector::_set_color(float spd, float* color)
 #endif
 }
 
-void WindVector::_draw_arrow(float x, float y, float z,
+void WindVector::_draw_arrow(double x, double y, double z,
                              float u, float v, float w)
 {
     float color[3];
-    float tail[3];
-    float head[3];
-    float suvw[3];
-    float dist = sqrt(u*u + v*v + w*w);
+    double tail[3];
+    double head[3];
+    double suvw[3];
+    double dist = sqrt(u*u + v*v + w*w);
 
     _set_color(dist, color);
     glColor3fv(color);
@@ -343,14 +349,14 @@ void WindVector::_draw_arrow(float x, float y, float z,
     _arrow(tail, head, suvw);
 }
 
-void WindVector::_draw_arrow(float x, float y, float z,
+void WindVector::_draw_arrow(double x, double y, double z,
                              float u, float v)
 {
     float color[3];
-    float tail[3];
-    float head[3];
-    float suvw[3];
-    float dist = sqrt(u*u + v*v);
+    double tail[3];
+    double head[3];
+    double suvw[3];
+    double dist = sqrt(u*u + v*v);
 
     _set_color(dist, color);
     glColor3fv(color);
@@ -370,13 +376,13 @@ void WindVector::_draw_arrow(float x, float y, float z,
     _arrow(tail, head, suvw);
 }
 
-void WindVector::_arrow(float tail[3], float head[3], float w[3])
+void WindVector::_arrow(double tail[3], double head[3], double w[3])
 {
-    float u[3], v[3];        // arrow coordinate system
+    double u[3], v[3];        // arrow coordinate system
 
   //determine major direction:
     int axis = X_DIRECTION;
-    float mag = fabs(w[0]);
+    double mag = fabs(w[0]);
     if(mag < fabs(w[1]))
     {
         axis = Y_DIRECTION;
@@ -390,7 +396,7 @@ void WindVector::_arrow(float tail[3], float head[3], float w[3])
     }
 
   //set size of wings and turn w into a Unit vector:
-    float d = _wings * _dist(w);
+    double d = _wings * _dist(w);
 
     if(d > 0.125)
        d = 0.125;
@@ -403,12 +409,12 @@ void WindVector::_arrow(float tail[3], float head[3], float w[3])
 
   //draw the shaft of the arrow:
     glBegin( GL_LINE_STRIP );
-        glVertex3fv( tail );
-        glVertex3fv( head );
+        glVertex3dv( tail );
+        glVertex3dv( head );
     glEnd( );
 
   //draw two sets of wings in the non-major directions:
-    float x, y, z;
+    double x, y, z;
 
     if(axis != X_DIRECTION)
     {
@@ -420,8 +426,8 @@ void WindVector::_arrow(float tail[3], float head[3], float w[3])
         z = head[2] + d * ( u[2] - w[2] );
 
         glBegin( GL_LINE_STRIP );
-            glVertex3fv( head );
-            glVertex3f( x, y, z );
+            glVertex3dv( head );
+            glVertex3d( x, y, z );
         glEnd( );
 
         x = head[0] + d * ( -u[0] - w[0] );
@@ -429,8 +435,8 @@ void WindVector::_arrow(float tail[3], float head[3], float w[3])
         z = head[2] + d * ( -u[2] - w[2] );
 
         glBegin( GL_LINE_STRIP );
-            glVertex3fv( head );
-            glVertex3f( x, y, z );
+            glVertex3dv( head );
+            glVertex3d( x, y, z );
         glEnd( );
     }
 
@@ -444,8 +450,8 @@ void WindVector::_arrow(float tail[3], float head[3], float w[3])
         z = head[2] + d * ( u[2] - w[2] );
 
         glBegin( GL_LINE_STRIP );
-            glVertex3fv( head );
-            glVertex3f( x, y, z );
+            glVertex3dv( head );
+            glVertex3d( x, y, z );
         glEnd( );
 
         x = head[0] + d * ( -u[0] - w[0] );
@@ -453,8 +459,8 @@ void WindVector::_arrow(float tail[3], float head[3], float w[3])
         z = head[2] + d * ( -u[2] - w[2] );
 
         glBegin( GL_LINE_STRIP );
-            glVertex3fv( head );
-            glVertex3f( x, y, z );
+            glVertex3dv( head );
+            glVertex3d( x, y, z );
         glEnd( );
     }
 
@@ -468,8 +474,8 @@ void WindVector::_arrow(float tail[3], float head[3], float w[3])
         z = head[2] + d * ( u[2] - w[2] );
 
         glBegin( GL_LINE_STRIP );
-            glVertex3fv( head );
-            glVertex3f( x, y, z );
+            glVertex3dv( head );
+            glVertex3d( x, y, z );
         glEnd( );
 
         x = head[0] + d * ( -u[0] - w[0] );
@@ -477,41 +483,46 @@ void WindVector::_arrow(float tail[3], float head[3], float w[3])
         z = head[2] + d * ( -u[2] - w[2] );
 
         glBegin( GL_LINE_STRIP );
-            glVertex3fv( head );
-            glVertex3f( x, y, z );
+            glVertex3dv( head );
+            glVertex3d( x, y, z );
         glEnd( );
     }
 }
 
-void WindVector::_cross( float v1[3], float v2[3], float vout[3] )
+void WindVector::_cross( double v1[3], double v2[3], double vout[3] )
 {
     vout[0] = v1[1]*v2[2] - v2[1]*v1[2];
     vout[1] = v2[0]*v1[2] - v1[0]*v2[2];
     vout[2] = v1[0]*v2[1] - v2[0]*v1[1];
 }
 
-float WindVector::_dist(float v[3])
+double WindVector::_dist(double v[3])
 {
-    float dist = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+    double dist = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
 
     return dist;
 }
 
-void WindVector::_display_arrow_onZplane()
+void WindVector::_display_arrow_onZplane(int k)
 {
     int i, j, n;
-    float x, y, z;
+    double x, y, z;
 
-  //z = nvoptions->get_zsec() * _zDelt + 1.0;
-    z = nvoptions->get_zsec() * _zDelt + 0.075;
+    // z = nvoptions->get_zsec() * _zDelt + 1.0;
+    // z = nvoptions->get_zsec() * _zDelt + 0.075;
+    z = double(k) + 0.5;
 
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tz1 = " << z << ", zs = " << nvoptions->get_zsec() << ", nz = " << _nz << endl;
+    cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t k = " << k << ", _nz = " << _nz << endl;
+    cout << "\t _xStart = " << _xStart << ", _yStart = " << _yStart << ", _xyDelt = " << _xyDelt << endl;
+    cout << "\t has_w() = " << has_w() << endl;
 
-    for(j = _stepsize/2; j < _ny; j += _stepsize)
+    if(has_w())
     {
+      for(j = _stepsize/2; j < _ny; j += _stepsize)
+      {
         y = _yStart + _xyDelt * j;
-        n = (nvoptions->get_zsec() * _ny + j) * _nx;
+        n = ((_nz-k-1) * _ny + j) * _nx;
 
         for(i = _stepsize/2; i < _nx; i += _stepsize)
         {
@@ -520,12 +531,43 @@ void WindVector::_display_arrow_onZplane()
             arrow->setup(x, y, z, _u[n+i], _v[n+i], _w[n+i]);
             arrow->draw();
         }
+      }
+    }
+    else
+    {
+      for(j = _stepsize/2; j < _ny; j += _stepsize)
+      {
+        // y = _yStart + _xyDelt * j;
+        y = _yFlat[j];
+        n = ((_nz-k-1) * _ny + j) * _nx;
+
+        for(i = _stepsize/2; i < _nx; i += _stepsize)
+        {
+            // x = _xStart + _xyDelt * i;
+            x = _xFlat[j];
+
+            arrow->setup(x, y, z, _u[n+i], _v[n+i]);
+            arrow->draw();
+        }
+      }
     }
 }
 
 void WindVector::setup_lonlat(double* lon, double* lat)
 {
+    cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\tlon[0] = " << lon[0] << ", lat[0] = " << lat[0] << endl;
     _lon = lon;
     _lat = lat;
+    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+}
+
+void WindVector::setup_xyFlat(double* xFlat, double* yFlat)
+{
+    cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\txFlat[0] = " << xFlat[0] << ", yFlat[0] = " << yFlat[0] << endl;
+    _xFlat = xFlat;
+    _yFlat = yFlat;
+    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 

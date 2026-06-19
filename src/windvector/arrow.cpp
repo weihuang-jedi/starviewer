@@ -34,7 +34,7 @@ Arrow::~Arrow()
     delete [] cylinder;
 }
 
-void Arrow::setup(float x, float y, float z,
+void Arrow::setup(double x, double y, double z,
                   float u, float v, float w)
 {
     _u = u;
@@ -66,17 +66,9 @@ void Arrow::setup(float x, float y, float z,
     _y1 = y - _dy;
     _z1 = z - _dz;
 #endif
-
-  //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">";
-  //cout << "\tline: " << __LINE__;
-  //cout << "\tfile: <" << __FILE__ << ">" << endl;
-  //cout << "\tu = " << u << ", v = " << v << ", w = " << w << endl;
-  //cout << "\tx = " << x << ", y = " << y << ", z = " << z << endl;
-  //cout << "\tdx = " << _dx << ", dy = " << _dy << ", _dz = " << _dz << endl;
-  //cout << "\tspeed = " << _speed << ", _length = " << _length << ", _width = " << _width << endl;
 }
 
-void Arrow::setup(float x, float y, float z,
+void Arrow::setup(double x, double y, double z,
                   float u, float v)
 {
     _u = u;
@@ -106,19 +98,11 @@ void Arrow::setup(float x, float y, float z,
     _y1 = y - _dy;
     _z1 = z;
 #endif
-
-  //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">";
-  //cout << "\tline: " << __LINE__;
-  //cout << "\tfile: <" << __FILE__ << ">" << endl;
-  //cout << "\tu = " << u << ", v = " << v << endl;
-  //cout << "\tx = " << x << ", y = " << y << ", z = " << z << endl;
-  //cout << "\tdx = " << _dx << ", dy = " << _dy << ", _dz = " << _dz << endl;
-  //cout << "\tspeed = " << _speed << ", _length = " << _length << ", _width = " << _width << endl;
 }
 
 void Arrow::_set_color(double spd)
 {
-    int idx = (int) (((float)(spd * _colorlen)) / _maxspeed);
+    int idx = (int) (((spd * _colorlen)) / _maxspeed);
  
     if(idx > (_colorlen - 1))
        idx = _colorlen - 1;
@@ -146,15 +130,15 @@ void Arrow::draw()
     {
       //draw a dot
         glBegin(GL_POINTS);
-            glVertex3f(_x1, _y1, _z1);
+            glVertex3d(_x1, _y1, _z1);
         glEnd();
     }
     else if(0.1 > _speed)
     {
       //draw a line
         glBegin(GL_LINE_STRIP);
-            glVertex3f(_x1, _y1, _z1);
-            glVertex3f(_x2, _y2, _z2);
+            glVertex3d(_x1, _y1, _z1);
+            glVertex3d(_x2, _y2, _z2);
         glEnd();
     }
     else

@@ -28,7 +28,6 @@ typedef enum
     EAGLEGLOBAL = 0x1201,
     MPIDEMO = 0x8888,
     TEST    = 0xffff
->>>>>>> origin/develop
 } ModelType;
 
 typedef enum
