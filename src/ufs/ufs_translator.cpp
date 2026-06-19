@@ -25,13 +25,12 @@ string number2string(T n)
 
 //Constructor
 UFSTranslator::UFSTranslator(ColorTable* ct, NVOptions* opt,
-                             string flnm, bool isList, string mfnm, QWidget* parent)
+                             string flnm, QWidget* parent)
                : BaseTranslator(ct, opt, parent)
 {
   //cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 
     _filename = flnm;
-    _hasFileList = isList;
 
     nvoptions->set_xsec(-1);
     nvoptions->set_ysec(-1);
@@ -62,16 +61,8 @@ void UFSTranslator::setup()
     if(NULL != ufs_controller)
         delete ufs_controller;
 
-  //if(_hasFileList)
-  //{
-  //  //cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //    ufs_controller = new UFSController(colorTable, nvoptions, _filename.c_str(), _hasFileList);
-  //}
-  //else
-  //{
-        // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-        ufs_controller = new UFSController(colorTable, nvoptions, _filename.c_str());
-  //}
+    // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    ufs_controller = new UFSController(colorTable, nvoptions, _filename.c_str());
 
     // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufs_controller->setup();
@@ -103,8 +94,6 @@ void UFSTranslator::setup()
     if(_maxTime > 12)
         _maxTime = 12;
 
-  //cout << "\t_maxFile = " << _maxFile << endl;
-  //cout << "\t_maxTime = " << _maxTime << endl;
     // cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 

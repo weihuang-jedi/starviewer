@@ -49,7 +49,7 @@ void ControlWidget::_setup_buttons()
 
     bump_cb    = new QCheckBox("Bump");
     colorbar_cb= new QCheckBox("ColorBar");
-    sphere_cb  = new QCheckBox("Sphere");
+    vector_cb  = new QCheckBox("Vector");
     flat_cb    = new QCheckBox("Flat");
     bgBW_cb    = new QCheckBox("BG-BW");
     onmap_cb   = new QCheckBox("OnMap");
@@ -104,7 +104,7 @@ void ControlWidget::_setup_buttons()
     connect(flat_cb,    SIGNAL(stateChanged(int)), translator, SLOT(selectFlat(int)));
     connect(bgBW_cb,    SIGNAL(stateChanged(int)), translator, SLOT(selectBackground(int)));
     connect(onmap_cb,   SIGNAL(stateChanged(int)), translator, SLOT(selectOnMap(int)));
-    connect(sphere_cb,  SIGNAL(stateChanged(int)), translator, SLOT(selectSphere(int)));
+    connect(vector_cb,  SIGNAL(stateChanged(int)), translator, SLOT(selectVector(int)));
   //connect(title_cb,   SIGNAL(stateChanged(int)), translator, SLOT(selectTitle(int)));
   //connect(surface_cb, SIGNAL(stateChanged(int)), translator, SLOT(selectSurface(int)));
   //connect(shader_cb,  SIGNAL(stateChanged(int)), translator, SLOT(selectShader(int)));
@@ -129,7 +129,7 @@ void ControlWidget::_setup_buttons()
 
     button_lay->addWidget(bgBW_cb,    2, 0);
     button_lay->addWidget(onmap_cb,   2, 1);
-    button_lay->addWidget(sphere_cb,  2, 2);
+    button_lay->addWidget(vector_cb,  2, 2);
 
   //button_lay->addWidget(title_cb,   3, 0);
 

@@ -225,22 +225,6 @@ void MainWindow::_setup_display()
     // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
-/*
-void MainWindow::wrf()
-{
-    wrf_translator = new WRFTranslator(colorTable, nvoptions,
-                                       fileName.toStdString(),
-                                       isFileList);
-    translator = wrf_translator;
-
-    setWindowTitle(tr("NV for WRF"));
-
-    _setup_controlPanel();
-
-    _setup_display();
-}
-*/
-
 void MainWindow::mpidemo()
 {
     setWindowTitle(tr("NV to demo MPI"));
