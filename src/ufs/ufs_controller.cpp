@@ -219,12 +219,8 @@ void UFSController::set3dvarname(string vn)
     _minval = ufs_viewer->get_minval();
     _maxval = ufs_viewer->get_maxval();
 
-    cout << "function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "nvoptions->get_cb(NV_VECTORON): <" << nvoptions->get_cb(NV_VECTORON) << ">" << endl;
     // if(nvoptions->get_cb(NV_VECTORON))
     // {
-        cout << "function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-        cout << "get u and v" << endl;
 	float* u = ncfile->get_fv("ugrd");
 	float* v = ncfile->get_fv("vgrd");
 	ufs_viewer->setup_wind(u, v);

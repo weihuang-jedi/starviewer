@@ -6,10 +6,10 @@
 
 WindVector::WindVector(ColorTable *ct, NVOptions* opt)
 {
-    colorTable = ct;
-    // colorTable = new ColorTable();
-    // string vecmap = "vector";
-    // colorTable->set_colorMap(vecmap);
+    // colorTable = ct;
+    colorTable = new ColorTable();
+    string vecmap = "vector";
+    colorTable->set_colorMap(vecmap);
 
     nvoptions = opt;
 
@@ -81,8 +81,45 @@ void WindVector::setup(int nx, int ny, int nz,
     nvoptions->set_zsec(0);
 }
 
+void WindVector::_parameter_setup()
+{
+    double hDelt, vDelt;
+
+    if(_nx > _ny)
+    {
+        hDelt = 1.0 / (_nx - 1.0);
+
+        _local_stepsize = _nx / 100;
+    }
+    else
+    {
+        hDelt = 1.0 / (_ny - 1.0);
+
+        _local_stepsize = _ny / 100;
+    }
+
+    if(1 < _nz)
+        vDelt = 1.0 / (_nz - 1.0);
+    else
+        vDelt = 1.0;
+
+    _scale = 5.0 * hDelt / _maxspeed;
+    _zScale = 50.0 * vDelt / _maxspeed;
+
+    cout << "Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
+         << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\t_nx = " << _nx << ", _ny = " << _ny << ", _nz = " << _nz << endl;
+    cout << "\t_scale = " << _scale << ", _zScale = " << _zScale << endl;
+
+    if(_stepsize < _local_stepsize)
+       _stepsize = _local_stepsize;
+}
+
 void WindVector::draw(int k, double z)
 {
+    int i, j, n;
+    double zp = z + 0.025;
+
     if(nvoptions->get_cb(NV_VECTOR_LONGER))
     {
         arrow->longer();
@@ -121,64 +158,9 @@ void WindVector::draw(int k, double z)
         nvoptions->set_cb(NV_VECTOR_LESS, false);
     }
 
-    // glPushMatrix();
-
-    // glEnable(GL_BLEND);
-    // glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-
-    _display_all(k, z);
-
-    // glDisable(GL_BLEND);
-
-    // glPopMatrix();
-}
-
-void WindVector::_parameter_setup()
-{
-    if(_nx > _ny)
-    {
-        _xyDelt = 1.0 / (_nx - 1.0);
-        _yStart = 0.5 * (1.0 - (_ny - 1.0) * _xyDelt);
-        _xStart = 0.0;
-
-        _local_stepsize = _nx / 50;
-    }
-    else
-    {
-        _xyDelt = 1.0 / (_ny - 1.0);
-        _xStart = 0.5 * (1.0 - (_nx - 1.0) * _xyDelt);
-        _yStart = 0.0;
-
-        _local_stepsize = _ny / 50;
-    }
-
-    if(1 < _nz)
-        _zDelt = 1.0 / (_nz - 1.0);
-    else
-        _zDelt = 1.0;
-
-    // _scale = 5.0 * _xyDelt / _maxspeed;
-    // _zScale = 50.0 * _zDelt / _maxspeed;
-
-    _scale = 5.0 * _xyDelt / _maxspeed;
-    _zScale = 50.0 * _zDelt / _maxspeed;
-
-    cout << "Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
-         << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\t_nx = " << _nx << ", _ny = " << _ny << ", _nz = " << _nz << endl;
-    cout << "\t_scale = " << _scale << ", _zScale = " << _zScale << endl;
-
-    if(_stepsize < _local_stepsize)
-       _stepsize = _local_stepsize;
-}
-
-void WindVector::_display_all(int k, double z)
-{
-    cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\t_nx = " << _nx << ", _ny = " << _ny << ", _nz = " << _nz << endl;
-  //cout << "\tnvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
-  //cout << "\tnvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
-    cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
+    // cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\t_nx = " << _nx << ", _ny = " << _ny << ", _nz = " << _nz << endl;
+    // cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
 
     _colorlen = colorTable->get_clen() - 3;
     _colormap = colorTable->get_cmap();
@@ -186,100 +168,20 @@ void WindVector::_display_all(int k, double z)
     if(_stepsize < _local_stepsize)
        _stepsize = _local_stepsize;
 
-#if 0
-    glLineWidth(1.5);
-
-    glScalef(1.0, 1.0, 0.4);
-    if(_nz > 1)
-    {
-        glTranslatef(-0.5, -0.5, -0.5);
-    }
-    else
-    {
-        glTranslatef(-0.5, -0.5, 0.0);
-    }
-
-    if((_nx > nvoptions->get_xsec()) && (_nz > 1))
-    {
-        _display_Xplane();
-    }
-
-    if((_ny > nvoptions->get_ysec()) && (_nz > 1))
-    {
-        _display_Yplane();
-    }
-#endif
-
-    if(_nz > nvoptions->get_zsec())
-    {
-        _display_Zplane(k, z);
-        // _display_arrow_onZplane(k, z);
-    }
-}
-
-void WindVector::_display_Xplane()
-{
-    int j, k, n;
-    double x, y, z;
-
-    x = _xStart + nvoptions->get_xsec() * _xyDelt;
-
-    for(k = 0; k < _nz; ++k)
-    {
-        z = k * _zDelt;
-
-        for(j = _stepsize/2; j < _ny; j += _stepsize)
-        {
-            y = _yStart + j * _xyDelt;
-            n = nvoptions->get_xsec() + (j + k * _ny) * _nx;
-            _draw_arrow(x, y, z, _u[n], _v[n], _w[n]);
-        }
-    }
-}
-
-void WindVector::_display_Yplane()
-{
-    int i, k, n;
-    double x, y, z;
-
-    y = _yStart + nvoptions->get_ysec() * _xyDelt;
-
-    for(k = 0; k < _nz; ++k)
-    {
-        z = k * _zDelt;
-
-        for(i = _stepsize/2; i < _nx; i += _stepsize)
-        {
-            x = _xStart + i * _xyDelt;
-            n = i + (nvoptions->get_ysec() + k * _ny) * _nx;
-            _draw_arrow(x, y, z, _u[n], _v[n], _w[n]);
-        }
-    }
-}
-
-void WindVector::_display_Zplane(int k, double z)
-{
-    int i, j, n;
-    double x, y;
-
     if(has_w())
     {
       for(j = _stepsize/2; j < _ny; j += _stepsize)
       {
-        y = _yStart + _xyDelt * j;
         n = (k * _ny + j) * _nx;
 
         for(i = _stepsize/2; i < _nx; i += _stepsize)
         {
-            x = _xStart + _xyDelt * i;
-
-            _draw_arrow(x, y, z, _u[n+i], _v[n+i], _w[n+i]);
+            _draw_arrow(_xFlat[i], _yFlat[j], zp, _u[n+i], _v[n+i], _w[n+i]);
         }
       }
     }
     else
     {
-      double zp = z + 0.25;
       for(j = _stepsize/2; j < _ny; j += _stepsize)
       {
         n = (k * _ny + j) * _nx;
@@ -389,8 +291,11 @@ void WindVector::_arrow(double tail[3], double head[3], double w[3])
   //if(d > 0.125)
   //   d = 0.125;
 
-    if(d > 1.25)
-       d = 1.25;
+  //if(d > 1.25)
+  //   d = 1.25;
+
+    if(d > 2.5)
+       d = 2.5;
 
   //cout << "Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
   //     << ", file: <" << __FILE__ << ">" << endl;
@@ -494,72 +399,21 @@ double WindVector::_dist(double v[3])
     return dist;
 }
 
-void WindVector::_display_arrow_onZplane(int k, double z)
-{
-    int i, j, n;
-    double x, y;
-
-    cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\t k = " << k << ", _nx = " << _nx << ", _ny = " << _ny << ", _nz = " << _nz << endl;
-    cout << "\t has_w() = " << has_w() << endl;
-
-    if(has_w())
-    {
-      cout << "\t _xStart = " << _xStart << ", _yStart = " << _yStart << ", _xyDelt = " << _xyDelt << endl;
-      for(j = _stepsize/2; j < _ny; j += _stepsize)
-      {
-        y = _yStart + _xyDelt * j;
-        n = (k * _ny + j) * _nx;
-
-        for(i = _stepsize/2; i < _nx; i += _stepsize)
-        {
-            x = _xStart + _xyDelt * i;
-
-            arrow->setup(x, y, z, _u[n+i], _v[n+i], _w[n+i]);
-            arrow->draw();
-        }
-      }
-    }
-    else
-    {
-      cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-      cout << "\t k = " << k << ", _nz = " << _nz << endl;
-      cout << "\t has_w() = " << has_w() << endl;
-      for(j = _stepsize/2; j < _ny; j += _stepsize)
-      {
-        // y = _yStart + _xyDelt * j;
-        y = _yFlat[j];
-        n = (k * _ny + j) * _nx;
-
-        cout << "\t_u[n] = " << _u[n] << ", _v[n] = " << _v[n]<< endl;
-
-        for(i = _stepsize/2; i < _nx; i += _stepsize)
-        {
-            // x = _xStart + _xyDelt * i;
-            x = _xFlat[i];
-
-            arrow->setup(x, y, z, _u[n+i], _v[n+i]);
-            arrow->draw();
-        }
-      }
-    }
-}
-
 void WindVector::setup_lonlat(double* lon, double* lat)
 {
-    cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     // cout << "\tlon[0] = " << lon[0] << ", lat[0] = " << lat[0] << endl;
     _lon = lon;
     _lat = lat;
-    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void WindVector::setup_xyFlat(double* xFlat, double* yFlat)
 {
-    cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\txFlat[0] = " << xFlat[0] << ", yFlat[0] = " << yFlat[0] << endl;
+    // cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\txFlat[0] = " << xFlat[0] << ", yFlat[0] = " << yFlat[0] << endl;
     _xFlat = xFlat;
     _yFlat = yFlat;
-    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 

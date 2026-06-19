@@ -445,8 +445,8 @@ void UFS2dViewer::_flatDisplay()
         glEnd();
       }
 
-      cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-      cout << "\tnvoptions->get_cb(NV_VECTORON): " << nvoptions->get_cb(NV_VECTORON) << endl;
+      // cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+      // cout << "\tnvoptions->get_cb(NV_VECTORON): " << nvoptions->get_cb(NV_VECTORON) << endl;
       if(nvoptions->get_cb(NV_VECTORON))
       {
         windvector->draw(k, height);

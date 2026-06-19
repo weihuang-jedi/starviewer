@@ -61,14 +61,7 @@ class WindVector
         double* _xFlat;
         double* _yFlat;
 
-        void _display_all(int k, double z);
-
     private:
-        void _display_Xplane();
-        void _display_Yplane();
-        void _display_Zplane(int k, double z);
-        void _display_arrow_onZplane(int k, double z);
-
         int _nx, _ny, _nz;
         int _stepsize, _local_stepsize;
 	bool _has_w;
@@ -78,8 +71,6 @@ class WindVector
         double _wings;
         double _maxspeed;
         double _scale, _zScale;
-        double _xStart, _yStart;
-        double _xyDelt, _zDelt;
 
         double axx[3];
         double ayy[3];
