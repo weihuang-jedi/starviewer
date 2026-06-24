@@ -6,28 +6,13 @@ void EagleGlobalParser::parse(YAMLHandler *yamlHandler, NVOptions* nvoptions,
 {
     // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     vector<string> datafiles = yamlHandler->get_datafiles();
-    string flnm = datafiles[0];
 
-    // cout << "Parsing Eagle lon-lat grid..." << endl;
-    // cout << "flnm: " << flnm << endl;
+    cout << "Parsing Eagle global..." << endl;
+    // for (int n = 0; n < datafiles.size(); ++n)
+    //     cout << "datafiles[" << n << "]: <" << datafiles[n] << ">" << endl;
     // cout << "nvoptions->get_model(): " << nvoptions->get_model() << endl;
 
-    eagleglobal_translator = new EagleGlobalTranslator(colorTable, nvoptions, flnm);
-
-    // if(locator)
-    //     cout << "locator->on(): " << locator->on() << endl;
-    // else
-    //     cout << "locator is null." << endl;
-
-    // if(light)
-    //     cout << "light->on(): " << light->on() << endl;
-    // else
-    //     cout << "light is null." << endl;
-
-    // if(eagleglobal_translator)
-    //     cout << "eagleglobal_translator: " << eagleglobal_translator << endl;
-    // else
-    //     cout << "eagleglobal_translator is null." << endl;
+    eagleglobal_translator = new EagleGlobalTranslator(colorTable, nvoptions, datafiles);
 
     // cout << "function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     eagleglobal_translator->setup();

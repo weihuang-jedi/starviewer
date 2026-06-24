@@ -10,14 +10,20 @@ coastline:
   name: data/gshhg-shp-2.3.7/GSHHS_shp
   resolution: c
 
+# 1. Define the variable using an anchor (&)
+vars:
+# base_dir: &data_path "/scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/global"
+  base_dir: &data_path "/scratch5/purged/Wei.Huang/src/EAGLE/run/wei_learning_main/vx/grid2grid/global/grids/forecast/20220203/12/024"
+
 input:
+  # 2. Reference the anchor so your script knows the directory
+  directory: *data_path
   data:
-    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/global/t-isobaricInhPa-0850.nc
-    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/global/gh-isobaricInhPa-0500.nc
-    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/global/10u-heightAboveGround-0010.nc
-    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/global/10v-heightAboveGround-0010.nc
-    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/global/2t-heightAboveGround-0002.nc
-    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/global/gh-isobaricInhPa-0500.nc
-    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/global/sp-surface.nc
-    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/global/u-isobaricInhPa-0250.nc
-    - /scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/global/v-isobaricInhPa-0250.nc
+    - "2t-heightAboveGround-0002.nc"
+    - "10u-heightAboveGround-0010.nc"
+    - "10v-heightAboveGround-0010.nc"
+    - "t-isobaricInhPa-0850.nc"
+    - "gh-isobaricInhPa-0500.nc"
+    - "sp-surface.nc"
+    - "u-isobaricInhPa-0250.nc"
+    - "v-isobaricInhPa-0250.nc"

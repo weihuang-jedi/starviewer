@@ -3,31 +3,31 @@
 #include "eagleglobal_controller.h"
 
 EagleGlobalController::EagleGlobalController(ColorTable *ct, NVOptions* opt,
-                                 const char *fn)
+                                             vector<string> vecdfs)
 {
-    int n;
-    string sfn = string(fn);
-
     colorTable = ct;
     nvoptions = opt;
-    strcpy(_flnm, fn);
+    datafiles = vecdfs;
 
+    // cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     geometry = new EagleGlobalGeometry();
-    geometry->set_name(sfn);
 
     coastline = new CoastLine();
   
     _maxFile = 1;
     _ntime = 1;
 
-    ncfile = new EagleGlobalReader(fn);
+    // for (int n = 0; n < datafiles.size(); ++n)
+    //     cout << "datafiles[" << n << "]: <" << datafiles[n] << ">" << endl;
+
+    ncfile = new EagleGlobalReader(datafiles[0]);
 
     set<string> nc1dvars = {"forecast_reference_time", "time",
                             "latitude", "longitude", "CRS"};
 
     vector<string> varnames = ncfile->getVarNames();
     _varname = varnames[0];
-    for(n=0; n<varnames.size(); ++n)
+    for(int n=0; n<varnames.size(); ++n)
     {
 	if (nc1dvars.find(varnames[n]) == nc1dvars.end())
 	{
@@ -35,8 +35,9 @@ EagleGlobalController::EagleGlobalController(ColorTable *ct, NVOptions* opt,
 	    break;
         }
     }
-    cout << "Select varname: " << _varname << endl;
+    // cout << "Select varname: " << _varname << endl;
     eagleglobal_viewer = NULL;
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 EagleGlobalController::~EagleGlobalController()
@@ -67,7 +68,8 @@ void EagleGlobalController::_print1d(T* var, int nl)
 
 void EagleGlobalController::setup()
 {
-    int n;
+    // cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    int i, n;
     char bmpflnm[1024];
     const char* path = getenv("STARVIEWERHOME");
     if (path == nullptr) {
@@ -76,6 +78,32 @@ void EagleGlobalController::setup()
     }
     strcpy(bmpflnm, path);
     strcat(bmpflnm, "/data/earth.bmp");
+
+    set<string> nc1dvars = {"forecast_reference_time", "time",
+                            "latitude", "longitude", "CRS"};
+
+    vector<EagleGlobalReader*> nchandler(datafiles.size());
+    varlist.resize(datafiles.size());
+    
+    for (i = 0; i < datafiles.size(); ++i)
+    {
+        // cout << "datafiles[" << i << "]: <" << datafiles[i] << ">" << endl;
+
+        nchandler[i] = new EagleGlobalReader(datafiles[i]);
+
+        vector<string> varnames = nchandler[i]->getVarNames();
+
+        for(n=0; n<varnames.size(); ++n)
+        {
+	    if (nc1dvars.find(varnames[n]) == nc1dvars.end())
+	    {
+                var2file[varnames[n]] = nchandler[i];
+                varlist[i] = varnames[n];
+                // cout << "varlist[" << i << "]: <" << varlist[i] << ">" << endl;
+	        break;
+            }
+        }
+    }
 
   //_ntimes = ncfile->get_ntimes();
 
@@ -121,7 +149,7 @@ void EagleGlobalController::setup()
     _curTime = 0;
     _preFile = _curFile;
 
-    eagleglobal_viewer = new EagleGlobal2dViewer(colorTable, nvoptions, bmpflnm, ncfile);
+    eagleglobal_viewer = new EagleGlobal2dViewer(colorTable, nvoptions, bmpflnm);
 
   //eagleglobal_viewer->set_lister(&lister[0]);
     // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
@@ -141,6 +169,7 @@ void EagleGlobalController::setup()
     eagleglobal_viewer->setup(_varname, _value);
     _minval = eagleglobal_viewer->get_minval();
     _maxval = eagleglobal_viewer->get_maxval();
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void EagleGlobalController::draw()
@@ -162,7 +191,7 @@ void EagleGlobalController::setvarname(string vn)
     // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     // cout << "\tvarname: " << vn << endl;
 
-    _value = ncfile->get_fv(vn.c_str());
+    _value = var2file[vn]->get_fv(vn.c_str());
     _title = vn;
 
     // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
