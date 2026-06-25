@@ -1,5 +1,5 @@
-#ifndef _EAGLE_Viewer_H
-#define _EAGLE_Viewer_H
+#ifndef _EAGLELAM_Viewer_H
+#define _EAGLELAM_Viewer_H
 
 #include <iostream>
 #include <vector>
@@ -14,25 +14,25 @@
 #include "coastline.h"
 #include "mapprojection.h"
 #include "stateboundary.h"
-#include "eagle_geometry.h"
+#include "eaglelam_geometry.h"
 #include "nvoptions.h"
 #include "locator.h"
 #include "niceminmaxstepsize.h"
 
 using namespace std;
 
-class EAGLE_Viewer
+class EAGLELAM_Viewer
 {
     public:
-        EAGLE_Viewer(ColorTable *ct, NVOptions* opt);
-       ~EAGLE_Viewer();
+        EAGLELAM_Viewer(ColorTable *ct, NVOptions* opt);
+       ~EAGLELAM_Viewer();
 
         void draw();
         void scaleNtranslate();
 
         void reset();
         void setup(string vn, double *var);
-        void set_geometry(EAGLE_Geometry *geometry);
+        void set_geometry(EAGLELAM_Geometry *geometry);
 
         void set_opacity(int o);
         void set_colorTable(ColorTable *ct);
@@ -57,7 +57,7 @@ class EAGLE_Viewer
         CoastLine* coastline;
         MapProjection* mapprojection;
         StateBoundary* stateboundary;
-        EAGLE_Geometry *geometry;
+        EAGLELAM_Geometry *geometry;
 
         string _varname;
 

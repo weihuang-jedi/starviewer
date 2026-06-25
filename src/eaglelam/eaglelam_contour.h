@@ -1,7 +1,5 @@
-#ifndef _EAGLE_Contour_H
-#define _EAGLE_Contour_H
-
-//$Id: eagle_contour.h 4833 2013-11-05 15:49:31Z starviewer $
+#ifndef _EAGLELAM_Contour_H
+#define _EAGLELAM_Contour_H
 
 #include <QtOpenGL>
 
@@ -17,23 +15,19 @@
 #include <vector>
 #include <iostream>
 
-#include <cairo/cairo.h>
-
 #include "colorTable.h"
 #include "evaluator.h"
-#include "eagle_geometry.h"
+#include "eaglelam_geometry.h"
 #include "texturekeeper.h"
 
 using namespace std;
 
-class EAGLE_Contour
+class EAGLELAM_Contour
 {
     public:
-        EAGLE_Contour(ColorTable *ct);	//  Constructor
-       ~EAGLE_Contour();			//  Destructor
+        EAGLELAM_Contour(ColorTable *ct);	//  Constructor
+       ~EAGLELAM_Contour();			//  Destructor
 
-        unsigned int get_xid(int n);
-        unsigned int get_yid(int n);
         unsigned int get_zid(int n);
 
         void _tick_setup();
@@ -44,16 +38,16 @@ class EAGLE_Contour
         void set_ny(int n) { _ny = n; };
         void set_nz(int n) { _nz = n; };
 
-        void setup(string vn, double *var);
-        void set_geometry(EAGLE_Geometry *gm) { geometry = gm; };
+        void setup(string vn, float *var);
+        void set_geometry(EAGLELAM_Geometry *gm) { geometry = gm; };
         void set_opacity(int opacity) { _opacity = opacity; };
         void set_colorTable(ColorTable *ct) { colorTable = ct; };
 
         void reset();
         void update_colormap();
 
-        float get_min() { return _minval; }
-        float get_max() { return _maxval; }
+        float get_min() { return _valmin; }
+        float get_max() { return _valmax; }
 
         float get_xStart() { return _xStart; }
         float get_yStart() { return _yStart; }
@@ -88,37 +82,25 @@ class EAGLE_Contour
 
     protected:
         ColorTable *colorTable;
-        EAGLE_Geometry  *geometry;
+        EAGLELAM_Geometry  *geometry;
         TextureKeeper* texturekeeper;
-
-        cairo_surface_t *surface;
-        cairo_t         *context;
 
         int iwidth;
         int iheight;
         int clen[2];
 
-        int grlist;
-        int srlist;
-
-        int appid;
-        int wksid;
-        int mapid;
-        int dataid;
-        int cnid;
-
         int dims[2];
 
         string _varname;
-        double* _value;
+        float* _value;
         float* pltvar;
 
         double* lon;
         double* lat;
         double* lev;
 
-        double _minval;
-        double _maxval;
+        float _valmin;
+        float _valmax;
 
         float _xStart;
         float _yStart;

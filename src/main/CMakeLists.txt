@@ -30,6 +30,7 @@ add_executable(starviewer
     ufsincrparser.cpp
     eagleparser.cpp
     eagleglobalparser.cpp
+    eaglelamparser.cpp
     # ... other files
     ../ncreader/ncreader.cpp
     ../geometry/geometry.cpp
@@ -67,6 +68,7 @@ target_include_directories(starviewer PUBLIC
     ${CMAKE_SOURCE_DIR}/ufsincr
     ${CMAKE_SOURCE_DIR}/eagle
     ${CMAKE_SOURCE_DIR}/eagleglobal
+    ${CMAKE_SOURCE_DIR}/eaglelam
     ${CMAKE_SOURCE_DIR}/mpidemo
     ${NetCDF_INCLUDE_DIRS}
 )
@@ -87,6 +89,7 @@ target_link_libraries(starviewer PRIVATE
     ufsincr
     eagle
     eagleglobal
+    eaglelam
     view
     contour
     shared

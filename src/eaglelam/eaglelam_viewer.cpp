@@ -1,10 +1,10 @@
 #include <QtOpenGL>
 
-#include "eagle_viewer.h"
+#include "eaglelam_viewer.h"
 
 #define MINVAL	1.0e-20
 
-EAGLE_Viewer::EAGLE_Viewer(ColorTable *ct, NVOptions* opt)
+EAGLELAM_Viewer::EAGLELAM_Viewer(ColorTable *ct, NVOptions* opt)
 {
     colorTable = ct;
     nvoptions = opt;
@@ -39,7 +39,7 @@ EAGLE_Viewer::EAGLE_Viewer(ColorTable *ct, NVOptions* opt)
     first_time = true;
 }
 
-EAGLE_Viewer::~EAGLE_Viewer()
+EAGLELAM_Viewer::~EAGLELAM_Viewer()
 {
   //cout << "\tEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
@@ -54,7 +54,7 @@ EAGLE_Viewer::~EAGLE_Viewer()
   //cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
-void EAGLE_Viewer::scaleNtranslate()
+void EAGLELAM_Viewer::scaleNtranslate()
 {
     glScalef(1.0, 1.0, 0.4);
     if(geometry->get_nz() > 1)
@@ -67,7 +67,7 @@ void EAGLE_Viewer::scaleNtranslate()
     }
 }
 
-void EAGLE_Viewer::draw()
+void EAGLELAM_Viewer::draw()
 {
     glPushMatrix();
 
@@ -111,7 +111,7 @@ void EAGLE_Viewer::draw()
     glPopMatrix();
 }
 
-void EAGLE_Viewer::_parameter_setup()
+void EAGLELAM_Viewer::_parameter_setup()
 {
     size_t sz;
     Evaluator evaluator;
@@ -232,7 +232,7 @@ void EAGLE_Viewer::_parameter_setup()
   //}
 }
 
-void EAGLE_Viewer::_display_all()
+void EAGLELAM_Viewer::_display_all()
 {
   //cout << "\tFunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\tnvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
@@ -270,7 +270,7 @@ void EAGLE_Viewer::_display_all()
     }
 }
 
-void EAGLE_Viewer::_display_Xplane(int xs)
+void EAGLELAM_Viewer::_display_Xplane(int xs)
 {
     int j, k, n;
     float f;
@@ -316,7 +316,7 @@ void EAGLE_Viewer::_display_Xplane(int xs)
     glDisable(GL_TEXTURE_1D);
 }
 
-void EAGLE_Viewer::_display_Yplane(int ys)
+void EAGLELAM_Viewer::_display_Yplane(int ys)
 {
     int i, k, n;
     float f;
@@ -362,7 +362,7 @@ void EAGLE_Viewer::_display_Yplane(int ys)
     glDisable(GL_TEXTURE_1D);
 }
 
-void EAGLE_Viewer::_display_Zplane(int zs)
+void EAGLELAM_Viewer::_display_Zplane(int zs)
 {
     int i, j, n;
     double *pltvar = NULL;
@@ -481,7 +481,7 @@ void EAGLE_Viewer::_display_Zplane(int zs)
   //}
 }
 
-void EAGLE_Viewer::_display_with_bump()
+void EAGLELAM_Viewer::_display_with_bump()
 {
     if((geometry->get_nx() > nvoptions->get_xsec()) && (geometry->get_nz() > 1))
     {
@@ -499,7 +499,7 @@ void EAGLE_Viewer::_display_with_bump()
     }
 }
 
-void EAGLE_Viewer::_display_Xplane_with_bump(int xs)
+void EAGLELAM_Viewer::_display_Xplane_with_bump(int xs)
 {
     int j, k, n;
     float f;
@@ -548,7 +548,7 @@ void EAGLE_Viewer::_display_Xplane_with_bump(int xs)
     glDisable(GL_TEXTURE_1D);
 }
 
-void EAGLE_Viewer::_display_Yplane_with_bump(int ys)
+void EAGLELAM_Viewer::_display_Yplane_with_bump(int ys)
 {
     int i, k, n;
     float f;
@@ -597,7 +597,7 @@ void EAGLE_Viewer::_display_Yplane_with_bump(int ys)
     glDisable(GL_TEXTURE_1D);
 }
 
-void EAGLE_Viewer::_display_Zplane_with_bump(int zs)
+void EAGLELAM_Viewer::_display_Zplane_with_bump(int zs)
 {
     int i, j, n;
     double *pltvar = NULL;
@@ -657,7 +657,7 @@ void EAGLE_Viewer::_display_Zplane_with_bump(int zs)
     glDisable(GL_TEXTURE_1D);
 }
 
-void EAGLE_Viewer::_display_on_height_surface()
+void EAGLELAM_Viewer::_display_on_height_surface()
 {
     if(geometry->get_nz() > 1)
     {
@@ -693,7 +693,7 @@ void EAGLE_Viewer::_display_on_height_surface()
     }
 }
 
-void EAGLE_Viewer::_display_Xplane_on_height_surface(int xs)
+void EAGLELAM_Viewer::_display_Xplane_on_height_surface(int xs)
 {
     int j, k, n;
     float f;
@@ -743,7 +743,7 @@ void EAGLE_Viewer::_display_Xplane_on_height_surface(int xs)
     glDisable(GL_TEXTURE_1D);
 }
 
-void EAGLE_Viewer::_display_Yplane_on_height_surface(int ys)
+void EAGLELAM_Viewer::_display_Yplane_on_height_surface(int ys)
 {
     int i, k, n;
     float f;
@@ -793,7 +793,7 @@ void EAGLE_Viewer::_display_Yplane_on_height_surface(int ys)
     glDisable(GL_TEXTURE_1D);
 }
 
-void EAGLE_Viewer::_display_Zplane_on_height_surface(int zs)
+void EAGLELAM_Viewer::_display_Zplane_on_height_surface(int zs)
 {
     int i, j, n;
     double* height = NULL;
@@ -857,7 +857,7 @@ void EAGLE_Viewer::_display_Zplane_on_height_surface(int zs)
     glDisable(GL_TEXTURE_1D);
 }
 
-void EAGLE_Viewer::_display_on_sphere()
+void EAGLELAM_Viewer::_display_on_sphere()
 {
     if(geometry->get_nz() > 1)
     {
@@ -906,7 +906,7 @@ void EAGLE_Viewer::_display_on_sphere()
 }
 
 //Draw vertex in polar coordinates
-void EAGLE_Viewer::_sphere1dVertex(float lon, float lat, float r, float f)
+void EAGLELAM_Viewer::_sphere1dVertex(float lon, float lat, float r, float f)
 {
     float lamda = lon * deg2rad;
     float phi   = lat * deg2rad;
@@ -921,7 +921,7 @@ void EAGLE_Viewer::_sphere1dVertex(float lon, float lat, float r, float f)
     glVertex3f(x, y, z);
 }
 
-void EAGLE_Viewer::_display_Xplane_on_sphere(int xs)
+void EAGLELAM_Viewer::_display_Xplane_on_sphere(int xs)
 {
     int j, k, n;
     float f;
@@ -990,7 +990,7 @@ void EAGLE_Viewer::_display_Xplane_on_sphere(int xs)
     glDisable(GL_TEXTURE_1D);
 }
 
-void EAGLE_Viewer::_display_Yplane_on_sphere(int ys)
+void EAGLELAM_Viewer::_display_Yplane_on_sphere(int ys)
 {
     int i, k, n;
     float f;
@@ -1060,7 +1060,7 @@ void EAGLE_Viewer::_display_Yplane_on_sphere(int ys)
     glDisable(GL_TEXTURE_1D);
 }
 
-void EAGLE_Viewer::_display_Zplane_on_sphere(int zs)
+void EAGLELAM_Viewer::_display_Zplane_on_sphere(int zs)
 {
     int i, j, n;
     float f;
@@ -1130,12 +1130,12 @@ void EAGLE_Viewer::_display_Zplane_on_sphere(int zs)
   //}
 }
 
-void EAGLE_Viewer::set_geometry(EAGLE_Geometry *gm)
+void EAGLELAM_Viewer::set_geometry(EAGLE_Geometry *gm)
 {
     geometry = gm;
 }
 
-void EAGLE_Viewer::setup(string vn, double *var)
+void EAGLELAM_Viewer::setup(string vn, double *var)
 {
     _varname  = vn;
     _var = var;
@@ -1159,12 +1159,12 @@ void EAGLE_Viewer::setup(string vn, double *var)
     draw();
 }
 
-void EAGLE_Viewer::set_OP(bool s)
+void EAGLELAM_Viewer::set_OP(bool s)
 {
     _hasOP = s;
 }
 
-void EAGLE_Viewer::set_opacity(int o)
+void EAGLELAM_Viewer::set_opacity(int o)
 {
   //cout << "Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
   //     << ", file: <" << __FILE__ << ">" << endl;
@@ -1175,7 +1175,7 @@ void EAGLE_Viewer::set_opacity(int o)
     draw();
 }
 
-void EAGLE_Viewer::saveDataset()
+void EAGLELAM_Viewer::saveDataset()
 {
     FILE *outfl;
 
@@ -1203,7 +1203,7 @@ void EAGLE_Viewer::saveDataset()
     fclose(outfl);
 }
 
-void EAGLE_Viewer::_display_on_map()
+void EAGLELAM_Viewer::_display_on_map()
 {
     double height;
 
@@ -1234,7 +1234,7 @@ void EAGLE_Viewer::_display_on_map()
 }
 
 //Draw vertex in xyz coordinates
-void EAGLE_Viewer::_planeVertex(double lon, double lat, double height, double f)
+void EAGLELAM_Viewer::_planeVertex(double lon, double lat, double height, double f)
 {
     double x = lon * oneover - _xfactor;
     double y = lat * oneover;
@@ -1244,7 +1244,7 @@ void EAGLE_Viewer::_planeVertex(double lon, double lat, double height, double f)
     glVertex3d(x,y,height);
 }
 
-void EAGLE_Viewer::_display_Zplane_on_map(int zs)
+void EAGLELAM_Viewer::_display_Zplane_on_map(int zs)
 {
     int i, j, n;
     double f;
@@ -1297,7 +1297,7 @@ void EAGLE_Viewer::_display_Zplane_on_map(int zs)
   //glEndList();
 }
 
-void EAGLE_Viewer::_get_factor()
+void EAGLELAM_Viewer::_get_factor()
 {
     int i, j, n;
     bool need_adjust = false;
@@ -1335,7 +1335,7 @@ void EAGLE_Viewer::_get_factor()
     }
 }
 
-void EAGLE_Viewer::_display_on_sphere_map()
+void EAGLELAM_Viewer::_display_on_sphere_map()
 {
     double height;
 
@@ -1365,7 +1365,7 @@ void EAGLE_Viewer::_display_on_sphere_map()
     stateboundary->draw(height, 1);
 }
 
-void EAGLE_Viewer::_display_Zplane_on_sphere_map(int zs)
+void EAGLELAM_Viewer::_display_Zplane_on_sphere_map(int zs)
 {
     int i, j, n, n1, n2;
     double f;
@@ -1420,7 +1420,7 @@ void EAGLE_Viewer::_display_Zplane_on_sphere_map(int zs)
   //glEndList();
 }
 
-void EAGLE_Viewer::update_colormap()
+void EAGLELAM_Viewer::update_colormap()
 {
     texture1d->reset();
     texture1d->set_colors(colorTable->get_clen(), colorTable->get_cmap());

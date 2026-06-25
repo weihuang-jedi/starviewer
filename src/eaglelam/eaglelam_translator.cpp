@@ -1,7 +1,5 @@
-//$Id: eagletranslator.cpp 4947 2014-02-04 16:09:40Z starviewer $
-
 #include <QtOpenGL>
-#include "eagletranslator.h"
+#include "eaglelamtranslator.h"
 #include "colorTable.h"
 
 template<typename T>
@@ -23,13 +21,19 @@ string number2string(T n)
 }
 
 //Constructor
-EAGLETranslator::EAGLETranslator(ColorTable *ct, NVOptions* opt, string flnm,
-                             bool isFileList, QWidget* parent)
-             : GeneralTranslator(ct, opt, flnm, isFileList, parent)
+EAGLETranslator::EAGLETranslator(ColorTable *ct, NVOptions* opt,
+                                 vector<string> datafiles, QWidget* parent)
+             : BaseTranslator(ct, opt, parent)
 {
   //cout << "\tEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
-    _varname = "HGT";
+    _datafiles = datafiles;
+
+    nvoptions->set_xsec(-1);
+    nvoptions->set_ysec(-1);
+    nvoptions->set_zsec(0);
+    nvoptions->set_tsec(0);
+
   //dim = 0.25;
 
     _preTime = 0;
@@ -44,8 +48,8 @@ EAGLETranslator::EAGLETranslator(ColorTable *ct, NVOptions* opt, string flnm,
   //cout << "\t_filename: <" << _filename << ">, _hasFileList = " << _hasFileList << endl;
   //cout << "\t_filename.c_str(): <" << _filename.c_str() << ">, _hasFileList = " << _hasFileList << endl;
 
-    eagle_controller = new EAGLE_Controller(colorTable, nvoptions,
-                                        _filename.c_str(), _hasFileList);
+    eagleglobal_controller = new EagleGlobalController(colorTable, nvoptions, _datafiles);
+    eagleglobal_controller->setup();
 
   //cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
@@ -53,7 +57,7 @@ EAGLETranslator::EAGLETranslator(ColorTable *ct, NVOptions* opt, string flnm,
 EAGLETranslator::~EAGLETranslator()
 {
   //cout << "\tEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-    delete eagle_controller;
+    delete eaglelam_controller;
   //cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
@@ -65,21 +69,21 @@ void EAGLETranslator::setup()
 
   //cout << "\t_filename: <" << _filename << ">, _hasFileList = " << _hasFileList << endl;
 
-    eagle_controller->setup();
+    eaglelam_controller->setup();
 
   //cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
-    geometry = eagle_controller->get_geometry();
+    geometry = eaglelam_controller->get_geometry();
 
   //cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
-  //_varname = eagle_controller->get_varname();
-    _title = eagle_controller->get_title();
-    _timestr = eagle_controller->get_timestring();
-    _maxFile = eagle_controller->get_nfils();
-    _nTimes  = eagle_controller->get_ntimes();
-    _maxval  = eagle_controller->get_maxval();
-    _minval  = eagle_controller->get_minval();
+  //_varname = eaglelam_controller->get_varname();
+    _title = eaglelam_controller->get_title();
+    _timestr = eaglelam_controller->get_timestring();
+    _maxFile = eaglelam_controller->get_nfils();
+    _nTimes  = eaglelam_controller->get_ntimes();
+    _maxval  = eaglelam_controller->get_valmax();
+    _minval  = eaglelam_controller->get_valmin();
 
   //cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
@@ -121,7 +125,7 @@ void EAGLETranslator::show()
 
         _set_current_time();
 
-        eagle_controller->set_fileNtime(_curFile, _curTime);
+        eaglelam_controller->set_fileNtime(_curFile, _curTime);
 
         _preTime = _glbTime;
     }
@@ -134,7 +138,7 @@ void EAGLETranslator::show()
   //cout << "\tnvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
   //cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
 
-    eagle_controller->draw();
+    eaglelam_controller->draw();
 
     setLabelColor();
 
@@ -153,11 +157,11 @@ void EAGLETranslator::show()
 
 void EAGLETranslator::createVarInfo()
 {
-    _varinfo = "Dim nx="+QString::number(eagle_controller->get_nx())
-             + ", ny=" + QString::number(eagle_controller->get_ny())
-             + ", nz=" + QString::number(eagle_controller->get_nz())
-             + "\nVar min=" + QString::number(eagle_controller->get_minval())
-             + ", max=" + QString::number(eagle_controller->get_maxval());
+    _varinfo = "Dim nx="+QString::number(eaglelam_controller->get_nx())
+             + ", ny=" + QString::number(eaglelam_controller->get_ny())
+             + ", nz=" + QString::number(eaglelam_controller->get_nz())
+             + "\nVar min=" + QString::number(eaglelam_controller->get_valmin())
+             + ", max=" + QString::number(eaglelam_controller->get_valmax());
 }
 
 void EAGLETranslator::writeVarInfo()
@@ -180,7 +184,7 @@ void EAGLETranslator::make_timeNpositionString()
 {
     int framenumb = 0;
 
-    framenumb = eagle_controller->get_curTime();
+    framenumb = eaglelam_controller->get_curTime();
     if((0 <= framenumb) && (NULL != _timestr))
     {
       //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -224,11 +228,11 @@ void EAGLETranslator::select2dVar(const QString& str)
     {
         _isDummy = false;
 
-        eagle_controller->set2dvarname(_varname);
-        _title = eagle_controller->get_title();
-        _timestr = eagle_controller->get_timestring();
-        _maxval  = eagle_controller->get_maxval();
-        _minval  = eagle_controller->get_minval();
+        eaglelam_controller->set2dvarname(_varname);
+        _title = eaglelam_controller->get_title();
+        _timestr = eaglelam_controller->get_timestring();
+        _maxval  = eaglelam_controller->get_valmax();
+        _minval  = eaglelam_controller->get_valmin();
 
         if((_displaying3D) || (! _displaying2D))
         {
@@ -257,11 +261,11 @@ void EAGLETranslator::select3dVar(const QString& str)
     {
         _isDummy = false;
 
-        eagle_controller->set3dvarname(_varname);
-        _title = eagle_controller->get_title();
-        _timestr = eagle_controller->get_timestring();
-        _maxval  = eagle_controller->get_maxval();
-        _minval  = eagle_controller->get_minval();
+        eaglelam_controller->set3dvarname(_varname);
+        _title = eaglelam_controller->get_title();
+        _timestr = eaglelam_controller->get_timestring();
+        _maxval  = eaglelam_controller->get_valmax();
+        _minval  = eaglelam_controller->get_valmin();
 
         if((_displaying2D) || (! _displaying3D))
         {
@@ -284,21 +288,21 @@ void EAGLETranslator::update_sliderNspin()
 
     _first_time = false;
 
-    sliderNspinX->set_max(eagle_controller->get_nx());
-    sliderNspinX->setValue(eagle_controller->get_nx());
-    intvl = (eagle_controller->get_nx()+9)/10;
+    sliderNspinX->set_max(eaglelam_controller->get_nx());
+    sliderNspinX->setValue(eaglelam_controller->get_nx());
+    intvl = (eaglelam_controller->get_nx()+9)/10;
     sliderNspinX->set_tickinterval(intvl);
-    stepsize = (eagle_controller->get_nx() + 350)/360;
+    stepsize = (eaglelam_controller->get_nx() + 350)/360;
     sliderNspinX->set_step(stepsize);
 
-    sliderNspinY->set_max(eagle_controller->get_ny());
-    sliderNspinY->setValue(eagle_controller->get_ny());
-    intvl = (eagle_controller->get_ny()+9)/10;
+    sliderNspinY->set_max(eaglelam_controller->get_ny());
+    sliderNspinY->setValue(eaglelam_controller->get_ny());
+    intvl = (eaglelam_controller->get_ny()+9)/10;
     sliderNspinY->set_tickinterval(intvl);
-    stepsize = (eagle_controller->get_ny() + 170)/180;
+    stepsize = (eaglelam_controller->get_ny() + 170)/180;
     sliderNspinY->set_step(stepsize);
 
-    sliderNspinZ->set_max(eagle_controller->get_nz());
+    sliderNspinZ->set_max(eaglelam_controller->get_nz());
     sliderNspinZ->set_step(1);
     sliderNspinZ->setValue(0);
 
@@ -310,9 +314,9 @@ void EAGLETranslator::update_sliderNspin()
   //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\tvariable name: <" << _varname << ">" << endl;
   //cout << "\ttitle: <" << _title << ">" << endl;
-  //cout << "\teagle_controller->get_nx() = " << eagle_controller->get_nx() << endl;
-  //cout << "\teagle_controller->get_ny() = " << eagle_controller->get_ny() << endl;
-  //cout << "\teagle_controller->get_nz() = " << eagle_controller->get_nz() << endl;
+  //cout << "\teaglelam_controller->get_nx() = " << eaglelam_controller->get_nx() << endl;
+  //cout << "\teaglelam_controller->get_ny() = " << eaglelam_controller->get_ny() << endl;
+  //cout << "\teaglelam_controller->get_nz() = " << eaglelam_controller->get_nz() << endl;
 }
 
 void EAGLETranslator::selectColorMap(const QString& str)
@@ -325,8 +329,8 @@ void EAGLETranslator::selectColorMap(const QString& str)
 
     colorTable->set_colorMap(str.toStdString());
 
-    eagle_controller->set_colorTable(colorTable);
-    eagle_controller->update_colormap();
+    eaglelam_controller->set_colorTable(colorTable);
+    eaglelam_controller->update_colormap();
 
     updateGL();
 }
@@ -338,8 +342,8 @@ void EAGLETranslator::update_frame()
        _glbTime = 0;
 
     _set_current_time();
-    eagle_controller->set_fileNtime(_curFile, _curTime);
-    _timestr = eagle_controller->get_timestring();
+    eaglelam_controller->set_fileNtime(_curFile, _curTime);
+    _timestr = eaglelam_controller->get_timestring();
 
     if(nvoptions->get_cb(NV_ANIMATIONON))
     {
@@ -382,7 +386,7 @@ void EAGLETranslator::update_frame()
 
         _curTime = _glbTime;
         nvoptions->set_tsec(_curTime);
-        _timestr = eagle_controller->get_timestring();
+        _timestr = eaglelam_controller->get_timestring();
 
       //cout << "Leave Function: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     }
@@ -397,8 +401,8 @@ void EAGLETranslator::nextFrame()
        _glbTime = 0;
 
     _set_current_time();
-    eagle_controller->set_fileNtime(_curFile, _curTime);
-    _timestr = eagle_controller->get_timestring();
+    eaglelam_controller->set_fileNtime(_curFile, _curTime);
+    _timestr = eaglelam_controller->get_timestring();
 
     _curTime = _glbTime;
     nvoptions->set_tsec(_curTime);
@@ -413,8 +417,8 @@ void EAGLETranslator::backFrame()
        _glbTime += _maxTime;
 
     _set_current_time();
-    eagle_controller->set_fileNtime(_curFile, _curTime);
-    _timestr = eagle_controller->get_timestring();
+    eaglelam_controller->set_fileNtime(_curFile, _curTime);
+    _timestr = eaglelam_controller->get_timestring();
 
     _curTime = _glbTime;
     nvoptions->set_tsec(_curTime);
@@ -431,7 +435,7 @@ void EAGLETranslator::set_locator(Locator* l)
     locator->set_zfar(zFar);
     locator->set_znear(zNear);
 
-    eagle_controller->set_locator(l);
+    eaglelam_controller->set_locator(l);
 }
 
 void EAGLETranslator::writeLocatorMsg()
@@ -445,17 +449,17 @@ void EAGLETranslator::writeLocatorMsg()
 void EAGLETranslator::set_light(Light* l)
 {
     light = l;
-  //eagle_controller->set_light(l);
+  //eaglelam_controller->set_light(l);
 }
 
 int EAGLETranslator::get_ndv(int n)
 {
-    return eagle_controller->get_ndv(n);
+    return eaglelam_controller->get_ndv(n);
 }
 
 string* EAGLETranslator::get_ndvNames(int n)
 {
-    string* varnames = eagle_controller->get_ndvNames(n);
+    string* varnames = eaglelam_controller->get_ndvNames(n);
     return varnames;
 }
 

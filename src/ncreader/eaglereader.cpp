@@ -147,7 +147,64 @@ void EagleReader::exploreFile() {
     _latitude = getFloat("latitude");
     _time = getInt64("time");
 
+//  int64 CRS ;
+//      CRS:false_easting = 0. ;
+//      CRS:false_northing = 0. ;
+//      CRS:grid_mapping_name = "lambert_conformal_conic" ;
+//      CRS:latitude_of_projection_origin = 38.5 ;
+//      CRS:longitude_of_central_meridian = 262.5 ;
+//      CRS:standard_parallel = 38.5, 38.5 ;
+
+    grid_mapping_name = "lambert_conformal_conic" ;
+    latitude_of_projection_origin = 38.5 ;
+    longitude_of_central_meridian = 262.5 ;
+    standard_parallel.push_back(38.5);
+    standard_parallel.push_back(38.5);
+
+    grid_map_info();
+
     // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+}
+
+// Function to recursively explore groups, dimensions, and variables
+void EagleReader::grid_map_info() {
+    int var_id, n;
+    nc_type var_type;
+    int var_ndims;
+    int var_dimids[NC_MAX_VAR_DIMS];
+    int var_natts;
+    size_t att_len = 1;
+
+    status = nc_inq_varid (ncid, "CRS", &var_id);
+    if (status != NC_NOERR) handle_error(status);
+    
+    status = nc_inq_var (ncid, var_id, 0, &var_type, &var_ndims, var_dimids, &var_natts);
+    if (status != NC_NOERR) handle_error(status);
+
+    // 1. Get the length of the attribute array
+    status = nc_inq_attlen(ncid, varid, "grid_mapping_name", &att_len);
+    if (status != NC_NOERR) handle_error(status);
+
+    // 2. Allocate buffer (add 1 for string null-terminator)
+    char *buffer = (char *)malloc(att_len + 1);
+
+    // 3. Read the attribute text data
+    status = nc_get_att_text(ncid, varid, "grid_mapping_name", buffer);
+    if (status == NC_NOERR) {
+        buffer[att_len] = '\0'; // Properly terminate C-string
+        cout << "Variable Attribute <grid_mapping_name> = " << buffer << endl;
+        grid_mapping_name = buffer;
+    }
+    free(buffer);
+
+    nc_get_att_float(ncid, varid, "latitude_of_projection_origin", &latitude_of_projection_origin);
+    nc_get_att_float(ncid, varid, "longitude_of_central_meridian", &longitude_of_central_meridian);
+
+    float *buf = new float[2];
+    nc_get_att_float(ncid, varid, "standard_parallel", buf);
+    standard_parallel[0] = buf[0];
+    standard_parallel[1] = buf[1];
+    delete[] buf;
 }
  
 long long int* EagleReader::getInt64(const char* var_name) {

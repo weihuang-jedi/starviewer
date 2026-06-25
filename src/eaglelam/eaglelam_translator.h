@@ -1,7 +1,5 @@
-#ifndef _EAGLETranslator_H
-#define _EAGLETranslator_H
-
-//$Id: eagletranslator.h 5315 2015-02-06 21:24:34Z starviewer $
+#ifndef _EagleLAMTranslator_H
+#define _EagleLAMTranslator_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,18 +19,18 @@
 #include <QTimer>
 
 #include "sliderNspin.h"
-#include "eagle_controller.h"
-#include "generaltranslator.h"
+#include "eaglelam_controller.h"
+#include "basetranslator.h"
 
 using namespace std;
 
-class EAGLETranslator : public GeneralTranslator
+class EagleLAMTranslator : public BaseTranslator
 {
     Q_OBJECT		//  Qt magic macro
     public:
-        EAGLETranslator(ColorTable *ct, NVOptions* opt, string flnm,
-                      bool isFileList = false, QWidget* parent=0);	//  Constructor
-       ~EAGLETranslator();						//  Destructor
+        EagleLAMTranslator(ColorTable *ct, NVOptions* opt, 
+                           vector<string> datafiles, QWidget* parent=0);	//  Constructor
+       ~EagleLAMTranslator();						//  Destructor
 
         void show();
         void setup();
@@ -56,7 +54,9 @@ class EAGLETranslator : public GeneralTranslator
 
     protected:
         QGridLayout* layout;
-        EAGLE_Controller* eagle_controller;
+        EAGLELAM_Controller* eaglelam_controller;
+
+	vector<string> _datafiles;
 
         void createVarInfo();
         void writeVarInfo();

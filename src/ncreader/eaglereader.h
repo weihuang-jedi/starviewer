@@ -46,6 +46,11 @@ class EagleReader {
     int _ny;
     int _ntime;
     int _nforecast_reference_time;
+
+    string grid_mapping_name;
+    float latitude_of_projection_origin;
+    float longitude_of_central_meridian;
+    vector<float> standard_parallel;
  
   public:
     // declare constructor and deconstructor methods
@@ -92,5 +97,7 @@ class EagleReader {
     long long int* get_ntimes() { return _time; };
 
     void select_file(int nf);
+
+    void grid_map_info();
 };
 #endif

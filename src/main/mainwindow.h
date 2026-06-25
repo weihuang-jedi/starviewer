@@ -31,6 +31,7 @@
 #include "ufsincr_translator.h"
 #include "eagle_translator.h"
 #include "eagleglobal_translator.h"
+#include "eaglelam_translator.h"
 
 #include "modelparser.h"
 #include "modelparserFactory.h"
@@ -72,6 +73,7 @@ class MainWindow : public QMainWindow
         void ufsincr();
         void eagle();
         void eagleglobal();
+        void eaglelam();
 
         void animation_func();
         void inspector_func();
@@ -141,6 +143,7 @@ class MainWindow : public QMainWindow
       //QAction *mpasAct;
         QAction *eagleAct;
         QAction *eagleglobalAct;
+        QAction *eaglelamAct;
         QAction *mpidemoAct;
 
         QAction *animationAct;
