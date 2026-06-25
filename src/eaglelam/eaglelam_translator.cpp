@@ -1,5 +1,5 @@
 #include <QtOpenGL>
-#include "eaglelamtranslator.h"
+#include "eaglelam_translator.h"
 #include "colorTable.h"
 
 template<typename T>
@@ -21,7 +21,7 @@ string number2string(T n)
 }
 
 //Constructor
-EAGLETranslator::EAGLETranslator(ColorTable *ct, NVOptions* opt,
+EAGLELAM_Translator::EAGLELAM_Translator(ColorTable *ct, NVOptions* opt,
                                  vector<string> datafiles, QWidget* parent)
              : BaseTranslator(ct, opt, parent)
 {
@@ -36,32 +36,24 @@ EAGLETranslator::EAGLETranslator(ColorTable *ct, NVOptions* opt,
 
   //dim = 0.25;
 
-    _preTime = 0;
-    _filename = flnm;
-    _hasFileList = isFileList;
-
-    _first_time = true;
-    _displaying2D = false;
-    _displaying3D = false;
-
   //cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
   //cout << "\t_filename: <" << _filename << ">, _hasFileList = " << _hasFileList << endl;
   //cout << "\t_filename.c_str(): <" << _filename.c_str() << ">, _hasFileList = " << _hasFileList << endl;
 
-    eagleglobal_controller = new EagleGlobalController(colorTable, nvoptions, _datafiles);
-    eagleglobal_controller->setup();
+    eaglelam_controller = new EAGLELAM_Controller(colorTable, nvoptions, _datafiles);
+    eaglelam_controller->setup();
 
   //cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
-EAGLETranslator::~EAGLETranslator()
+EAGLELAM_Translator::~EAGLELAM_Translator()
 {
   //cout << "\tEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     delete eaglelam_controller;
   //cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
-void EAGLETranslator::setup()
+void EAGLELAM_Translator::setup()
 {
     int n;
 
@@ -78,37 +70,20 @@ void EAGLETranslator::setup()
   //cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
   //_varname = eaglelam_controller->get_varname();
-    _title = eaglelam_controller->get_title();
+    _title = "EAGLE LAM";
     _timestr = eaglelam_controller->get_timestring();
-    _maxFile = eaglelam_controller->get_nfils();
-    _nTimes  = eaglelam_controller->get_ntimes();
+    _maxFile = 1;
+    _maxTime = 1;
+    // _nTimes  = eaglelam_controller->get_ntimes();
     _maxval  = eaglelam_controller->get_valmax();
     _minval  = eaglelam_controller->get_valmin();
-
-  //cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-
-    _preTime = 0;
-    _curTime = 0;
-    _glbTime = 0;
-    _maxTime = 0;
-    if(NULL != _nTimes)
-    {
-        for(n = 0; n < _maxFile; ++n)
-            _maxTime += _nTimes[n];
-    }
-    else
-        _maxTime = 1;
-
-    _isDummy = false;
-
-    _varname = "HGT";
 
   //cout << "\t_maxFile = " << _maxFile << ", _maxTime = " << _maxTime << endl;
   //cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 //Draw the window
-void EAGLETranslator::show()
+void EAGLELAM_Translator::show()
 {
   //cout << "\n\tEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
   //cout << "\t_glbTime = " << _glbTime << ", _curFile = " << _curFile << endl;
@@ -155,23 +130,22 @@ void EAGLETranslator::show()
   //cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl << endl;
 }
 
-void EAGLETranslator::createVarInfo()
+void EAGLELAM_Translator::createVarInfo()
 {
     _varinfo = "Dim nx="+QString::number(eaglelam_controller->get_nx())
              + ", ny=" + QString::number(eaglelam_controller->get_ny())
-             + ", nz=" + QString::number(eaglelam_controller->get_nz())
              + "\nVar min=" + QString::number(eaglelam_controller->get_valmin())
              + ", max=" + QString::number(eaglelam_controller->get_valmax());
 }
 
-void EAGLETranslator::writeVarInfo()
+void EAGLELAM_Translator::writeVarInfo()
 {
     createVarInfo();
     emit info(_varinfo);
 }
 
 
-void EAGLETranslator::writeFrameInfo()
+void EAGLELAM_Translator::writeFrameInfo()
 {
     if(nvoptions->get_cb(NV_ANIMATIONON))
     {
@@ -180,27 +154,12 @@ void EAGLETranslator::writeFrameInfo()
     }
 }
 
-void EAGLETranslator::make_timeNpositionString()
+void EAGLELAM_Translator::make_timeNpositionString()
 {
-    int framenumb = 0;
-
-    framenumb = eaglelam_controller->get_curTime();
-    if((0 <= framenumb) && (NULL != _timestr))
-    {
-      //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-      //cout << "\tframenumb = " << framenumb << endl;
-      //cout << "\t_timestr[" << framenumb << "] = <" << _timestr[framenumb] << ">" << endl;
-      //_timeinfo = "          " + _timestr[framenumb];
-        _timeinfo = _timestr[framenumb];
-    }
-    else
-    {
-        string tstr = number2string<int>(_glbTime);
-        _timeinfo = "Time: ";
-        _timeinfo += tstr;
-    }
+    _timeinfo = "Time: 0";
 
     _position = "Position: ";
+#if 0
     string xstr = number2string<int>(nvoptions->get_xsec());
     string ystr = number2string<int>(nvoptions->get_ysec());
     string zstr = number2string<int>(nvoptions->get_zsec());
@@ -211,82 +170,33 @@ void EAGLETranslator::make_timeNpositionString()
         _position += ", Ygrid: " + ystr;
     if(0 < nvoptions->get_zsec())
         _position += ", Level: " + zstr;
+#endif
 }
 
-void EAGLETranslator::select2dVar(const QString& str)
+void EAGLELAM_Translator::selectVar(const QString& vn)
 {
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "2d var: <" << str.toStdString() << "> is selected." << endl;
 
     _glbTime = 0;
 
-    _varname = str.toStdString();
+    _varname = vn.toStdString();
 
-    if(0 == _varname.compare("dummy"))
-        _isDummy = true;
-    else
-    {
-        _isDummy = false;
+    eaglelam_controller->setvarname(_varname);
+    _title = "EAGLE LAM";
+    _timestr = eaglelam_controller->get_timestring();
+    _maxval  = eaglelam_controller->get_valmax();
+    _minval  = eaglelam_controller->get_valmin();
 
-        eaglelam_controller->set2dvarname(_varname);
-        _title = eaglelam_controller->get_title();
-        _timestr = eaglelam_controller->get_timestring();
-        _maxval  = eaglelam_controller->get_valmax();
-        _minval  = eaglelam_controller->get_valmin();
-
-        if((_displaying3D) || (! _displaying2D))
-        {
-            _first_time = true;
-            update_sliderNspin();
-            _displaying2D = true;
-            _displaying3D = false;
-        }
-    }
+    update_sliderNspin();
 
     updateGL();
 }
 
-void EAGLETranslator::select3dVar(const QString& str)
-{
-  //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "3d var: <" << str.toStdString() << "> is selected." << endl;
-
-    _glbTime = 0;
-
-    _varname = str.toStdString();
-
-    if(0 == _varname.compare("dummy"))
-        _isDummy = true;
-    else
-    {
-        _isDummy = false;
-
-        eaglelam_controller->set3dvarname(_varname);
-        _title = eaglelam_controller->get_title();
-        _timestr = eaglelam_controller->get_timestring();
-        _maxval  = eaglelam_controller->get_valmax();
-        _minval  = eaglelam_controller->get_valmin();
-
-        if((_displaying2D) || (! _displaying3D))
-        {
-            _first_time = true;
-            update_sliderNspin();
-            _displaying2D = false;
-            _displaying3D = true;
-        }
-    }
-
-    updateGL();
-}
-
-void EAGLETranslator::update_sliderNspin()
+void EAGLELAM_Translator::update_sliderNspin()
 {
     int intvl = 0;
     int stepsize = 1;
-    if(! _first_time)
-        return;
-
-    _first_time = false;
 
     sliderNspinX->set_max(eaglelam_controller->get_nx());
     sliderNspinX->setValue(eaglelam_controller->get_nx());
@@ -302,7 +212,7 @@ void EAGLETranslator::update_sliderNspin()
     stepsize = (eaglelam_controller->get_ny() + 170)/180;
     sliderNspinY->set_step(stepsize);
 
-    sliderNspinZ->set_max(eaglelam_controller->get_nz());
+    sliderNspinZ->set_max(1);
     sliderNspinZ->set_step(1);
     sliderNspinZ->setValue(0);
 
@@ -316,10 +226,9 @@ void EAGLETranslator::update_sliderNspin()
   //cout << "\ttitle: <" << _title << ">" << endl;
   //cout << "\teaglelam_controller->get_nx() = " << eaglelam_controller->get_nx() << endl;
   //cout << "\teaglelam_controller->get_ny() = " << eaglelam_controller->get_ny() << endl;
-  //cout << "\teaglelam_controller->get_nz() = " << eaglelam_controller->get_nz() << endl;
 }
 
-void EAGLETranslator::selectColorMap(const QString& str)
+void EAGLELAM_Translator::selectColorMap(const QString& str)
 {
   //cout << "\nfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__
   //     << ">, line: " << __LINE__ << endl;
@@ -335,7 +244,7 @@ void EAGLETranslator::selectColorMap(const QString& str)
     updateGL();
 }
 
-void EAGLETranslator::update_frame()
+void EAGLELAM_Translator::update_frame()
 {
     ++_glbTime;
     if(_glbTime >= _maxTime)
@@ -365,27 +274,20 @@ void EAGLETranslator::update_frame()
                //cout << "\tFunction: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
                //cout << "\tBefore save jpeg for time: " << _glbTime << endl;
 
-                 SaveJpg(_glbTime);
+                 SaveJpg(0);
 
                //cout << "\tAfter ave jpeg for time: " << _glbTime << endl;
              }
-
-             if((_glbTime + 1) == _maxTime)
-             {
-                 _startSave = false;
-                 if(_jpgNotSaved)
-                    _jpgNotSaved = false;
-             }
+            _startSave = false;
          }
 
-        if(nvoptions->get_cb(NV_SAVEJPG) && (0 == _glbTime))
+        if(nvoptions->get_cb(NV_SAVEJPG))
             _startSave = true;
 
       //cout << "\tFunction: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
       //cout << "\t_curTime = " << _curTime << ", _glbTime = " << _glbTime << ", _maxTime = " << _maxTime << endl;
 
-        _curTime = _glbTime;
-        nvoptions->set_tsec(_curTime);
+        nvoptions->set_tsec(0);
         _timestr = eaglelam_controller->get_timestring();
 
       //cout << "Leave Function: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -394,7 +296,7 @@ void EAGLETranslator::update_frame()
     updateGL();
 }
 
-void EAGLETranslator::nextFrame()
+void EAGLELAM_Translator::nextFrame()
 {
     ++_glbTime;
     if(_glbTime >= _maxTime)
@@ -410,7 +312,7 @@ void EAGLETranslator::nextFrame()
     updateGL();
 }
 
-void EAGLETranslator::backFrame()
+void EAGLELAM_Translator::backFrame()
 {
     --_glbTime;
     if(_glbTime < 0)
@@ -426,7 +328,7 @@ void EAGLETranslator::backFrame()
     updateGL();
 }
 
-void EAGLETranslator::set_locator(Locator* l)
+void EAGLELAM_Translator::set_locator(Locator* l)
 {
     locator = l;
 
@@ -438,7 +340,7 @@ void EAGLETranslator::set_locator(Locator* l)
     eaglelam_controller->set_locator(l);
 }
 
-void EAGLETranslator::writeLocatorMsg()
+void EAGLELAM_Translator::writeLocatorMsg()
 {
      _locatorinfo = "Location lon="+QString::number(locator->x())
                + ", lat=" + QString::number(locator->y());
@@ -446,20 +348,25 @@ void EAGLETranslator::writeLocatorMsg()
     emit locator_msg(_locatorinfo);
 }
 
-void EAGLETranslator::set_light(Light* l)
+void EAGLELAM_Translator::set_light(Light* l)
 {
     light = l;
   //eaglelam_controller->set_light(l);
 }
 
-int EAGLETranslator::get_ndv(int n)
+int EAGLELAM_Translator::get_ndv(int n)
 {
-    return eaglelam_controller->get_ndv(n);
+    vector<string> vecnames = eaglelam_controller->get_varlist();
+    return vecnames.size();
 }
 
-string* EAGLETranslator::get_ndvNames(int n)
+string* EAGLELAM_Translator::get_ndvNames(int n)
 {
-    string* varnames = eaglelam_controller->get_ndvNames(n);
+    vector<string> vecnames = eaglelam_controller->get_varlist();
+    string* varnames = new string[vecnames.size()];
+    for (int i=0; i<vecnames.size(); ++i) {
+        varnames[i] = vecnames[i];
+    }
     return varnames;
 }
 

@@ -1,5 +1,5 @@
-#ifndef _EagleLAMTranslator_H
-#define _EagleLAMTranslator_H
+#ifndef _EAGLELAM_Translator_H
+#define _EAGLELAM_Translator_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,13 +24,13 @@
 
 using namespace std;
 
-class EagleLAMTranslator : public BaseTranslator
+class EAGLELAM_Translator : public BaseTranslator
 {
     Q_OBJECT		//  Qt magic macro
     public:
-        EagleLAMTranslator(ColorTable *ct, NVOptions* opt, 
-                           vector<string> datafiles, QWidget* parent=0);	//  Constructor
-       ~EagleLAMTranslator();						//  Destructor
+        EAGLELAM_Translator(ColorTable *ct, NVOptions* opt, 
+                            vector<string> datafiles, QWidget* parent=0);	//  Constructor
+       ~EAGLELAM_Translator();						//  Destructor
 
         void show();
         void setup();
@@ -43,10 +43,12 @@ class EagleLAMTranslator : public BaseTranslator
         string* get_ndvNames(int n);
 
     public slots:
-        void select2dVar(const QString& str);
-        void select3dVar(const QString& str);
+        void selectColorMap(const QString& cmap);
 
-        void selectColorMap(const QString& str);
+        void selectVar(const QString& vn);
+        void select1dVar(const QString& vn) { selectVar(vn); };
+        void select2dVar(const QString& vn) { selectVar(vn); };
+        void select3dVar(const QString& vn) { selectVar(vn); };
 
         void update_frame();
         void nextFrame();
@@ -55,6 +57,7 @@ class EagleLAMTranslator : public BaseTranslator
     protected:
         QGridLayout* layout;
         EAGLELAM_Controller* eaglelam_controller;
+	EAGLELAM_Geometry* geometry;
 
 	vector<string> _datafiles;
 
@@ -63,10 +66,6 @@ class EagleLAMTranslator : public BaseTranslator
         void writeFrameInfo();
         void make_timeNpositionString();
         void writeLocatorMsg();
-
-        bool _first_time;
-        bool _displaying2D;
-        bool _displaying3D;
 };
 #endif
 

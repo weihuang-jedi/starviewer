@@ -8,7 +8,7 @@
 #include "modelparser.h"
 #include "eaglelam_translator.h"
 
-class EagleGlobalParser : public ModelParser
+class EagleLAMParser : public ModelParser
 {
     public:
         void parse(YAMLHandler *yamlHandler, NVOptions* nvoptions,
@@ -20,7 +20,7 @@ class EagleGlobalParser : public ModelParser
         void cleanup() override;
 
     protected:
-        EagleLAMTranslator* eaglelam_translator;
+        EAGLELAM_Translator* eaglelam_translator;
 };
 
 #endif

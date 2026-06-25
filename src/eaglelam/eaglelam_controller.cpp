@@ -96,18 +96,17 @@ EAGLELAM_Controller::~EAGLELAM_Controller()
 
 void EAGLELAM_Controller::setup()
 {
-    size_t i;
-    size_t xy_size;
-    size_t gridsize;
-    double* ph = NULL;
-    double* phb = NULL;
+    size_t i, n;
 
-    vector<EagleGlobalReader*> nchandler(datafiles.size());
+    set<string> nc1dvars = {"forecast_reference_time", "time",
+                            "latitude", "longitude", "x", "y", "CRS"};
+
+    vector<EagleReader*> nchandler(datafiles.size());
     varlist.resize(datafiles.size());
 
     for (i = 0; i < datafiles.size(); ++i)
     {
-        nchandler[i] = new EagleGlobalReader(datafiles[i]);
+        nchandler[i] = new EagleReader(datafiles[i].c_str());
 
         vector<string> varnames = nchandler[i]->getVarNames();
 
@@ -139,7 +138,7 @@ void EAGLELAM_Controller::setup()
     geometry->set_longitude(lon);
     geometry->set_latitude(lat);
 
-    _value = ncfile->get_fv(_varname);
+    _value = ncfile->get_fv(_varname.c_str());
     _title = "EAGLE LAM";
     // _setup_eaglelam_timestring();
 
@@ -157,7 +156,7 @@ void EAGLELAM_Controller::setvarname(string vn)
 {
     _varname = vn;
 
-    _value = ncfile->get_fv(_varname);
+    _value = ncfile->get_fv(_varname.c_str());
 
     eaglelam_viewer->setup(vn, _value);
     eaglelam_viewer->setup(_varname, _value);
@@ -209,24 +208,8 @@ void EAGLELAM_Controller::_setup4eaglelam()
 
 void EAGLELAM_Controller::set_fileNtime(int nf, int nt)
 {
-    size_t gridsize = 1;
-
-  //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tcurFile: " << nf << ", curTime: " << nt << ", varname: <" << _varname << ">" << endl;
-
-  //cout << "\tnvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
-  //cout << "\tnvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
-  //cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
-
-    _curFile = nf;
-    _curTime = nt;
-
-  //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tcurFile: " << nf << ", curTime: " << nt << ", varname: <" << _varname << ">" << endl;
-
-  //cout << "\tnvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
-  //cout << "\tnvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
-  //cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
+    cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tcurFile: " << nf << ", curTime: " << nt << ", varname: <" << _varname << ">" << endl;
 }
 
 void EAGLELAM_Controller::draw()
@@ -328,6 +311,7 @@ void EAGLELAM_Controller::update_colormap()
 
 void EAGLELAM_Controller::draw_isosurface()
 {
+/*
     size_t gridsize = _curTime * geometry->get_nx() * geometry->get_ny() * geometry->get_nz();
 
   //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__;
@@ -353,14 +337,16 @@ void EAGLELAM_Controller::draw_isosurface()
 
         marchingCube.display();
     }
+*/
 }
 
 void EAGLELAM_Controller::draw_vector()
 {
-  //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: "
-  //     << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tdrawWindVector = " << drawWindVector << endl;
+    cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: "
+         << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tdrawWindVector = " << drawWindVector << endl;
 
+#if 0
     if(nvoptions->get_cb(NV_VECTORON))
     {
         if(NULL == windvector)
@@ -389,13 +375,14 @@ void EAGLELAM_Controller::draw_vector()
         if(drawWindVector)
             unset_vector();
     }
+#endif
 }
 
 void EAGLELAM_Controller::draw_trajectory()
 {
-  //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: "
-  //     << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
+    cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: "
+         << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+#if 0
     if(nvoptions->get_cb(NV_TRAJECTORY_ON))
     {  
         if(NULL == trajectory)
@@ -415,10 +402,14 @@ void EAGLELAM_Controller::draw_trajectory()
 
         trajectory->draw();
     }
+#endif
 }
 
 void EAGLELAM_Controller::draw_lic()
 {
+    cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: "
+         << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+#if 0
     if(nvoptions->get_cb(NV_LICON))
     {
         if(NULL == lic)
@@ -439,6 +430,7 @@ void EAGLELAM_Controller::draw_lic()
         if(drawWindVector)
             unset_vector();
     }
+#endif
 }
 
 void EAGLELAM_Controller::_setup_eaglelam_timestring()
@@ -450,15 +442,11 @@ void EAGLELAM_Controller::_setup_eaglelam_timestring()
 string* EAGLELAM_Controller::get_timestring()
 {
     int n = 0;
-    string* timestring = ncfile->get_timestr();
+    string* timestring = new string[eaglelam_timestring.size()];
 
-    for(n = 0; n < _nt; ++n)
+    for(n = 0; n < eaglelam_timestring.size(); ++n)
     {
-        timestring[n] += eaglelam_timestring[n];
-
-      //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: "
-      //     << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-      //cout << "\ttimestring[" << n << "] = " << timestring[n] << endl;
+        timestring[n] = eaglelam_timestring[n];
     }
 
     return timestring;
@@ -513,8 +501,6 @@ void EAGLELAM_Controller::unset_vector()
 void EAGLELAM_Controller::setup_vector()
 {
     size_t i;
-    size_t xy_size;
-    size_t gridsize;
 
     drawWindVector = true;
 

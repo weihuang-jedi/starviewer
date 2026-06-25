@@ -26,7 +26,7 @@ typedef enum
     MPAS    = 0x0100,
     EAGLE   = 0x0200,
     EAGLEGLOBAL = 0x0201,
-    EAGLEALM = 0x0202,
+    EAGLELAM = 0x0202,
     MPIDEMO = 0x1000
 } ModelType;
 

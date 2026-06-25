@@ -7,21 +7,21 @@ void EagleLAMParser::parse(YAMLHandler *yamlHandler, NVOptions* nvoptions,
     // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     vector<string> datafiles = yamlHandler->get_datafiles();
 
-    cout << "Parsing Eagle global..." << endl;
+    cout << "Parsing Eagle LAM..." << endl;
     // for (int n = 0; n < datafiles.size(); ++n)
     //     cout << "datafiles[" << n << "]: <" << datafiles[n] << ">" << endl;
     // cout << "nvoptions->get_model(): " << nvoptions->get_model() << endl;
 
-    eagleglobal_translator = new EagleLAMTranslator(colorTable, nvoptions, datafiles);
+    eaglelam_translator = new EAGLELAM_Translator(colorTable, nvoptions, datafiles);
 
     // cout << "function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-    eagleglobal_translator->setup();
-    eagleglobal_translator->set_light(light);
-    eagleglobal_translator->set_locator(locator);
+    eaglelam_translator->setup();
+    eaglelam_translator->set_light(light);
+    eaglelam_translator->set_locator(locator);
 
     // cout << "function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     controlPanel->set_colortable(colorTable);
-    controlPanel->set_translator(eagleglobal_translator);
+    controlPanel->set_translator(eaglelam_translator);
     controlPanel->setup();
 
     // controlPanel->disable_onmap();
@@ -29,16 +29,16 @@ void EagleLAMParser::parse(YAMLHandler *yamlHandler, NVOptions* nvoptions,
     controlPanel->disable_y2();
     controlPanel->disable_z2();
     controlPanel->disable_t2();
-    eagleglobal_translator->updateSliders();
+    eaglelam_translator->updateSliders();
     // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 BaseTranslator* EagleLAMParser::get_translator()
 {
-    return eagleglobal_translator;
+    return eaglelam_translator;
 }
 
 void EagleLAMParser::cleanup()
 {
-    delete eagleglobal_translator;
+    delete eaglelam_translator;
 }

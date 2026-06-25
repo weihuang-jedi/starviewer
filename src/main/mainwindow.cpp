@@ -145,8 +145,8 @@ void MainWindow::_setup()
 	case EAGLEGLOBAL:
             eagleglobal();
             break;
-	case EAGLELAm:
-            eagleglam();
+	case EAGLELAM:
+            eaglelam();
             break;
       //case MPAS:
       //    mpas();
@@ -358,7 +358,7 @@ void MainWindow::createActions()
 
     eaglelamAct = new QAction(tr("&EAGLELAM"), this);
     eaglelamAct->setStatusTip(tr("Try to activate 'eaglelam' application"));
-    connect(eaglelamAct, SIGNAL(triggered()), this, SLOT(eaglelam);
+    connect(eaglelamAct, SIGNAL(triggered()), this, SLOT(eaglelam()));
 
     ufsAct = new QAction(tr("&UFS"), this);
     ufsAct->setStatusTip(tr("Try to activate 'ufs' application"));

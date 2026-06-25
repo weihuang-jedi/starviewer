@@ -31,7 +31,7 @@ class EAGLELAM_Viewer
         void scaleNtranslate();
 
         void reset();
-        void setup(string vn, double *var);
+        void setup(string vn, float *var);
         void set_geometry(EAGLELAM_Geometry *geometry);
 
         void set_opacity(int o);
@@ -45,8 +45,8 @@ class EAGLELAM_Viewer
         void saveDataset();
         void set_locator(Locator* l) { locator = l; };
 
-        double get_minval() { return vMinimum; };
-        double get_maxval() { return vMaximum; };
+        float get_minval() { return vMinimum; };
+        float get_maxval() { return vMaximum; };
 
     protected:
         NVOptions *nvoptions;
@@ -64,7 +64,7 @@ class EAGLELAM_Viewer
         int  _opacity;
         bool _hasOP;
 
-        double *_var;
+        float *_var;
 
         void _display_all();
         void _display_with_bump();
@@ -76,20 +76,12 @@ class EAGLELAM_Viewer
     private:
         Texture1d*    texture1d;
 
-        void _display_Xplane(int xs);
-        void _display_Yplane(int ys);
         void _display_Zplane(int zs);
 
-        void _display_Xplane_with_bump(int xs);
-        void _display_Yplane_with_bump(int ys);
         void _display_Zplane_with_bump(int zs);
 
-        void _display_Xplane_on_height_surface(int xs);
-        void _display_Yplane_on_height_surface(int ys);
         void _display_Zplane_on_height_surface(int zs);
 
-        void _display_Xplane_on_sphere(int xs);
-        void _display_Yplane_on_sphere(int ys);
         void _display_Zplane_on_sphere(int zs);
 
         void _display_Zplane_on_map(int zs);
@@ -98,21 +90,22 @@ class EAGLELAM_Viewer
         int nx, ny, nz;
         int nxp, nyp, nzp;
 
-        double deg2rad;
-        double _xfactor;
-        double oneover;
+        float deg2rad;
+        float _xfactor;
+        float oneover;
+
         float xStart, yStart;
         float xyDelt, zDelt;
         float vMinimum, vMaximum, scale, zScale;
         float niceMin, niceMax;
 
-        double *lon;
-        double *lat;
-        double *pltvar;
+        float *lon;
+        float *lat;
+        float *pltvar;
 
         void _parameter_setup();
         void _get_factor();
-        void _planeVertex(double lon, double lat, double height, double f);
+        void _planeVertex(float lon, float lat, float height, float f);
         void _sphere1dVertex(float lon, float lat, float r, float f);
 
         bool first_time;

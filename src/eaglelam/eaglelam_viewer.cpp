@@ -27,8 +27,8 @@ EAGLELAM_Viewer::EAGLELAM_Viewer(ColorTable *ct, NVOptions* opt)
 
     coastline = new CoastLine();
     mapprojection = new MapProjection();
-    stateboundary = new StateBoundary();
-    stateboundary->set_mapprojection(mapprojection);
+    // stateboundary = new StateBoundary();
+    // stateboundary->set_mapprojection(mapprojection);
     locator = NULL;
 
     _hasOP = false;
@@ -48,8 +48,8 @@ EAGLELAM_Viewer::~EAGLELAM_Viewer()
 
     delete texture1d;
     delete coastline;
-  //delete mapprojection;
-    delete stateboundary;
+    // delete mapprojection;
+    // delete stateboundary;
 
   //cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
@@ -116,7 +116,6 @@ void EAGLELAM_Viewer::_parameter_setup()
     size_t sz;
     Evaluator evaluator;
     string tex1dName = texture1d->get_name();
-    double* hgt = geometry->get_hgt();
 
     if(0 != tex1dName.compare(colorTable->get_name()))
     {
@@ -124,23 +123,11 @@ void EAGLELAM_Viewer::_parameter_setup()
         texture1d->set_name(colorTable->get_name());
     }
 
-    nxp = geometry->get_nx();
-    nyp = geometry->get_ny();
-    nzp = geometry->get_nz();
+    nx = geometry->get_nx();
+    ny = geometry->get_ny();
+    nz = geometry->get_nz();
 
-    nx = nxp;
-    if(geometry->isXstaggered())
-        --nx;
-
-    ny = nyp;
-    if(geometry->isYstaggered())
-        --ny;
-
-    nz = nzp;
-    if(geometry->isZstaggered())
-        --nz;
-
-    sz = nxp * nyp * nzp;
+    sz = nx * ny * nz;
     evaluator.set_value(sz, _var);
 
     vMinimum = evaluator.get_min();
@@ -153,9 +140,6 @@ void EAGLELAM_Viewer::_parameter_setup()
     niceMin = nicemms.get_min_flt();
     niceMax = nicemms.get_max_flt();
     scale  = 1.0/(niceMax - niceMin + MINVAL);
-
-    sz = nx * ny * nz;
-    evaluator.set_value(sz, hgt);
 
     zScale = 1.0/(evaluator.get_max() + 0.01);
 
@@ -177,21 +161,8 @@ void EAGLELAM_Viewer::_parameter_setup()
     else
         zDelt = 1.0;
 
-    if(geometry->isXstaggered())
-    {
-        lon = geometry->get_ulon();
-        lat = geometry->get_ulat();
-    }
-    else if(geometry->isYstaggered())
-    {
-        lon = geometry->get_vlon();
-        lat = geometry->get_vlat();
-    }
-    else
-    {
-        lon = geometry->get_lon();
-        lat = geometry->get_lat();
-    }
+    lon = geometry->get_longitude();
+    lat = geometry->get_latitude();
 
   //cout << "Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\tnx  = " << nx  << ", ny  = " << ny  << ", nz  = " << nz  << endl;
@@ -207,6 +178,7 @@ void EAGLELAM_Viewer::_parameter_setup()
   //cout << "\t\ttruelat1 = " << geometry->get_truelat1() << endl;
   //cout << "\t\ttruelat2 = " << geometry->get_truelat2() << endl;
 
+#if 0
     mapprojection->setup(geometry->get_map_proj(),
                          lon[0], lat[0],
                          geometry->get_dx(),
@@ -214,22 +186,7 @@ void EAGLELAM_Viewer::_parameter_setup()
                          geometry->get_truelat1(),
                          geometry->get_truelat2());
     mapprojection->set_dimension(nx, ny);
-
-  //int i;
-  //double x, y;
-
-  //mapprojection->lc_llxy(lon[0], lat[0], x, y);
-  //cout << "\tlon = " << lon[0] << ", lat = " << lat[0] << ", x = " << x << ", y = " << y << endl;
-  //mapprojection->lc_llxy(lon[1], lat[1], x, y);
-  //cout << "\tlon = " << lon[1] << ", lat = " << lat[1] << ", x = " << x << ", y = " << y << endl;
-  //mapprojection->lc_llxy(lon[nx], lat[nx], x, y);
-  //cout << "\tlon = " << lon[nx] << ", lat = " << lat[nx] << ", x = " << x << ", y = " << y << endl;
-
-  //for(i = 0; i < nx; ++i)
-  //{
-  //    mapprojection->lc_llxy(lon[i], lat[i], x, y);
-  //    cout << "\ti = " << i << ", lon = " << lon[i] << ", lat = " << lat[i] << ", x = " << x << ", y = " << y << endl;
-  //}
+#endif
 }
 
 void EAGLELAM_Viewer::_display_all()
@@ -238,26 +195,6 @@ void EAGLELAM_Viewer::_display_all()
   //cout << "\tnvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
   //cout << "\tnvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
   //cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
-
-    if((geometry->get_nx() > nvoptions->get_xsec()) && (geometry->get_nz() > 1))
-    {
-        _display_Xplane(nvoptions->get_xsec());
-    }
-
-    if(nvoptions->get_cb(NV_HASX2) && (geometry->get_nx() > nvoptions->get_xsec2()) && (geometry->get_nz() > 1))
-    {
-        _display_Xplane(nvoptions->get_xsec2());
-    }
-
-    if((geometry->get_ny() > nvoptions->get_ysec()) && (geometry->get_nz() > 1))
-    {
-        _display_Yplane(nvoptions->get_ysec());
-    }
-
-    if(nvoptions->get_cb(NV_HASY2) && (geometry->get_ny() > nvoptions->get_ysec2()) && (geometry->get_nz() > 1))
-    {
-        _display_Yplane(nvoptions->get_ysec2());
-    }
 
     if(geometry->get_nz() > nvoptions->get_zsec())
     {
@@ -270,123 +207,12 @@ void EAGLELAM_Viewer::_display_all()
     }
 }
 
-void EAGLELAM_Viewer::_display_Xplane(int xs)
-{
-    int j, k, n;
-    float f;
-    float x1, y1, z1, z2;
-    float value[nz][ny];
-
-    for(k = 0; k < nz; ++k)
-    {
-        for(j = 0; j < ny; ++j)
-        {
-            n = xs + (j + k * nyp) * nxp;
-            value[k][j] = _var[n];
-        }
-    }
-
-    x1 = xStart + xs * xyDelt;
-
-    glDisable(GL_TEXTURE_GEN_S); 
-    glDisable(GL_TEXTURE_2D);
-    glEnable( GL_TEXTURE_1D );
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
-    for(k = 0; k < nz - 1; ++k)
-    {
-        z1 = k * zDelt;
-        z2 = z1 + zDelt;
-
-        glBegin(GL_QUAD_STRIP);
-            for(j = 0; j < ny; ++j)
-            {
-                y1 = yStart + j * xyDelt;
-                f = scale * (value[k][j] - vMinimum);
-                glTexCoord1f(f);
-                glVertex3d(x1, y1, z1);
-
-                f = scale * (value[k+1][j] - vMinimum);
-                glTexCoord1f(f);
-                glVertex3d(x1, y1, z2);
-            }
-        glEnd();
-    }
-
-    glDisable(GL_TEXTURE_1D);
-}
-
-void EAGLELAM_Viewer::_display_Yplane(int ys)
-{
-    int i, k, n;
-    float f;
-    float x1, y1, z1, z2;
-    float value[nz][nx];
-
-    for(k = 0; k < nz; ++k)
-    {
-        for(i = 0; i < nx; ++i)
-        {
-            n = i + (ys + k * nyp) * nxp;
-            value[k][i] = _var[n];
-        }
-    }
-
-    y1 = yStart + ys * xyDelt;
-
-    glDisable(GL_TEXTURE_GEN_S); 
-    glDisable(GL_TEXTURE_2D);
-    glEnable( GL_TEXTURE_1D );
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
-    for(k = 0; k < nz - 1; ++k)
-    {
-        z1 = k * zDelt;
-        z2 = z1 + zDelt;
-
-        glBegin(GL_QUAD_STRIP);
-            for(i = 0; i < nx; ++i)
-            {
-                x1 = xStart + i * xyDelt;
-                f = scale * (value[k][i] - vMinimum);
-                glTexCoord1f(f);
-                glVertex3d(x1, y1, z1);
-
-                f = scale * (value[k+1][i] - vMinimum);
-                glTexCoord1f(f);
-                glVertex3d(x1, y1, z2);
-            }
-        glEnd();
-    }
-
-    glDisable(GL_TEXTURE_1D);
-}
-
 void EAGLELAM_Viewer::_display_Zplane(int zs)
 {
     int i, j, n;
-    double *pltvar = NULL;
+    float *pltvar = NULL;
     float f;
     float x1, y1, y2, z1;
-
-#if 0
-    double color4v[4];
-    double factor;
-
-    glColor3f(1,1,1);
-
-  //OpenGL should normalize normal vectors
-  //glEnable(GL_NORMALIZE);
-
-    glEnable(GL_BLEND);
-  //glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-
-  //glShadeModel(GL_SMOOTH);
-
-  //glDisable(GL_CULL_FACE);
-  //glEnable(GL_CULL_FACE);
-#endif
 
     n = zs * geometry->get_nx() * geometry->get_ny();
 
@@ -468,7 +294,7 @@ void EAGLELAM_Viewer::_display_Zplane(int zs)
         glEnd();
     }
 
-    stateboundary->drawONplane2(z1, 1);
+    // stateboundary->drawONplane2(z1, 1);
 
     glDisable(GL_TEXTURE_1D);
 
@@ -483,124 +309,16 @@ void EAGLELAM_Viewer::_display_Zplane(int zs)
 
 void EAGLELAM_Viewer::_display_with_bump()
 {
-    if((geometry->get_nx() > nvoptions->get_xsec()) && (geometry->get_nz() > 1))
-    {
-        _display_Xplane_with_bump(nvoptions->get_xsec());
-    }
-
-    if((geometry->get_ny() > nvoptions->get_ysec()) && (geometry->get_nz() > 1))
-    {
-        _display_Yplane_with_bump(nvoptions->get_ysec());
-    }
-
     if(geometry->get_nz() > nvoptions->get_zsec())
     {
         _display_Zplane_with_bump(nvoptions->get_zsec());
     }
 }
 
-void EAGLELAM_Viewer::_display_Xplane_with_bump(int xs)
-{
-    int j, k, n;
-    float f;
-    float amp = 0.2;
-    float offset = 0.5;
-    float x1, y1, z1, z2;
-    float value[nz][ny];
-
-    for(k = 0; k < nz; ++k)
-    {
-        for(j = 0; j < ny; ++j)
-        {
-            n = xs + (j + k * nyp) * nxp;
-            value[k][j] = _var[n];
-        }
-    }
-
-    x1 = xStart + xs * xyDelt;
-
-    glDisable(GL_TEXTURE_GEN_S);
-    glDisable(GL_TEXTURE_2D);
-    glEnable( GL_TEXTURE_1D );
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
-    for(k = 0; k < nz - 1; ++k)
-    {
-        z1 = k * zDelt;
-        z2 = z1 + zDelt;
-
-        glBegin(GL_QUAD_STRIP);
-            for(j = 0; j < ny; ++j)
-            {
-                y1 = yStart + j * xyDelt;
-
-                f = scale * (value[k][j] - vMinimum);
-                glTexCoord1f(f);
-                glVertex3d(x1 + amp * (f - offset), y1, z1);
-
-                f = scale * (value[k+1][j] - vMinimum);
-                glTexCoord1f(f);
-                glVertex3d(x1 + amp * (f - offset), y1, z2);
-            }
-        glEnd();
-    }
-
-    glDisable(GL_TEXTURE_1D);
-}
-
-void EAGLELAM_Viewer::_display_Yplane_with_bump(int ys)
-{
-    int i, k, n;
-    float f;
-    float amp = 0.2;
-    float offset = 0.5;
-    float x1, y1, z1, z2;
-    float value[nz][nx];
-    
-    for(k = 0; k < nz; ++k)
-    {
-        for(i = 0; i < nx; ++i)
-        {
-            n = i + (ys + k * nyp) * nxp;
-            value[k][i] = _var[n];
-        }   
-    }       
-        
-    y1 = yStart + ys * xyDelt;
-
-    glDisable(GL_TEXTURE_GEN_S);
-    glDisable(GL_TEXTURE_2D);
-    glEnable( GL_TEXTURE_1D );
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-    
-    for(k = 0; k < nz - 1; ++k)
-    {
-        z1 = k * zDelt; 
-        z2 = z1 + zDelt;
-        
-        glBegin(GL_QUAD_STRIP);
-            for(i = 0; i < nx; ++i)
-            {
-                x1 = xStart + i * xyDelt;
-
-                f = scale * (value[k][i] - vMinimum);
-                glTexCoord1f(f);
-                glVertex3d(x1, y1 + amp * (f - offset), z1);
-                
-                f = scale * (value[k+1][i] - vMinimum);
-                glTexCoord1f(f);
-                glVertex3d(x1, y1 + amp * (f - offset), z2);
-            }   
-        glEnd();
-    }       
-        
-    glDisable(GL_TEXTURE_1D);
-}
-
 void EAGLELAM_Viewer::_display_Zplane_with_bump(int zs)
 {
     int i, j, n;
-    double *pltvar = NULL;
+    float *pltvar = NULL;
     float f;
     float amp = 0.2;
     float offset = 0.5;
@@ -659,29 +377,6 @@ void EAGLELAM_Viewer::_display_Zplane_with_bump(int zs)
 
 void EAGLELAM_Viewer::_display_on_height_surface()
 {
-    if(geometry->get_nz() > 1)
-    {
-        if(geometry->get_nx() > nvoptions->get_xsec())
-        {
-            _display_Xplane_on_height_surface(nvoptions->get_xsec());
-        }
-
-        if(geometry->get_nx() > nvoptions->get_xsec2())
-        {
-            _display_Xplane_on_height_surface(nvoptions->get_xsec2());
-        }
-
-        if(geometry->get_ny() > nvoptions->get_ysec())
-        {
-            _display_Yplane_on_height_surface(nvoptions->get_ysec());
-        }
-
-        if(geometry->get_ny() > nvoptions->get_ysec2())
-        {
-            _display_Yplane_on_height_surface(nvoptions->get_ysec2());
-        }
-    }
-
     if(geometry->get_nz() > nvoptions->get_zsec())
     {
         _display_Zplane_on_height_surface(nvoptions->get_zsec());
@@ -693,119 +388,18 @@ void EAGLELAM_Viewer::_display_on_height_surface()
     }
 }
 
-void EAGLELAM_Viewer::_display_Xplane_on_height_surface(int xs)
-{
-    int j, k, n;
-    float f;
-    float x1, y1, z1, z2;
-    float height[nz][ny];
-    float values[nz][ny];
-    double* terrain = geometry->get_hgt();
-    
-    for(k = 0; k < nz; ++k)
-    {
-        for(j = 0; j < ny; ++j)
-        {
-            n = xs + (j + k * nyp) * nxp;
-            values[k][j] = _var[n];
-
-            n = xs + (j + k * ny) * nx;
-            height[k][j] = terrain[n];
-        }
-    }
-
-    x1 = xStart + xs * xyDelt;
-
-    glDisable(GL_TEXTURE_GEN_S);
-    glDisable(GL_TEXTURE_2D);
-    glEnable( GL_TEXTURE_1D );
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
-    for(k = 0; k < nz - 1; ++k)
-    {
-        glBegin(GL_QUAD_STRIP);
-            for(j = 0; j < ny; ++j)
-            {
-                y1 = yStart + j * xyDelt;
-                z1 = zScale * height[k][j];
-                f = scale * (values[k][j] - vMinimum);
-                glTexCoord1f(f);
-                glVertex3d(x1, y1, z1);
-
-                z2 = zScale * height[k+1][j];
-                f = scale * (values[k+1][j] - vMinimum);
-                glTexCoord1f(f);
-                glVertex3d(x1, y1, z2);
-            }
-        glEnd();
-    }
-
-    glDisable(GL_TEXTURE_1D);
-}
-
-void EAGLELAM_Viewer::_display_Yplane_on_height_surface(int ys)
-{
-    int i, k, n;
-    float f;
-    float x1, y1, z1, z2;
-    float height[nz][nx];
-    float values[nz][nx];
-    double* terrain = geometry->get_hgt();
-    
-    for(k = 0; k < nz; ++k)
-    {
-        for(i = 0; i < nx; ++i)
-        {
-            n = i + (ys + k * nyp) * nxp;
-            values[k][i] = _var[n];
-
-            n = i + (ys + k * ny) * nx;
-            height[k][i] = terrain[n];
-        }
-    }       
-            
-    y1 = yStart + ys * xyDelt;
-    
-    glDisable(GL_TEXTURE_GEN_S);
-    glDisable(GL_TEXTURE_2D);
-    glEnable( GL_TEXTURE_1D );
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-    
-    for(k = 0; k < nz - 1; ++k)
-    {
-        glBegin(GL_QUAD_STRIP);
-            for(i = 0; i < nx; ++i)
-            {
-                x1 = xStart + i * xyDelt;
-                z1 = zScale * height[k][i];
-                f = scale * (values[k][i] - vMinimum);
-                glTexCoord1f(f);
-                glVertex3d(x1, y1, z1);
-                
-                z2 = zScale * height[k+1][i];
-                f = scale * (values[k+1][i] - vMinimum);
-                glTexCoord1f(f);
-                glVertex3d(x1, y1, z2);
-            }   
-        glEnd();
-    }       
-        
-    glDisable(GL_TEXTURE_1D);
-}
-
 void EAGLELAM_Viewer::_display_Zplane_on_height_surface(int zs)
 {
-    int i, j, n;
-    double* height = NULL;
+    int i, j, n, np1;
+    float height;
     float f;
     float x1, y1, y2, z1;
-    double* terrain = geometry->get_hgt();
     
     n = zs * geometry->get_nx() * geometry->get_ny();
     pltvar = &_var[n];
 
     n = zs * nx * ny;
-    height = &terrain[n];
+    height = 0.1;
 
   //cout << "Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\t_varname = " << _varname << endl;
@@ -829,6 +423,8 @@ void EAGLELAM_Viewer::_display_Zplane_on_height_surface(int zs)
                 
     for(j = 0; j < ny - 1; ++j)
     {           
+        n = j * nx;
+        np1 = (j + 1) * nx;
         y1 = yStart + xyDelt * j;
         y2 = yStart + xyDelt * (j + 1);
                 
@@ -836,20 +432,14 @@ void EAGLELAM_Viewer::_display_Zplane_on_height_surface(int zs)
         for(i = 0; i < nx; ++i)
         {   
             x1 = xStart + xyDelt * i;
-            n = j * nx + i;
-            z1 = zScale * height[n];
     
-            n = j * nxp + i;
-            f = scale * (pltvar[n] - vMinimum);
+            f = scale * (pltvar[n+i] - vMinimum);
             glTexCoord1f(f);
-            glVertex3d(x1, y1, z1); 
+            glVertex3d(x1, y1, height); 
 
-            n += nxp;
-            f = scale * (pltvar[n] - vMinimum);
-            n = (j + 1) * nx + i;
-            z1 = zScale * height[n];
+            f = scale * (pltvar[np1+i] - vMinimum);
             glTexCoord1f(f);
-            glVertex3d(x1, y2, z1);
+            glVertex3d(x1, y2, height);
         }
         glEnd();
     }
@@ -859,29 +449,6 @@ void EAGLELAM_Viewer::_display_Zplane_on_height_surface(int zs)
 
 void EAGLELAM_Viewer::_display_on_sphere()
 {
-    if(geometry->get_nz() > 1)
-    {
-        if(geometry->get_nx() > nvoptions->get_xsec())
-        {
-            _display_Xplane_on_sphere(nvoptions->get_xsec());
-        }
-
-      //if(nvoptions->get_cb(NV_HASX2) && (geometry->get_nx() > nvoptions->get_xsec2()))
-      //{
-      //    _display_Xplane_on_sphere(nvoptions->get_xsec2());
-      //}
-
-        if(geometry->get_ny() > nvoptions->get_ysec())
-        {
-            _display_Yplane_on_sphere(nvoptions->get_ysec());
-        }
-
-      //if(nvoptions->get_cb(NV_HASY2) && (geometry->get_ny() > nvoptions->get_ysec2()))
-      //{
-      //    _display_Yplane_on_sphere(nvoptions->get_ysec2());
-      //}
-    }
-
     if(geometry->get_nz() > nvoptions->get_zsec())
     {
       //cout << "Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
@@ -921,178 +488,21 @@ void EAGLELAM_Viewer::_sphere1dVertex(float lon, float lat, float r, float f)
     glVertex3f(x, y, z);
 }
 
-void EAGLELAM_Viewer::_display_Xplane_on_sphere(int xs)
-{
-    int j, k, n;
-    float f;
-    float amp = 0.2 * zScale;
-    float x1, y1, z1;
-    float height[nz][ny];
-    float values[nz][ny];
-    double* terrain = geometry->get_hgt();
-
-    if(xs >= nx)
-        return;
-
-    for(k = 0; k < nz; ++k)
-    {
-        for(j = 0; j < ny; ++j)
-        {
-            n = xs + (j + k * nyp) * nxp;
-            values[k][j] = _var[n];
-
-            n = xs + (j + k * ny) * nx;
-            height[k][j] = terrain[n];
-        }
-    }
-
-    if(geometry->isXstaggered())
-    {
-        lon = geometry->get_ulon();
-        lat = geometry->get_ulat();
-    }
-    else if(geometry->isYstaggered())
-    {
-        lon = geometry->get_vlon();
-        lat = geometry->get_vlat();
-    }
-    else
-    {
-        lon = geometry->get_lon();
-        lat = geometry->get_lat();
-    }
-
-    glDisable(GL_TEXTURE_GEN_S);
-    glDisable(GL_TEXTURE_2D);
-    glEnable( GL_TEXTURE_1D );
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
-    n = nx - 1 - xs;
-    for(k = 0; k < nz - 1; ++k)
-    {
-        glBegin(GL_QUAD_STRIP);
-            for(j = 0; j < ny; ++j)
-            {
-                x1 = lon[n + j * nxp];
-                y1 = lat[n + j * nxp];
-
-                z1 = 1.001 + amp * height[k][j];
-                f = scale * (values[k][j] - vMinimum);
-                _sphere1dVertex(x1, y1, z1, f);
-
-                z1 = 1.001 + amp * height[k+1][j];
-                f = scale * (values[k+1][j] - vMinimum);
-                _sphere1dVertex(x1, y1, z1, f);
-            }
-        glEnd();
-    }
-
-    glDisable(GL_TEXTURE_1D);
-}
-
-void EAGLELAM_Viewer::_display_Yplane_on_sphere(int ys)
-{
-    int i, k, n;
-    float f;
-    float amp = 0.2 * zScale;
-    float x1, y1, z1;
-    float height[nz][nx];
-    float values[nz][nx];
-    double* terrain = geometry->get_hgt();
-
-    if(ys >= ny)
-        return;
-
-    for(k = 0; k < nz; ++k)
-    {
-        for(i = 0; i < nx; ++i)
-        {
-            n = i + (ys + k * nyp) * nxp;
-            values[k][i] = _var[n];
-
-            n = i + (ys + k * ny) * nx;
-            height[k][i] = terrain[n];
-        }
-    }
-
-    if(geometry->isXstaggered())
-    {
-        lon = geometry->get_ulon();
-        lat = geometry->get_ulat();
-    }
-    else if(geometry->isYstaggered())
-    {
-        lon = geometry->get_vlon();
-        lat = geometry->get_vlat();
-    }
-    else
-    {
-        lon = geometry->get_lon();
-        lat = geometry->get_lat();
-    }
-
-    glDisable(GL_TEXTURE_GEN_S);
-    glDisable(GL_TEXTURE_2D);
-    glEnable( GL_TEXTURE_1D );
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
-    for(k = 0; k < nz - 1; ++k)
-    {
-        glBegin(GL_QUAD_STRIP);
-            n = nxp;
-            for(i = 0; i < nx; ++i)
-            {
-                --n;
-                x1 = lon[n + ys * nxp];
-                y1 = lat[n + ys * nxp];
-
-                z1 = 1.001 + amp * height[k][i];
-                f = scale * (values[k][i] - vMinimum);
-                _sphere1dVertex(x1, y1, z1, f);
-
-                z1 = 1.001 + amp * height[k+1][i];
-                f = scale * (values[k+1][i] - vMinimum);
-                _sphere1dVertex(x1, y1, z1, f);
-            }
-        glEnd();
-    }
-
-    glDisable(GL_TEXTURE_1D);
-}
-
 void EAGLELAM_Viewer::_display_Zplane_on_sphere(int zs)
 {
     int i, j, n;
     float f;
     float amp = 0.2 * zScale;
     float x1, y1, z1;
-    double* height = NULL;
-    double* terrain = geometry->get_hgt();
+    float height = 1.01;
 
     if(zs >= nz)
         return;
-
-    if(geometry->isXstaggered())
-    {
-        lon = geometry->get_ulon();
-        lat = geometry->get_ulat();
-    }
-    else if(geometry->isYstaggered())
-    {
-        lon = geometry->get_vlon();
-        lat = geometry->get_vlat();
-    }
-    else
-    {
-        lon = geometry->get_lon();
-        lat = geometry->get_lat();
-    }
 
     n = zs * geometry->get_nx() * geometry->get_ny();
     pltvar = &_var[n];
 
     n = zs * nx * ny;
-    height = &terrain[n];
 
     glDisable(GL_TEXTURE_GEN_S);
     glDisable(GL_TEXTURE_2D);
@@ -1104,17 +514,15 @@ void EAGLELAM_Viewer::_display_Zplane_on_sphere(int zs)
         glBegin(GL_QUAD_STRIP);
         for(i = 0; i < nx; ++i)
         {
-            x1 = lon[i + j * nxp];
-            y1 = lat[i + j * nxp];
-            z1 = 1.001 + amp * height[i + j * nx];
-            f = scale * (pltvar[i + j * nxp] - vMinimum);
-            _sphere1dVertex(x1, y1, z1, f);
+            x1 = lon[i + j * nx];
+            y1 = lat[i + j * nx];
+            f = scale * (pltvar[i + j * nx] - vMinimum);
+            _sphere1dVertex(x1, y1, height, f);
 
-            x1 = lon[i + (j + 1) * nxp];
-            y1 = lat[i + (j + 1) * nxp];
-            z1 = 1.001 + amp * height[i + (j + 1) * nx];
-            f = scale * (pltvar[i + (j + 1)* nxp] - vMinimum);
-            _sphere1dVertex(x1, y1, z1, f);
+            x1 = lon[i + (j + 1) * nx];
+            y1 = lat[i + (j + 1) * nx];
+            f = scale * (pltvar[i + (j + 1)* nx] - vMinimum);
+            _sphere1dVertex(x1, y1, height, f);
         }
         glEnd();
     }
@@ -1130,31 +538,19 @@ void EAGLELAM_Viewer::_display_Zplane_on_sphere(int zs)
   //}
 }
 
-void EAGLELAM_Viewer::set_geometry(EAGLE_Geometry *gm)
+void EAGLELAM_Viewer::set_geometry(EAGLELAM_Geometry *gm)
 {
     geometry = gm;
 }
 
-void EAGLELAM_Viewer::setup(string vn, double *var)
+void EAGLELAM_Viewer::setup(string vn, float *var)
 {
     _varname  = vn;
     _var = var;
 
     _parameter_setup();
 
-    if(first_time)
-    {
-        nvoptions->set_xsec(geometry->get_nx() + 1);
-        nvoptions->set_xsec2(geometry->get_nx() + 1);
-        nvoptions->set_ysec(geometry->get_ny() + 1);
-        nvoptions->set_ysec2(geometry->get_ny() + 1);
-        nvoptions->set_zsec(0);
-        nvoptions->set_zsec2(geometry->get_nz() + 1);
-
-        first_time = false;
-    }
-
-  //_marchingCubeSetup();
+    nvoptions->set_zsec(0);
 
     draw();
 }
@@ -1205,13 +601,13 @@ void EAGLELAM_Viewer::saveDataset()
 
 void EAGLELAM_Viewer::_display_on_map()
 {
-    double height;
+    float height;
 
     glDisable(GL_LIGHTING);
 
-    height = (double)nvoptions->get_zsec() / nz;
-    coastline->drawONplane2(height, 3);
-    stateboundary->drawONplane2(height, 1);
+    height = (float)nvoptions->get_zsec() / nz;
+    coastline->drawOnPlane(height+0.01);
+    // stateboundary->drawONplane2(height, 1);
 
     glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(1, 1);
@@ -1234,22 +630,22 @@ void EAGLELAM_Viewer::_display_on_map()
 }
 
 //Draw vertex in xyz coordinates
-void EAGLELAM_Viewer::_planeVertex(double lon, double lat, double height, double f)
+void EAGLELAM_Viewer::_planeVertex(float lon, float lat, float height, float f)
 {
-    double x = lon * oneover - _xfactor;
-    double y = lat * oneover;
+    float x = lon * oneover - _xfactor;
+    float y = lat * oneover;
 
-    glNormal3d(0.0, 0.0, 1.0);
-    glTexCoord1d(f);
-    glVertex3d(x,y,height);
+    glNormal3f(0.0, 0.0, 1.0);
+    glTexCoord1f(f);
+    glVertex3f(x,y,height);
 }
 
 void EAGLELAM_Viewer::_display_Zplane_on_map(int zs)
 {
     int i, j, n;
-    double f;
-    double height;
-    double* pltvar = NULL;
+    float f;
+    float height;
+    float* pltvar = NULL;
 
     if(zs >= nz)
         return;
@@ -1257,8 +653,7 @@ void EAGLELAM_Viewer::_display_Zplane_on_map(int zs)
     n = zs * nxp * nyp;
     pltvar = &_var[n];
 
-  //height = (double) zs / (double) geometry->get_nz() - 0.5;
-    height = (double) zs / (double) geometry->get_nz();
+    height = 0.01;
 
   //_zlist[zs] = glGenLists(1);
   //glNewList(_zlist[zs], GL_COMPILE);
@@ -1289,8 +684,8 @@ void EAGLELAM_Viewer::_display_Zplane_on_map(int zs)
 
     glDisable(GL_TEXTURE_1D);
 
-    coastline->drawONplane2(height+0.001, 3);
-    stateboundary->drawONplane2(height+0.001, 1);
+    coastline->drawOnPlane(height+0.001);
+    // stateboundary->drawONplane2(height+0.001, 1);
 
     glPopMatrix();
 
@@ -1337,40 +732,24 @@ void EAGLELAM_Viewer::_get_factor()
 
 void EAGLELAM_Viewer::_display_on_sphere_map()
 {
-    double height;
+    float radius = 1.01;
 
-    if(geometry->isXstaggered())
-    {
-        lon = geometry->get_ulon();
-        lat = geometry->get_ulat();
-    }
-    else if(geometry->isYstaggered())
-    {
-        lon = geometry->get_vlon();
-        lat = geometry->get_vlat();
-    }
-    else
-    {
-        lon = geometry->get_lon();
-        lat = geometry->get_lat();
-    }
+    lon = geometry->get_longitude();
+    lat = geometry->get_latitude();
 
     _get_factor();
     _display_Zplane_on_sphere_map(nvoptions->get_zsec());
 
-  //height = 0.501 + (nz - 1 - nvoptions->get_zsec()) * zDelt;
-    height = 0.501 + (double) nvoptions->get_zsec() / nz;
-
-    coastline->draw(height, 3);
-    stateboundary->draw(height, 1);
+    coastline->drawOnSphere(radius);
+    // stateboundary->draw(radius, 1);
 }
 
 void EAGLELAM_Viewer::_display_Zplane_on_sphere_map(int zs)
 {
     int i, j, n, n1, n2;
-    double f;
-    double height;
-    double* pltvar = NULL;
+    float f;
+    float height;
+    float* pltvar = NULL;
 
     if(zs >= nz)
         return;
@@ -1381,7 +760,7 @@ void EAGLELAM_Viewer::_display_Zplane_on_sphere_map(int zs)
   //cout << "Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\tnx = " << nx << ", ny = " << ny << ", nz = " << nz << ", n = " << n << endl;
 
-    height = 0.501 + (double) zs / nz;
+    height = 0.501 + (float) zs / nz;
 
   //_zlist[zs] = glGenLists(1);
   //glNewList(_zlist[zs], GL_COMPILE);
@@ -1398,17 +777,16 @@ void EAGLELAM_Viewer::_display_Zplane_on_sphere_map(int zs)
 
     for(j = 0; j < ny - 1; ++j)
     {
+        n1 = j * nx;
+        n2 = n1 + nx;
         glBegin(GL_QUAD_STRIP);
             for(i = 0; i < nx; ++i)
             {
-                n1 = i + j * nxp;
-                n2 = n1 + nxp;
+                f = scale * (pltvar[n1+i] - vMinimum);
+                _sphere1dVertex(lon[n1+i], lat[n1+i], height, f);
 
-                f = scale * (pltvar[n1] - vMinimum);
-                _sphere1dVertex(lon[n1], lat[n1], height, f);
-
-                f = scale * (pltvar[n2] - vMinimum);
-                _sphere1dVertex(lon[n2], lat[n2], height, f);
+                f = scale * (pltvar[n2+i] - vMinimum);
+                _sphere1dVertex(lon[n2+i], lat[n2+i], height, f);
             }
         glEnd();
     }

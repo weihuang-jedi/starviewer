@@ -36,6 +36,7 @@ class EAGLELAM_Controller
         void setup_vector();
         void unset_vector();
 
+        void set_colorTable(ColorTable* ct) { colorTable = ct; };
         void update_colormap();
         void draw_isosurface();
         void draw_lic();
@@ -44,11 +45,16 @@ class EAGLELAM_Controller
 
         string* get_timestring();
 
+        int get_nx() { return _nx; };
+        int get_ny() { return _ny; };
+
         int get_numvars() { return _numvars; };
         vector<string> get_varlist() { return varlist; };
 
         float get_valmax() { return _valmax; };
         float get_valmin() { return _valmin; };
+
+        EAGLELAM_Geometry* get_geometry() { return geometry; };
 
     protected:
         EagleReader* ncfile;
@@ -96,6 +102,7 @@ class EAGLELAM_Controller
         void _get_vector(int nt);
 
 	string _varname;
+	string _title;
 };
 #endif
 
