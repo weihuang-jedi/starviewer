@@ -6,12 +6,14 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 
-#include <netcdf.h>
+#include <ogrsf_frmts.h>
+#include "mapprojection.h"
 
 using namespace std;
 
@@ -22,72 +24,44 @@ class StateBoundary
        ~StateBoundary();
 
         void print();
-
-        float*  get_value(char *vn);
-        double* get_dv(char *vn);
-        int*    get_iv(char *vn);
+        void process();
 
         void draw();
-        void draw(int n);
-        void draw(double r, int n);
 
         void drawONplane();
-        void drawONplane(int n);
-        void drawONplane(double h, int n);
-        void drawONplane2(double h, int n);
 
-        void set_plot_level(int n);
-        void set_min_plot_points(int n) { minPlotPoints = n; };
+	void set_mapprojection(MapProjection* mp) { _mapprojection = mp; };
+	MapProjection* get_mapprojection() { return _mapprojection; };
 
     protected:
-        int plotLevel;
-        int maxPlotLevel;
-
+	MapProjection* _mapprojection;
         int minPlotPoints;
-
-        string flnm[3];
-
-        int ndims[3];
-        int nvars[3];
-        int natts[3];
 
         double deg2rad;
         double oneover;
 
-        string layer_name[3];
-        string geometry_type[3];
-
-        int geom_segIndex[3]; // 0
-        int geom_numSegs[3];  // 1
-        int segs_xyzIndex[3]; // 0
-        int segs_numPnts[3];  // 1
-
-        int geometry[3];
-        int segments[3];
-        int num_features[3];
-        int num_segments[3];
-        int num_points[3];
-
-        int** geometry_array;
-        int** segments_array;
-
-        double** lon;
-        double** lat;
-
         double height;
         double radius;
-
-        int** id;
-
-        void _check_atts(int i);
-        void _check_dims(int i);
-        void _check_vars(int i);
 
         void _setup();
 
         void _lonlat2xy(double lon, double lat, double &x, double &y);
         void _lonlat2xy2(double lon, double lat, double &x, double &y);
         void _lonlat2xyz(double lon, double lat, double &x, double &y, double &z);
+
+	vector<string> state_abbr;
+	unordered_map<string, string> state_abbr2name;
+	unordered_map<string, vector<vector<OGRPoint>>> state_polygon;
+
+        GDALDataset* poDS;
+        OGRLayer* poLayer;
+        OGRFeature* poFeature;
+
+	void printPolygonCoordinates(OGRGeometry* poGeometry);
+	void printMultiPolygonCoordinates(OGRGeometry* poGeometry);
+
+	vector<vector<OGRPoint>> processPolygonCoordinates(OGRGeometry* poGeometry);
+	vector<vector<OGRPoint>> processMultiPolygonCoordinates(OGRGeometry* poGeometry);
 };
 #endif
 
