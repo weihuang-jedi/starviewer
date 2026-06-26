@@ -6,6 +6,7 @@
 
 EAGLELAM_Viewer::EAGLELAM_Viewer(ColorTable *ct, NVOptions* opt)
 {
+    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     colorTable = ct;
     nvoptions = opt;
     string name = colorTable->get_name();
@@ -27,8 +28,7 @@ EAGLELAM_Viewer::EAGLELAM_Viewer(ColorTable *ct, NVOptions* opt)
 
     coastline = new CoastLine();
     mapprojection = new MapProjection();
-    // stateboundary = new StateBoundary();
-    // stateboundary->set_mapprojection(mapprojection);
+    stateboundary = new StateBoundary();
     locator = NULL;
 
     _hasOP = false;
@@ -36,7 +36,7 @@ EAGLELAM_Viewer::EAGLELAM_Viewer(ColorTable *ct, NVOptions* opt)
     _xfactor = 999.0;
     oneover  = 1.0 / 180.0;
 
-    first_time = true;
+    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 EAGLELAM_Viewer::~EAGLELAM_Viewer()
@@ -48,8 +48,8 @@ EAGLELAM_Viewer::~EAGLELAM_Viewer()
 
     delete texture1d;
     delete coastline;
-    // delete mapprojection;
-    // delete stateboundary;
+    delete mapprojection;
+    delete stateboundary;
 
   //cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
@@ -164,87 +164,97 @@ void EAGLELAM_Viewer::_parameter_setup()
     lon = geometry->get_longitude();
     lat = geometry->get_latitude();
 
-  //cout << "Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tnx  = " << nx  << ", ny  = " << ny  << ", nz  = " << nz  << endl;
-  //cout << "\tnxp = " << nxp << ", nyp = " << nyp << ", nzp = " << nzp << endl;
-  //cout << "\tsetup map projection: " << endl;
-  //cout << "\t\tcode = " << geometry->get_map_proj() << endl;
-  //cout << "\t\tlon1 = " << lon[0] << endl;
-  //cout << "\t\tlat1 = " << lat[0] << endl;
-  //cout << "\t\tdx = " << geometry->get_dx() << endl;
-  //cout << "\t\tstdlon = " << geometry->get_stand_lon() << endl;
-  //cout << "\t\tcenlon = " << geometry->get_cen_lon() << endl;
-  //cout << "\t\tcenlat = " << geometry->get_cen_lat() << endl;
-  //cout << "\t\ttruelat1 = " << geometry->get_truelat1() << endl;
-  //cout << "\t\ttruelat2 = " << geometry->get_truelat2() << endl;
+    _xGrid = geometry->get_xGrid();
+    _yGrid = geometry->get_yGrid();
 
-#if 0
-    mapprojection->setup(geometry->get_map_proj(),
-                         lon[0], lat[0],
-                         geometry->get_dx(),
-                         geometry->get_stand_lon(),
-                         geometry->get_truelat1(),
-                         geometry->get_truelat2());
+    _grid_mapping_name = geometry->get_grid_mapping_name();
+    _latitude_of_projection_origin = geometry->get_latitude_of_projection_origin();
+    _longitude_of_central_meridian = geometry->get_longitude_of_central_meridian();
+    _standard_parallel = geometry->get_standard_parallel();
+
+    //Projection codes for proj_info structure: (in mapprojection.h)
+//#define PROJ_LATLON     0
+//#define PROJ_LAMBERT_CONFORMAL 1
+//#define PROJ_MERCATER   3
+//#define PROJ_POLAR_STEREOGRAPHIC                5
+    int map_projection = PROJ_LAMBERT_CONFORMAL;
+    // map_projection = 1;
+    float dx = static_cast<float>(_xGrid[1] - _xGrid[0]);
+
+    cout << "Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tnx  = " << nx  << ", ny  = " << ny  << ", nz  = " << nz  << endl;
+    cout << "\tsetup map projection: " << endl;
+    cout << "\t\tcode = " << map_projection;
+    cout << "\t\tlon1 = " << lon[0] << endl;
+    cout << "\t\tlat1 = " << lat[0] << endl;
+    cout << "\t\tdx = " << dx << endl;
+    cout << "\t\tstdlon = " << _longitude_of_central_meridian << endl;
+    cout << "\t\tcenlon = " << _longitude_of_central_meridian << endl;
+    cout << "\t\tcenlat = " << _latitude_of_projection_origin << endl;
+    cout << "\t\ttruelat1 = " << _standard_parallel[0] << endl;
+    cout << "\t\ttruelat2 = " << _standard_parallel[1] << endl;
+
+    mapprojection->setup(map_projection, lon[0], lat[0], dx,
+                         _longitude_of_central_meridian,
+                         _standard_parallel[0], _standard_parallel[1]);
     mapprojection->set_dimension(nx, ny);
-#endif
+
+    // stateboundary->set_mapprojection(mapprojection);
 }
 
 void EAGLELAM_Viewer::_display_all()
 {
-  //cout << "\tFunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tnvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
-  //cout << "\tnvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
+    cout << "\tFunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
 
     if(geometry->get_nz() > nvoptions->get_zsec())
     {
         _display_Zplane(nvoptions->get_zsec());
     }
-
-    if(nvoptions->get_cb(NV_HASZ2) && (geometry->get_nz() > nvoptions->get_zsec2()) && (geometry->get_nz() > 1))
-    {
-        _display_Zplane(nvoptions->get_zsec2());
-    }
 }
 
 void EAGLELAM_Viewer::_display_Zplane(int zs)
 {
-    int i, j, n;
+    int i, j, k, n1, n2;
     float *pltvar = NULL;
     float f;
     float x1, y1, y2, z1;
 
-    n = zs * geometry->get_nx() * geometry->get_ny();
+    // cout << "\nEnter Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
-    pltvar = &_var[n];
+    pltvar = &_var[0];
 
-    if(1 < nz)
-    {
-       z1 = (float) zs / (nz - 1.0);
-    }
-    else
-    {
-       z1 = 0.0;
-    }
+    z1 = 0.0;
 
-    if(NULL != locator)
-        locator->set_height(z1);
+    k = nvoptions->get_zsec()+1;
 
-  //The texture coordinate comes from the data, it it not
-  //generated from the vertex position!!!
-    glDisable(GL_TEXTURE_GEN_S); 
-    glDisable(GL_TEXTURE_2D);
-    glEnable( GL_TEXTURE_1D );
+    // zcl = glGenLists(1);
+    // glNewList(zcl, GL_COMPILE_AND_EXECUTE);
+    // lister->set_zid(k, zcl);
+
+    glPushMatrix();
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+  //OpenGL should normalize normal vectors
+    glEnable(GL_NORMALIZE);
+    glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glNormal3f(0.0, 0.0, -1.0);
 
-  //glEnable(GL_CULL_FACE);
-  //glEnable(GL_NORMALIZE);
-  //glNormal3f(0.0, 0.0, 1.0);
+    // cout << "\tFunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tnx: " << nx << ", ny: " << ny << ", xStart: " << xStart << ", yStart: " << yStart << ", xyDelt = " << xyDelt << endl;
+    // cout << "\tvMinimum =" << vMinimum << endl;
+    // cout << "\tnx*ny =" << nx*ny << endl;
 
     for(j = 0; j < ny - 1; ++j)
     {
         y1 = yStart + xyDelt * j;
         y2 = yStart + xyDelt * (j + 1);
+
+        n1 = j * nx;
+        n2 = n1 + nx;
+
+        // cout << "\tn1: " << n1 << ", n2: " << n2 << endl;
 
         glBegin(GL_QUAD_STRIP);
 #if 1
@@ -252,15 +262,13 @@ void EAGLELAM_Viewer::_display_Zplane(int zs)
         {
             x1 = xStart + xyDelt * i;
 
-            n = j * nxp + i;
-            f = scale * (pltvar[n] - vMinimum);
+            f = scale * (pltvar[n1+i] - vMinimum);
             glTexCoord1f(f);
-            glVertex3d(x1, y1, z1);
+            glVertex3f(x1, y1, z1);
 
-            n += nxp;
-            f = scale * (pltvar[n] - vMinimum);
+            f = scale * (pltvar[n2+i] - vMinimum);
             glTexCoord1f(f);
-            glVertex3d(x1, y2, z1);
+            glVertex3f(x1, y2, z1);
         }
 #else
       //cout << "j = " << j << endl;
@@ -294,17 +302,21 @@ void EAGLELAM_Viewer::_display_Zplane(int zs)
         glEnd();
     }
 
+    // coastline->drawOnPlane(z1+0.01);
     // stateboundary->drawONplane2(z1, 1);
 
     glDisable(GL_TEXTURE_1D);
+    glPopMatrix();
+    // glEndList();
 
   //if(locator->on())
   //{
   //  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
   //  //cout << "\tlocation = (" << locator->x() << ", " << locator->y() << ")" << endl;
-
   //    _draw_cross(height+ 0.5);
   //}
+  //
+     // cout << "Leave Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void EAGLELAM_Viewer::_display_with_bump()

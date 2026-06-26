@@ -103,12 +103,20 @@ class EAGLELAM_Viewer
         float *lat;
         float *pltvar;
 
+        double *_xGrid;
+        double *_yGrid;
+
         void _parameter_setup();
         void _get_factor();
         void _planeVertex(float lon, float lat, float height, float f);
         void _sphere1dVertex(float lon, float lat, float r, float f);
 
-        bool first_time;
+	GLuint zcl;
+
+	string _grid_mapping_name;
+        float _latitude_of_projection_origin;
+        float _longitude_of_central_meridian;
+        vector<float> _standard_parallel;
 };
 #endif
 

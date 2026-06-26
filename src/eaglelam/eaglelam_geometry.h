@@ -40,11 +40,27 @@ class EAGLELAM_Geometry : public Geometry {
 	void set_longitude(float *v) { _longitude = v; };
 	void set_latitude(float *v) { _latitude = v; };
 
+        double* get_xGrid() { return _xGrid; };
+        double* get_yGrid() { return _yGrid; };
+
+	void set_xGrid(double *v) { _xGrid = v; };
+	void set_yGrid(double *v) { _yGrid = v; };
+
       //EAGLE
         void setup();
 
 	void set_ntime(int v) { _ntime = v; };
 	int get_ntime() { return _ntime; };
+
+	string get_grid_mapping_name() { return _grid_mapping_name; };
+        float get_latitude_of_projection_origin() { return _latitude_of_projection_origin; };
+        float get_longitude_of_central_meridian() { return _longitude_of_central_meridian; };
+        vector<float> get_standard_parallel() { return _standard_parallel; };
+
+	void set_grid_mapping_name(string v) { _grid_mapping_name = v; };
+        void set_latitude_of_projection_origin(float v) { _latitude_of_projection_origin = v; };
+        void set_longitude_of_central_meridian(float v) { _longitude_of_central_meridian = v; };
+        void set_standard_parallel(vector<float> v) { _standard_parallel = v; };
 
     protected:
         string name;
@@ -59,10 +75,18 @@ class EAGLELAM_Geometry : public Geometry {
         float* _longitude;
         float* _latitude;
 
+        double* _xGrid;
+        double* _yGrid;
+
     private:
         void _set_default();
 
 	int _ntime;
+
+	string _grid_mapping_name;
+        float _latitude_of_projection_origin;
+        float _longitude_of_central_meridian;
+        vector<float> _standard_parallel;
 };
 #endif
 

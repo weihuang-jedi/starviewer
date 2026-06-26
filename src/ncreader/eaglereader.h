@@ -29,8 +29,9 @@ class EagleReader {
     vector<string> dim_names;
     vector<size_t> dim_length;
 
-    double* _x;
-    double* _y;
+    // double* _x;
+    // double* _y;
+
     float* _longitude;
     float* _latitude;
 
@@ -64,6 +65,11 @@ class EagleReader {
     // instance method(s)
     string getfilename(); 
 
+    string get_grid_mapping_name() { return grid_mapping_name; };
+    float get_latitude_of_projection_origin() { return latitude_of_projection_origin; };
+    float get_longitude_of_central_meridian() { return longitude_of_central_meridian; };
+    vector<float> get_standard_parallel() { return standard_parallel; };
+
     // class method(s)
     void exploreFile();
     void close();
@@ -84,8 +90,8 @@ class EagleReader {
 
     string  getTimeString() { return string(""); };
 
-    double* getX() { return _x; };
-    double* getY() { return _y; };
+    // double* getX() { return _x; };
+    // double* getY() { return _y; };
     float* getLongitude() { return _longitude; };
     float* getLatitude() { return _latitude; };
 

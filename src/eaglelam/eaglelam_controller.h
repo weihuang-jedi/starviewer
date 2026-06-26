@@ -44,6 +44,7 @@ class EAGLELAM_Controller
         void draw_trajectory();
 
         string* get_timestring();
+        string get_varname() { return _varname; };
 
         int get_nx() { return _nx; };
         int get_ny() { return _ny; };
@@ -53,6 +54,9 @@ class EAGLELAM_Controller
 
         float get_valmax() { return _valmax; };
         float get_valmin() { return _valmin; };
+
+        double* get_xGrid() { return _xGrid; };
+        double* get_yGrid() { return _yGrid; };
 
         EAGLELAM_Geometry* get_geometry() { return geometry; };
 
@@ -74,6 +78,9 @@ class EAGLELAM_Controller
 	unordered_map<string, EagleReader*> var2file;
         vector<string> datafiles;
         vector<string> varlist;
+
+        double* _xGrid;
+        double* _yGrid;
 
         float* lon;
         float* lat;
@@ -103,6 +110,11 @@ class EAGLELAM_Controller
 
 	string _varname;
 	string _title;
+
+	string _grid_mapping_name;
+        float _latitude_of_projection_origin;
+        float _longitude_of_central_meridian;
+        vector<float> _standard_parallel;
 };
 #endif
 

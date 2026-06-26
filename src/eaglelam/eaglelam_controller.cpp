@@ -9,9 +9,7 @@ string number2string(T n);
 EAGLELAM_Controller::EAGLELAM_Controller(ColorTable *ct, NVOptions* opt,
                                          vector<string> vecdfs)
 {
-  //cout << "\tEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-
-  //cout << "\tfilename: <" << fn << ">, isList = " << isList << endl;
+    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     colorTable = ct;
     nvoptions = opt;
@@ -30,8 +28,6 @@ EAGLELAM_Controller::EAGLELAM_Controller(ColorTable *ct, NVOptions* opt,
     lic = NULL;
     windvector = NULL;
     trajectory = NULL;
-
-  //cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     eaglelam_viewer = NULL;
 
@@ -59,12 +55,17 @@ EAGLELAM_Controller::EAGLELAM_Controller(ColorTable *ct, NVOptions* opt,
     _nz = 1;
     _nt = 1;
 
-  //cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 EAGLELAM_Controller::~EAGLELAM_Controller()
 {
   //cout << "\tEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+
+    if(NULL != _xGrid)
+        free(_xGrid);
+    if(NULL != _yGrid)
+        free(_yGrid);
 
     if(NULL != u)
         free(u);
@@ -133,10 +134,25 @@ void EAGLELAM_Controller::setup()
     geometry->set_nz(_nz);
     geometry->set_nt(_nt);
 
+    _xGrid = ncfile->get_dv("x");
+    _yGrid = ncfile->get_dv("y");
+    geometry->set_xGrid(_xGrid);
+    geometry->set_yGrid(_yGrid);
+
     lon = ncfile->get_fv("longitude");
     lat = ncfile->get_fv("latitude");
     geometry->set_longitude(lon);
     geometry->set_latitude(lat);
+
+    _grid_mapping_name = ncfile->get_grid_mapping_name();
+    _latitude_of_projection_origin = ncfile->get_latitude_of_projection_origin();
+    _longitude_of_central_meridian = ncfile->get_longitude_of_central_meridian();
+    _standard_parallel = ncfile->get_standard_parallel();
+
+    geometry->set_grid_mapping_name(_grid_mapping_name);
+    geometry->set_latitude_of_projection_origin(_latitude_of_projection_origin);
+    geometry->set_longitude_of_central_meridian(_longitude_of_central_meridian);
+    geometry->set_standard_parallel(_standard_parallel);
 
     _value = ncfile->get_fv(_varname.c_str());
     _title = "EAGLE LAM";
@@ -156,7 +172,8 @@ void EAGLELAM_Controller::setvarname(string vn)
 {
     _varname = vn;
 
-    _value = ncfile->get_fv(_varname.c_str());
+    //_value = ncfile->get_fv(_varname.c_str());
+    _value = var2file[vn]->get_fv(vn.c_str());
 
     eaglelam_viewer->setup(vn, _value);
     eaglelam_viewer->setup(_varname, _value);

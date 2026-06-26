@@ -25,7 +25,7 @@ EAGLELAM_Translator::EAGLELAM_Translator(ColorTable *ct, NVOptions* opt,
                                  vector<string> datafiles, QWidget* parent)
              : BaseTranslator(ct, opt, parent)
 {
-  //cout << "\tEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\tEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     _datafiles = datafiles;
 
@@ -43,7 +43,7 @@ EAGLELAM_Translator::EAGLELAM_Translator(ColorTable *ct, NVOptions* opt,
     eaglelam_controller = new EAGLELAM_Controller(colorTable, nvoptions, _datafiles);
     eaglelam_controller->setup();
 
-  //cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 EAGLELAM_Translator::~EAGLELAM_Translator()
@@ -57,19 +57,16 @@ void EAGLELAM_Translator::setup()
 {
     int n;
 
-  //cout << "\tEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-
-  //cout << "\t_filename: <" << _filename << ">, _hasFileList = " << _hasFileList << endl;
-
-    eaglelam_controller->setup();
-
-  //cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\tEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 
     geometry = eaglelam_controller->get_geometry();
 
-  //cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    _varname = eaglelam_controller->get_varname();
 
-  //_varname = eaglelam_controller->get_varname();
+    // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\t_varname: <" << _varname << ">" << endl;
+
     _title = "EAGLE LAM";
     _timestr = eaglelam_controller->get_timestring();
     _maxFile = 1;
@@ -78,40 +75,17 @@ void EAGLELAM_Translator::setup()
     _maxval  = eaglelam_controller->get_valmax();
     _minval  = eaglelam_controller->get_valmin();
 
-  //cout << "\t_maxFile = " << _maxFile << ", _maxTime = " << _maxTime << endl;
-  //cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\t_maxval: " << _maxval << ", _minval" << _minval << endl;
+
+    // cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
 //Draw the window
 void EAGLELAM_Translator::show()
 {
-  //cout << "\n\tEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-  //cout << "\t_glbTime = " << _glbTime << ", _curFile = " << _curFile << endl;
-  //cout << "\t_preTime = " << _preTime << ", nvoptions->get_tsec() = " << nvoptions->get_tsec() << endl;
-
-  //cout << "\tnvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
-  //cout << "\tnvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
-  //cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
-
-  //if(nvoptions->get_tsec() != _glbTime)
-    if(_preTime != _glbTime)
-    {
-        _glbTime = nvoptions->get_tsec();
-
-        _set_current_time();
-
-        eaglelam_controller->set_fileNtime(_curFile, _curTime);
-
-        _preTime = _glbTime;
-    }
-
-  //cout << "\tFunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
-  //cout << "\t_glbTime = " << _glbTime << ", _curFile = " << _curFile << endl;
-  //cout << "\t_preTime = " << _preTime << ", nvoptions->get_tsec() = " << nvoptions->get_tsec() << endl;
-
-  //cout << "\tnvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
-  //cout << "\tnvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
-  //cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
+    // cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    // cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
 
     eaglelam_controller->draw();
 
@@ -127,7 +101,7 @@ void EAGLELAM_Translator::show()
     if(locator->on())
         writeLocatorMsg();
 
-  //cout << "\tLeave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl << endl;
+    // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl << endl;
 }
 
 void EAGLELAM_Translator::createVarInfo()

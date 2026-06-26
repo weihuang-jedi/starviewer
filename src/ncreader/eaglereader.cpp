@@ -17,8 +17,8 @@ EagleReader::EagleReader(const char* fname) {
  
 // empty deconstructor method
 EagleReader::~EagleReader() {
-    delete[] _x;
-    delete[] _y;
+    // delete[] _x;
+    // delete[] _y;
     delete[] _time;
     delete[] _longitude;
     delete[] _latitude;
@@ -72,7 +72,7 @@ void EagleReader::_get_dim_info() {
 
 void EagleReader::_get_var_info() {
     int n = 0; 
-    int  var_id;
+    int  varid;
     nc_type var_type;
     int var_ndims;
     int var_dimids[NC_MAX_VAR_DIMS];
@@ -141,8 +141,8 @@ void EagleReader::exploreFile() {
 
 
     // Find element with var name
-    _x = getDouble("x");
-    _y = getDouble("y");
+    // _x = getDouble("x");
+    // _y = getDouble("y");
     _longitude = getFloat("longitude");
     _latitude = getFloat("latitude");
     _time = getInt64("time");
@@ -168,17 +168,20 @@ void EagleReader::exploreFile() {
 
 // Function to recursively explore groups, dimensions, and variables
 void EagleReader::grid_map_info() {
-    int var_id, n;
+    int varid, n;
     nc_type var_type;
     int var_ndims;
     int var_dimids[NC_MAX_VAR_DIMS];
     int var_natts;
     size_t att_len = 1;
 
-    status = nc_inq_varid (ncid, "CRS", &var_id);
+    // cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    status = nc_inq_varid (ncid, "CRS", &varid);
     if (status != NC_NOERR) handle_error(status);
     
-    status = nc_inq_var (ncid, var_id, 0, &var_type, &var_ndims, var_dimids, &var_natts);
+    // cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "var CRS id: " << varid << endl;
+    status = nc_inq_var (ncid, varid, 0, &var_type, &var_ndims, var_dimids, &var_natts);
     if (status != NC_NOERR) handle_error(status);
 
     // 1. Get the length of the attribute array
@@ -192,7 +195,7 @@ void EagleReader::grid_map_info() {
     status = nc_get_att_text(ncid, varid, "grid_mapping_name", buffer);
     if (status == NC_NOERR) {
         buffer[att_len] = '\0'; // Properly terminate C-string
-        cout << "Variable Attribute <grid_mapping_name> = " << buffer << endl;
+        // cout << "Variable Attribute <grid_mapping_name> = " << buffer << endl;
         grid_mapping_name = buffer;
     }
     free(buffer);
@@ -200,46 +203,53 @@ void EagleReader::grid_map_info() {
     nc_get_att_float(ncid, varid, "latitude_of_projection_origin", &latitude_of_projection_origin);
     nc_get_att_float(ncid, varid, "longitude_of_central_meridian", &longitude_of_central_meridian);
 
+    // cout << "latitude_of_projection_origin: " << latitude_of_projection_origin << endl;
+    // cout << "longitude_of_central_meridian: " << longitude_of_central_meridian << endl;
+
     float *buf = new float[2];
     nc_get_att_float(ncid, varid, "standard_parallel", buf);
     standard_parallel[0] = buf[0];
     standard_parallel[1] = buf[1];
     delete[] buf;
+
+    // cout << "standard_parallel[0]: " << standard_parallel[0] << endl;
+    // cout << "standard_parallel[1]: " << standard_parallel[1] << endl;
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
  
 long long int* EagleReader::getInt64(const char* var_name) {
-    int var_id;
+    int varid;
     size_t var_length = 1;
     size_t length = 1;
 
-    status = nc_inq_varid (ncid, var_name, &var_id);
+    status = nc_inq_varid (ncid, var_name, &varid);
     if (status != NC_NOERR) handle_error(status);
 
     var_length = getVarSize(var_name);
 
     long long int* value = new long long int[var_length];
 
-    status = nc_get_var_longlong(ncid, var_id, value);
+    status = nc_get_var_longlong(ncid, varid, value);
     if (status != NC_NOERR) handle_error(status);
 
     return value;
 }
 
 float* EagleReader::getFloat(const char* var_name) {
-    int var_id;
+    int varid;
     size_t var_length = 1;
     size_t length = 1;
 
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    status = nc_inq_varid (ncid, var_name, &var_id);
+    status = nc_inq_varid (ncid, var_name, &varid);
     if (status != NC_NOERR) handle_error(status);
 
     var_length = getVarSize(var_name);
-  //cout << "var_name: " << var_name << ", ncid = " << ncid << ", var_id = " << var_id << ", var_length = " << var_length << endl;
+  //cout << "var_name: " << var_name << ", ncid = " << ncid << ", varid = " << varid << ", var_length = " << var_length << endl;
 
     float* value = new float[var_length];
     
-    status = nc_get_var_float(ncid, var_id, value);
+    status = nc_get_var_float(ncid, varid, value);
     if (status != NC_NOERR) handle_error(status);
   //cout << "value[0] = " << value[0] << endl;
 
@@ -248,20 +258,20 @@ float* EagleReader::getFloat(const char* var_name) {
 }
 
 double* EagleReader::getDouble(const char* var_name) {
-    int var_id;
+    int varid;
     size_t var_length = 1;
     size_t length = 1;
 
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    status = nc_inq_varid (ncid, var_name, &var_id);
+    status = nc_inq_varid (ncid, var_name, &varid);
     if (status != NC_NOERR) handle_error(status);
     
     var_length = getVarSize(var_name);
-  //cout << "var_name: " << var_name << ", ncid = " << ncid << ", var_id = " << var_id << ", var_length = " << var_length << endl;
+  //cout << "var_name: " << var_name << ", ncid = " << ncid << ", varid = " << varid << ", var_length = " << var_length << endl;
 
     double* value = new double[var_length];
     
-    status = nc_get_var_double(ncid, var_id, value);
+    status = nc_get_var_double(ncid, varid, value);
     if (status != NC_NOERR) handle_error(status);
   //cout << "value[0] = " << value[0] << endl;
 
@@ -271,7 +281,7 @@ double* EagleReader::getDouble(const char* var_name) {
 
 // Function to recursively explore groups, dimensions, and variables
 size_t EagleReader::getVarSize(const char* var_name) {
-    int var_id, n;
+    int varid, n;
     nc_type var_type;
     int var_ndims;
     int var_dimids[NC_MAX_VAR_DIMS];
@@ -279,10 +289,10 @@ size_t EagleReader::getVarSize(const char* var_name) {
     size_t var_length = 1;
     size_t length = 1;
 
-    status = nc_inq_varid (ncid, var_name, &var_id);
+    status = nc_inq_varid (ncid, var_name, &varid);
     if (status != NC_NOERR) handle_error(status);
     
-    status = nc_inq_var (ncid, var_id, 0, &var_type, &var_ndims, var_dimids, &var_natts);
+    status = nc_inq_var (ncid, varid, 0, &var_type, &var_ndims, var_dimids, &var_natts);
     if (status != NC_NOERR) handle_error(status);
 
     for (n = 0; n < var_ndims; ++n) {

@@ -27,6 +27,11 @@ EAGLELAM_Geometry::~EAGLELAM_Geometry()
 
 void EAGLELAM_Geometry::_set_default()
 {
+    // cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "_xSphere: " << _xSphere << endl;
+    // cout << "_ySphere: " << _ySphere << endl;
+    // cout << "_zSphere: " << _zSphere << endl;
+#if 0
     if(NULL != _xSphere)
         delete [] _xSphere;
     if(NULL != _ySphere)
@@ -34,15 +39,24 @@ void EAGLELAM_Geometry::_set_default()
     if(NULL != _zSphere)
         delete [] _zSphere;
 
+    cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     if(NULL != _xFlat)
         delete [] _xFlat;
     if(NULL != _yFlat)
         delete [] _yFlat;
 
+    cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    if(NULL != _xGrid)
+        delete [] _xGrid;
+    if(NULL != _yGrid)
+        delete [] _yGrid;
+
+    cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     if(NULL != _longitude)
-        delete [] _lon2d;
+        delete [] _longitude;
     if(NULL != _latitude)
         delete [] _latitude;
+#endif
 
     _xSphere = NULL;
     _ySphere = NULL;
@@ -54,7 +68,11 @@ void EAGLELAM_Geometry::_set_default()
     _xFlat = NULL;
     _yFlat = NULL;
 
+    _xGrid = NULL;
+    _yGrid = NULL;
+
     reset();
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 } 
 
 void EAGLELAM_Geometry::reset_dimension()

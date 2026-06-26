@@ -15,7 +15,7 @@ StateBoundary::StateBoundary()
 
     _setup();
 
-  //print();
+    print();
 }
 
 StateBoundary::~StateBoundary()
@@ -42,17 +42,19 @@ StateBoundary::~StateBoundary()
 
 void StateBoundary::_setup()
 {
+    cout << "\tEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     int n;
     char shpflnm[1024];
+    const char* path = getenv("STARVIEWERHOME");
+    if (path == nullptr) {
+        cout << "ERROR: STARVIEWERHOME not set!" << endl;
+        throw(errno);
+    }
+    strcpy(shpflnm, path);
+    strcat(shpflnm, "/data/stateboundary/s_16ap26.shp");
 
-  //cout << "\tEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
-    flnm[0] = "$NV_DATA/states_shapefile/statesp020.shp";
-
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\nflnm[0]: " << flnm[0] << endl;
-
-  //guiSetAdvancedFileStructure("shp");
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\nshpflnm: " << shpflnm << endl;
 
     id = (int**) calloc(maxPlotLevel, sizeof(int*));
 
@@ -61,21 +63,19 @@ void StateBoundary::_setup()
 
     lon = (double**) calloc(maxPlotLevel, sizeof(double*));
     lat = (double**) calloc(maxPlotLevel, sizeof(double*));
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tmaxPlotLevel = " << maxPlotLevel << endl;
+    cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tmaxPlotLevel = " << maxPlotLevel << endl;
 
     for(n = 0; n < maxPlotLevel; ++n)
     {
+        cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+        cout << "\tn = " << n << endl;
+
         geometry_array[n] = NULL;
         segments_array[n] = NULL;
 
         lon[n] = NULL;
         lat[n] = NULL;
-
-      //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-      //cout << "\tfile name " << n << ": <" << flnm[n] << ">" << endl;
-
-        strcpy(shpflnm, flnm[n].c_str());
 
         natts[n] = 0;
         ndims[n] = 0;
@@ -93,7 +93,7 @@ void StateBoundary::_setup()
         _check_vars(n);
     }
 
-  //cout << "\tLeave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tLeave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void StateBoundary::_check_atts(int i)
