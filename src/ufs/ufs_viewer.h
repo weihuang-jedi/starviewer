@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <memory>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,6 +24,7 @@
 #include "locator.h"
 #include "nvoptions.h"
 #include "ncreader.h"
+#include "windvector.h"
 
 using namespace std;
 
@@ -49,6 +51,7 @@ class UFS2dViewer : public QGLWidget
 
         void reset();
         void setup(string vn, float* var);
+        void setup_wind(float* u, float* v);
         void set_geometry(UFSGeometry* gm);
         void reset_texture1d(ColorTable *ct);
 
@@ -71,6 +74,8 @@ class UFS2dViewer : public QGLWidget
         Lister* lister;
         Locator* locator;
         NVOptions* nvoptions;
+	// WindVector* windvector;
+	unique_ptr<WindVector> windvector;
 
         string _varname;
 
@@ -99,6 +104,8 @@ class UFS2dViewer : public QGLWidget
 
         float* _var;
         float* pltvar;
+        float* _u;
+        float* _v;
 
         float _valmin;
         float _valavg;

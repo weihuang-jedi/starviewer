@@ -62,8 +62,7 @@ void UFSController::setup()
 
   //_ntimes = ncfile->get_ntimes();
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\t_ntimes = " << _ntimes << endl;
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
   //_maxFile = get_nfiles();
     _maxFile = 1;
@@ -74,6 +73,7 @@ void UFSController::setup()
 
   //lister = new Lister[_maxTime];
 
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     geometry->set_nlon(ncfile->getNlon());
     geometry->set_nlat(ncfile->getNlat());
   //geometry->set_nlev(ncfile->getNlev());
@@ -92,11 +92,11 @@ void UFSController::setup()
     geometry->set_has2dLon(false);
     geometry->set_has2dLat(false);
 
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //_varname = string("sst");
     _varname = string("hgtsfc");
 
     _sphere = false;
-    _ball = false;
     _initialized = false;
     _tvalue = 0;
     _time_interval = 128;
@@ -104,25 +104,28 @@ void UFSController::setup()
     _curTime = 0;
     _preFile = _curFile;
 
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     ufs_viewer = new UFS2dViewer(colorTable, nvoptions, bmpflnm, ncfile);
 
   //ufs_viewer->set_lister(&lister[0]);
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tvarname:" << _varname << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tvarname:" << _varname << endl;
 
     _value = ncfile->get_fv(_varname.c_str());
     _title = _varname;
 
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //geometry->print();
-
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     ufs_viewer->set_coastline(coastline);
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     ufs_viewer->set_geometry(geometry);
   //ufs_3dviewer->set_geoufs_(geoufs_);
 
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     ufs_viewer->setup(_varname, _value);
     _minval = ufs_viewer->get_minval();
     _maxval = ufs_viewer->get_maxval();
+
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void UFSController::draw()
@@ -134,7 +137,6 @@ void UFSController::set1dvarname(string vn)
 {
     _varname = vn;
     _sphere = true;
-    _ball = false;
 
     _tvalue = 0;
 
@@ -163,7 +165,6 @@ void UFSController::set2dvarname(string vn)
 {
     _varname = vn;
     _sphere = false;
-    _ball = true;
 
     _tvalue = 0;
 
@@ -192,7 +193,6 @@ void UFSController::set3dvarname(string vn)
 {
     _varname = vn;
     _sphere = false;
-    _ball = true;
 
     _tvalue = 0;
 
@@ -218,6 +218,13 @@ void UFSController::set3dvarname(string vn)
 
     _minval = ufs_viewer->get_minval();
     _maxval = ufs_viewer->get_maxval();
+
+    // if(nvoptions->get_cb(NV_VECTORON))
+    // {
+	float* u = ncfile->get_fv("ugrd");
+	float* v = ncfile->get_fv("vgrd");
+	ufs_viewer->setup_wind(u, v);
+    // }
 }
 
 void UFSController::set_colorTable(ColorTable *ct)

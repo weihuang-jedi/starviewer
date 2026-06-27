@@ -38,7 +38,6 @@ typedef enum
     NV_BGBLACK,
     NV_BUMPON,
     NV_FLATON,
-    NV_SPHEREON,
     NV_COLORBARON,
     NV_TITLEON,
     NV_COASTLINEON,

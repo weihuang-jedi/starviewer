@@ -36,8 +36,7 @@ class UFSTranslator : public BaseTranslator
     Q_OBJECT                                             //  Qt magic macro
     public:
         UFSTranslator(ColorTable* ct, NVOptions* opt,
-                      string flnm, bool isList=false,
-                      string mfnm = "unknown", QWidget* parent=0);	//  Constructor
+                      string flnm, QWidget* parent=0);	//  Constructor
        ~UFSTranslator();				//  Destructor
     
         void show();

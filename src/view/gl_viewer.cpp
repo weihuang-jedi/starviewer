@@ -76,14 +76,9 @@ void GL_Viewer::draw()
 
   //glPushMatrix();
 
-    if(nvoptions->get_cb(NV_SPHEREON))
+    if(nvoptions->get_cb(NV_FLATON))
     {
-        if(nvoptions->get_cb(NV_ONMAPON))
-        {
-            _display_on_sphere_map();
-        }
-        else
-             _display_on_sphere();
+        _display_all();
     }
     else if(nvoptions->get_cb(NV_BUMPON))
     {
@@ -99,7 +94,12 @@ void GL_Viewer::draw()
     }
     else
     {
-        _display_all();
+        if(nvoptions->get_cb(NV_ONMAPON))
+        {
+            _display_on_sphere_map();
+        }
+        else
+             _display_on_sphere();
     }
 
   //glPopMatrix();

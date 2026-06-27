@@ -102,7 +102,6 @@ class BaseTranslator : public QGLWidget
         virtual void backFrame();
 
         void selectMCub(int f);
-        void selectSphere(int f);
         void selectOnMap(int n);
         void selectBump(int f);
         void selectSaveImage();
