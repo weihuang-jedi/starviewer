@@ -4,6 +4,7 @@
 #include <QtOpenGL>
 
 #include <iostream>
+#include <unordered_map>
 
 #include "eagleglobalreader.h"
 #include "eagleglobal_viewer.h"
@@ -11,14 +12,10 @@
 
 using namespace std;
 
-#ifndef NAME_LENG
-#define NAME_LENG	1024
-#endif
-
 class EagleGlobalController
 {
     public:
-        EagleGlobalController(ColorTable* ct, NVOptions* opt, const char* fn);
+        EagleGlobalController(ColorTable* ct, NVOptions* opt, vector<string> datafiles);
        ~EagleGlobalController();
 
         void setup();
@@ -53,6 +50,7 @@ class EagleGlobalController
         int get_nfiles() { return _maxFile; };
         int* get_ntimes() { return _ntimes; };
 
+        vector<string> get_varlist() { return varlist; };
         vector<string> get_ndvNames(int n);
         void set_fileNtime(int nf, int nt);
 
@@ -65,9 +63,12 @@ class EagleGlobalController
       //Lister* lister;
         Locator* locator;
 
-        char _flnm[NAME_LENG];
-
         EagleGlobal2dViewer* eagleglobal_viewer;
+
+        unordered_map<string, EagleGlobalReader*> var2file;
+
+	vector<string> datafiles;
+	vector<string> varlist;
 
         int _max_frame;
         int _time_interval;

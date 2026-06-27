@@ -22,7 +22,6 @@
 #include "lister.h"
 #include "locator.h"
 #include "nvoptions.h"
-#include "eagleglobalreader.h"
 
 using namespace std;
 
@@ -40,7 +39,7 @@ class EagleGlobal2dViewer : public QGLWidget
 
     public:
         EagleGlobal2dViewer(ColorTable* ct, NVOptions* opt);
-        EagleGlobal2dViewer(ColorTable* ct, NVOptions* opt, const char* bmpflnm, EagleGlobalReader* nchandler);
+        EagleGlobal2dViewer(ColorTable* ct, NVOptions* opt, const char* bmpflnm);
        ~EagleGlobal2dViewer();
 
         void draw();
@@ -62,7 +61,6 @@ class EagleGlobal2dViewer : public QGLWidget
         float get_maxval() { return _valmax; };
 
     protected:
-        EagleGlobalReader* ncfile;
         EagleGlobalGeometry* geometry;
         ColorTable* colorTable;
         CoastLine* coastline;

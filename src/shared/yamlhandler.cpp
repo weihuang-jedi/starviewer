@@ -110,10 +110,37 @@ void YAMLHandler::read_yaml()
     // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if (config["input"].IsDefined())
     {
-	if(_model == string("ufsincr"))
+        if(_model == string("ufsincr"))
+        {
             _datafiles = get_files("input", config);
+        }
         else
-            _datafiles = config["input"]["data"].as<vector<string>>();
+        {
+            // 1. Get the list of file names
+            vector<string> filenames = config["input"]["data"].as<vector<string>>();
+
+            // 2. Check if a base directory is specified
+            if (config["input"]["directory"].IsDefined())
+            {
+                string base_dir = config["input"]["directory"].as<string>();
+            
+                // Ensure the base directory ends with a trailing slash
+                if (!base_dir.empty() && base_dir.back() != '/') {
+                    base_dir += "/";
+                }
+
+                // 3. Prepend the base directory to each file
+                _datafiles.clear();
+                for (const auto& file : filenames) {
+                    _datafiles.push_back(base_dir + file);
+                }
+            }
+            else
+            {
+                // Fallback: If no directory is provided, use the filenames as-is
+                _datafiles = filenames;
+            }
+        }
     }
 
     // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;

@@ -47,7 +47,7 @@ class EagleGlobalReader {
  
   public:
     // declare constructor and deconstructor methods
-    EagleGlobalReader(const char*);
+    EagleGlobalReader(string flnm);
     virtual ~EagleGlobalReader();
  
     void handle_error(int status);

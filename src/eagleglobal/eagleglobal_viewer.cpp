@@ -38,7 +38,7 @@ EagleGlobal2dViewer::EagleGlobal2dViewer(ColorTable *ct, NVOptions* opt)
 }
 
 EagleGlobal2dViewer::EagleGlobal2dViewer(ColorTable *ct, NVOptions* opt,
-		                         const char* bmpflnm, EagleGlobalReader* nchandler)
+		                         const char* bmpflnm)
 {
     colorTable = ct;
     nvoptions = opt;
@@ -49,7 +49,6 @@ EagleGlobal2dViewer::EagleGlobal2dViewer(ColorTable *ct, NVOptions* opt,
 
     _var = NULL;
 
-    ncfile = nchandler;
     earth = new Earth(bmpflnm);
 
     nvoptions->set_xsec(0);

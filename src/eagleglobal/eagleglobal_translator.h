@@ -30,7 +30,7 @@ class EagleGlobalTranslator : public BaseTranslator
     Q_OBJECT                                             //  Qt magic macro
     public:
         EagleGlobalTranslator(ColorTable* ct, NVOptions* opt,
-                        string flnm, QWidget* parent=0);	//  Constructor
+                              vector<string> datafiles, QWidget* parent=0);	//  Constructor
        ~EagleGlobalTranslator();				//  Destructor
     
         void show();
@@ -63,7 +63,8 @@ class EagleGlobalTranslator : public BaseTranslator
         EagleGlobalController* eagleglobal_controller;
         EagleGlobalGeometry* geometry;
 
-    private:
+        vector<string> _datafiles;
+
 #if 0
         bool _jpgNotSaved;
         bool _startSave;

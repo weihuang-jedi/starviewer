@@ -2,11 +2,11 @@
 #include <cstring>
  
 // implementation of constructor method from EagleGlobalReader.h
-EagleGlobalReader::EagleGlobalReader(const char* fname) {
+EagleGlobalReader::EagleGlobalReader(string flnm) {
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    filename = (string)fname;
+    filename = flnm;
     // Open the file in read-only mode.
-    status = nc_open(fname, NC_NOWRITE, &ncid);
+    status = nc_open(flnm.c_str(), NC_NOWRITE, &ncid);
     if (status != NC_NOERR) handle_error(status);
     status = nc_inq(ncid, &num_dims, &num_vars, &num_gatts, &unlimdimid);
     if (status != NC_NOERR) handle_error(status);
@@ -88,6 +88,7 @@ void EagleGlobalReader::_get_var_info() {
         if (status != NC_NOERR) handle_error(status);
 
 	var_names[n] = var_name;
+        // cout << "var #" << n << ", name:" << var_name << endl;
     }
 }
 

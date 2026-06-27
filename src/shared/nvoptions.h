@@ -20,14 +20,14 @@ using namespace std;
 
 typedef enum
 {
-    NOMODEL = 0x1000,
-    UFS     = 0x1001,
-    UFSINCR = 0x1010,
-    MPAS    = 0x1100,
-    EAGLE   = 0x1200,
-    EAGLEGLOBAL = 0x1201,
-    MPIDEMO = 0x8888,
-    TEST    = 0xffff
+    NOMODEL = 0x0000,
+    UFS     = 0x0001,
+    UFSINCR = 0x0010,
+    MPAS    = 0x0100,
+    EAGLE   = 0x0200,
+    EAGLEGLOBAL = 0x0201,
+    EAGLELAM = 0x0202,
+    MPIDEMO = 0x1000
 } ModelType;
 
 typedef enum

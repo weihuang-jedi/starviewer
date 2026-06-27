@@ -3,6 +3,7 @@
 #include "ufsincrparser.h"
 #include "eagleparser.h"
 #include "eagleglobalparser.h"
+#include "eaglelamparser.h"
 #include "mainwindow.h"
 
 MainWindow::MainWindow(string yamlfile)
@@ -47,6 +48,11 @@ MainWindow::MainWindow(string yamlfile)
     {
         nvoptions->set_model(EAGLEGLOBAL);
         userConfig = ModelType::EAGLEGLOBAL;
+    }
+    else if(0 == tmpstr.compare("eaglelam"))
+    {
+        nvoptions->set_model(EAGLELAM);
+        userConfig = ModelType::EAGLELAM;
     }
     else if(0 == tmpstr.compare("mpas"))
     {
@@ -138,6 +144,9 @@ void MainWindow::_setup()
             break;
 	case EAGLEGLOBAL:
             eagleglobal();
+            break;
+	case EAGLELAM:
+            eaglelam();
             break;
       //case MPAS:
       //    mpas();
@@ -270,6 +279,15 @@ void MainWindow::eagleglobal()
     _setup_display();
 }
 
+void MainWindow::eaglelam()
+{
+    setWindowTitle(tr("NV for EAGLE LAM"));
+
+    _setup_controlPanel();
+
+    _setup_display();
+}
+
 void MainWindow::about()
 {
     QMessageBox::about(this, tr("About Menu"),
@@ -321,6 +339,10 @@ void MainWindow::createActions()
     eagleglobalAct = new QAction(tr("&EAGLEGLOBAL"), this);
     eagleglobalAct->setStatusTip(tr("Try to activate 'eagleglobal' application"));
     connect(eagleglobalAct, SIGNAL(triggered()), this, SLOT(eagleglobal()));
+
+    eaglelamAct = new QAction(tr("&EAGLELAM"), this);
+    eaglelamAct->setStatusTip(tr("Try to activate 'eaglelam' application"));
+    connect(eaglelamAct, SIGNAL(triggered()), this, SLOT(eaglelam()));
 
     ufsAct = new QAction(tr("&UFS"), this);
     ufsAct->setStatusTip(tr("Try to activate 'ufs' application"));

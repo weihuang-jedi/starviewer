@@ -25,19 +25,23 @@ string number2string(T n)
 
 //Constructor
 EagleGlobalTranslator::EagleGlobalTranslator(ColorTable* ct, NVOptions* opt,
-                             string flnm, QWidget* parent)
+                                             vector<string> datafiles, QWidget* parent)
                : BaseTranslator(ct, opt, parent)
 {
   //cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 
-    _filename = flnm;
+    // for (int n = 0; n < datafiles.size(); ++n)
+    //     cout << "datafiles[" << n << "]: <" << datafiles[n] << ">" << endl;
+
+    _datafiles = datafiles;
 
     nvoptions->set_xsec(-1);
     nvoptions->set_ysec(-1);
     nvoptions->set_zsec(0);
     nvoptions->set_tsec(0);
 
-    eagleglobal_controller = NULL;
+    eagleglobal_controller = new EagleGlobalController(colorTable, nvoptions, _datafiles);
+    eagleglobal_controller->setup();
 
     _timestr = new string[2];
 
@@ -56,13 +60,6 @@ EagleGlobalTranslator::~EagleGlobalTranslator()
 void EagleGlobalTranslator::setup()
 {
     // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    if(NULL != eagleglobal_controller)
-        delete eagleglobal_controller;
-
-    eagleglobal_controller = new EagleGlobalController(colorTable, nvoptions, _filename.c_str());
-
-    // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    eagleglobal_controller->setup();
 
     _jpgNotSaved = true;
     _startSave = false;
@@ -72,7 +69,6 @@ void EagleGlobalTranslator::setup()
     // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     geometry = eagleglobal_controller->get_geometry();
 
-    // _varname = string("t");
     _varname = eagleglobal_controller->get_varname();
 
     eagleglobal_controller->setvarname(_varname);
@@ -293,16 +289,13 @@ int EagleGlobalTranslator::get_ndv(int n)
 
 string* EagleGlobalTranslator::get_ndvNames(int n)
 {
-    vector<string> vecnames = eagleglobal_controller->get_ndvNames(n);
-    int numbvars = get_ndv(n);
-    string* varnames = new string[numbvars];
-  //cout << "n = " << n << endl;
-  //cout << "numbvars = " << numbvars << endl;
-  //cout << "vecnames.size() = " << vecnames.size() << endl;
-    for (int i=0; i<numbvars; ++i) {
-      //cout << "vecnames[" << i << "] = " << vecnames[i] << endl;
+    vector<string> vecnames = eagleglobal_controller->get_varlist();
+    string* varnames = new string[vecnames.size()];
+    // cout << "vecnames.size() = " << vecnames.size() << endl;
+    for (int i=0; i<vecnames.size(); ++i) {
+        // cout << "vecnames[" << i << "] = " << vecnames[i] << endl;
 	varnames[i] = vecnames[i];
-      //cout << "varnames[" << i << "] = " << varnames[i] << endl;
+        // cout << "varnames[" << i << "] = " << varnames[i] << endl;
     }
     return varnames;
 }
