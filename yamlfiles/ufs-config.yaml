@@ -4,11 +4,14 @@ application:
   version: 0.0.1
 
 earth:
-  name: data/earth.bmp
+  name: /scratch5/purged/Wei.Huang/src/nv/starviewer/data/earth.bmp
 
 coastline:
-  name: data/gshhg-shp-2.3.7/GSHHS_shp
+  name: /scratch5/purged/Wei.Huang/src/nv/starviewer/data/gshhg-shp-2.3.7/GSHHS_shp
   resolution: c
+
+windvector:
+  name: /scratch5/purged/Wei.Huang/src/nv/starviewer/data/earth.bmp
 
 input:
   data:

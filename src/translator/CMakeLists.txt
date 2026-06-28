@@ -33,6 +33,8 @@ target_include_directories(translator PUBLIC
     ${CMAKE_SOURCE_DIR}/leveler
     ${CMAKE_SOURCE_DIR}/spreadsheet
     ${CMAKE_SOURCE_DIR}/coastline
+    ${CMAKE_SOURCE_DIR}/earth
+    ${CMAKE_SOURCE_DIR}/windvector
     ${CMAKE_SOURCE_DIR}/contour
     ${CMAKE_SOURCE_DIR}/control
     ${CMAKE_SOURCE_DIR}/ncreader

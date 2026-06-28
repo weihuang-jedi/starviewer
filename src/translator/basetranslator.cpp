@@ -73,6 +73,12 @@ BaseTranslator::BaseTranslator(ColorTable* ct, NVOptions* opt, QWidget* parent)
 
 BaseTranslator::~BaseTranslator()
 {
+    if (NULL != earth)
+        delete earth;
+    if (NULL != coastline)
+        delete coastline;
+    if (NULL != windvector)
+        delete windvector;
 }
 
 void BaseTranslator::set_filename(QString flnm)

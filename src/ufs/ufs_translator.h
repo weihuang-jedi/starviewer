@@ -25,7 +25,6 @@
 #include <QString>
 #include <QTimer>
 
-#include "yamlhandler.h"
 #include "sliderNspin.h"
 #include "controlWidget.h"
 #include "basetranslator.h"
@@ -36,7 +35,7 @@ class UFSTranslator : public BaseTranslator
     Q_OBJECT                                             //  Qt magic macro
     public:
         UFSTranslator(ColorTable* ct, NVOptions* opt,
-                      string flnm, QWidget* parent=0);	//  Constructor
+                      YAMLHandler *yamlHandler, QWidget* parent=0);	//  Constructor
        ~UFSTranslator();				//  Destructor
     
         void show();

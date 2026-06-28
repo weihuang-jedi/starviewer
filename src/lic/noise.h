@@ -17,7 +17,7 @@
 using namespace std;
 
 #define MAXB 0x100
-#define N 0x1000
+#define NNNN 0x1000
 
 class Noise
 {

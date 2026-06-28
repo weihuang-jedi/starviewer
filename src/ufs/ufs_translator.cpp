@@ -25,19 +25,28 @@ string number2string(T n)
 
 //Constructor
 UFSTranslator::UFSTranslator(ColorTable* ct, NVOptions* opt,
-                             string flnm, QWidget* parent)
-               : BaseTranslator(ct, opt, parent)
+                             YAMLHandler *yamlHandler, QWidget* parent)
+             : BaseTranslator(ct, opt, parent)
 {
   //cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-
-    _filename = flnm;
+    vector<string> datafiles = yamlHandler->get_datafiles();
+    _filename = datafiles[0];
 
     nvoptions->set_xsec(-1);
     nvoptions->set_ysec(-1);
     nvoptions->set_zsec(0);
     nvoptions->set_tsec(0);
 
-    ufs_controller = NULL;
+    string earthflnm = yamlHandler->get_earth_bmp();
+    earth = new Earth(earthflnm);
+
+    string clflnm = yamlHandler->get_coastline_file();
+    // string clres = yamlHandler->get_coastline_resolution();
+    // coastline = new coastline(clflnm, clres);
+    coastline = new CoastLine(clflnm);
+
+    // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    ufs_controller = new UFSController(colorTable, nvoptions, earth, coastline, _filename.c_str());
 
     _timestr = new string[2];
 
@@ -58,12 +67,6 @@ void UFSTranslator::setup()
     int n;
 
     // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    if(NULL != ufs_controller)
-        delete ufs_controller;
-
-    // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    ufs_controller = new UFSController(colorTable, nvoptions, _filename.c_str());
-
     // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufs_controller->setup();
 

@@ -30,6 +30,27 @@ CoastLine::CoastLine()
     }
 }
 
+CoastLine::CoastLine(string clfn)
+{
+    int n;
+
+    GDALAllRegister(); // 1. Register Drivers
+
+    height = 0.0;
+    radius = 1.01;
+    oneover = 1.0 / 180.0;
+    deg2rad = 3.1415926535897932 * oneover;
+
+    flnm = clfn;
+
+    // Open Dataset
+    poDS = (GDALDataset*) OGROpen(flnm.c_str(), FALSE, NULL);
+    if (poDS == NULL) {
+        cerr << "Opening failed." << endl;
+        exit -1;
+    }
+}
+
 CoastLine::~CoastLine()
 {
     // Close Dataset

@@ -1,25 +1,24 @@
 #include "ufs_controller.h"
 
 UFSController::UFSController(ColorTable *ct, NVOptions* opt,
+                                 Earth* earth, CoastLine* cl,
                                  const char *fn, bool isList)
 {
     string sfn = string(fn);
 
     colorTable = ct;
     nvoptions = opt;
+    coastline = cl;
     strcpy(_flnm, fn);
 
     geometry = new UFSGeometry();
     geometry->set_name(sfn);
-
-    coastline = new CoastLine();
   
     _maxFile = 1;
     _ntim = 1;
 
     ncfile = new ncReader(fn);
-
-    ufs_viewer = NULL;
+    ufs_viewer = new UFS2dViewer(colorTable, nvoptions, earth, ncfile);
 }
 
 UFSController::~UFSController()
@@ -51,16 +50,6 @@ void UFSController::_print1d(T* var, int nl)
 void UFSController::setup()
 {
     int n;
-    char bmpflnm[1024];
-    const char* path = getenv("STARVIEWERHOME");
-    if (path == nullptr) {
-        cout << "ERROR: STARVIEWERHOME not set!" << endl;
-        throw(errno);
-    }
-    strcpy(bmpflnm, path);
-    strcat(bmpflnm, "/data/earth.bmp");
-
-  //_ntimes = ncfile->get_ntimes();
 
     // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
@@ -103,9 +92,6 @@ void UFSController::setup()
     _curFile = 0;
     _curTime = 0;
     _preFile = _curFile;
-
-    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    ufs_viewer = new UFS2dViewer(colorTable, nvoptions, bmpflnm, ncfile);
 
   //ufs_viewer->set_lister(&lister[0]);
     // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;

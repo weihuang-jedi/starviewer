@@ -21,16 +21,13 @@
 #include <cmath>
 #include <vector>
 
-#include "ncreader.h"
-
 using namespace std;
 
 class Earth : public QGLWidget, protected QOpenGLFunctions
 {
     public:
-        Earth();         //  Constructor
-        Earth(const char *flnm);         //  Constructor
-        Earth(const char *flnm, ncReader* nchandler);         //  Constructor
+        Earth();                    //  Constructor
+        Earth(string flnm);         //  Constructor
         ~Earth();        //  Destructor
 
         void draw();
@@ -48,8 +45,7 @@ class Earth : public QGLWidget, protected QOpenGLFunctions
         void _loadTexBMP();
 
     private:
-        char _bmpflnm[1024];
-        char _topoflnm[1024];
+        string _earthflnm;
         GLuint _texture_id;
 
         double deg2arc;

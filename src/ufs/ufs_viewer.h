@@ -41,8 +41,7 @@ class UFS2dViewer : public QGLWidget
 {
 
     public:
-        UFS2dViewer(ColorTable* ct, NVOptions* opt);
-        UFS2dViewer(ColorTable* ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler);
+        UFS2dViewer(ColorTable* ct, NVOptions* opt, Earth* earth, ncReader* nchandler);
        ~UFS2dViewer();
 
         void draw();

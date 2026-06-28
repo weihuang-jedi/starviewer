@@ -20,6 +20,7 @@ class CoastLine
 {
     public:
         CoastLine();
+        CoastLine(string fl);
        ~CoastLine();
 
         // void print();

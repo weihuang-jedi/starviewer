@@ -5,43 +5,7 @@
 
 #include "ufs_viewer.h"
 
-UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt)
-{
-    colorTable = ct;
-    nvoptions = opt;
-
-    texture1d = new Texture1d();
-    texture1d->set_colors(ct->get_clen(), ct->get_cmap());
-    texture1d->set_name(ct->get_name());
-
-    _var = NULL;
- 
-    earth = new Earth();
-
-    nvoptions->set_xsec(0);
-    nvoptions->set_ysec(0);
-    nvoptions->set_zsec(0);
-
-    _nlon = 360;
-    _nlat = 180;
-    _nlev = 1;
-
-    oneover = 1.0 / 180.0;
-    deg2rad = 3.1415926535897932 * oneover;
-
-    lister = new Lister();
-    lister->setup(361, 181, 121);
-
-    locator = NULL;
-    // windvector = new WindVector(ct, opt);
-    // windvector = make_unique<WindVector>(ct, opt);
-    windvector.reset(new WindVector(ct, opt));
-
-    previoustimelevel = -1;
-    current_timelevel = 0;
-}
-
-UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler)
+UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, Earth* e, ncReader* nchandler)
 {
     colorTable = ct;
     nvoptions = opt;
@@ -53,7 +17,7 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, nc
     _var = NULL;
 
     ncfile = nchandler;
-    earth = new Earth(bmpflnm, ncfile);
+    earth = e;
     // windvector = new WindVector(ct, opt);
     // windvector = make_unique<WindVector>(ct, opt);
     windvector.reset(new WindVector(ct, opt));
@@ -81,7 +45,6 @@ UFS2dViewer::~UFS2dViewer()
 {
     locator->turnOff();
 
-    delete earth;
     delete lister;
     delete texture1d;
 }
