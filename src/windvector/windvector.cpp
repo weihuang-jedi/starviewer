@@ -105,7 +105,7 @@ void WindVector::_parameter_setup()
     else
         vDelt = 1.0;
 
-    _scale = 10.0 * hDelt / _maxspeed;
+    _scale = 50.0 * hDelt / _maxspeed;
     _zScale = 1000.0 * vDelt / _maxspeed;
 
     cout << "Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
