@@ -126,7 +126,7 @@ void Arrow::draw()
   //cout << "\tfile: <" << __FILE__ << ">" << endl;
 
     _set_color(_speed);
-  //glColor4fv(color);
+    glColor4fv(color);
 
     if(0.01 > _speed)
     {
