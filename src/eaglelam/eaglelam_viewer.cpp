@@ -76,14 +76,11 @@ void EAGLELAM_Viewer::draw()
   //cout << "\tnvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
   //cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
 
-    if(nvoptions->get_cb(NV_SPHEREON))
+    if(nvoptions->get_cb(NV_FLATON))
     {
-        if(nvoptions->get_cb(NV_ONMAPON))
-        {
-            _display_on_sphere_map();
-        }
-        else
-            _display_on_sphere();
+	scaleNtranslate();
+
+        _display_all();
     }
     else if(nvoptions->get_cb(NV_BUMPON))
     {
@@ -103,9 +100,12 @@ void EAGLELAM_Viewer::draw()
     }
     else
     {
-	scaleNtranslate();
-
-        _display_all();
+        if(nvoptions->get_cb(NV_ONMAPON))
+        {
+            _display_on_sphere_map();
+        }
+        else
+            _display_on_sphere();
     }
 
     glPopMatrix();

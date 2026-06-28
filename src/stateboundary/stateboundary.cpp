@@ -52,15 +52,15 @@ StateBoundary::StateBoundary()
                        {"SC", "South Carolina"},
                        {"MD", "Maryland"},
                        {"MO", "Missouri"},
+                       {"LA", "Louisiana"},
+                       {"AL", "Alabama"},
+                       {"FL", "Florida"},
+                       {"WA", "Washington"},
                        {"WY", "Wyoming"},
                        {"WV", "West Virginia"},
                        {"WI", "Wisconsin"}};
 
     // These two states has issues to plot.
-    //                 {"LA", "Louisiana"},
-    //                 {"AL", "Alabama"},
-    //                 {"FL", "Florida"},
-    //                 {"WA", "Washington"},
 
 #if 1
     for (const auto& pair : state_abbr2name) {
@@ -245,7 +245,8 @@ void StateBoundary::process()
         // const char* stateAbbr = poFeature->GetFieldAsString("STATE");
         string stateAbbr = poFeature->GetFieldAsString("STATE");
 
-        // cout << "State: " << stateName << " (" << stateAbbr << ")" << endl;
+        cout << "-----------------------------------------------------------" << endl;
+        cout << "Processing State: " << stateName << " (" << stateAbbr << ")" << endl;
 
         // 5. Fetch geometry (e.g., Polygon or MultiPolygon data)
         OGRGeometry* poGeometry = poFeature->GetGeometryRef();
@@ -283,6 +284,7 @@ vector<vector<OGRPoint>> StateBoundary::processPolygonCoordinates(OGRGeometry* p
 
     // 1. Get the exterior ring (index 0 is always the outer boundary)
     OGRLinearRing* poExteriorRing = poPolygon->getExteriorRing();
+    cout << "NumPoints: " << poExteriorRing->getNumPoints() << endl;
     vector<OGRPoint> spoint;
     for (int i = 0; i < poExteriorRing->getNumPoints(); i++) {
         OGRPoint point;
@@ -319,6 +321,8 @@ vector<vector<OGRPoint>> StateBoundary::processMultiPolygonCoordinates(OGRGeomet
 
     int numPolygons = poMultiPolygon->getNumGeometries();
 
+    cout << "numPolygons = " << numPolygons << endl;
+
     vector<OGRPoint> spoint;
     // 1. Loop through each individual Polygon inside the MultiPolygon
     for (int p = 0; p < numPolygons; p++) {
@@ -328,12 +332,17 @@ vector<vector<OGRPoint>> StateBoundary::processMultiPolygonCoordinates(OGRGeomet
         if (poPolygon) {
             // 2. Loop through the exterior ring of this sub-polygon
             OGRLinearRing* poExterior = poPolygon->getExteriorRing();
+	    // if (poExterior->getNumPoints() > 100)
+	    if (poExterior->getNumPoints() > 300)
+	    {
+            cout << "\tNumPoints: " << poExterior->getNumPoints() << endl;
             for (int i = 0; i < poExterior->getNumPoints(); i++) {
                 OGRPoint point;
                 poExterior->getPoint(i, &point);
 		spoint.push_back(point);
             }
             vpoint.push_back(spoint);
+	    }
         }
     }
 
@@ -376,7 +385,7 @@ void StateBoundary::draw()
 
     GLfloat line_width = 1.0;
 
-    cout << "\nEnter file: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
+    // cout << "\nEnter file: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
 
     // --- ADD THIS LINE TO FIX COLOR ---
     glDisable(GL_LIGHTING);
@@ -399,15 +408,15 @@ void StateBoundary::draw()
     {
         // cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
         // cout << "\tstate_abbr[" << n << "]: " << state_abbr[n] << endl;
-	vector<vector<OGRPoint>> vvpoint = state_polygon[state_abbr[n]];
-	for(k = 0; k < vvpoint.size(); ++k)
+	vector<vector<OGRPoint>> polygons = state_polygon[state_abbr[n]];
+	for(k = 0; k < polygons.size(); ++k)
 	{
-	    vector<OGRPoint> vpoint = vvpoint[k];
+	    vector<OGRPoint> points = polygons[k];
             glBegin(GL_LINE_STRIP);
-	    for(i = 0; i < vpoint.size(); ++i)
+	    for(i = 0; i < points.size()-1; ++i)
 	    {
-		dlon = vpoint[i].getX();
-		dlat = vpoint[i].getY();
+		dlon = points[i].getX();
+		dlat = points[i].getY();
 		_mapprojection->lc_llxy(dlon, dlat, x, y);
                 glVertex3d(x, y, z);
             }
@@ -417,7 +426,7 @@ void StateBoundary::draw()
 
     glPopMatrix();
     glEnable(GL_LIGHTING);
-    cout << "Leave file: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
+    // cout << "Leave file: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
 }
 
 void StateBoundary::drawONplane()
