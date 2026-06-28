@@ -49,6 +49,24 @@ int* NCBaseReader::getInt(const char* var_name) {
     return value;
 }
 
+long long int* NCBaseReader::getInt64(const char* var_name) {
+    int var_id;
+    size_t var_length = 1;
+    size_t length = 1;
+
+    status = nc_inq_varid (ncid, var_name, &var_id);
+    if (status != NC_NOERR) handle_error(status);
+
+    var_length = getVarSize(var_name);
+
+    long long int* value = new long long int[var_length];
+
+    status = nc_get_var_longlong(ncid, var_id, value);
+    if (status != NC_NOERR) handle_error(status);
+
+    return value;
+}
+
 char* NCBaseReader::getChar(const char* var_name) {
     int var_id;
     size_t var_length = 1;

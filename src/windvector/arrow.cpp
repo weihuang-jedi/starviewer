@@ -14,12 +14,16 @@ Arrow::Arrow(ColorTable *ct)
 
   //_sh = 0.1;
   //_sv = 0.1;
-  //_sh = 0.001;
-  //_sv = 0.01;
-    _sh = 0.005;
-    _sv = 0.02;
+  //_sw = 0.01;
+
+  //_sh = 0.005;
+  //_sv = 0.02;
+ 
+    _sh = 0.01;
+    _sv = 0.01;
     _sw = 0.01;
-    _maxspeed = 50.0;
+
+    _maxspeed = 10.0;
 
     _colorlen = colorTable->get_clen() - 3;
     _colormap = colorTable->get_cmap();
@@ -34,7 +38,7 @@ Arrow::~Arrow()
     delete [] cylinder;
 }
 
-void Arrow::setup(float x, float y, float z,
+void Arrow::setup(double x, double y, double z,
                   float u, float v, float w)
 {
     _u = u;
@@ -66,19 +70,43 @@ void Arrow::setup(float x, float y, float z,
     _y1 = y - _dy;
     _z1 = z - _dz;
 #endif
+}
 
-  //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">";
-  //cout << "\tline: " << __LINE__;
-  //cout << "\tfile: <" << __FILE__ << ">" << endl;
-  //cout << "\tu = " << u << ", v = " << v << ", w = " << w << endl;
-  //cout << "\tx = " << x << ", y = " << y << ", z = " << z << endl;
-  //cout << "\tdx = " << _dx << ", dy = " << _dy << ", _dz = " << _dz << endl;
-  //cout << "\tspeed = " << _speed << ", _length = " << _length << ", _width = " << _width << endl;
+void Arrow::setup(double x, double y, double z,
+                  float u, float v)
+{
+    _u = u;
+    _v = v;
+    _speed = sqrt(u*u + v*v);
+
+    _dx = _sh * u;
+    _dy = _sh * v;
+
+    _length = sqrt(_dx*_dx + _dy*_dy);
+    _width = _sw * _length;
+
+#if 0
+    _x1 = x;
+    _y1 = y;
+    _z1 = z;
+
+    _x2 = x + _dx;
+    _y2 = y + _dy;
+    _z2 = z + _dz;
+#else
+    _x2 = x;
+    _y2 = y;
+    _z2 = z;
+
+    _x1 = x - _dx;
+    _y1 = y - _dy;
+    _z1 = z;
+#endif
 }
 
 void Arrow::_set_color(double spd)
 {
-    int idx = (int) (((float)(spd * _colorlen)) / _maxspeed);
+    int idx = (int) (((spd * _colorlen)) / _maxspeed);
  
     if(idx > (_colorlen - 1))
        idx = _colorlen - 1;
@@ -97,8 +125,6 @@ void Arrow::draw()
   //cout << "\tline: " << __LINE__;
   //cout << "\tfile: <" << __FILE__ << ">" << endl;
 
-    glPushMatrix();
-
     _set_color(_speed);
   //glColor4fv(color);
 
@@ -106,15 +132,15 @@ void Arrow::draw()
     {
       //draw a dot
         glBegin(GL_POINTS);
-            glVertex3f(_x1, _y1, _z1);
+            glVertex3d(_x1, _y1, _z1);
         glEnd();
     }
     else if(0.1 > _speed)
     {
       //draw a line
         glBegin(GL_LINE_STRIP);
-            glVertex3f(_x1, _y1, _z1);
-            glVertex3f(_x2, _y2, _z2);
+            glVertex3d(_x1, _y1, _z1);
+            glVertex3d(_x2, _y2, _z2);
         glEnd();
     }
     else
@@ -202,8 +228,6 @@ void Arrow::draw()
             cone->draw();
         }
     }
-
-    glPopMatrix();
 }
 
 vector_struct get_normalized_vector(vector_struct &vec)

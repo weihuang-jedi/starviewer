@@ -1,7 +1,4 @@
-#include <QtOpenGL>
-
-#include <vector>
-
+// #include <GL/glut.h>
 #include "ufsincr_viewer.h"
 
 UFSINCR2dViewer::UFSINCR2dViewer(ColorTable *ct, NVOptions* opt)
@@ -341,8 +338,49 @@ void UFSINCR2dViewer::draw()
         }
     }
 
+#if 0
+    // Initialize QPainter to overlay 2D Text
+    QPainter painter(this);
+    painter.setPen(Qt::yellow); 
+    painter.setFont(QFont("Helvetica", 12, QFont::Bold));
+        
+    // Optional: Turn on antialiasing for crisp text geometry edges
+    painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+
+    // Draw text using screen-space coordinates (X, Y from top-left)
+    QString frameLabel = _varname.c_str();
+    painter.drawText(20, 40, frameLabel); 
+
+    painter.end(); // Always terminate the painter state pass explicitly
+
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // Set text color using standard glColor hooks
+    glColor3f(0.0f, 1.0f, 1.0f); // Cyan Text
+
+    // Common FreeGLUT font selections:
+    // - GLUT_BITMAP_HELVETICA_18
+    // - GLUT_BITMAP_TIMES_ROMAN_24
+    // - GLUT_BITMAP_9_BY_15
+    renderBitmapString(-0.9f, 0.8f, GLUT_BITMAP_HELVETICA_18, _varname.c_str());
+
+    glutSwapBuffers();
+#endif
     glFlush();             // Force the command queue to execute
 }
+
+#if 0
+void UFSINCR2dViewer::renderBitmapString(float x, float y, void *font, const string &str)
+{
+    // 1. Define the exact world-space starting anchor point for the text
+    glRasterPos2f(x, y);
+
+    // 2. Loop through every character in the string vector array
+    for (char c : str) {
+        glutBitmapCharacter(font, c);
+    }
+}
+#endif
 
 void UFSINCR2dViewer::_flatVertex(double x, double y, double z,
                                   double fact)

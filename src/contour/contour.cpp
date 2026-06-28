@@ -4,10 +4,6 @@
 #undef debug
 #endif
 
-// #include <ncarg/hlu/MapPlot.h>
-// #include "nclInterface.h"
-
-
 //Constructor
 Contour::Contour(ColorTable *ct)
 {

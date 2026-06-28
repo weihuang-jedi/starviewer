@@ -22,6 +22,6 @@ install
 # generated images
 *.png
 
-removed.colormaps
-log.sv
+#removed.colormaps
+log.nv
 

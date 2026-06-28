@@ -21,11 +21,13 @@ using namespace std;
 typedef enum
 {
     NOMODEL = 0x0000,
-    WRF     = 0x0001,
-    UFS     = 0x0010,
-    UFSINCR = 0x0011,
+    UFS     = 0x0001,
+    UFSINCR = 0x0010,
     UFSMOM6 = 0x0020,
     MPAS    = 0x0100,
+    EAGLE   = 0x0200,
+    EAGLEGLOBAL = 0x0201,
+    EAGLELAM = 0x0202,
     MPIDEMO = 0x1000
 } ModelType;
 
@@ -37,7 +39,6 @@ typedef enum
     NV_BGBLACK,
     NV_BUMPON,
     NV_FLATON,
-    NV_SPHEREON,
     NV_COLORBARON,
     NV_TITLEON,
     NV_COASTLINEON,

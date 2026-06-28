@@ -29,7 +29,6 @@ class MPASTranslator : public BaseTranslator
     
         void show();
         void setup();
-        void paintGL();
 
         void set_static_flnm(string s) { _static_flnm = s; };
         void set_data_flnm(string s) { _data_flnm = s; };

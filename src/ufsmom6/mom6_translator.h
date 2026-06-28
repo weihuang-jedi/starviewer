@@ -33,7 +33,6 @@ class MOM6Translator : public BaseTranslator
                       vector<string> flnms, QWidget* parent=0);	//  Constructor
        ~MOM6Translator();				//  Destructor
     
-        void paintGL();
         void show();
         void setup();
         void setfilename(string flnm) { _filename = flnm; };

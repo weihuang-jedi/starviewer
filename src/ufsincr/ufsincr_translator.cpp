@@ -1,5 +1,3 @@
-//$Id
-
 #include <QtOpenGL>
 
 #include "ufsincr_translator.h"
@@ -377,31 +375,3 @@ void UFSINCRTranslator::writeLocatorMsg()
     emit locator_msg(_locatorinfo);
 }
 
-void UFSINCRTranslator::paintGL()
-{
-    // 1. Establish the window camera projections
-    set_modelview();
-
-    // 2. Safely clear the active display buffer frames under Qt's authority
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
-
-    setViewOptions();
-    setBackgroundColor();
-
-    // 3. SECURE FORWARDING: Invoke your viewer drawing logic while the
-    // translator's screen context is completely locked and active!
-    show(); 
-
-    drawColorBar();
-
-    if(nvoptions->get_cb(NV_STATUS_CHANGED))
-        save_status();
-
-    // 4. Force a clean pipeline flush
-    glFlush();
-    
-    // Qt will now automatically run its internal swapBuffers() 
-    // on the translator's valid surface window right here!
-}

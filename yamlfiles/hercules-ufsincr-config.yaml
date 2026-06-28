@@ -1,0 +1,48 @@
+database:
+  the_grid: &grid_dir "/work2/noaa/global/role-global/fix/orog/20240917/C96"
+  the_grid_prefix: &grid_prefix "C96.mx025_oro_data"
+  the_grid_suffix: &grid_suffix "nc"
+  the_incr: &incr_dir "/work2/noaa/epic/weihuang/cadre/CADRE-DA-training/year2_cases/exp_case/cadre26_Day2_exp_hyb_weight.8988879/output"
+  the_incr_prefix: &incr_prefix "ufsda.t00z.atminc.cubed_sphere_grid"
+  the_incr_suffix: &incr_suffix "nc"
+
+application:
+  name: StarViewer
+  model: ufsincr
+  version: 0.0.1
+
+application:
+  name: StarViewer
+  model: ufsincr
+  version: 0.0.1
+
+earth:
+  name: /work2/noaa/epic/weihuang/nv/starviewer/data/earth.bmp
+
+coastline:
+  name: /work2/noaa/epic/weihuang/nv/starviewer/data/gshhg-shp-2.3.7/GSHHS_shp
+  resolution: c
+
+database:
+  the_grid: &grid_dir "/work2/noaa/global/role-global/fix/orog/20240917/C96"
+  the_grid_prefix: &grid_prefix "C96.mx025_oro_data"
+  the_grid_suffix: &grid_suffix "nc"
+  the_incr: &incr_dir "/work2/noaa/epic/weihuang/cadre/CADRE-DA-training/year2_cases/exp_case/cadre26_Day2_exp_hyb_weight.8988879/output"
+  the_incr_prefix: &incr_prefix "ufsda.t00z.atminc.cubed_sphere_grid"
+  the_incr_suffix: &incr_suffix "nc"
+
+grid:
+  data:
+    dir: *grid_dir
+    prefix: *grid_prefix
+    suffix: *grid_suffix
+    range_start: 1
+    range_end: 6
+
+increment:
+  data:
+    dir: *incr_dir
+    prefix: *incr_prefix
+    suffix: *incr_suffix
+    range_start: 1
+    range_end: 6

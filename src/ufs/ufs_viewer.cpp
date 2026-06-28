@@ -1,6 +1,7 @@
 #include <QtOpenGL>
 
 #include <vector>
+#include <memory>
 
 #include "ufs_viewer.h"
 
@@ -32,6 +33,9 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt)
     lister->setup(361, 181, 121);
 
     locator = NULL;
+    // windvector = new WindVector(ct, opt);
+    // windvector = make_unique<WindVector>(ct, opt);
+    windvector.reset(new WindVector(ct, opt));
 
     previoustimelevel = -1;
     current_timelevel = 0;
@@ -50,6 +54,9 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, nc
 
     ncfile = nchandler;
     earth = new Earth(bmpflnm, ncfile);
+    // windvector = new WindVector(ct, opt);
+    // windvector = make_unique<WindVector>(ct, opt);
+    windvector.reset(new WindVector(ct, opt));
 
     nvoptions->set_xsec(0);
     nvoptions->set_ysec(0);
@@ -77,6 +84,7 @@ UFS2dViewer::~UFS2dViewer()
     delete earth;
     delete lister;
     delete texture1d;
+    // delete windvector;
 }
 
 void UFS2dViewer::set_geometry(UFSGeometry *gm)
@@ -114,11 +122,7 @@ void UFS2dViewer::reset()
 
 void UFS2dViewer::_initialize()
 {
-    int i, j, m, n;
-
-    int positive;
-    int negative;
-
+    // cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     previoustimelevel = -1;
 
     _hlon = geometry->get_hlon();
@@ -136,6 +140,16 @@ void UFS2dViewer::_initialize()
     _yFlat = geometry->get_yFlat();
 
     geometry->set_ntim(1);
+
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    if (windvector == nullptr) {
+        cerr << "Error: WindVector pointer is NULL!" << endl;
+        // Handle error or exit
+    } else {
+        windvector->setup_lonlat(_lon, _lat);
+        windvector->setup_xyFlat(_xFlat, _yFlat);
+    }
+    // cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFS2dViewer::draw()
@@ -402,9 +416,8 @@ void UFS2dViewer::_flatDisplay()
     glNormal3f(0.0, 0.0, -1.0);
 
     if(k < _nlev || 1 == _nlev) {
-    for(j = 1; j < _nlat; ++j)
-    {
-      //cout << "\t_yFlat[" << j << "] = " << _yFlat[j] << endl;
+      for(j = 1; j < _nlat; ++j)
+      {
         mpos = (k*_nlat+(j-1))*_nlon;
         npos = (k*_nlat+j)*_nlon;
         glBegin(GL_QUAD_STRIP);
@@ -430,8 +443,16 @@ void UFS2dViewer::_flatDisplay()
             glVertex3d(_xFlat[i], _yFlat[j-1], height);
         }
         glEnd();
-    }
-    coastline->drawOnPlane(height+0.01);
+      }
+
+      // cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+      // cout << "\tnvoptions->get_cb(NV_VECTORON): " << nvoptions->get_cb(NV_VECTORON) << endl;
+      if(nvoptions->get_cb(NV_VECTORON))
+      {
+        windvector->draw(k, height);
+      }
+
+      coastline->drawOnPlane(height+0.01);
     }
 
     glDisable(GL_TEXTURE_1D);
@@ -1099,5 +1120,21 @@ double UFS2dViewer::_k2r(int k)
 {
     double radius = 1.0 + _k2h(k);
     return radius;
+}
+
+void UFS2dViewer::setup_wind(float* u, float* v)
+{
+    // cout << "function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "setup u and v" << endl;
+    _u = u;
+    _v = v;
+
+    // Safe explicit check
+    if (!windvector) {
+        cerr << "WindVector is not initialized yet!" << endl;
+        return;
+    }
+
+    windvector->setup(_nlon, _nlat, _nlev, _u, _v);
 }
 

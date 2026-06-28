@@ -72,51 +72,6 @@ void MPASTranslator::setup()
 //******************************************************************
 //*************************  OpenGL Events  ************************
 //******************************************************************
-void MPASTranslator::paintGL()
-{
-    // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    set_modelview();
-
-  //Clear screen and Z-buffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  //Enable Z-buffering in OpenGL
-    glEnable(GL_DEPTH_TEST);
-
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
-    // if(!locator)
-    // {
-    //     cout << "WARNING: locator is null. Skipping view configuration until initialized." << endl;
-    //     return; // Exits safely, preventing the segmentation fault!
-    // }
-
-    setViewOptions();
-
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
-    setBackgroundColor();
-
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
-    show();
-
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
-    drawColorBar();
-
-    // cout << "line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-
-    // if(! nvoptions->get_cb(NV_PIXELON))
-    //     drawAxis();
-
-    if(nvoptions->get_cb(NV_STATUS_CHANGED))
-        save_status();
-
-  //Done
-    glFlush();
-    // cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-}
-
 //show the image
 void MPASTranslator::show()
 {

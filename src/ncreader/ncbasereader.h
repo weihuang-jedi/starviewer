@@ -31,6 +31,7 @@ class NCBaseReader {
 
     void close();
 
+    long long int* getInt64(const char* var_name);
     int* getInt(const char* var_name);
     char* getChar(const char* var_name);
     float* getFloat(const char* var_name);

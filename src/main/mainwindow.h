@@ -29,6 +29,9 @@
 #include "ufsincr_translator.h"
 #include "mpastranslator.h"
 #include "mom6_translator.h"
+#include "eagle_translator.h"
+#include "eagleglobal_translator.h"
+#include "eaglelam_translator.h"
 
 #include "modelparser.h"
 #include "modelparserFactory.h"
@@ -43,6 +46,8 @@ QT_END_NAMESPACE
 
 class MPIDEMOParser;
 class UFSParser;
+class UFSINCRParser;
+class EagleParser;
 
 class MainWindow : public QMainWindow
 {
@@ -67,6 +72,9 @@ class MainWindow : public QMainWindow
         void ufsincr();
         void ufsmom6();
         void mpas();
+        void eagle();
+        void eagleglobal();
+        void eaglelam();
 
         void animation_func();
         void inspector_func();
@@ -134,6 +142,9 @@ class MainWindow : public QMainWindow
         QAction *ufsincrAct;
         QAction *ufsmom6Act;
         QAction *mpasAct;
+        QAction *eagleAct;
+        QAction *eagleglobalAct;
+        QAction *eaglelamAct;
         QAction *mpidemoAct;
 
         QAction *animationAct;

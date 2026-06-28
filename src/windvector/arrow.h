@@ -48,8 +48,10 @@ class Arrow
 
         void draw();
 
-        void setup(float x, float y, float z,
+        void setup(double x, double y, double z,
                    float u, float v, float w);
+        void setup(double x, double y, double z,
+                   float u, float v);
 
         void set_maxspeed(double d) { _maxspeed = d; };
 
@@ -83,7 +85,7 @@ class Arrow
         double _length, _width;
         double _maxspeed;
 
-        void _draw_arrow(float x, float y, float z,
+        void _draw_arrow(double x, double y, double z,
                          float u, float v, float w);
 
         void _set_color(double spd);

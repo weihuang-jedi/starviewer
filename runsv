@@ -48,33 +48,83 @@ yamlfile="yamlfiles/${model}-config.yaml"
 
 echo "yamlfile: $yamlfile"
 
- export STARVIEWERHOME=/lustre/wei/nv/starviewer
- export CONTAINER_DIR=${STARVIEWERHOME}
- export CONTAINER_BINDINGS="-B /lustre"
- export RUNTIME_DIR=/lustre/wei/tmp/runtime-dir
+# Create a temporary wildcard cookie file
+ touch /scratch5/purged/Wei.Huang/tmp/xauth_wildcard
+ xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | xauth -f /scratch5/purged/Wei.Huang/tmp/xauth_wildcard nmerge -
 
- export CONTAINER_SIF=${CONTAINER_DIR}/starviewer.sif
+#!/bin/bash
 
- if [ ! -d $RUNTIME_DIR ]; then
-     mkdir -p $RUNTIME_DIR
-     chmod 700 $RUNTIME_DIR
- fi
+set -x
 
-singularity exec --cleanenv \
-  --hostname $(hostname) \
-  -B /lustre -B /tmp \
-  --env QT_QPA_PLATFORM=offscreen \
-  --env QT_OPENGL=software \
-  --env QT_QUICK_BACKEND=software \
-  --env LIBGL_ALWAYS_SOFTWARE=1 \
-  --env GALLIUM_DRIVER=swrast \
-  --env MESA_LOADER_DRIVER_OVERRIDE=swrast \
-  --env STARVIEWERHOME=/lustre/wei/nv/starviewer \
-  /lustre/wei/nv/starviewer/starviewer.sif \
-  gdb --args \
-  /lustre/wei/nv/starviewer/build/main/starviewer \
-  -yaml yamlfiles/mpas-config.yaml
+# First detect w/ hostname
+case $(hostname -f) in
+    ufe0[1-9]) MACHINE_ID=ursa ;; ### ursa01-09
+    ufe1[0-6]) MACHINE_ID=ursa ;; ### ursa10-16
+    uecflow01) MACHINE_ID=ursa ;; ### ursaecflow01
+    [Hh]ercules-login-[1-4].[Hh][Pp][Cc].[Mm]s[Ss]tate.[Ee]du) MACHINE_ID=hercules ;; ### hercules1-4
+    *) MACHINE_ID=UNKNOWN ;;                        # Unknown platform
+esac
+
+if [[ "${MACHINE_ID}" == "ursa" ]]; then
+   #export STARVIEWERHOME=/scratch3/NAGAPE/epic/Wei.Huang/src/nv/starviewer
+    export STARVIEWERHOME=/scratch5/purged/Wei.Huang/src/nv/starviewer
+    export CONTAINER_DIR=${STARVIEWERHOME}
+    export CONTAINER_BINDINGS="-B /scratch3 -B /scratch4 -B /scratch5"
+    export RUNTIME_DIR=/scratch5/purged/Wei.Huang/tmp/runtime-dir
+    export CONTAINER_SIF=${CONTAINER_DIR}/starviewer.sif
+
+    if [ ! -d $RUNTIME_DIR ]; then
+        mkdir -p $RUNTIME_DIR
+        chmod 700 $RUNTIME_DIR
+    fi
+
+   # 1. On the host terminal (e01g01), allow the connection
+   xhost +local:$(whoami)
+
+   singularity exec --rocm --cleanenv \
+     --hostname $(hostname) \
+     --bind ${HOME}/.Xauthority:/root/.Xauthority \
+     -B /scratch3 -B /scratch4 -B /scratch5 -B /tmp \
+     --env XAUTHORITY=/root/.Xauthority \
+     --env DISPLAY=${DISPLAY} \
+     --env XDG_RUNTIME_DIR=$RUNTIME_DIR \
+     --env QT_X11_NO_MITSHM=1 \
+     --env STARVIEWERHOME=${STARVIEWERHOME} \
+     --env QT_QPA_PLATFORM=xcb \
+     --env QT_XCB_GL_INTEGRATION=xcb_glx \
+     --env LIBGL_ALWAYS_SOFTWARE=1 \
+     --env LIBGL_ALWAYS_INDIRECT=1 \
+     --env GALLIUM_DRIVER=llvmpipe \
+     --env DEBIAN_FRONTEND=noninteractive \
+     "${CONTAINER_SIF}" \
+     ${STARVIEWERHOME}/build/main/starviewer -yaml "${yamlfile}"
+
+#   gdb --args \
+elif [[ "${MACHINE_ID}" == "hercules" ]]; then
+    module load apptainer
+    export STARVIEWERHOME=/work2/noaa/epic/weihuang/nv/starviewer
+    export CONTAINER_DIR=${STARVIEWERHOME}
+    export CONTAINER_BINDINGS="-B /work -B /work2"
+    export RUNTIME_DIR=/work2/noaa/epic/weihuang/tmp/runtime-dir
+    export CONTAINER_SIF=${CONTAINER_DIR}/starviewer.sif
+
+    singularity exec --cleanenv \
+       --bind $HOME/.Xauthority:/root/.Xauthority \
+       ${CONTAINER_BINDINGS} \
+       --env STARVIEWERHOME=${STARVIEWERHOME} \
+       --env XAUTHORITY=/root/.Xauthority \
+       --env DISPLAY=$DISPLAY \
+       --env XDG_RUNTIME_DIR=$RUNTIME_DIR \
+       --env QT_X11_NO_MITSHM=1 \
+       "${CONTAINER_SIF}" \
+       ${STARVIEWERHOME}/build/main/starviewer \
+       -yaml yamlfiles/hercules-${model}-config.yaml
+
+#   gdb --args \
+else
+    echo "Run on unknown machine."
+fi
 
 exit 0
 
-#   gdb --args \
+xdg-open img_0015.png

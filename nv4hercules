@@ -1,0 +1,26 @@
+#!/bin/bash
+
+ set -x
+
+ export STARVIEWERHOME=/work2/noaa/epic/weihuang/nv/starviewer
+ export CONTAINER_DIR=${STARVIEWERHOME}
+ export CONTAINER_BINDINGS="-B /work -B /work2"
+ export RUNTIME_DIR=/work2/noaa/epic/weihuang/tmp/runtime-dir
+ export CONTAINER_SIF=${CONTAINER_DIR}/starviewer.sif
+
+ singularity exec --cleanenv \
+    --bind $HOME/.Xauthority:/root/.Xauthority \
+    ${CONTAINER_BINDINGS} \
+    --env STARVIEWERHOME=${STARVIEWERHOME} \
+    --env XAUTHORITY=/root/.Xauthority \
+    --env DISPLAY=$DISPLAY \
+    --env XDG_RUNTIME_DIR=$RUNTIME_DIR \
+    --env QT_X11_NO_MITSHM=1 \
+    "${CONTAINER_SIF}" \
+    ${STARVIEWERHOME}/build/main/starviewer \
+    -yaml yamlfiles/hercules-ufs-config.yaml
+
+#   -yaml yamlfiles/ufs-config.yaml
+#   -yaml yamlfiles/hercules-ufsincr-config.yaml
+
+#   gdb --args \
