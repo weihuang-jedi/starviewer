@@ -1,0 +1,141 @@
+#!/bin/bash
+
+############################################################
+# Help                                                     #
+############################################################
+Help()
+{
+   # Display Help
+   echo "Syntax: scriptName [-m|h|v|V]"
+   echo "options:"
+   echo "h     Print this Help."
+   echo "m     model."
+   echo "v     Verbose mode."
+   echo "V     Print software version and exit."
+   echo
+}
+
+# Set default model
+model=mpas
+
+############################################################
+# Process the input options. Add options as needed.        #
+############################################################
+# Get the options
+while getopts "h:m:vV" option; do
+   case $option in
+      h) # display Help
+         Help
+         exit 0;;
+      m) # Enter a name
+         model=$OPTARG
+	 ;;
+      v) # set verbose
+         set -x
+         ;;
+      V) # print software version
+         echo "StarViwer 0.0.1"
+         exit 0;;
+     \?) # Invalid option
+         echo "Error: Invalid option"
+         exit -1;;
+   esac
+done
+
+echo "model: $model"
+
+yamlfile="yamlfiles/${model}-config.yaml"
+
+echo "yamlfile: $yamlfile"
+
+# Create a temporary wildcard cookie file
+ touch /scratch5/purged/Wei.Huang/tmp/xauth_wildcard
+ xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | xauth -f /scratch5/purged/Wei.Huang/tmp/xauth_wildcard nmerge -
+
+#for derecho
+#export STARVIEWERHOME=/contrib/Wei.Huang/src/nv/starviewer
+#export STARVIEWERHOME=/gpfs/csfs1/work/huangwei/nv/starviewer
+#export CONTAINER_DIR=/gpfs/csfs1/work/huangwei/nv
+#export CONTAINER_BINDINGS="-B /glade -B /gpfs -B /lustre"
+#export RUNTIME_DIR=/gpfs/csfs1/work/huangwei/tmp/runtime-dir
+#for ursa
+ export STARVIEWERHOME=/scratch3/NAGAPE/epic/Wei.Huang/src/nv/starviewer
+ export CONTAINER_DIR=${STARVIEWERHOME}
+ export CONTAINER_BINDINGS="-B /scratch3 -B /scratch4 -B /scratch5"
+ export RUNTIME_DIR=/scratch5/purged/Wei.Huang/tmp/runtime-dir
+
+ export CONTAINER_SIF=${CONTAINER_DIR}/starviewer.sif
+
+ if [ ! -d $RUNTIME_DIR ]; then
+     mkdir -p $RUNTIME_DIR
+     chmod 700 $RUNTIME_DIR
+ fi
+
+# 1. On the host terminal (e01g01), allow the connection
+xhost +local:$(whoami)
+
+singularity exec --cleanenv \
+  --hostname $(hostname) \
+  --bind ${HOME}/.Xauthority:/root/.Xauthority \
+  -B /scratch3 -B /scratch4 -B /scratch5 -B /tmp \
+  --env XAUTHORITY=/root/.Xauthority \
+  --env DISPLAY=${DISPLAY} \
+  --env XDG_RUNTIME_DIR=$RUNTIME_DIR \
+  --env QT_X11_NO_MITSHM=1 \
+  --env STARVIEWERHOME=${STARVIEWERHOME} \
+  --env QT_QPA_PLATFORM=xcb \
+  --env QT_XCB_GL_INTEGRATION=xcb_glx \
+  --env LIBGL_ALWAYS_SOFTWARE=1 \
+  --env LIBGL_ALWAYS_INDIRECT=1 \
+  --env GALLIUM_DRIVER=llvmpipe \
+  --env DEBIAN_FRONTEND=noninteractive \
+  "${CONTAINER_SIF}" \
+  ${STARVIEWERHOME}/build/main/starviewer -yaml "${yamlfile}"
+
+exit 0
+
+singularity exec --rocm --cleanenv \
+    --hostname $(hostname) \
+    --bind ${HOME}/.Xauthority:/root/.Xauthority \
+    -B /scratch3 -B /scratch4 -B /scratch5 \
+    --env XAUTHORITY=/root/.Xauthority \
+    --env DISPLAY=${DISPLAY} \
+    --env XDG_RUNTIME_DIR=$RUNTIME_DIR \
+    --env QT_XCB_GL_INTEGRATION=xcb_glx \
+    --env LIBGL_ALWAYS_SOFTWARE=1 \
+    --env GALLIUM_DRIVER=llvmpipe \
+    --env LIBGL_ALWAYS_INDIRECT=0 \
+    --env QT_X11_NO_MITSHM=1 \
+    --env STARVIEWERHOME=${STARVIEWERHOME} \
+    "${CONTAINER_SIF}" \
+    ${STARVIEWERHOME}/build/main/starviewer \
+    -yaml "${yamlfile}" -platform offscreen
+
+exit 0
+
+singularity exec --cleanenv \
+  --hostname $(hostname) \
+  -B /scratch3 -B /scratch4 -B /scratch5 -B /tmp \
+  --env QT_QPA_PLATFORM=offscreen \
+  --env QT_OPENGL=software \
+  --env QT_QUICK_BACKEND=software \
+  --env LIBGL_ALWAYS_SOFTWARE=1 \
+  --env GALLIUM_DRIVER=swrast \
+  --env MESA_LOADER_DRIVER_OVERRIDE=swrast \
+  --env STARVIEWERHOME=/scratch3/NAGAPE/epic/Wei.Huang/src/nv/starviewer \
+  /scratch3/NAGAPE/epic/Wei.Huang/src/nv/starviewer/starviewer.sif \
+  /scratch3/NAGAPE/epic/Wei.Huang/src/nv/starviewer/build/main/starviewer \
+  -yaml yamlfiles/ufsincr-config.yaml
+
+exit 0
+#   --env LIBGL_ALWAYS_SOFTWARE=1 \
+#   --env GALLIUM_DRIVER=llvmpipe \
+#   --env LIBGL_ALWAYS_INDIRECT=0 \
+
+#   --env MESA_LOADER_DRIVER_OVERRIDE=radeonsi \
+#   --env LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/dri:$LD_LIBRARY_PATH \
+
+#   gdb --args \
+#   ${STARVIEWERHOME}/build/main/starviewer \
+
+ xdg-open img_0015.png
