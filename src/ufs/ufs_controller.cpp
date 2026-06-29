@@ -4,26 +4,37 @@ UFSController::UFSController(ColorTable *ct, NVOptions* opt,
                                  Earth* earth, CoastLine* cl,
                                  const char *fn, bool isList)
 {
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     string sfn = string(fn);
 
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     colorTable = ct;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     nvoptions = opt;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     coastline = cl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     strcpy(_flnm, fn);
 
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     geometry = new UFSGeometry();
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     geometry->set_name(sfn);
   
     _maxFile = 1;
     _ntim = 1;
 
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     ncfile = new ncReader(fn);
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     ufs_viewer = new UFS2dViewer(colorTable, nvoptions, earth, ncfile);
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    ufs_viewer->set_coastline(cl);
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 UFSController::~UFSController()
 {
-    delete coastline;
     delete ncfile;
     
     if(NULL != ufs_viewer)
@@ -100,8 +111,6 @@ void UFSController::setup()
     _value = ncfile->get_fv(_varname.c_str());
     _title = _varname;
 
-    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    ufs_viewer->set_coastline(coastline);
     // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     ufs_viewer->set_geometry(geometry);
   //ufs_3dviewer->set_geoufs_(geoufs_);

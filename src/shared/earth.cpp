@@ -34,7 +34,6 @@ Earth::Earth(string flnm)
     // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     // cout << "\tflnm: <" << flnm << ">" << endl;
     _earthflnm = flnm;
-    // initializeGL();
     // cout << "\t_earthflnm: <" << _earthflnm << ">" << endl;
     _loadTexBMP();
 
@@ -92,6 +91,8 @@ void Earth::_loadTexBMP()
     // cout << "enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     // cout << "\t_earthflnm: <" << _earthflnm << ">" << endl;
 
+    initializeGL();
+
     // Load the image
     QImage b(_earthflnm.c_str());
 
@@ -126,7 +127,7 @@ void Earth::_loadTexBMP()
     set_texture_id(textureID);
 
     // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tt.width(): " << t.width() << ", t.height(): " << t.height() << endl;
+    // cout << "\tt.width(): " << t.width() << ", t.height(): " << t.height() << endl;
 
     glBindTexture(GL_TEXTURE_2D, textureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -167,12 +168,14 @@ void Earth::draw()
 {
     int i,j,intv;
 
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     intv = 2;
 
     //  Draw surface of the planet
     //  Set texture
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, get_texture_id());
+    // cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     //  Latitude bands
     glColor3f(1,1,1);
     for(j = 90; j > -90; j -= intv)
@@ -187,6 +190,7 @@ void Earth::draw()
     }
 
     glDisable(GL_TEXTURE_2D);
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 // Draw earth

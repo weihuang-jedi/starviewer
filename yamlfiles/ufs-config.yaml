@@ -7,7 +7,7 @@ earth:
   name: /scratch5/purged/Wei.Huang/src/nv/starviewer/data/earth.bmp
 
 coastline:
-  name: /scratch5/purged/Wei.Huang/src/nv/starviewer/data/gshhg-shp-2.3.7/GSHHS_shp
+  name: /scratch5/purged/Wei.Huang/src/nv/starviewer/data/gshhg-shp-2.3.7/GSHHS_shp/c/GSHHS_c_L1.shp
   resolution: c
 
 windvector:

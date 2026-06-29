@@ -30,6 +30,7 @@ UFSGeometry::~UFSGeometry()
 
 void UFSGeometry::_set_default()
 {
+#if 0
     if(NULL != _xSphere)
         delete [] _xSphere;
     if(NULL != _ySphere)
@@ -48,7 +49,7 @@ void UFSGeometry::_set_default()
         delete [] _lat;
     if(NULL != _lev)
         delete [] _lev;
-
+#endif
     _xSphere = NULL;
     _ySphere = NULL;
     _zSphere = NULL;

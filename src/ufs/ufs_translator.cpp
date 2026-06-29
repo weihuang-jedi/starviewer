@@ -28,9 +28,10 @@ UFSTranslator::UFSTranslator(ColorTable* ct, NVOptions* opt,
                              YAMLHandler *yamlHandler, QWidget* parent)
              : BaseTranslator(ct, opt, parent)
 {
-  //cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     vector<string> datafiles = yamlHandler->get_datafiles();
     _filename = datafiles[0];
+    // cout << "\t_filename: " << _filename << endl;
 
     nvoptions->set_xsec(-1);
     nvoptions->set_ysec(-1);
@@ -38,11 +39,13 @@ UFSTranslator::UFSTranslator(ColorTable* ct, NVOptions* opt,
     nvoptions->set_tsec(0);
 
     string earthflnm = yamlHandler->get_earth_bmp();
+    // cout << "\tearthflnm: " << earthflnm << endl;
     earth = new Earth(earthflnm);
 
     string clflnm = yamlHandler->get_coastline_file();
     // string clres = yamlHandler->get_coastline_resolution();
     // coastline = new coastline(clflnm, clres);
+    // cout << "\tclflnm: " << clflnm << endl;
     coastline = new CoastLine(clflnm);
 
     // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -50,7 +53,7 @@ UFSTranslator::UFSTranslator(ColorTable* ct, NVOptions* opt,
 
     _timestr = new string[2];
 
-  //cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 UFSTranslator::~UFSTranslator()
