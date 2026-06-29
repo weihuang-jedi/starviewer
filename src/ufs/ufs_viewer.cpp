@@ -5,44 +5,9 @@
 
 #include "ufs_viewer.h"
 
-UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt)
+UFS2dViewer::UFS2dViewer(ColorTable *ct, ColorTable *wvct, NVOptions* opt, Earth* e, ncReader* nchandler)
 {
-    colorTable = ct;
-    nvoptions = opt;
-
-    texture1d = new Texture1d();
-    texture1d->set_colors(ct->get_clen(), ct->get_cmap());
-    texture1d->set_name(ct->get_name());
-
-    _var = NULL;
- 
-    earth = new Earth();
-
-    nvoptions->set_xsec(0);
-    nvoptions->set_ysec(0);
-    nvoptions->set_zsec(0);
-
-    _nlon = 360;
-    _nlat = 180;
-    _nlev = 1;
-
-    oneover = 1.0 / 180.0;
-    deg2rad = 3.1415926535897932 * oneover;
-
-    lister = new Lister();
-    lister->setup(361, 181, 121);
-
-    locator = NULL;
-    // windvector = new WindVector(ct, opt);
-    // windvector = make_unique<WindVector>(ct, opt);
-    windvector.reset(new WindVector(ct, opt));
-
-    previoustimelevel = -1;
-    current_timelevel = 0;
-}
-
-UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler)
-{
+    // cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     colorTable = ct;
     nvoptions = opt;
 
@@ -53,10 +18,8 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, nc
     _var = NULL;
 
     ncfile = nchandler;
-    earth = new Earth(bmpflnm, ncfile);
-    // windvector = new WindVector(ct, opt);
-    // windvector = make_unique<WindVector>(ct, opt);
-    windvector.reset(new WindVector(ct, opt));
+    earth = e;
+    windvector.reset(new WindVector(wvct, opt));
 
     nvoptions->set_xsec(0);
     nvoptions->set_ysec(0);
@@ -75,16 +38,15 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, nc
 
     previoustimelevel = -1;
     current_timelevel = 0;
+    // cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 UFS2dViewer::~UFS2dViewer()
 {
     locator->turnOff();
 
-    delete earth;
     delete lister;
     delete texture1d;
-    // delete windvector;
 }
 
 void UFS2dViewer::set_geometry(UFSGeometry *gm)
@@ -406,16 +368,17 @@ void UFS2dViewer::_flatDisplay()
     glNewList(zcl, GL_COMPILE_AND_EXECUTE);
     lister->set_zid(k, zcl);
 
-    glPushMatrix();
-    glClearColor(1.0, 1.0, 1.0, 1.0);
-  //OpenGL should normalize normal vectors
-    glEnable(GL_NORMALIZE);
-    glEnable(GL_TEXTURE_1D);
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glNormal3f(0.0, 0.0, -1.0);
-
     if(k < _nlev || 1 == _nlev) {
+      glPushMatrix();
+      glClearColor(1.0, 1.0, 1.0, 1.0);
+
+      // OpenGL should normalize normal vectors
+      glEnable(GL_NORMALIZE);
+      glEnable(GL_TEXTURE_1D);
+      glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glNormal3f(0.0, 0.0, -1.0);
+
       for(j = 1; j < _nlat; ++j)
       {
         mpos = (k*_nlat+(j-1))*_nlon;
@@ -445,6 +408,21 @@ void UFS2dViewer::_flatDisplay()
         glEnd();
       }
 
+      glDisable(GL_TEXTURE_1D);
+      glPopMatrix();
+
+      // cout << "\nEnter file: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
+
+      GLfloat line_width = 1.0;
+
+      glPushMatrix();
+      glClearColor(1.0, 1.0, 1.0, 1.0);
+      // --- ADD THIS LINE TO FIX COLOR ---
+      glDisable(GL_LIGHTING);
+      // glEnable(GL_COLOR_MATERIAL);
+      // glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+      glDisable(GL_TEXTURE_2D);
+
       // cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
       // cout << "\tnvoptions->get_cb(NV_VECTORON): " << nvoptions->get_cb(NV_VECTORON) << endl;
       if(nvoptions->get_cb(NV_VECTORON))
@@ -453,10 +431,9 @@ void UFS2dViewer::_flatDisplay()
       }
 
       coastline->drawOnPlane(height+0.01);
+      glPopMatrix();
+      glEnable(GL_LIGHTING);
     }
-
-    glDisable(GL_TEXTURE_1D);
-    glPopMatrix();
     glEndList();
 }
 

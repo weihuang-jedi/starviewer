@@ -25,32 +25,50 @@ string number2string(T n)
 
 //Constructor
 UFSTranslator::UFSTranslator(ColorTable* ct, NVOptions* opt,
-                             string flnm, QWidget* parent)
-               : BaseTranslator(ct, opt, parent)
+                             YAMLHandler *yamlHandler, QWidget* parent)
+             : BaseTranslator(ct, opt, parent)
 {
-  //cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-
-    _filename = flnm;
+    // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    vector<string> datafiles = yamlHandler->get_datafiles();
+    _filename = datafiles[0];
+    // cout << "\t_filename: " << _filename << endl;
 
     nvoptions->set_xsec(-1);
     nvoptions->set_ysec(-1);
     nvoptions->set_zsec(0);
     nvoptions->set_tsec(0);
 
-    ufs_controller = NULL;
+    string earthflnm = yamlHandler->get_earth_bmp();
+    // cout << "\tearthflnm: " << earthflnm << endl;
+    earth = new Earth(earthflnm);
+
+    string clflnm = yamlHandler->get_coastline_file();
+    // cout << "\tclflnm: " << clflnm << endl;
+    coastline = new CoastLine(clflnm);
+
+    string cmpath = yamlHandler->get_windvector_cmpath();
+    string cmname = yamlHandler->get_windvector_cmname();
+    // cout << "\tcmpath: " << cmpath << endl;
+    // cout << "\tcmname: " << cmname << endl;
+    wvct = new ColorTable(cmpath, cmname);
+
+    // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    ufs_controller = new UFSController(colorTable, wvct, nvoptions, earth, coastline, _filename.c_str());
 
     _timestr = new string[2];
 
-  //cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 UFSTranslator::~UFSTranslator()
 {
     if(NULL != ufs_controller)
         delete ufs_controller;
+    if(NULL != wvct)
+        delete wvct;
     if(NULL != _timestr)
         delete[] _timestr;
-    ufs_controller = NULL;
+    // ufs_controller = NULL;
 }
 
 void UFSTranslator::setup()
@@ -58,12 +76,6 @@ void UFSTranslator::setup()
     int n;
 
     // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    if(NULL != ufs_controller)
-        delete ufs_controller;
-
-    // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    ufs_controller = new UFSController(colorTable, nvoptions, _filename.c_str());
-
     // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ufs_controller->setup();
 

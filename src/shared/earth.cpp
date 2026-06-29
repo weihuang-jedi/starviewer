@@ -8,6 +8,7 @@
 //
 Earth::Earth()
 {
+    char _bmpflnm[1024];
     const char* path = getenv("STARVIEWERHOME");
     if (path == nullptr) {
         cout << "ERROR: STARVIEWERHOME not set!" << endl;
@@ -16,6 +17,8 @@ Earth::Earth()
     strcpy(_bmpflnm, path);
 
     strcat(_bmpflnm, "/data/earth.bmp");
+
+    _earthflnm = _bmpflnm;
 
     _loadTexBMP();
 
@@ -26,68 +29,18 @@ Earth::Earth()
     // read_terrain();
 }
 
-Earth::Earth(const char *flnm)
+Earth::Earth(string flnm)
 {
     // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     // cout << "\tflnm: <" << flnm << ">" << endl;
-    initializeGL();
-    strcpy(_bmpflnm, flnm);
-    // cout << "\t_bmpflnm: <" << _bmpflnm << ">" << endl;
+    _earthflnm = flnm;
+    // cout << "\t_earthflnm: <" << _earthflnm << ">" << endl;
     _loadTexBMP();
+
+    radius = 1.0;
+
+    deg2arc = 3.1415926535897932 / 180.0;
     // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-}
-
-Earth::Earth(const char *flnm, ncReader* nchandler)
-{
-    int i, j, n;
-    size_t nter;
-    float hgt;
-
-  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    initializeGL();
-
-    strcpy(_bmpflnm, flnm);
-    _loadTexBMP();
-
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    nlon = nchandler->getNlon();
-    nlat = nchandler->getNlat();
-    nter = nlon * nlat;
-
-    lon.resize(nlon);
-    lat.resize(nlat);
-    ter.resize(nter);
-
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    double* dbl_lon = nchandler->getLon();
-    double* dbl_lat = nchandler->getLat();
-    float* fter;
-    fter = nchandler->getFloat("hgtsfc");
-
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    maxhgt = 0.0;
-    minhgt = 0.0;
-
-    n = 0;
-    for(j = 0; j < nlat; ++j)
-    {
-      //fprintf(stderr, "\tlat[%d] = %f\n", j, lat[j]);
-        lat[j] = (float) dbl_lat[j];
-        for(i = 0; i < nlon; ++i)
-        {
-            lon[i] = (float) dbl_lon[i];
-            hgt = fter[n];
-            if(maxhgt < hgt)
-               maxhgt = hgt;
-            if(minhgt > hgt)
-               minhgt = hgt;
-	    ter[n] = hgt;
-
-            ++n;
-        }
-    }
-    free(fter);
-  //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 Earth::~Earth()
@@ -96,8 +49,6 @@ Earth::~Earth()
    lon.shrink_to_fit();
    lat.clear();
    lat.shrink_to_fit();
-   ter.clear();
-   ter.shrink_to_fit();
 }
 
 void Earth::initializeGL() {
@@ -138,10 +89,12 @@ void Earth::_loadTexBMP()
     GLuint textureID = 0;
 
     // cout << "enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    // cout << "\t_bmpflnm: <" << _bmpflnm << ">" << endl;
+    // cout << "\t_earthflnm: <" << _earthflnm << ">" << endl;
+
+    initializeGL();
 
     // Load the image
-    QImage b(_bmpflnm);
+    QImage b(_earthflnm.c_str());
 
     // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
@@ -174,7 +127,7 @@ void Earth::_loadTexBMP()
     set_texture_id(textureID);
 
     // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tt.width(): " << t.width() << ", t.height(): " << t.height() << endl;
+    // cout << "\tt.width(): " << t.width() << ", t.height(): " << t.height() << endl;
 
     glBindTexture(GL_TEXTURE_2D, textureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -215,12 +168,14 @@ void Earth::draw()
 {
     int i,j,intv;
 
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     intv = 2;
 
     //  Draw surface of the planet
     //  Set texture
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, get_texture_id());
+    // cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     //  Latitude bands
     glColor3f(1,1,1);
     for(j = 90; j > -90; j -= intv)
@@ -235,6 +190,7 @@ void Earth::draw()
     }
 
     glDisable(GL_TEXTURE_2D);
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 // Draw earth
@@ -278,9 +234,6 @@ void Earth::bump_plane(float z)
     int i, j;
     float x, y0, y1;
 
-    float hgt = 0.0;
-    float scl = 0.1 / maxhgt;
-
   //Set texture
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, get_texture_id());
@@ -294,21 +247,13 @@ void Earth::bump_plane(float z)
        y1 = lat[j + 1] / 180.0;
 
        glBegin(GL_QUAD_STRIP);
-         //hgt = ter[j*nlon];
-           hgt = 0.0;
            glNormal3d(0.0, 0.0, 1.0);
            glTexCoord2d(0.0, y0 + 0.5);
-           if(hgt > 0.0)
-               glVertex3d(0.0, y0, z + scl*hgt);
-           else
-               glVertex3d(0.0, y0, z);
+           glVertex3d(0.0, y0, z);
 
            glNormal3d(0.0, 0.0, 1.0);
            glTexCoord2d(0.0, y1 + 0.5);
-           if(hgt > 0.0)
-               glVertex3d(0.0, y1, z + scl*hgt);
-           else
-               glVertex3d(0.0, y1, z);
+           glVertex3d(0.0, y1, z);
 
            for(i = 0; i < nlon; ++i)
            {
@@ -317,113 +262,24 @@ void Earth::bump_plane(float z)
 		  x -= 2.0;
                glNormal3d(0.0, 0.0, 1.0);
                glTexCoord2d(x, y0 + 0.5);
-             //hgt = ter[j*nlon + i];
-               hgt = 0.0;
-               if(hgt > 0.0)
-                   glVertex3d(x, y0, z + scl*hgt);
-               else
-                   glVertex3d(x, y0, z);
+               glVertex3d(x, y0, z);
 
                glNormal3d(0.0, 0.0, 1.0);
                glTexCoord2d(x, y1 + 0.5);
-             //hgt = ter[(j+1)*nlon + i]; 
-               hgt = 0.0;
-               if(hgt > 0.0)
-                   glVertex3d(x, y1, z + scl*hgt);
-               else
-                   glVertex3d(x, y1, z);
+               glVertex3d(x, y1, z);
            }
 
            glNormal3d(0.0, 0.0, 1.0);
            glTexCoord2d(1.0 , y0 + 0.5);
-           if(hgt > 0.0)
-               glVertex3d(0.0, y0, z + scl*hgt);
-           else
-               glVertex3d(0.0, y0, z);
+           glVertex3d(0.0, y0, z);
 
            glNormal3d(0.0, 0.0, 1.0);
            glTexCoord2d(1.0 , y1 + 0.5);
-           if(hgt > 0.0)
-               glVertex3d(0.0, y1, z + scl*hgt);
-           else
-               glVertex3d(0.0, y1, z);
+           glVertex3d(0.0, y1, z);
        glEnd();
     }
 
     glDisable(GL_TEXTURE_2D);
-}
-
-void Earth::read_terrain()
-{
-    netCDF::NcFile* ncfl;
-
-    float hgt = 0.0;
-
-    int i = 0;
-    int j = 0;
-    size_t n = 0;
-
-    const char* path = getenv("STARVIEWERHOME");
-    if (path == nullptr) {
-        cout << "ERROR: STARVIEWERHOME not set!" << endl;
-        throw(errno);
-    }
-    strcpy(_topoflnm, path);
-    strcat(_topoflnm, "/data/GMTED2010_15n060_0250deg.nc");
-    cout << "_topoflnm: " << _topoflnm << endl;
-
-    try {
-        // Use the constructor to re-initialize the ncfl object
-        ncfl = new netCDF::NcFile(_topoflnm, netCDF::NcFile::read);
-
-        cout << "Successfully opened: " << _topoflnm << endl;
-    } catch (netCDF::exceptions::NcException& e) {
-        cerr << "Error opening file: " << e.what() << endl;
-    }
-
-    // Load necessary variables
-    netCDF::NcVar lonVar = ncfl->getVar("longitude");
-    netCDF::NcVar latVar = ncfl->getVar("latitude");
-    netCDF::NcVar terVar = ncfl->getVar("elevation");
-    nlon = lonVar.getDim(0).getSize();
-    nlat = latVar.getDim(0).getSize();
-    size_t nter = nlon*nlat;
-
-    lon.resize(nlon);
-    lat.resize(nlat);
-    ter.resize(nter);
-    vector<short> ster(nter);
-
-    lonVar.getVar(lon.data());
-    latVar.getVar(lat.data());
-    terVar.getVar(ster.data());
-
-    maxhgt = 0.0;
-    minhgt = 0.0;
-
-    n = 0;
-    for(j = 0; j < nlat; ++j)
-    {
-        for(i = 0; i < nlon; ++i)
-        {
-            hgt = ster[n];
-            if(maxhgt < hgt)
-               maxhgt = hgt;
-            if(minhgt > hgt)
-               minhgt = hgt;
-            ter[n] = hgt;
-
-            ++n;
-        }
-    }
-
-    ster.clear();
-    ster.shrink_to_fit();
-
-    free(ncfl);
-
-    cout << "\tmaxhgt = " << maxhgt << endl;
-    cout << "\tminhgt = " << minhgt << endl;
 }
 
 void Earth::bump(float r)
@@ -438,6 +294,7 @@ void Earth::bump()
 {
     int i, j, n;
 
+#if 0
     float hgt = 0.0;
     float scl = 0.1 / maxhgt;
 
@@ -503,6 +360,7 @@ void Earth::bump()
     }
 
     glDisable(GL_TEXTURE_2D);
+#endif
 }
 
 void Earth::_bumpVertex(float th, float ph, double radius)

@@ -6,23 +6,21 @@
 
 WindVector::WindVector(ColorTable *ct, NVOptions* opt)
 {
-    // colorTable = ct;
-    colorTable = new ColorTable();
-    string vecmap = "vector";
-    colorTable->set_colorMap(vecmap);
-
     nvoptions = opt;
+    set_colorTable(ct);
 
     arrow = new Arrow(ct);
 
     // _scale = 0.50;
-    _scale = 5000.0;
+    // _scale = 5000.0;
+    // _wings = 1000.0;
+    _scale = 1000.0;
+    _wings = 100.0;
     _zScale = 0.50;
-    _wings = 1000.0;
-    _stepsize = 2;
-    _local_stepsize = 2;
-  //_maxspeed = 100.0;
-    _maxspeed = 5.0;
+    _stepsize = 5;
+    _local_stepsize = _stepsize;
+    _maxspeed = 100.0;
+    // _maxspeed = 5.0;
 
     axx[0] = 1.0;
     axx[1] = 0.0;
@@ -103,13 +101,13 @@ void WindVector::_parameter_setup()
     else
         vDelt = 1.0;
 
-    _scale = 5.0 * hDelt / _maxspeed;
-    _zScale = 50.0 * vDelt / _maxspeed;
+    _scale = 50.0 * hDelt / _maxspeed;
+    _zScale = 1000.0 * vDelt / _maxspeed;
 
-    cout << "Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
-         << ", file: <" << __FILE__ << ">" << endl;
-    cout << "\t_nx = " << _nx << ", _ny = " << _ny << ", _nz = " << _nz << endl;
-    cout << "\t_scale = " << _scale << ", _zScale = " << _zScale << endl;
+    // cout << "Functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__
+    //      << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\t_nx = " << _nx << ", _ny = " << _ny << ", _nz = " << _nz << endl;
+    // cout << "\t_scale = " << _scale << ", _zScale = " << _zScale << endl;
 
     if(_stepsize < _local_stepsize)
        _stepsize = _local_stepsize;
@@ -147,7 +145,7 @@ void WindVector::draw(int k, double z)
     if(nvoptions->get_cb(NV_VECTOR_MORE))
     {
         --_stepsize;
-        if(0 == _stepsize)
+        if(1 > _stepsize)
             _stepsize = 1;
         nvoptions->set_cb(NV_VECTOR_MORE, false);
     }
@@ -158,9 +156,10 @@ void WindVector::draw(int k, double z)
         nvoptions->set_cb(NV_VECTOR_LESS, false);
     }
 
-    // cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     // cout << "\t_nx = " << _nx << ", _ny = " << _ny << ", _nz = " << _nz << endl;
     // cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
+    // cout << "\tcolorTable = " << colorTable << endl;
 
     _colorlen = colorTable->get_clen() - 3;
     _colormap = colorTable->get_cmap();
@@ -196,7 +195,7 @@ void WindVector::draw(int k, double z)
 
 void WindVector::_set_color(double spd, float* color)
 {
-#if 1
+#if 0
     color[0]  = 1.0;
     color[1]  = 1.0;
     color[2]  = 1.0;

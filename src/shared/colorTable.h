@@ -23,6 +23,7 @@ class ColorTable
 {
     public:
         ColorTable();			//  Constructor
+        ColorTable(string cmroot, string cmflnm);	//  Constructor
        ~ColorTable();			//  Destructor
 
         int get_nc() { return _clist.size(); };
@@ -34,6 +35,7 @@ class ColorTable
         void set_colorMap(string cn);
         void set_opacity(int opt);
         void set_color4v(double v, double* color4v);
+        void set_colorMapDir(string cmr) { _cmroot = cmr; };
 
         int    get_clen() { return _clen; };
         float* get_cmap() { return _cmap; };
@@ -49,6 +51,7 @@ class ColorTable
         vector<string> _clist;
 
         string _name;
+        string _cmroot;
 
         float* _cmap;
         float* _opacity;
@@ -56,6 +59,7 @@ class ColorTable
 
         void get_file_contents(const char *cn);
         void _setup();
+        void set_default_cmroot();
 };
 #endif
 

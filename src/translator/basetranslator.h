@@ -28,9 +28,13 @@
 #include "util.h"
 #include "light.h"
 #include "locator.h"
+#include "earth.h"
+#include "coastline.h"
 #include "nvoptions.h"
+#include "windvector.h"
 #include "colorTable.h"
 #include "sliderNspin.h"
+#include "yamlhandler.h"
 
 using namespace std;
 
@@ -289,6 +293,21 @@ class BaseTranslator : public QGLWidget
 
         void SaveJpg();
         void SaveJpg(int n);
+
+    protected:
+        ColorTable* windVectorColorTable;
+        CoastLine* coastline;
+        WindVector* windvector;
+        Earth* earth;
+
+    public:
+	ColorTable* get_windVectorColorTable() { return windVectorColorTable; };
+        CoastLine* get_coastline() { return coastline; };
+        Earth* get_earth() { return earth; };
+
+	void set_windVectorColorTable(ColorTable* ct) { windVectorColorTable = ct; };
+        void set_coastline(CoastLine* cl) { coastline = cl; };
+        void set_earth(Earth* e) { earth = e; };
 };
 #endif
 

@@ -22,6 +22,16 @@ ColorTable::ColorTable()
   //cout << "\tLeave ColorTable: file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
+ColorTable::ColorTable(string cmroot, string cmflnm)
+{
+    _cmap = NULL;
+    _opacity = NULL;
+    texture1d = NULL;
+
+    set_colorMapDir(cmroot);
+    set_colorMap(cmflnm);
+}
+
 ColorTable::~ColorTable()
 {
   //cout << "\tEnter ~ColorTable: file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -62,7 +72,6 @@ void ColorTable::_setup()
     int num = 0;
     DIR *dp;
     struct dirent *dirp;
-    char root[1024];
 
     char *cp;
     int dot_pos;
@@ -74,18 +83,8 @@ void ColorTable::_setup()
 
   //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
 
-    const char* path = getenv("STARVIEWERHOME");
-    if (path == nullptr) {
-        cout << "ERROR: STARVIEWERHOME not set!" << endl;
-        throw(errno);
-    }
-    strcpy(root, path);
-  //strcpy(root, "/contrib/Wei.Huang/src/nv/starviewer");
-  //cout << "root: " << root << endl;
-    strcat(root, "/colormaps/");
-  //cout << "root: " << root << endl;
+    set_default_cmroot();
 
-  //cout << "\troot: <" << root << ">" << endl;
   //cout << "\tUse default color map: gui_default" << endl;
 
     _opacity = NULL;
@@ -101,9 +100,9 @@ void ColorTable::_setup()
 
   //cout << "\tdir to get files of: <" << root << ">" << endl;
 
-    if(NULL == (dp = opendir(root)))
+    if(NULL == (dp = opendir(_cmroot.c_str())))
     {
-        cout << "Error(" << errno << ") opening " << root << endl;
+        cout << "Error(" << errno << ") opening " << _cmroot << endl;
         throw(errno);
     }
 
@@ -133,12 +132,28 @@ void ColorTable::_setup()
   //cout << "\tLeave _setup: file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
-void ColorTable::get_file_contents(const char *cn)
+void ColorTable::set_default_cmroot()
 {
     ifstream in;
     string contents = "BLANK";
 
     char root[1024];
+    const char* path = getenv("STARVIEWERHOME");
+    if (path == nullptr) {
+        cout << "ERROR: STARVIEWERHOME not set!" << endl;
+        throw(errno);
+    }
+    strcpy(root, path);
+    strcat(root, "/colormaps/");
+
+    _cmroot = root;
+}
+
+void ColorTable::get_file_contents(const char *cn)
+{
+    ifstream in;
+    string contents = "BLANK";
+
     char fullname[1024];
     char cstr[1024];
     char *pstr;
@@ -155,17 +170,8 @@ void ColorTable::get_file_contents(const char *cn)
 
     float maxval = 1.0;
 
-    const char* path = getenv("STARVIEWERHOME");
-    if (path == nullptr) {
-        cout << "ERROR: STARVIEWERHOME not set!" << endl;
-        throw(errno);
-    }
-    strcpy(root, path);
-    strcat(root, "/colormaps/");
-
-    strcat(root, cn);
-
-    strcpy(fullname, root);
+    strcpy(fullname, _cmroot.c_str());
+    strcat(fullname, cn);
     strcat(fullname, ".rgb");
 
     in.open(fullname, ios::in | ios::binary);
@@ -173,14 +179,16 @@ void ColorTable::get_file_contents(const char *cn)
     if(! in.is_open())
     {
         in.close();
-        strcpy(fullname, root);
+        strcpy(fullname, _cmroot.c_str());
+        strcat(fullname, cn);
         strcat(fullname, ".gp");
         in.open(fullname, ios::in | ios::binary);
 
         if(! in.is_open())
         {
             in.close();
-            strcpy(fullname, root);
+            strcpy(fullname, _cmroot.c_str());
+            strcat(fullname, cn);
             strcat(fullname, ".ncmap");
             in.open(fullname, ios::in | ios::binary);
 
@@ -192,15 +200,8 @@ void ColorTable::get_file_contents(const char *cn)
         }
     }
 
-  //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
-  //cout << "\troot: <" << root << ">" << endl;
-  //cout << "\tfullname: <" << fullname << ">" << endl;
-
-  //in.seekg(0, ios::end);
-  //contents.resize(in.tellg());
-  //in.seekg(0, ios::beg);
-  //in.read(&contents[0], contents.size());
-  //in.close();
+    // cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
+    // cout << "\tfullname: <" << fullname << ">" << endl;
 
     nl = 0;
     while(getline(in, contents))
@@ -229,7 +230,7 @@ void ColorTable::get_file_contents(const char *cn)
     {
         strcpy(cstr, strvector[k].c_str());
 
-      //cout << "Line " << k << ": <" << cstr << ">" << endl;
+        // cout << "Line " << k << ": <" << cstr << ">" << endl;
 
         n = 0;
         pstr = strtok(cstr, " \t");
@@ -237,17 +238,10 @@ void ColorTable::get_file_contents(const char *cn)
         {
             strcpy(carr[n], pstr);
 
-          //if(n)
-          //    cout << ", carr[" << n << "] = <" << carr[n] << ">";
-          //else
-          //    cout << "\tcarr[" << n << "] = <" << carr[n] << ">";
-
             pstr = strtok(NULL, " \t");
 
             ++n;
         }
-
-      //cout << endl;
 
         m = 0;
         for(i = 0; i < n; ++i)
@@ -263,17 +257,12 @@ void ColorTable::get_file_contents(const char *cn)
         {
             contents = string(carr[i]);
 
-          //if(i)
-          //    cout << ", carr[" << i << "] = <" << carr[i] << ">" << endl;
-          //else
-          //    cout << "\tcarr[" << i << "] = <" << carr[i] << ">" << endl;
-
             istringstream(contents) >> _cmap[_clen];
 
             if(maxval < _cmap[_clen])
                 maxval = _cmap[_clen];
 
-          //cout << "_cmap[" << _clen << "] = " << _cmap[_clen] << endl;
+            // cout << "_cmap[" << _clen << "] = " << _cmap[_clen] << endl;
 
             ++ _clen;
         }
@@ -326,28 +315,15 @@ void ColorTable::get_file_contents(const char *cn)
         _opacity[n] = 0.10 + 0.9*n / ((float) _clen);
     }
 
-  //print();
-
-#if 0
-  //Switch background and foreground color.
-    if(1 < _clen)
-    {
-        for(n = 0; n < 3; ++n)
-        {
-            maxval = _cmap[n];
-            _cmap[n] = _cmap[n+3];
-            _cmap[n+3] = maxval;
-        }
-    }
-#endif
+    // print();
 }
 
 void ColorTable::set_colorMap(string cn)
 {
     _name = cn;
 
-  //cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
-  //cout << "\t_name: <" << _name << ">" << endl;
+    // cout << "\tfile: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
+    // cout << "\t_name: <" << _name << ">" << endl;
 
     get_file_contents(cn.c_str());
 

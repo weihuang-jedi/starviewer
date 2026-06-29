@@ -32,7 +32,7 @@ target_include_directories(widget PUBLIC
     ${CMAKE_SOURCE_DIR}/geometry
     ${CMAKE_SOURCE_DIR}/shared
     ${CMAKE_SOURCE_DIR}/coastline
-    ${CMAKE_SOURCE_DIR}/nclapp
+    ${CMAKE_SOURCE_DIR}/windvector
     ${CMAKE_SOURCE_DIR}/contour
     ${CMAKE_SOURCE_DIR}/control
     ${CMAKE_SOURCE_DIR}/marchingCube

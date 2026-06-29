@@ -41,8 +41,7 @@ class UFS2dViewer : public QGLWidget
 {
 
     public:
-        UFS2dViewer(ColorTable* ct, NVOptions* opt);
-        UFS2dViewer(ColorTable* ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler);
+        UFS2dViewer(ColorTable* ct, ColorTable *wvct, NVOptions* opt, Earth* earth, ncReader* nchandler);
        ~UFS2dViewer();
 
         void draw();
@@ -74,7 +73,6 @@ class UFS2dViewer : public QGLWidget
         Lister* lister;
         Locator* locator;
         NVOptions* nvoptions;
-	// WindVector* windvector;
 	unique_ptr<WindVector> windvector;
 
         string _varname;

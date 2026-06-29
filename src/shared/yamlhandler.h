@@ -23,6 +23,8 @@ class YAMLHandler
 	string get_version() { return _version; };
 
 	string get_earth_bmp() { return _earth_bmp; };
+	string get_windvector_cmpath() { return _windvector_cmpath; };
+	string get_windvector_cmname() { return _windvector_cmname; };
 	string get_coastline_file() { return _coastline_file; };
 	string get_coastline_resolution() { return _coastline_resolution; };
 
@@ -41,6 +43,8 @@ class YAMLHandler
         string _version;
 
 	string _earth_bmp;
+	string _windvector_cmpath;
+	string _windvector_cmname;
 	string _coastline_file;
 	string _coastline_resolution;
 

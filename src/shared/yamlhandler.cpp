@@ -95,6 +95,18 @@ void YAMLHandler::read_yaml()
     }
 
     // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    if (config["windvector"].IsDefined())
+    {
+        _windvector_cmpath = config["windvector"]["path"].as<string>();
+        _windvector_cmname = config["windvector"]["name"].as<string>();
+        // cout << "windvector_rgb: " << _windvector_rgb << endl;
+    }
+    else
+    {
+        cerr << "Warning: earch bmp is not defined." << endl;
+    }
+
+    // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if (config["coastline"].IsDefined())
     {
         _coastline_file = config["coastline"]["name"].as<string>();

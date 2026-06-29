@@ -83,7 +83,7 @@ double Noise::at3(double rx, double ry, double rz, double q[3])
 void Noise::set_val(int i, double &t, int &b0, int &b1,
                     double &r0, double &r1, double vec[3])
 {
-    t  = vec[i] + N;
+    t  = vec[i] + NNNN;
     b0 = ((int)t) & BM;
     b1 = (b0+1) & BM;
     r0 = t - (int)t;

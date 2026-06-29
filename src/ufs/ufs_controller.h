@@ -5,6 +5,7 @@
 
 #include <iostream>
 
+#include "earth.h"
 #include "ncreader.h"
 #include "ufs_viewer.h"
 #include "locator.h"
@@ -18,8 +19,9 @@ using namespace std;
 class UFSController
 {
     public:
-        UFSController(ColorTable* ct, NVOptions* opt,
-                        const char* fn, bool isList = false);
+        UFSController(ColorTable* ct, ColorTable *wvct, NVOptions* opt,
+                      Earth* earth, CoastLine* cl,
+                      const char* fn, bool isList = false);
        ~UFSController();
 
         void setup();
