@@ -43,13 +43,17 @@ UFSTranslator::UFSTranslator(ColorTable* ct, NVOptions* opt,
     earth = new Earth(earthflnm);
 
     string clflnm = yamlHandler->get_coastline_file();
-    // string clres = yamlHandler->get_coastline_resolution();
-    // coastline = new coastline(clflnm, clres);
     // cout << "\tclflnm: " << clflnm << endl;
     coastline = new CoastLine(clflnm);
 
+    string cmpath = yamlHandler->get_windvector_cmpath();
+    string cmname = yamlHandler->get_windvector_cmname();
+    // cout << "\tcmpath: " << cmpath << endl;
+    // cout << "\tcmname: " << cmname << endl;
+    wvct = new ColorTable(cmpath, cmname);
+
     // cout << "\tFunciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    ufs_controller = new UFSController(colorTable, nvoptions, earth, coastline, _filename.c_str());
+    ufs_controller = new UFSController(colorTable, wvct, nvoptions, earth, coastline, _filename.c_str());
 
     _timestr = new string[2];
 
@@ -60,9 +64,11 @@ UFSTranslator::~UFSTranslator()
 {
     if(NULL != ufs_controller)
         delete ufs_controller;
+    if(NULL != wvct)
+        delete wvct;
     if(NULL != _timestr)
         delete[] _timestr;
-    ufs_controller = NULL;
+    // ufs_controller = NULL;
 }
 
 void UFSTranslator::setup()

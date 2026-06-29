@@ -5,7 +5,7 @@
 
 #include "ufs_viewer.h"
 
-UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, Earth* e, ncReader* nchandler)
+UFS2dViewer::UFS2dViewer(ColorTable *ct, ColorTable *wvct, NVOptions* opt, Earth* e, ncReader* nchandler)
 {
     // cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     colorTable = ct;
@@ -19,9 +19,7 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, NVOptions* opt, Earth* e, ncReader* nch
 
     ncfile = nchandler;
     earth = e;
-    // windvector = new WindVector(ct, opt);
-    // windvector = make_unique<WindVector>(ct, opt);
-    windvector.reset(new WindVector(ct, opt));
+    windvector.reset(new WindVector(wvct, opt));
 
     nvoptions->set_xsec(0);
     nvoptions->set_ysec(0);

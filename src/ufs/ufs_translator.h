@@ -67,6 +67,7 @@ class UFSTranslator : public BaseTranslator
     private:
         UFSController* ufs_controller;
         UFSGeometry* geometry;
+	ColorTable* wvct;
 
         QOpenGLShaderProgram m_shaderProgram;
         QOpenGLVertexArrayObject m_vao;

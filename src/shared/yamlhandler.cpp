@@ -97,7 +97,8 @@ void YAMLHandler::read_yaml()
     // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if (config["windvector"].IsDefined())
     {
-        _windvector_rgb = config["windvector"]["name"].as<string>();
+        _windvector_cmpath = config["windvector"]["path"].as<string>();
+        _windvector_cmname = config["windvector"]["name"].as<string>();
         // cout << "windvector_rgb: " << _windvector_rgb << endl;
     }
     else

@@ -19,7 +19,7 @@ using namespace std;
 class UFSController
 {
     public:
-        UFSController(ColorTable* ct, NVOptions* opt,
+        UFSController(ColorTable* ct, ColorTable *wvct, NVOptions* opt,
                       Earth* earth, CoastLine* cl,
                       const char* fn, bool isList = false);
        ~UFSController();

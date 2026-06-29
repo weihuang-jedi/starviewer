@@ -11,7 +11,8 @@ coastline:
   resolution: c
 
 windvector:
-  name: /scratch5/purged/Wei.Huang/src/nv/starviewer/data/earth.bmp
+  path: /scratch5/purged/Wei.Huang/src/nv/starviewer/colormaps/   # must have slash at the end.
+  name: vector
 
 input:
   data:
