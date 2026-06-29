@@ -238,6 +238,7 @@ void StateBoundary::process()
 {
     vector<vector<OGRPoint>> vpnt;
 
+    // cout << "-----------------------------------------------------------" << endl;
     while ((poFeature = poLayer->GetNextFeature()) != NULL) {
         // Fetch attributes. NWS state shapefiles usually have fields like "NAME" or "STATE"
         // Adjust field names based on your specific NWS shapefile schema
@@ -245,8 +246,7 @@ void StateBoundary::process()
         // const char* stateAbbr = poFeature->GetFieldAsString("STATE");
         string stateAbbr = poFeature->GetFieldAsString("STATE");
 
-        cout << "-----------------------------------------------------------" << endl;
-        cout << "Processing State: " << stateName << " (" << stateAbbr << ")" << endl;
+        // cout << "Processing State: " << stateName << " (" << stateAbbr << ")" << endl;
 
         // 5. Fetch geometry (e.g., Polygon or MultiPolygon data)
         OGRGeometry* poGeometry = poFeature->GetGeometryRef();
@@ -284,7 +284,7 @@ vector<vector<OGRPoint>> StateBoundary::processPolygonCoordinates(OGRGeometry* p
 
     // 1. Get the exterior ring (index 0 is always the outer boundary)
     OGRLinearRing* poExteriorRing = poPolygon->getExteriorRing();
-    cout << "NumPoints: " << poExteriorRing->getNumPoints() << endl;
+    // cout << "NumPoints: " << poExteriorRing->getNumPoints() << endl;
     vector<OGRPoint> spoint;
     for (int i = 0; i < poExteriorRing->getNumPoints(); i++) {
         OGRPoint point;
@@ -321,7 +321,7 @@ vector<vector<OGRPoint>> StateBoundary::processMultiPolygonCoordinates(OGRGeomet
 
     int numPolygons = poMultiPolygon->getNumGeometries();
 
-    cout << "numPolygons = " << numPolygons << endl;
+    // cout << "numPolygons = " << numPolygons << endl;
 
     vector<OGRPoint> spoint;
     // 1. Loop through each individual Polygon inside the MultiPolygon
@@ -335,13 +335,14 @@ vector<vector<OGRPoint>> StateBoundary::processMultiPolygonCoordinates(OGRGeomet
 	    // if (poExterior->getNumPoints() > 100)
 	    if (poExterior->getNumPoints() > 300)
 	    {
-            cout << "\tNumPoints: " << poExterior->getNumPoints() << endl;
-            for (int i = 0; i < poExterior->getNumPoints(); i++) {
+	      spoint.clear();
+              // cout << "\tNumPoints: " << poExterior->getNumPoints() << endl;
+              for (int i = 0; i < poExterior->getNumPoints(); i++) {
                 OGRPoint point;
                 poExterior->getPoint(i, &point);
 		spoint.push_back(point);
-            }
-            vpoint.push_back(spoint);
+              }
+              vpoint.push_back(spoint);
 	    }
         }
     }
@@ -412,8 +413,8 @@ void StateBoundary::draw()
 	for(k = 0; k < polygons.size(); ++k)
 	{
 	    vector<OGRPoint> points = polygons[k];
-            glBegin(GL_LINE_STRIP);
-	    for(i = 0; i < points.size()-1; ++i)
+            glBegin(GL_LINE_LOOP);
+	    for(i = 0; i < points.size(); ++i)
 	    {
 		dlon = points[i].getX();
 		dlat = points[i].getY();
