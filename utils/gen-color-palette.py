@@ -17,9 +17,9 @@ def generate_rgb_palette(num_colors=128):
         b_float = (np.cos(1.5 * angle) + 1.0) / 2.0
 
         # Cast to proper 0-255 RGB integers
-        r = int(r_float * 255)
-        g = int(g_float * 255)
-        b = int(b_float * 255)
+        r = int(r_float * 256)
+        g = int(g_float * 256)
+        b = int(b_float * 256)
 
         palette.append((r, g, b))
 

@@ -51,7 +51,7 @@ void AnimationWidget::_setup_animation()
     connect(slowButton, SIGNAL(clicked()),       this, SLOT(animateSlower()));
     connect(nextButton, SIGNAL(clicked()), translator, SLOT(nextFrame()));
     connect(backButton, SIGNAL(clicked()), translator, SLOT(backFrame()));
-
+    translator->set_timer(timer);
     connect(timer, SIGNAL(timeout()), translator, SLOT(update_frame()));
 
   //Group animation parameters

@@ -232,24 +232,17 @@ void MainWindow::_setup_display()
     // cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
     display->show();
 
+#if 0
     int time_interval = 1024;
     QTimer* timer = new QTimer(translator);
     timer->start(time_interval);
     translator->set_timer(timer);
 
-    cout << "DIAGNOSTIC: translator address = " << translator << endl;
-    cout << "DIAGNOSTIC: timer address = " << timer << endl;
-
-    if (timer) {
-        cout << "DIAGNOSTIC: timer interval = " << timer->interval() << endl;
-        cout << "DIAGNOSTIC: timer is active? = " << (timer->isActive() ? "yes" : "no") << endl;
-    }
-
     if (timer && translator) {
         cout << "Connecting signal..." << endl;
         QObject::connect(timer, &QTimer::timeout, translator, &BaseTranslator::update_frame);
     }
-
+#endif
     // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 

@@ -17,3 +17,7 @@ windvector:
 input:
   data:
     - /scratch5/purged/Wei.Huang/src/nv/data/gdas.t00z.atm.f006.nc
+
+animation:
+  name: zRot
+  interval: 400
