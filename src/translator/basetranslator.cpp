@@ -21,7 +21,7 @@ void gluPerspective(double fovy,double aspect, double zNear, double zFar)
 BaseTranslator::BaseTranslator(ColorTable* ct, NVOptions* opt, QWidget* parent)
               : QGLWidget(parent)
 {
-  //cout << "\tEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\nEnter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     colorTable = ct;
     nvoptions = opt;
@@ -68,7 +68,11 @@ BaseTranslator::BaseTranslator(ColorTable* ct, NVOptions* opt, QWidget* parent)
     locator = nullptr;
     light = nullptr;
 
-  //cout << "\tLeave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    _time_interval = 1024;
+    // timer = new QTimer(this);
+    // timer->start(_time_interval);
+
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 BaseTranslator::~BaseTranslator()
@@ -79,6 +83,8 @@ BaseTranslator::~BaseTranslator()
         delete coastline;
     if (NULL != windvector)
         delete windvector;
+    if (NULL != timer)
+        delete timer;
 }
 
 void BaseTranslator::set_filename(QString flnm)
@@ -533,6 +539,11 @@ void BaseTranslator::SaveImage(char *flnm)
 
 void BaseTranslator::update_frame()
 {
+    zRot += 5;
+    if (360 < zRot)
+        zRot -= 360;
+    SaveImage();
+
     updateGL();
 }
 
@@ -1605,4 +1616,10 @@ void BaseTranslator::paintGL()
 
     // Re-enable states for subsequent Qt internal paint cycles
     glEnable(GL_DEPTH_TEST);
+
+    // 4. NOW it is safe to save the frame, because the buffer is fully drawn!
+    static int frame_counter = 0;
+    if (timer && timer->isActive()) {
+        SaveImage(); // Or capture frame via QOpenGLWidget::grabFramebuffer()
+    }
 }

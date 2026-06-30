@@ -77,6 +77,9 @@ class BaseTranslator : public QGLWidget
 
         NVOptions* get_nvoptions() { return nvoptions; };
 
+	void set_timer(QTimer* v) { timer = v; };
+	QTimer* get_timer() { return timer; };
+
     public slots:
         void reset(void);           //  Reset view angles
         void selectProjection(int p);
@@ -299,6 +302,9 @@ class BaseTranslator : public QGLWidget
         CoastLine* coastline;
         WindVector* windvector;
         Earth* earth;
+
+	QTimer* timer;
+	int _time_interval;
 
     public:
 	ColorTable* get_windVectorColorTable() { return windVectorColorTable; };
