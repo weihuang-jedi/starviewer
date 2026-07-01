@@ -55,7 +55,7 @@ class MarchingCube
         void set_colorTable(ColorTable *ct) { colorTable = ct; };
 
         void setup(int ix, int iy, int iz,
-                   double* var, double vmin, double vmax);
+                   float* var, float vmin, float vmax);
 
         void set_descend() { _descend = 1.0; }
         void set_ascend() { _descend = -1.0; }
@@ -85,7 +85,7 @@ class MarchingCube
         int _display_list;
         int _curtime;
 
-        double* _var;
+        float* _var;
         float  _isolevel[21];
         float  _isoalpha[21];
 

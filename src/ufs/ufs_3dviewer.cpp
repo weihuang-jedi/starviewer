@@ -4,7 +4,7 @@
 
 #include "ufs_3dviewer.h"
 
-UFS3dViewer::UFS3dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, ncReader* nchandler)
+UFS3dViewer::UFS3dViewer(ColorTable *ct, Earth* e, NVOptions* opt, ncReader* nchandler)
 {
     colorTable = ct;
     nvoptions = opt;
@@ -12,7 +12,7 @@ UFS3dViewer::UFS3dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, nc
     _var = NULL;
 
     ncfile = nchandler;
-    earth = new Earth(bmpflnm, ncfile);
+    earth = e;
 
     nvoptions->set_xsec(0);
     nvoptions->set_ysec(0);
@@ -31,6 +31,8 @@ UFS3dViewer::UFS3dViewer(ColorTable *ct, NVOptions* opt, const char* bmpflnm, nc
 
     previoustimelevel = -1;
     current_timelevel = 0;
+
+    marchingcube = new MarchingCube();
 }
 
 UFS3dViewer::~UFS3dViewer()
@@ -39,6 +41,7 @@ UFS3dViewer::~UFS3dViewer()
 
     delete earth;
     delete lister;
+    delete marchingcube;
 }
 
 void UFS3dViewer::set_geometry(UFSGeometry *gm)
@@ -67,6 +70,8 @@ void UFS3dViewer::setup(string vn, float *var)
     _evaluate(_var);
 
     previoustimelevel = -1;
+
+    marchingcube->setup(_nlon, _nlat, _nlev, _var, _valmin, _valmax);
 }
 
 void UFS3dViewer::reset()
@@ -194,19 +199,6 @@ void UFS3dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact
     glVertex3d(x * radius, y * radius, z * radius);
 }
 
-void UFS3dViewer::_xyVertex(double x, double y, double z, double fact)
-{
-    double alpha = 1.05 * fact;
-    if(alpha < 0.01)
-        alpha = 0.0;
-    else if(alpha > 1.0)
-        alpha = 1.0;
-
-    glColor4d(fact, fact, fact, alpha);
-    glNormal3d(x, y, z);
-    glVertex3d(x, y, z);
-}
-
 void UFS3dViewer::_sphereDisplay()
 {
     int i, j, k, k1;
@@ -314,72 +306,7 @@ void UFS3dViewer::_sphereDisplay()
 
 void UFS3dViewer::_flatDisplay()
 {
-    int i, j, k, k1;
-    size_t mpos, npos;
-    double sv = 1.0;
-    double fact;
-    double height = 0.0;
-
-    k1 = nvoptions->get_zsec()+1;
-    k = _nlev-k1;
-    height = _k2h(k);
-    sv = 1.0 / (_valmax - _valmin);
-
-    zcl = glGenLists(1);
-  //glNewList(zcl, GL_COMPILE);
-    glNewList(zcl, GL_COMPILE_AND_EXECUTE);
-    lister->set_zid(k, zcl);
-
-    glPushMatrix();
-
-    glClearColor(1.0, 1.0, 1.0, 1.0);
-
-  //OpenGL should normalize normal vectors
-    glEnable(GL_NORMALIZE);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-
-    earth->draw(0.999);
-
-    glPopMatrix();
-
-    glPushMatrix();
-
-  //OpenGL should normalize normal vectors
-    glNormal3f(0.0, 0.0, -1.0);
-    for(k1 = 1; k1 < _nlev; ++k1)
-    {
-      k = _nlev - k1;
-      for(j = 1; j < _nlat; ++j)
-      {
-        mpos = (k*_nlat+(j-1))*_nlon;
-        npos = (k*_nlat+j)*_nlon;
-        glBegin(GL_QUAD_STRIP);
-        for(i = _hlon+1; i < _nlon; ++i)
-        {
-            fact = sv * (pltvar[npos+i] - _valmin);
-            _xyVertex(_xFlat[i], _yFlat[j], height, fact);
-
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            _xyVertex(_xFlat[i], _yFlat[j-1], height, fact);
-        }
-
-	for(i = 0; i < _hlon; ++i)
-        {
-            fact = sv * (pltvar[npos+i] - _valmin);
-            _xyVertex(_xFlat[i], _yFlat[j], height, fact);
-
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            _xyVertex(_xFlat[i], _yFlat[j-1], height, fact);
-        }
-        glEnd();
-    }
-    coastline->drawOnPlane(height+0.01);
-    }
-
-    glPopMatrix();
-    glEndList();
+    marchingcube->display();
 }
 
 void UFS3dViewer::_evaluate(float *var)

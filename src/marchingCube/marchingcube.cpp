@@ -543,7 +543,7 @@ MarchingCube::~MarchingCube()
 }
 
 void MarchingCube::setup(int ix, int iy, int iz,
-                         double* var, double vmin, double vmax)
+                         float* var, float vmin, float vmax)
 {
     int n = 0;
     float  amin, aval;
