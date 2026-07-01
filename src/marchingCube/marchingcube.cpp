@@ -816,15 +816,11 @@ void MarchingCube::_compile_sphere_list()
 
         glColor4fv(cv4f);
 
-      //cout << "\tcolor[" << m << "] = (" << cv4f[0]
-      //     << ", " << cv4f[1] << ", " << cv4f[2] 
-      //     << ", " << cv4f[3] << ")" << endl;
-
         for(k = 0; k < nz - 1; k++)
         {
             for(j = 0; j < ny - 1; j++)
             {
-                for(i = 0; i < nx - 1; i++)
+                for(i = 0; i < nx; i++)
                 {
                     _sphere_cube(i, j, k, fTargetValue);
                 }
@@ -866,7 +862,7 @@ void MarchingCube::displayOnSphere()
     {
         cout << "\nfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
-        _compile_display_list();
+        _compile_sphere_list();
 
       //cout << "\t_display_list = " << _display_list << endl;
     }

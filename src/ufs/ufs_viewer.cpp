@@ -81,6 +81,8 @@ void UFS2dViewer::setup(string vn, float *var)
     previoustimelevel = -1;
 
     marchingcube->setup(_nlon, _nlat, _nlev, _var, _valmin, _valmax);
+    marchingcube->set_lon(_lon);
+    marchingcube->set_lat(_lat);
 }
 
 void UFS2dViewer::reset()
@@ -237,7 +239,12 @@ void UFS2dViewer::draw()
                 if(zcl)
                     glCallList(zcl);
                 else
-                    _sphereDisplay();
+                {
+                    // if (1 < _nlev)
+		    //     marchingcube->displayOnSphere();
+		    // else
+                        _sphereDisplay();
+                }
             }
     
             if(nvoptions->get_xsec() < _nlon && nvoptions->get_xsec() > 0)
