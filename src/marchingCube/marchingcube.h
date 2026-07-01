@@ -63,7 +63,10 @@ class MarchingCube
         void reset();
 
         void display();
+        void displayOnSphere();
 
+        void set_lon(double* v) { _lon = v; };
+        void set_lat(double* v) { _lat = v; };
         void set_varname(string n) { _varname = n; };
         void set_curtime(int n) { _curtime = n; };
         void set_nvoptions(NVOptions* opt) { nvoptions = opt; };
@@ -81,9 +84,18 @@ class MarchingCube
         void _march_this_cube(int is, int js, int ks,
                               float fTargetValue);
 
+        void _compile_sphere_list();
+        void _sphere_cube(int is, int js, int ks,
+                          float fTargetValue);
+
         int _display_layers;
         int _display_list;
         int _curtime;
+
+	double oneover;
+	double deg2rad;
+	double* _lon;
+	double* _lat;
 
         float* _var;
         float  _isolevel[21];
@@ -106,6 +118,8 @@ class MarchingCube
         float get_x(int i) { return (xStart + i * xDelt); };
         float get_y(int j) { return (yStart + j * yDelt); };
         float get_z(int k) { return (zStart + k * zDelt); };
+
+	void _lonlat2xyz(double lon, double lat, float radius, mc_vector &pnt);
 };
 
 #endif

@@ -21,6 +21,9 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, ColorTable *wvct, NVOptions* opt, Earth
     earth = e;
     windvector.reset(new WindVector(wvct, opt));
 
+    marchingcube = new MarchingCube();
+    marchingcube->set_colorTable(ct);
+
     nvoptions->set_xsec(0);
     nvoptions->set_ysec(0);
     nvoptions->set_zsec(0);
@@ -47,6 +50,7 @@ UFS2dViewer::~UFS2dViewer()
 
     delete lister;
     delete texture1d;
+    delete marchingcube;
 }
 
 void UFS2dViewer::set_geometry(UFSGeometry *gm)
@@ -75,6 +79,8 @@ void UFS2dViewer::setup(string vn, float *var)
     _evaluate(_var);
 
     previoustimelevel = -1;
+
+    marchingcube->setup(_nlon, _nlat, _nlev, _var, _valmin, _valmax);
 }
 
 void UFS2dViewer::reset()
@@ -200,7 +206,10 @@ void UFS2dViewer::draw()
                 if(zcl)
                     glCallList(zcl);
                 else
-                    _flatDisplay();
+		{
+                     _flatDisplay();
+		     // marchingcube->display();
+		}
             }
 
           //draw_plane_grids();

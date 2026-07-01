@@ -532,8 +532,9 @@ MarchingCube::MarchingCube()
 {
   //cout << "\nfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     _display_list = 0;
-
     _descend = -1.0;
+    oneover = 1.0 / 180.0;
+    deg2rad = 3.1415926535897932 * oneover;
 
     reset();
 }
@@ -548,9 +549,8 @@ void MarchingCube::setup(int ix, int iy, int iz,
     int n = 0;
     float  amin, aval;
 
-  //cout << "\nIn functions: <" << __PRETTY_FUNCTION__;
-  //cout << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-  //cout << "\tvmin = " << vmin << ", vmax = " << vmax << endl;
+    cout << "\nEnter : <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\tvmin = " << vmin << ", vmax = " << vmax << endl;
 
     nx = ix;
     ny = iy;
@@ -628,14 +628,12 @@ void MarchingCube::setup(int ix, int iy, int iz,
 
     reset();
 
-  //cout << "\nfunctions: <" << __PRETTY_FUNCTION__ << ">";
-  //cout << "\tline: " << __LINE__;
-  //cout << "\tfile: <" << __FILE__ << ">" << endl;
-  //cout << "\tnx = " << nx << ", ny = " << ny << ", nz = " << nz << endl;
-  //cout << "\t_minval = " << _minval << ", _maxval = " << _maxval << endl;
-  //cout << "\txStart = " << xStart << ", xDelt = " << xDelt << endl;
-  //cout << "\tyStart = " << yStart << ", yDelt = " << yDelt << endl;
-  //cout << "\tzStart = " << zStart << ", zDelt = " << zDelt << endl;
+    cout << "\tnx = " << nx << ", ny = " << ny << ", nz = " << nz << endl;
+    cout << "\t_minval = " << _minval << ", _maxval = " << _maxval << endl;
+    cout << "\txStart = " << xStart << ", xDelt = " << xDelt << endl;
+    cout << "\tyStart = " << yStart << ", yDelt = " << yDelt << endl;
+    cout << "\tzStart = " << zStart << ", zDelt = " << zDelt << endl;
+    cout << "Leave : <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void MarchingCube::reset()
@@ -660,11 +658,11 @@ void MarchingCube::_compile_display_list()
     float fTargetValue = 0.1;
     float cv4f[4];
 
-  //cout << "\nfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "\nEnter : <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     _display_list = glGenLists(1);
 
-  //cout << "\t_display_list = " << _display_list << endl;
+    cout << "\t_display_list = " << _display_list << endl;
 
     glNewList(_display_list, GL_COMPILE_AND_EXECUTE);
 
@@ -760,7 +758,86 @@ void MarchingCube::_compile_display_list()
   //glNormal3f(0.0, 0.0, -1.0);
     glEndList();
 
-  //cout << "\t_display_list = " << _display_list << endl;
+    cout << "\t_display_list = " << _display_list << endl;
+    cout << "Leave : <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+}
+
+void MarchingCube::_compile_sphere_list()
+{
+    int m;
+    int i, j, k;
+    int    clen = colorTable->get_clen();
+    int    dlen = 1;
+    int    idx = 0;
+    float* cmap = colorTable->get_cmap();
+    float fTargetValue = 0.1;
+    float cv4f[4];
+
+    cout << "\nEnter : <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+    _display_list = glGenLists(1);
+
+    cout << "\t_display_list = " << _display_list << endl;
+
+    glNewList(_display_list, GL_COMPILE_AND_EXECUTE);
+
+    glColor3f(0,0,1);
+
+  //OpenGL should normalize normal vectors
+    glEnable(GL_NORMALIZE);
+
+    glEnable(GL_BLEND);
+  //glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
+  //glShadeModel(GL_SMOOTH);
+
+  //glDisable(GL_CULL_FACE);
+  //glEnable(GL_CULL_FACE);
+
+    dlen = clen / _display_layers;
+    if(dlen < 1)
+       dlen = 1;
+
+    idx = clen - 2;
+  //Compile each compartment into a list
+    for(m = _display_layers - 1; m >= 0; --m)
+    {
+        fTargetValue = _isolevel[m];
+
+      //cout << "\tm = " << m << ", fTargetValue = " << fTargetValue << endl;
+
+        for(i = 0; i < 3; ++i)
+            cv4f[i] = cmap[3*idx+i];
+        cv4f[3] = _isoalpha[m];
+        idx -= dlen;
+        if(idx < 0)
+           idx = 0;
+
+        glColor4fv(cv4f);
+
+      //cout << "\tcolor[" << m << "] = (" << cv4f[0]
+      //     << ", " << cv4f[1] << ", " << cv4f[2] 
+      //     << ", " << cv4f[3] << ")" << endl;
+
+        for(k = 0; k < nz - 1; k++)
+        {
+            for(j = 0; j < ny - 1; j++)
+            {
+                for(i = 0; i < nx - 1; i++)
+                {
+                    _sphere_cube(i, j, k, fTargetValue);
+                }
+            }
+        }
+    }
+
+  //glDisable(GL_CULL_FACE);
+  //glNormal3f(0.0, 0.0, -1.0);
+    glEndList();
+
+    cout << "\t_display_list = " << _display_list << endl;
+    cout << "Leave : <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 void MarchingCube::display() 
@@ -769,7 +846,25 @@ void MarchingCube::display()
 
     if(! _display_list)
     {
-      //cout << "\nfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+        cout << "\nfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+        _compile_display_list();
+
+      //cout << "\t_display_list = " << _display_list << endl;
+    }
+    else
+        glCallList(_display_list);
+
+    glPopMatrix();
+}
+
+void MarchingCube::displayOnSphere() 
+{ 
+    glPushMatrix();
+
+    if(! _display_list)
+    {
+        cout << "\nfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
         _compile_display_list();
 
@@ -827,6 +922,136 @@ void MarchingCube::_march_this_cube(int is, int js, int ks,
     set_cube_vertex(afCubeVertex[5], get_x(is+1), get_y(js),   get_z(ks+1));
     set_cube_vertex(afCubeVertex[6], get_x(is+1), get_y(js+1), get_z(ks+1));
     set_cube_vertex(afCubeVertex[7], get_x(is),   get_y(js+1), get_z(ks+1));
+
+  //Find which vertices are inside of the surface and which are outside
+    iFlagIndex = 0;
+    for(iVertex = 0; iVertex < 8; iVertex++)
+    {
+        if(afCubeValue[iVertex] <= fTargetValue) 
+            iFlagIndex |= 1<<iVertex;
+    }
+
+  //Find which edges are intersected by the surface
+    iEdgeFlags = aiCubeEdgeFlags[iFlagIndex];
+
+  //If the cube is entirely inside or outside of the surface, then there will be no intersections
+    if(iEdgeFlags == 0) 
+    {
+        return;
+    }
+
+  //Find the point of intersection of the surface with each edge
+  //Then find the normal to the surface at those points
+    for(iEdge = 0; iEdge < 12; iEdge++)
+    {
+      //if there is an intersection on this edge
+        if(iEdgeFlags & (1<<iEdge))
+        {
+            iStart = a2iEdgeConnection[iEdge][0];
+            iEnd   = a2iEdgeConnection[iEdge][1];
+            fOffset = fGetOffset(afCubeValue[iStart], afCubeValue[iEnd], fTargetValue);
+
+            asEdgeVertex[iEdge].fX = afCubeVertex[iStart].fX * (1.0 - fOffset)
+                                   + afCubeVertex[iEnd].fX * fOffset;
+            asEdgeVertex[iEdge].fY = afCubeVertex[iStart].fY * (1.0 - fOffset)
+                                   + afCubeVertex[iEnd].fY * fOffset;
+            asEdgeVertex[iEdge].fZ = afCubeVertex[iStart].fZ * (1.0 - fOffset)
+                                   + afCubeVertex[iEnd].fZ * fOffset;
+
+            if(afCubeValue[iEnd] > afCubeValue[iStart])
+            {
+                asEdgeVector[iEdge].fX = afCubeVertex[iEnd].fX - afCubeVertex[iStart].fX;
+                asEdgeVector[iEdge].fY = afCubeVertex[iEnd].fY - afCubeVertex[iStart].fY;
+                asEdgeVector[iEdge].fZ = afCubeVertex[iEnd].fZ - afCubeVertex[iStart].fZ;
+            }
+            else
+            {
+                asEdgeVector[iEdge].fX = afCubeVertex[iStart].fX - afCubeVertex[iEnd].fX;
+                asEdgeVector[iEdge].fY = afCubeVertex[iStart].fY - afCubeVertex[iEnd].fY;
+                asEdgeVector[iEdge].fZ = afCubeVertex[iStart].fZ - afCubeVertex[iEnd].fZ;
+            }
+        }
+    }
+
+  //Draw the triangles that were found.  There can be up to five per cube
+    for(iTriangle = 0; iTriangle < 5; iTriangle++)
+    {
+        if(a2iTriangleConnectionTable[iFlagIndex][3*iTriangle] < 0)
+            break;
+
+        for(iCorner = 0; iCorner < 3; iCorner++)
+        {
+            iVertex = a2iTriangleConnectionTable[iFlagIndex][3*iTriangle+iCorner];
+
+            asTriangle[iCorner] = asEdgeVertex[iVertex];
+        }
+
+        get_norm(asNorm, asTriangle, asEdgeVector[iVertex], _descend);
+        glNormal3f(asNorm.fX, asNorm.fY, asNorm.fZ);
+
+        glBegin(GL_TRIANGLES);
+        for(iCorner = 0; iCorner < 3; iCorner++)
+        {
+            glVertex3f(asTriangle[iCorner].fX, asTriangle[iCorner].fY, asTriangle[iCorner].fZ);
+        }
+        glEnd();
+    }
+}
+
+//march_cube performs the Marching Cubes algorithm on a single cube
+void MarchingCube::_sphere_cube(int is, int js, int ks,
+                                float fTargetValue)
+{
+    int       iCorner, iVertex, iEdge, iTriangle, iFlagIndex, iEdgeFlags;
+    int       iStart, iEnd;
+    float     fOffset;
+    float     afCubeValue[8];
+    mc_vector afCubeVertex[8];
+    mc_vector asEdgeVertex[12];
+    mc_vector asEdgeVector[12];
+    mc_vector asTriangle[3];
+    mc_vector asNorm;
+    size_t n;
+
+    n = nx * (ny * ks + js) + is;
+    afCubeValue[0] = _var[n];
+    if (is == (nx-1))
+        afCubeValue[1] = _var[n-nx+1];
+    else
+        afCubeValue[1] = _var[n+1];
+
+    n = nx * (ny * ks + js + 1) + is;
+    if (is == (nx-1))
+        afCubeValue[2] = _var[n-nx+1];
+    else
+        afCubeValue[2] = _var[n+1];
+    afCubeValue[3] = _var[n];
+
+    n = nx * (ny * (ks + 1) + js) + is;
+    afCubeValue[4] = _var[n];
+    if (is == (nx-1))
+        afCubeValue[5] = _var[n-nx+1];
+    else
+        afCubeValue[5] = _var[n+1];
+
+    n = nx * (ny * (ks + 1) + js + 1) + is;
+    if (is == (nx-1))
+        afCubeValue[6] = _var[n-nx+1];
+    else
+        afCubeValue[6] = _var[n+1];
+    afCubeValue[7] = _var[n];
+
+    int isp1 = is+1;
+    if (isp1 >= nx)
+	isp1 = 0;
+    _lonlat2xyz(_lon[is],   _lat[js],   get_z(ks),   afCubeVertex[0]);
+    _lonlat2xyz(_lon[isp1], _lat[js],   get_z(ks),   afCubeVertex[1]);
+    _lonlat2xyz(_lon[isp1], _lat[js+1], get_z(ks),   afCubeVertex[2]);
+    _lonlat2xyz(_lon[is],   _lat[js+1], get_z(ks),   afCubeVertex[3]);
+    _lonlat2xyz(_lon[is],   _lat[js],   get_z(ks+1), afCubeVertex[4]);
+    _lonlat2xyz(_lon[isp1], _lat[js],   get_z(ks+1), afCubeVertex[5]);
+    _lonlat2xyz(_lon[isp1], _lat[js+1], get_z(ks+1), afCubeVertex[6]);
+    _lonlat2xyz(_lon[is],   _lat[js+1], get_z(ks+1), afCubeVertex[7]);
 
   //Find which vertices are inside of the surface and which are outside
     iFlagIndex = 0;
@@ -982,5 +1207,20 @@ void MarchingCube::_vMarchTetrahedron(mc_vector *pasTetrahedronPosition,
         }
     }
     glEnd();
+}
+
+void MarchingCube::_lonlat2xyz(double lon, double lat, float radius, mc_vector &pnt)
+{
+    double phi = lat * deg2rad;
+    double dist = radius * cos(phi);
+    double lamda = lon * deg2rad;
+
+    double x = dist * sin(lamda);
+    double z = dist * cos(lamda);
+    double y = radius * sin(phi);
+
+    pnt.fX = static_cast<float>(x);
+    pnt.fY = static_cast<float>(y);
+    pnt.fZ = static_cast<float>(z);
 }
 

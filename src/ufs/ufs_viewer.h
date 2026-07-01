@@ -25,6 +25,7 @@
 #include "nvoptions.h"
 #include "ncreader.h"
 #include "windvector.h"
+#include "marchingcube.h"
 
 using namespace std;
 
@@ -64,6 +65,7 @@ class UFS2dViewer : public QGLWidget
         float get_maxval() { return _valmax; };
 
     protected:
+	MarchingCube* marchingcube;
         ColorTable* colorTable;
         UFSGeometry* geometry;
         CoastLine* coastline;
