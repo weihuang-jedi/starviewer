@@ -134,7 +134,7 @@ class UFS2dViewer : public QGLWidget
         void _display_Xflat_plane(int xs);
         void _display_Yflat_plane(int ys);
 
-        void _sphereDisplayOriginal();
+        void _sphereDisplay();
         void _sphereXplane(int xs);
         void _sphereYplane(int ys);
 
@@ -144,8 +144,8 @@ class UFS2dViewer : public QGLWidget
         double _k2h(int k);
         double _k2r(int k);
 
-	void _packVertex(double lon, double lat, double radius, double fact, vector<VertexPoint>& buffer);
-        void _sphereDisplay();
+	void _packSphere(double lon, double lat, double radius, double fact, vector<VertexPoint>& buffer);
+	void _packFlat(double x, double y, double z, double fact, vector<VertexPoint>& buffer);
 };
 #endif
 

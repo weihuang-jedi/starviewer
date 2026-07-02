@@ -299,153 +299,6 @@ void UFS2dViewer::_lonlat2xyz_texture(double lon, double lat,
     glVertex3d(x * radius, y * radius, z * radius);
 }
 
-void UFS2dViewer::_sphereDisplayOriginal()
-{
-    int i, j, k, k1;
-    size_t mpos, npos;
-
-    double sv = 1.0;
-    double fact;
-    double radius = 1.001;
-
-    k1 = nvoptions->get_zsec()+1;
-    k = _nlev-k1;
-    radius = _k2r(k);
-    sv = 1.0 / (_valmax - _valmin);
-
-    zcl = glGenLists(1);
-  //glNewList(zcl, GL_COMPILE);
-    glNewList(zcl, GL_COMPILE_AND_EXECUTE);
-    lister->set_zid(k, zcl);
-
-  //OpenGL should normalize normal vectors
-    glEnable(GL_NORMALIZE);
-    glPushMatrix();
-    glDisable(GL_LIGHTING);
-    glColor4f(1.0, 1.0, 1.0, 1.0);
-  //glColor4f(0.0, 0.0, 0.0, 0.0);
-
-    glEnable(GL_TEXTURE_1D);
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  //#pragma omp parallel for
-    if(k < _nlev || 1 == _nlev) {
-    for(j = 1; j < _nlat; ++j)
-    {
-        mpos = (k*_nlat + (j-1))*_nlon;
-        npos = (k*_nlat + j)*_nlon;
-        glBegin(GL_QUAD_STRIP);
-        for(i = 0; i < _nlon; ++i)
-        {
-            fact = sv * (pltvar[npos+i] - _valmin);
-            _lonlat2xyz_texture(_lon[i], _lat[j], radius, fact);
-
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            _lonlat2xyz_texture(_lon[i], _lat[j-1], radius, fact);
-        }
-        fact = sv * (pltvar[npos] - _valmin);
-        _lonlat2xyz_texture(_lon[0], _lat[j], radius, fact);
-
-        fact = sv * (pltvar[mpos] - _valmin);
-        _lonlat2xyz_texture(_lon[0], _lat[j-1], radius, fact);
-        glEnd();
-    }
-    coastline->drawOnSphere(radius+0.01);
-    }
-
-    glDisable(GL_TEXTURE_1D);
-    glPopMatrix();
-    glEndList();
-}
-
-void UFS2dViewer::_flatDisplay()
-{
-    int i, j, k, k1;
-    size_t mpos, npos;
-    double sv = 1.0;
-    double fact;
-    double height = 0.0;
-
-    k1 = nvoptions->get_zsec()+1;
-    k = _nlev-k1;
-    height = _k2h(k);
-    sv = 1.0 / (_valmax - _valmin);
-
-    zcl = glGenLists(1);
-  //glNewList(zcl, GL_COMPILE);
-    glNewList(zcl, GL_COMPILE_AND_EXECUTE);
-    lister->set_zid(k, zcl);
-
-    if(k < _nlev || 1 == _nlev) {
-      glPushMatrix();
-      glClearColor(1.0, 1.0, 1.0, 1.0);
-
-      // OpenGL should normalize normal vectors
-      glEnable(GL_NORMALIZE);
-      glEnable(GL_TEXTURE_1D);
-      glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      glNormal3f(0.0, 0.0, -1.0);
-
-      for(j = 1; j < _nlat; ++j)
-      {
-        mpos = (k*_nlat+(j-1))*_nlon;
-        npos = (k*_nlat+j)*_nlon;
-        glBegin(GL_QUAD_STRIP);
-        for(i = _hlon; i < _nlon; ++i)
-        {
-            fact = sv * (pltvar[npos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height);
-
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j-1], height);
-        }
-
-	for(i = 0; i < _hlon; ++i)
-        {
-            fact = sv * (pltvar[npos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j], height);
-
-            fact = sv * (pltvar[mpos+i] - _valmin);
-            glTexCoord1d(fact);
-            glVertex3d(_xFlat[i], _yFlat[j-1], height);
-        }
-        glEnd();
-      }
-
-      glDisable(GL_TEXTURE_1D);
-      glPopMatrix();
-
-      // cout << "\nEnter file: <" << __FILE__ << ">, function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << endl;
-
-      GLfloat line_width = 1.0;
-
-      glPushMatrix();
-      glClearColor(1.0, 1.0, 1.0, 1.0);
-      // --- ADD THIS LINE TO FIX COLOR ---
-      glDisable(GL_LIGHTING);
-      // glEnable(GL_COLOR_MATERIAL);
-      // glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-      glDisable(GL_TEXTURE_2D);
-
-      // cout << "functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-      // cout << "\tnvoptions->get_cb(NV_VECTORON): " << nvoptions->get_cb(NV_VECTORON) << endl;
-      if(nvoptions->get_cb(NV_VECTORON))
-      {
-        windvector->draw(k, height);
-      }
-
-      coastline->drawOnPlane(height+0.01);
-      glPopMatrix();
-      glEnable(GL_LIGHTING);
-    }
-    glEndList();
-}
-
 void UFS2dViewer::_evaluate(float *var)
 {
     size_t varsize;
@@ -1126,7 +979,7 @@ void UFS2dViewer::setup_wind(float* u, float* v)
     windvector->setup(_nlon, _nlat, _nlev, _u, _v);
 }
 
-void UFS2dViewer::_packVertex(double lon, double lat, double radius, double fact, std::vector<VertexPoint>& buffer)
+void UFS2dViewer::_packSphere(double lon, double lat, double radius, double fact, std::vector<VertexPoint>& buffer)
 {
     double phi = lat * deg2rad;
     double dist = cos(phi);
@@ -1198,17 +1051,17 @@ void UFS2dViewer::_sphereDisplay()
             for(int i = 0; i < _nlon; ++i)
             {
                 double fact_n = sv * (pltvar[npos + i] - _valmin);
-                _packVertex(_lon[i], _lat[j], radius, fact_n, vertexBuffer);
+                _packSphere(_lon[i], _lat[j], radius, fact_n, vertexBuffer);
 
                 double fact_m = sv * (pltvar[mpos + i] - _valmin);
-                _packVertex(_lon[i], _lat[j - 1], radius, fact_m, vertexBuffer);
+                _packSphere(_lon[i], _lat[j - 1], radius, fact_m, vertexBuffer);
             }
             // Closing the loop for the sphere seams
             double fact_n0 = sv * (pltvar[npos] - _valmin);
-            _packVertex(_lon[0], _lat[j], radius, fact_n0, vertexBuffer);
+            _packSphere(_lon[0], _lat[j], radius, fact_n0, vertexBuffer);
 
             double fact_m0 = sv * (pltvar[mpos] - _valmin);
-            _packVertex(_lon[0], _lat[j - 1], radius, fact_m0, vertexBuffer);
+            _packSphere(_lon[0], _lat[j - 1], radius, fact_m0, vertexBuffer);
         }
 
         // 3. Send data to GPU and Draw
@@ -1232,7 +1085,18 @@ void UFS2dViewer::_sphereDisplay()
 
             // Execute draw directly out of GPU memory
             // We use GL_TRIANGLE_STRIP which handles the alternating vertices exactly like GL_QUAD_STRIP
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(vertexBuffer.size()));
+            // glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(vertexBuffer.size()));
+
+	    // --- FIX: Draw each latitude row as an independent strip ---
+            // Total vertices per row: (_nlon * 2) from the two inner loops
+            GLsizei verticesPerRow = static_cast<GLsizei>(_nlon * 2);
+            int totalRows = _nlat - 1;
+
+            for (int row = 0; row < totalRows; ++row)
+            {
+                GLint firstVertexOfRow = row * verticesPerRow;
+                glDrawArrays(GL_TRIANGLE_STRIP, firstVertexOfRow, verticesPerRow);
+            }
 
             // Cleanup States
             glDisableClientState(GL_VERTEX_ARRAY);
@@ -1249,4 +1113,135 @@ void UFS2dViewer::_sphereDisplay()
     glPopMatrix();
 }
 
+void UFS2dViewer::_packFlat(double x, double y, double z, double fact, std::vector<VertexPoint>& buffer)
+{
+    double alpha = 1.05 * fact;
+    if(alpha < 0.1)       alpha = 0.0;
+    else if(alpha > 1.0)  alpha = 1.0;
+
+    VertexPoint vp;
+    // Position scaled by radius
+    vp.x = static_cast<float>(x);
+    vp.y = static_cast<float>(y);
+    vp.z = static_cast<float>(z);
+
+    // Normals
+    vp.nx = static_cast<float>(x);
+    vp.ny = static_cast<float>(y);
+    vp.nz = static_cast<float>(z);
+
+    int cidx = (int) (fact*_colorLen);
+
+    // Color parameters (using 'fact' for grayscale representation as in your original code)
+    vp.r = static_cast<float>(_colorMap[3*cidx]);
+    vp.g = static_cast<float>(_colorMap[3*cidx+1]);
+    vp.b = static_cast<float>(_colorMap[3*cidx+2]);
+    vp.a = static_cast<float>(1.0);
+    // vp.a = static_cast<float>(alpha);
+
+    buffer.push_back(vp);
+}
+
+void UFS2dViewer::_flatDisplay()
+{
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    if (!f) return; // Guard against uninitialized contexts
+
+    // 1. Setup states (Keep your setup clean)
+    glEnable(GL_NORMALIZE);
+    glPushMatrix();
+    glDisable(GL_LIGHTING);
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+    // glEnable(GL_TEXTURE_1D);
+    // glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    int k1 = nvoptions->get_zsec() + 1;
+    int k = _nlev - k1;
+    double height = _k2h(k);
+    double sv = 1.0 / (_valmax - _valmin);
+
+    if(k < _nlev || 1 == _nlev)
+    {
+        vector<VertexPoint> vertexBuffer;
+        int i, j;
+        size_t mpos, npos;
+        double fact_m, fact_n;
+
+        // 2. Build the CPU array (Replacing GL_QUAD_STRIP with GL_TRIANGLE_STRIP)
+        // Note: Modern OpenGL core profile does not support GL_QUADS or GL_QUAD_STRIP.
+        // A Quad strip maps perfectly to a Triangle strip!
+        for(j = 1; j < _nlat; ++j)
+        {
+            mpos = (k * _nlat + (j - 1)) * _nlon;
+            npos = (k * _nlat + j) * _nlon;
+
+            for(i = _hlon; i < _nlon; ++i)
+            {
+                fact_n = sv * (pltvar[npos + i] - _valmin);
+                _packFlat(_xFlat[i], _yFlat[j], height, fact_n, vertexBuffer);
+
+                fact_m = sv * (pltvar[mpos + i] - _valmin);
+                _packFlat(_xFlat[i], _yFlat[j-1], height, fact_m, vertexBuffer);
+            }
+
+	    for(i = 0; i < _hlon; ++i)
+            {
+                fact_n = sv * (pltvar[npos + i] - _valmin);
+                _packFlat(_xFlat[i], _yFlat[j], height, fact_n, vertexBuffer);
+
+                fact_m = sv * (pltvar[mpos + i] - _valmin);
+                _packFlat(_xFlat[i], _yFlat[j-1], height, fact_m, vertexBuffer);
+            }
+        }
+
+        // 3. Send data to GPU and Draw
+        if (!vertexBuffer.empty())
+        {
+            GLuint vbo;
+            f->glGenBuffers(1, &vbo);
+            f->glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            // Upload entire batch to GPU at once
+            f->glBufferData(GL_ARRAY_BUFFER, vertexBuffer.size() * sizeof(VertexPoint), vertexBuffer.data(), GL_STREAM_DRAW);
+
+            // Enable client states to read our struct format
+            glEnableClientState(GL_VERTEX_ARRAY);
+            glEnableClientState(GL_NORMAL_ARRAY);
+            glEnableClientState(GL_COLOR_ARRAY);
+
+            // Tell OpenGL where to find attributes inside the Vertex struct (stride is sizeof(Vertex))
+            glVertexPointer(3, GL_FLOAT, sizeof(VertexPoint), (void*)offsetof(VertexPoint, x));
+            glNormalPointer(GL_FLOAT, sizeof(VertexPoint), (void*)offsetof(VertexPoint, nx));
+            glColorPointer(4, GL_FLOAT, sizeof(VertexPoint), (void*)offsetof(VertexPoint, r));
+
+            // Execute draw directly out of GPU memory
+            // We use GL_TRIANGLE_STRIP which handles the alternating vertices exactly like GL_QUAD_STRIP
+            // glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(vertexBuffer.size()));
+
+            // --- FIX: Draw each latitude row as an independent strip ---
+            // Total vertices per row: (_nlon * 2) from the two inner loops
+            GLsizei verticesPerRow = static_cast<GLsizei>(_nlon * 2);
+            int totalRows = _nlat - 1;
+
+            for (int row = 0; row < totalRows; ++row)
+            {
+                GLint firstVertexOfRow = row * verticesPerRow;
+                glDrawArrays(GL_TRIANGLE_STRIP, firstVertexOfRow, verticesPerRow);
+            }
+
+            // Cleanup States
+            glDisableClientState(GL_VERTEX_ARRAY);
+            glDisableClientState(GL_NORMAL_ARRAY);
+            glDisableClientState(GL_COLOR_ARRAY);
+            f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+            f->glDeleteBuffers(1, &vbo);
+        }
+
+        coastline->drawOnPlane(height+0.01);
+    }
+
+    // glDisable(GL_TEXTURE_1D);
+    glPopMatrix();
+}
 
