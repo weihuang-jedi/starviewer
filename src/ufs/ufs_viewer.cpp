@@ -15,6 +15,9 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, ColorTable *wvct, NVOptions* opt, Earth
     texture1d->set_colors(ct->get_clen(), ct->get_cmap());
     texture1d->set_name(ct->get_name());
 
+    _colorLen = colorTable->get_clen();
+    _colorMap = colorTable->get_cmap();
+
     _var = NULL;
 
     ncfile = nchandler;
@@ -268,6 +271,7 @@ void UFS2dViewer::draw()
     }
 }
 
+#if 1
 void UFS2dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact)
 {
     double phi = lat * deg2rad;
@@ -288,6 +292,30 @@ void UFS2dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact
     glNormal3d(x, y, z);
     glVertex3d(x * radius, y * radius, z * radius);
 }
+#else
+void UFS2dViewer::_lonlat2xyz(double lon, double lat, double radius, double fact)
+{
+    double phi = lat * deg2rad;
+    double dist = cos(phi);
+    double lamda = lon * deg2rad;
+
+    double x = dist * sin(lamda);
+    double z = dist * cos(lamda);
+    double y = sin(phi);
+
+    double alpha = 1.05 * fact;
+    if(alpha < 0.1)
+        alpha = 0.0;
+    else if(alpha > 1.0)
+        alpha = 1.0;
+
+    int cidx = (int) (fact*_colorLen);
+
+    glColor4d(_colorMap[3*cidx], _colorMap[3*cidx+1], _colorMap[3*cidx+2], alpha);
+    glNormal3d(x, y, z);
+    glVertex3d(x * radius, y * radius, z * radius);
+}
+#endif
 
 void UFS2dViewer::_lonlat2xyz_texture(double lon, double lat,
 		                      double radius, double fact)

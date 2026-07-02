@@ -102,6 +102,9 @@ class UFS2dViewer : public QGLWidget
         double* _xFlat;
         double* _yFlat;
 
+        int _colorLen;
+        float* _colorMap;
+
         float* _var;
         float* pltvar;
         float* _u;

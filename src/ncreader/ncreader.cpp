@@ -161,9 +161,9 @@ void ncReader::exploreFile() {
     int n = 0;
     size_t attr_len;
 
-  //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     num_grps = 1;
-
+#if 0
     status = nc_inq_attlen(ncid, NC_GLOBAL, "ak", &attr_len);
     if (status != NC_NOERR) handle_error(status);
 
@@ -177,8 +177,8 @@ void ncReader::exploreFile() {
     if (status != NC_NOERR) handle_error(status);
     status = nc_get_att_float(ncid, NC_GLOBAL, "bk", _bk);
     if (status != NC_NOERR) handle_error(status);
-
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+#endif
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     _get_dim_info();
   //cout << "_nlon:" << _nlon << endl;
   //cout << "_nlat:" << _nlat << endl;
@@ -187,7 +187,7 @@ void ncReader::exploreFile() {
   //cout << "_nhalf:" << _nhalf << endl;
   //cout << "_nfull:" << _nfull << endl;
   //cout << "_nchars:" << _nchars << endl;
-  //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     _get_var_info();
 
    /*
@@ -207,20 +207,21 @@ void ncReader::exploreFile() {
     }
     */
 
-
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     // Find element with var name
     _grid_xt = getDouble("grid_xt");
     _grid_yt = getDouble("grid_yt");
     _lon2d = getDouble("lon");
     _lat2d = getDouble("lat");
     _time = getDouble("time");
-    _time_iso = getChar("time_iso");
-    _timestring = _time_iso;
+    // _time_iso = getChar("time_iso");
+    _timestring = "not avail";
 
-  //cout << " _timestring:" << _timestring << endl;
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    // cout << " _timestring:" << _timestring << endl;
 
-    _pfull = getFloat("pfull");
-    _phalf = getFloat("phalf");
+    // _pfull = getFloat("pfull");
+    // _phalf = getFloat("phalf");
 
     _lon = new double[_nlon];
     _lat = new double[_nlat];
