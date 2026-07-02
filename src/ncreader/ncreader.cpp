@@ -164,6 +164,7 @@ void ncReader::exploreFile() {
   //cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     num_grps = 1;
 
+#if 0
     status = nc_inq_attlen(ncid, NC_GLOBAL, "ak", &attr_len);
     if (status != NC_NOERR) handle_error(status);
 
@@ -177,7 +178,7 @@ void ncReader::exploreFile() {
     if (status != NC_NOERR) handle_error(status);
     status = nc_get_att_float(ncid, NC_GLOBAL, "bk", _bk);
     if (status != NC_NOERR) handle_error(status);
-
+#endif
   //cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     _get_dim_info();
   //cout << "_nlon:" << _nlon << endl;
@@ -214,13 +215,16 @@ void ncReader::exploreFile() {
     _lon2d = getDouble("lon");
     _lat2d = getDouble("lat");
     _time = getDouble("time");
-    _time_iso = getChar("time_iso");
-    _timestring = _time_iso;
+
+    // _time_iso = getChar("time_iso");
+    // _timestring = _time_iso;
+
+    _timestring = "un-avail";
 
   //cout << " _timestring:" << _timestring << endl;
 
-    _pfull = getFloat("pfull");
-    _phalf = getFloat("phalf");
+    // _pfull = getFloat("pfull");
+    // _phalf = getFloat("phalf");
 
     _lon = new double[_nlon];
     _lat = new double[_nlat];
