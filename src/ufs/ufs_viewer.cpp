@@ -1,5 +1,6 @@
 #include <QtOpenGL>
 #include <QOpenGLFunctions>
+#include <QOpenGLFunctions_3_3_Core>
 
 #include <vector>
 #include <memory>
@@ -56,6 +57,7 @@ UFS2dViewer::~UFS2dViewer()
 
     delete lister;
     delete texture1d;
+    delete myShaderProgram;
 }
 
 void UFS2dViewer::set_geometry(UFSGeometry *gm)
@@ -1211,6 +1213,172 @@ void UFS2dViewer::_fillFlatVertexVector(int k, string vn)
             fact_m = sv * (pltvar[mpos + i] - _valmin);
             _fillVertex(fact_m, _flatVertex[idx++]);
         }
+    }
+}
+
+void UFS2dViewer::_initStaticGPUGrid() {
+    QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
+    // QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    if (!f) return;
+
+    // Make sure shaders and static grids are allocated on the GPU before drawing
+    if (myShaderProgram == nullptr) {
+        _initShaders();
+        _initStaticGPUGrid(); // The initialization step from the previous answer
+    }
+
+    std::vector<float> vertices;
+    std::vector<unsigned int> indices;
+
+    // 1. Generate unique UV coordinates for every vertex cell crossing
+    for (int j = 0; j < _nlat; ++j) {
+        float v = (float)j / (_nlat - 1);
+        for (int i = 0; i < _nlon; ++i) {
+            float u = (float)i / (_nlon - 1);
+            vertices.push_back(u);
+            vertices.push_back(v);
+        }
+    }
+
+    // 2. Generate optimized element array indices (Triangle Strips with Primitive Restart)
+    for (int j = 0; j < _nlat - 1; ++j) {
+        for (int i = 0; i < _nlon; ++i) {
+            indices.push_back(j * _nlon + i);
+            indices.push_back((j + 1) * _nlon + i);
+        }
+        indices.push_back(0xFFFFFFFF); // Restart strip index
+    }
+    indexCount = static_cast<GLsizei>(indices.size());
+
+    // 3. Bind objects to GPU memory permanently
+    f->glGenVertexArrays(1, &gridVAO);
+    f->glGenBuffers(1, &gridVBO);
+    f->glGenBuffers(1, &gridEBO);
+
+    f->glBindVertexArray(gridVAO);
+
+    f->glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
+    f->glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridEBO);
+    f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+
+    f->glEnableVertexAttribArray(0);
+    f->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+
+    f->glBindVertexArray(0);
+}
+
+void UFS2dViewer::_flatDisplayGPU()
+{
+    QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
+    // QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    if (!f || gridVAO == 0) return;
+
+    int k1 = nvoptions->get_zsec() + 1;
+    int k = _nlev - k1;
+    double height = _k2h(k);
+
+    if (k >= _nlev && _nlev != 1) return;
+
+    // 1. Calculate offset pointer where this specific Z vertical level begins in pltvar
+    size_t dataOffset = static_cast<size_t>(k) * _nlat * _nlon;
+    float* rawDataPtr = &pltvar[dataOffset];
+
+    // 2. Stream raw data bytes to the GPU texture allocation
+    if (dataTexture == 0) {
+        f->glGenTextures(1, &dataTexture);
+        f->glBindTexture(GL_TEXTURE_2D, dataTexture);
+        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    }
+    f->glBindTexture(GL_TEXTURE_2D, dataTexture);
+
+    // Direct raw single-channel float upload (No CPU processing)
+    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, _nlon, _nlat, 0, GL_RED, GL_FLOAT, rawDataPtr);
+
+    // 3. Activate Shader Program and update uniform settings
+    myShaderProgram->bind();
+    myShaderProgram->setUniformValue("u_ValMin", static_cast<float>(_valmin));
+    myShaderProgram->setUniformValue("u_ValMax", static_cast<float>(_valmax));
+    myShaderProgram->setUniformValue("u_Height", static_cast<float>(height));
+
+    f->glActiveTexture(GL_TEXTURE0);
+    f->glBindTexture(GL_TEXTURE_2D, dataTexture);
+    myShaderProgram->setUniformValue("u_PltvarTex", 0);
+
+    // 4. Draw the entire 4.7 Million Point Grid instantaneously
+    f->glBindVertexArray(gridVAO);
+    f->glEnable(GL_PRIMITIVE_RESTART);
+    f->glPrimitiveRestartIndex(0xFFFFFFFF);
+
+    f->glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, (void*)0);
+
+    // 5. Clean up bound contexts
+    f->glDisable(GL_PRIMITIVE_RESTART);
+    f->glBindVertexArray(0);
+    myShaderProgram->release();
+
+    coastline->drawOnPlane(height + 0.01);
+}
+
+void UFS2dViewer::_initShaders()
+{
+    // If already initialized, don't do it again
+    if (myShaderProgram != nullptr) return;
+
+    myShaderProgram = new QOpenGLShaderProgram();
+
+    // 1. Define and compile the Vertex Shader
+    const char* vertexShaderSource = R"glsl(
+        #version 330 core
+        layout (location = 0) in vec2 aTexCoord;
+        uniform sampler2D u_PltvarTex;
+        uniform float u_ValMin;
+        uniform float u_ValMax;
+        uniform float u_Height;
+        out float v_Fact; // Pass 'fact' to fragment shader for colormap lookup
+
+        void main() {
+            float rawVal = texture(u_PltvarTex, aTexCoord).r;
+            float sv = 1.0 / (u_ValMax - u_ValMin);
+            float fact = sv * (rawVal - u_ValMin);
+
+            v_Fact = clamp(fact, 0.0, 1.0); // Ensure it stays in bounds [0,1]
+
+            // Simple map: scale normalized coordinates (0 to 1) to a flat grid
+            // Adjust these coefficients if your flat domain space spans differently
+            float x = aTexCoord.x * 360.0 - 180.0;
+            float y = aTexCoord.y * 180.0 - 90.0;
+
+            gl_Position = gl_ModelViewProjectionMatrix * vec4(x, y, u_Height, 1.0);
+        }
+    )glsl";
+
+    if (!myShaderProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource)) {
+        qDebug() << "Vertex shader error:" << myShaderProgram->log();
+    }
+
+    // 2. Define and compile the Fragment Shader
+    const char* fragmentShaderSource = R"glsl(
+        #version 330 core
+        in float v_Fact;
+        uniform sampler1D u_ColorMap; // The 1D texture containing your color scale
+        out vec4 FragColor;
+
+        void main() {
+            // Fetch the exact RGB color from your 1D texture scale
+            FragColor = texture(u_ColorMap, v_Fact);
+        }
+    )glsl";
+
+    if (!myShaderProgram->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource)) {
+        qDebug() << "Fragment shader error:" << myShaderProgram->log();
+    }
+
+    // 3. Link the shaders together into an executable GPU pipeline
+    if (!myShaderProgram->link()) {
+        qDebug() << "Shader program linking error:" << myShaderProgram->log();
     }
 }
 

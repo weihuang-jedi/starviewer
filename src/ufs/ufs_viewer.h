@@ -12,6 +12,7 @@
 #include <assert.h>
 
 #include <QGLWidget>
+#include <QOpenGLShaderProgram>
 // #include <QOpenGLWidget>
 
 #include "ufs_geometry.h"
@@ -147,6 +148,19 @@ class UFS2dViewer : public QGLWidget
 
 	void _fillSphereVertexVector(int k, string vn);
 	void _fillFlatVertexVector(int k, string vn);
+
+    private:
+	GLuint gridVAO = 0;
+        GLuint gridVBO = 0;
+        GLuint gridEBO = 0;
+	GLuint dataTexture = 0;
+        GLsizei indexCount = 0;
+
+        void _initStaticGPUGrid();
+	void _flatDisplayGPU();
+
+	QOpenGLShaderProgram* myShaderProgram = nullptr;
+        void _initShaders(); // Helper function to compile them
 };
 #endif
 
