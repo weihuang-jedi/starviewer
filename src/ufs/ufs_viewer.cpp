@@ -42,6 +42,9 @@ UFS2dViewer::UFS2dViewer(ColorTable *ct, ColorTable *wvct, NVOptions* opt, Earth
 
     locator = NULL;
 
+    _current_sphere_varname = "unknown";
+    _current_flat_varname = "unknown";
+
     previoustimelevel = -1;
     current_timelevel = 0;
     // cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -58,6 +61,9 @@ UFS2dViewer::~UFS2dViewer()
 void UFS2dViewer::set_geometry(UFSGeometry *gm)
 {
     geometry = gm;
+
+    _sphereVertex = geometry->get_sphereVertex();
+    _flatVertex = geometry->get_flatVertex();
 
     _initialize();
 }
@@ -979,43 +985,6 @@ void UFS2dViewer::setup_wind(float* u, float* v)
     windvector->setup(_nlon, _nlat, _nlev, _u, _v);
 }
 
-void UFS2dViewer::_packSphere(double lon, double lat, double radius, double fact, std::vector<VertexPoint>& buffer)
-{
-    double phi = lat * deg2rad;
-    double dist = cos(phi);
-    double lamda = lon * deg2rad;
-
-    double x = dist * sin(lamda);
-    double z = dist * cos(lamda);
-    double y = sin(phi);
-
-    double alpha = 1.05 * fact;
-    if(alpha < 0.1)       alpha = 0.0;
-    else if(alpha > 1.0)  alpha = 1.0;
-
-    VertexPoint vp;
-    // Position scaled by radius
-    vp.x = static_cast<float>(x * radius);
-    vp.y = static_cast<float>(y * radius);
-    vp.z = static_cast<float>(z * radius);
-
-    // Normals
-    vp.nx = static_cast<float>(x);
-    vp.ny = static_cast<float>(y);
-    vp.nz = static_cast<float>(z);
-
-    int cidx = (int) (fact*_colorLen);
-
-    // Color parameters (using 'fact' for grayscale representation as in your original code)
-    vp.r = static_cast<float>(_colorMap[3*cidx]);
-    vp.g = static_cast<float>(_colorMap[3*cidx+1]);
-    vp.b = static_cast<float>(_colorMap[3*cidx+2]);
-    vp.a = static_cast<float>(1.0);
-    // vp.a = static_cast<float>(alpha);
-
-    buffer.push_back(vp);
-}
-
 void UFS2dViewer::_sphereDisplay()
 {
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
@@ -1038,73 +1007,42 @@ void UFS2dViewer::_sphereDisplay()
 
     if(k < _nlev || 1 == _nlev)
     {
-        vector<VertexPoint> vertexBuffer;
-
-        // 2. Build the CPU array (Replacing GL_QUAD_STRIP with GL_TRIANGLE_STRIP)
-        // Note: Modern OpenGL core profile does not support GL_QUADS or GL_QUAD_STRIP.
-        // A Quad strip maps perfectly to a Triangle strip!
-        for(int j = 1; j < _nlat; ++j)
-        {
-            size_t mpos = (k * _nlat + (j - 1)) * _nlon;
-            size_t npos = (k * _nlat + j) * _nlon;
-
-            for(int i = 0; i < _nlon; ++i)
-            {
-                double fact_n = sv * (pltvar[npos + i] - _valmin);
-                _packSphere(_lon[i], _lat[j], radius, fact_n, vertexBuffer);
-
-                double fact_m = sv * (pltvar[mpos + i] - _valmin);
-                _packSphere(_lon[i], _lat[j - 1], radius, fact_m, vertexBuffer);
-            }
-            // Closing the loop for the sphere seams
-            double fact_n0 = sv * (pltvar[npos] - _valmin);
-            _packSphere(_lon[0], _lat[j], radius, fact_n0, vertexBuffer);
-
-            double fact_m0 = sv * (pltvar[mpos] - _valmin);
-            _packSphere(_lon[0], _lat[j - 1], radius, fact_m0, vertexBuffer);
-        }
+        _fillSphereVertexVector(k, _varname);
 
         // 3. Send data to GPU and Draw
-        if (!vertexBuffer.empty())
+        GLuint vbo;
+        f->glGenBuffers(1, &vbo);
+        f->glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        // Upload entire batch to GPU at once
+        f->glBufferData(GL_ARRAY_BUFFER, _sphereVertex.size() * sizeof(VertexPoint), _sphereVertex.data(), GL_STREAM_DRAW);
+
+        // Enable client states to read our struct format
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_NORMAL_ARRAY);
+        glEnableClientState(GL_COLOR_ARRAY);
+
+        // Tell OpenGL where to find attributes inside the Vertex struct (stride is sizeof(Vertex))
+        glVertexPointer(3, GL_FLOAT, sizeof(VertexPoint), (void*)offsetof(VertexPoint, x));
+        glNormalPointer(GL_FLOAT, sizeof(VertexPoint), (void*)offsetof(VertexPoint, nx));
+        glColorPointer(4, GL_FLOAT, sizeof(VertexPoint), (void*)offsetof(VertexPoint, r));
+
+        // Draw each latitude row as an independent strip ---
+        // Total vertices per row: (_nlon * 2) from the two inner loops
+        GLsizei verticesPerRow = static_cast<GLsizei>(_nlon * 2);
+        int totalRows = _nlat - 1;
+
+        for (int row = 0; row < totalRows; ++row)
         {
-            GLuint vbo;
-            f->glGenBuffers(1, &vbo);
-            f->glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            // Upload entire batch to GPU at once
-            f->glBufferData(GL_ARRAY_BUFFER, vertexBuffer.size() * sizeof(VertexPoint), vertexBuffer.data(), GL_STREAM_DRAW);
-
-            // Enable client states to read our struct format
-            glEnableClientState(GL_VERTEX_ARRAY);
-            glEnableClientState(GL_NORMAL_ARRAY);
-            glEnableClientState(GL_COLOR_ARRAY);
-
-            // Tell OpenGL where to find attributes inside the Vertex struct (stride is sizeof(Vertex))
-            glVertexPointer(3, GL_FLOAT, sizeof(VertexPoint), (void*)offsetof(VertexPoint, x));
-            glNormalPointer(GL_FLOAT, sizeof(VertexPoint), (void*)offsetof(VertexPoint, nx));
-            glColorPointer(4, GL_FLOAT, sizeof(VertexPoint), (void*)offsetof(VertexPoint, r));
-
-            // Execute draw directly out of GPU memory
-            // We use GL_TRIANGLE_STRIP which handles the alternating vertices exactly like GL_QUAD_STRIP
-            // glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(vertexBuffer.size()));
-
-	    // --- FIX: Draw each latitude row as an independent strip ---
-            // Total vertices per row: (_nlon * 2) from the two inner loops
-            GLsizei verticesPerRow = static_cast<GLsizei>(_nlon * 2);
-            int totalRows = _nlat - 1;
-
-            for (int row = 0; row < totalRows; ++row)
-            {
-                GLint firstVertexOfRow = row * verticesPerRow;
-                glDrawArrays(GL_TRIANGLE_STRIP, firstVertexOfRow, verticesPerRow);
-            }
-
-            // Cleanup States
-            glDisableClientState(GL_VERTEX_ARRAY);
-            glDisableClientState(GL_NORMAL_ARRAY);
-            glDisableClientState(GL_COLOR_ARRAY);
-            f->glBindBuffer(GL_ARRAY_BUFFER, 0);
-            f->glDeleteBuffers(1, &vbo);
+            GLint firstVertexOfRow = row * verticesPerRow;
+            glDrawArrays(GL_TRIANGLE_STRIP, firstVertexOfRow, verticesPerRow);
         }
+
+        // Cleanup States
+        glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_NORMAL_ARRAY);
+        glDisableClientState(GL_COLOR_ARRAY);
+        f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+        f->glDeleteBuffers(1, &vbo);
 
         coastline->drawOnSphere(radius + 0.01);
     }
@@ -1113,22 +1051,11 @@ void UFS2dViewer::_sphereDisplay()
     glPopMatrix();
 }
 
-void UFS2dViewer::_packFlat(double x, double y, double z, double fact, std::vector<VertexPoint>& buffer)
+void UFS2dViewer::_fillVertex(double fact, VertexPoint& vp)
 {
     double alpha = 1.05 * fact;
     if(alpha < 0.1)       alpha = 0.0;
     else if(alpha > 1.0)  alpha = 1.0;
-
-    VertexPoint vp;
-    // Position scaled by radius
-    vp.x = static_cast<float>(x);
-    vp.y = static_cast<float>(y);
-    vp.z = static_cast<float>(z);
-
-    // Normals
-    vp.nx = static_cast<float>(x);
-    vp.ny = static_cast<float>(y);
-    vp.nz = static_cast<float>(z);
 
     int cidx = (int) (fact*_colorLen);
 
@@ -1136,10 +1063,8 @@ void UFS2dViewer::_packFlat(double x, double y, double z, double fact, std::vect
     vp.r = static_cast<float>(_colorMap[3*cidx]);
     vp.g = static_cast<float>(_colorMap[3*cidx+1]);
     vp.b = static_cast<float>(_colorMap[3*cidx+2]);
-    vp.a = static_cast<float>(1.0);
+    vp.a = 1.0;
     // vp.a = static_cast<float>(alpha);
-
-    buffer.push_back(vp);
 }
 
 void UFS2dViewer::_flatDisplay()
@@ -1160,88 +1085,140 @@ void UFS2dViewer::_flatDisplay()
     int k1 = nvoptions->get_zsec() + 1;
     int k = _nlev - k1;
     double height = _k2h(k);
-    double sv = 1.0 / (_valmax - _valmin);
 
     if(k < _nlev || 1 == _nlev)
     {
-        vector<VertexPoint> vertexBuffer;
-        int i, j;
-        size_t mpos, npos;
-        double fact_m, fact_n;
-
-        // 2. Build the CPU array (Replacing GL_QUAD_STRIP with GL_TRIANGLE_STRIP)
-        // Note: Modern OpenGL core profile does not support GL_QUADS or GL_QUAD_STRIP.
-        // A Quad strip maps perfectly to a Triangle strip!
-        for(j = 1; j < _nlat; ++j)
-        {
-            mpos = (k * _nlat + (j - 1)) * _nlon;
-            npos = (k * _nlat + j) * _nlon;
-
-            for(i = _hlon; i < _nlon; ++i)
-            {
-                fact_n = sv * (pltvar[npos + i] - _valmin);
-                _packFlat(_xFlat[i], _yFlat[j], height, fact_n, vertexBuffer);
-
-                fact_m = sv * (pltvar[mpos + i] - _valmin);
-                _packFlat(_xFlat[i], _yFlat[j-1], height, fact_m, vertexBuffer);
-            }
-
-	    for(i = 0; i < _hlon; ++i)
-            {
-                fact_n = sv * (pltvar[npos + i] - _valmin);
-                _packFlat(_xFlat[i], _yFlat[j], height, fact_n, vertexBuffer);
-
-                fact_m = sv * (pltvar[mpos + i] - _valmin);
-                _packFlat(_xFlat[i], _yFlat[j-1], height, fact_m, vertexBuffer);
-            }
-        }
+        _fillFlatVertexVector(k, _varname);
 
         // 3. Send data to GPU and Draw
-        if (!vertexBuffer.empty())
+        GLuint vbo;
+        f->glGenBuffers(1, &vbo);
+        f->glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        // Upload entire batch to GPU at once
+        f->glBufferData(GL_ARRAY_BUFFER, _flatVertex.size() * sizeof(VertexPoint), _flatVertex.data(), GL_STREAM_DRAW);
+
+        // Enable client states to read our struct format
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_NORMAL_ARRAY);
+        glEnableClientState(GL_COLOR_ARRAY);
+
+        // Tell OpenGL where to find attributes inside the Vertex struct (stride is sizeof(Vertex))
+        glVertexPointer(3, GL_FLOAT, sizeof(VertexPoint), (void*)offsetof(VertexPoint, x));
+        glNormalPointer(GL_FLOAT, sizeof(VertexPoint), (void*)offsetof(VertexPoint, nx));
+        glColorPointer(4, GL_FLOAT, sizeof(VertexPoint), (void*)offsetof(VertexPoint, r));
+
+        // Draw each latitude row as an independent strip ---
+        // Total vertices per row: (_nlon * 2) from the two inner loops
+        GLsizei verticesPerRow = static_cast<GLsizei>(_nlon * 2);
+        int totalRows = _nlat - 1;
+
+        for (int row = 0; row < totalRows; ++row)
         {
-            GLuint vbo;
-            f->glGenBuffers(1, &vbo);
-            f->glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            // Upload entire batch to GPU at once
-            f->glBufferData(GL_ARRAY_BUFFER, vertexBuffer.size() * sizeof(VertexPoint), vertexBuffer.data(), GL_STREAM_DRAW);
-
-            // Enable client states to read our struct format
-            glEnableClientState(GL_VERTEX_ARRAY);
-            glEnableClientState(GL_NORMAL_ARRAY);
-            glEnableClientState(GL_COLOR_ARRAY);
-
-            // Tell OpenGL where to find attributes inside the Vertex struct (stride is sizeof(Vertex))
-            glVertexPointer(3, GL_FLOAT, sizeof(VertexPoint), (void*)offsetof(VertexPoint, x));
-            glNormalPointer(GL_FLOAT, sizeof(VertexPoint), (void*)offsetof(VertexPoint, nx));
-            glColorPointer(4, GL_FLOAT, sizeof(VertexPoint), (void*)offsetof(VertexPoint, r));
-
-            // Execute draw directly out of GPU memory
-            // We use GL_TRIANGLE_STRIP which handles the alternating vertices exactly like GL_QUAD_STRIP
-            // glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(vertexBuffer.size()));
-
-            // --- FIX: Draw each latitude row as an independent strip ---
-            // Total vertices per row: (_nlon * 2) from the two inner loops
-            GLsizei verticesPerRow = static_cast<GLsizei>(_nlon * 2);
-            int totalRows = _nlat - 1;
-
-            for (int row = 0; row < totalRows; ++row)
-            {
-                GLint firstVertexOfRow = row * verticesPerRow;
-                glDrawArrays(GL_TRIANGLE_STRIP, firstVertexOfRow, verticesPerRow);
-            }
-
-            // Cleanup States
-            glDisableClientState(GL_VERTEX_ARRAY);
-            glDisableClientState(GL_NORMAL_ARRAY);
-            glDisableClientState(GL_COLOR_ARRAY);
-            f->glBindBuffer(GL_ARRAY_BUFFER, 0);
-            f->glDeleteBuffers(1, &vbo);
+            GLint firstVertexOfRow = row * verticesPerRow;
+            glDrawArrays(GL_TRIANGLE_STRIP, firstVertexOfRow, verticesPerRow);
         }
+
+        // Cleanup States
+        glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_NORMAL_ARRAY);
+        glDisableClientState(GL_COLOR_ARRAY);
+        f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+        f->glDeleteBuffers(1, &vbo);
 
         coastline->drawOnPlane(height+0.01);
     }
 
     // glDisable(GL_TEXTURE_1D);
     glPopMatrix();
+}
+
+void UFS2dViewer::_fillSphereVertexVector(int k, string vn)
+{
+    geometry->set_sphereVertex(k);
+    if(_current_sphere_varname == vn)
+	return;
+    _current_sphere_varname = vn;
+
+    int i, j;
+    size_t rowStartIndex;
+    size_t localIdx;
+    size_t mpos, npos;
+    double fact_m, fact_n;
+    double sv = 1.0 / (_valmax - _valmin);
+
+    // Use OpenMP to spread the row generation across your supercomputer's CPU cores
+    #pragma omp parallel for schedule(static)
+    for(j = 1; j < _nlat; ++j)
+    {
+        rowStartIndex = (j - 1) * ((_nlon+1) * 2);
+        localIdx = rowStartIndex;
+        mpos = (k * _nlat + (j - 1)) * _nlon;
+        npos = (k * _nlat + j) * _nlon;
+
+        for(i = 0; i < _nlon; ++i)
+        {
+            fact_n = sv * (pltvar[npos + i] - _valmin);
+	    _fillVertex(fact_n, _sphereVertex[localIdx]);
+            localIdx++;
+
+            fact_m = sv * (pltvar[mpos + i] - _valmin);
+	    _fillVertex(fact_m, _sphereVertex[localIdx]);
+            localIdx++;
+        }
+        fact_n = sv * (pltvar[npos] - _valmin);
+        _fillVertex(fact_n, _sphereVertex[localIdx]);
+        localIdx++;
+
+        fact_m = sv * (pltvar[mpos] - _valmin);
+        _fillVertex(fact_m, _sphereVertex[localIdx]);
+        localIdx++;
+    }
+}
+
+void UFS2dViewer::_fillFlatVertexVector(int k, string vn)
+{
+    geometry->set_flatVertex(k);
+    if(_current_flat_varname == vn)
+	return;
+    _current_flat_varname = vn;
+
+    int i, j;
+    size_t rowStartIndex;
+    size_t localIdx;
+    size_t mpos, npos;
+    double fact_m, fact_n;
+    double sv = 1.0 / (_valmax - _valmin);
+
+    // Use OpenMP to spread the row generation across your supercomputer's CPU cores
+    #pragma omp parallel for schedule(static)
+    for(j = 1; j < _nlat; ++j)
+    {
+        rowStartIndex = (j - 1) * (_nlon * 2);
+        localIdx = rowStartIndex;
+        mpos = (k * _nlat + (j - 1)) * _nlon;
+        npos = (k * _nlat + j) * _nlon;
+
+        for(i = _hlon; i < _nlon; ++i)
+        {
+            fact_n = sv * (pltvar[npos + i] - _valmin);
+            _fillVertex(fact_n, _flatVertex[localIdx]);
+            localIdx++;
+
+            fact_m = sv * (pltvar[mpos + i] - _valmin);
+            _fillVertex(fact_m, _flatVertex[localIdx]);
+            localIdx++;
+        }
+
+	for(i = 0; i < _hlon; ++i)
+        {
+            fact_n = sv * (pltvar[npos + i] - _valmin);
+            _fillVertex(fact_n, _flatVertex[localIdx]);
+            localIdx++;
+
+            fact_m = sv * (pltvar[mpos + i] - _valmin);
+            _fillVertex(fact_m, _flatVertex[localIdx]);
+            localIdx++;
+        }
+    }
 }
 

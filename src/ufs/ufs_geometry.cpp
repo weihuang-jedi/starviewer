@@ -4,6 +4,9 @@ UFSGeometry::UFSGeometry()
 {
     _hlon = 0;
     _set_default();
+
+    _current_sphere_level = -1;
+    _current_flat_level = -1;
 }
 
 UFSGeometry::~UFSGeometry()
@@ -141,6 +144,153 @@ void UFSGeometry::setup()
 	}
       //cout << "i=" << i << ", _lon=" << _lon[i] << ", _xFlat=" << _xFlat[i] << endl;
     }
+
+    size_t totalRows = _nlat - 1;
+    size_t totalVertices = totalRows * (_nlon * 2);
+
+    _flatVertex.resize(totalVertices);
+
+    totalVertices = totalRows * ((_nlon+1) * 2);
+    _sphereVertex.resize(totalVertices);
+
+    int k = 0;
+    set_sphereVertex(k);
+    set_flatVertex(k);
   //cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
+double UFSGeometry::_k2h(int k)
+{
+    double height = 0.5 * ((double) (_nlev-k) / _nlev);
+    return height;
+}
+
+double UFSGeometry::_k2r(int k)
+{
+    double radius = 1.0 + _k2h(k);
+    return radius;
+}
+
+void UFSGeometry::_fillFlatVertex(double x, double y, double z, VertexPoint& vp)
+{
+    // Position scaled by radius
+    vp.x = static_cast<float>(x);
+    vp.y = static_cast<float>(y);
+    vp.z = static_cast<float>(z);
+
+    // Normals
+    vp.nx = static_cast<float>(x);
+    vp.ny = static_cast<float>(y);
+    vp.nz = static_cast<float>(z);
+
+#if 0
+    double alpha = 1.05 * fact;
+    if(alpha < 0.1)       alpha = 0.0;
+    else if(alpha > 1.0)  alpha = 1.0;
+    int cidx = (int) (fact*_colorLen);
+
+    // Color parameters (using 'fact' for grayscale representation as in your original code)
+    vp.r = static_cast<float>(_colorMap[3*cidx]);
+    vp.g = static_cast<float>(_colorMap[3*cidx+1]);
+    vp.b = static_cast<float>(_colorMap[3*cidx+2]);
+    vp.a = 1.0;
+    // vp.a = static_cast<float>(alpha);
+#endif
+}
+
+void UFSGeometry::set_flatVertex(int k)
+{
+    if(k == _current_flat_level)
+	return;
+    _current_flat_level = k;
+
+    int i, j;
+    size_t rowStartIndex;
+    size_t localIdx;
+    double height = _k2h(k);
+
+    // Use OpenMP to spread the row generation across your supercomputer's CPU cores
+    #pragma omp parallel for schedule(static)
+    for(j = 1; j < _nlat; ++j)
+    {
+        // Calculate the exact starting index in the pre-allocated vector for this row
+        rowStartIndex = (j - 1) * (_nlon * 2);
+        localIdx = 0;
+
+        // First half longitude loop
+        for(i = _hlon; i < _nlon; ++i)
+        {
+            _fillFlatVertex(_xFlat[i], _yFlat[j], height, _flatVertex[rowStartIndex + localIdx++]);
+            _fillFlatVertex(_xFlat[i], _yFlat[j-1], height, _flatVertex[rowStartIndex + localIdx++]);
+        }
+
+        // Second half longitude loop
+        for(i = 0; i < _hlon; ++i)
+        {
+            _fillFlatVertex(_xFlat[i], _yFlat[j], height, _flatVertex[rowStartIndex + localIdx++]);
+            _fillFlatVertex(_xFlat[i], _yFlat[j-1], height, _flatVertex[rowStartIndex + localIdx++]);
+        }
+    }
+}
+
+void UFSGeometry::_fillSphereVertex(double xs, double ys, double zs, double radius, VertexPoint& vp)
+{
+    // Position scaled by radius
+    vp.x = static_cast<float>(xs * radius);
+    vp.y = static_cast<float>(ys * radius);
+    vp.z = static_cast<float>(zs * radius);
+
+    // Normals
+    vp.nx = static_cast<float>(xs);
+    vp.ny = static_cast<float>(ys);
+    vp.nz = static_cast<float>(zs);
+
+#if 0
+    double alpha = 1.05 * fact;
+    if(alpha < 0.1)       alpha = 0.0;
+    else if(alpha > 1.0)  alpha = 1.0;
+    int cidx = (int) (fact*_colorLen);
+
+    // Color parameters (using 'fact' for grayscale representation as in your original code)
+    vp.r = static_cast<float>(_colorMap[3*cidx]);
+    vp.g = static_cast<float>(_colorMap[3*cidx+1]);
+    vp.b = static_cast<float>(_colorMap[3*cidx+2]);
+    vp.a = 1.0;
+    // vp.a = static_cast<float>(alpha);
+#endif
+}
+
+void UFSGeometry::set_sphereVertex(int k)
+{
+    if(k == _current_sphere_level)
+	return;
+    _current_sphere_level = k;
+
+    int i, j;
+    size_t mpos, npos;
+    size_t rowStartIndex;
+    size_t localIdx;
+    double radius = _k2r(k);
+
+    // Use OpenMP to spread the row generation across your supercomputer's CPU cores
+    #pragma omp parallel for schedule(static)
+    for(j = 1; j < _nlat; ++j)
+    {
+        // Calculate the exact starting index in the pre-allocated vector for this row
+        rowStartIndex = (j - 1) * ((_nlon+1) * 2);
+        localIdx = 0;
+
+        mpos = rowStartIndex = (j - 1) * _nlon;
+        npos = rowStartIndex = j * _nlon;
+
+        // First half longitude loop
+        for(i = 0; i < _nlon; ++i)
+        {
+            _fillSphereVertex(_xSphere[npos+i], _ySphere[npos+i], _zSphere[npos+i], radius, _sphereVertex[rowStartIndex + localIdx++]);
+            _fillSphereVertex(_xSphere[mpos+i], _ySphere[mpos+i], _zSphere[mpos+i], radius, _sphereVertex[rowStartIndex + localIdx++]);
+        }
+
+        _fillSphereVertex(_xSphere[npos], _ySphere[npos], _zSphere[npos], radius, _sphereVertex[rowStartIndex + localIdx++]);
+        _fillSphereVertex(_xSphere[mpos], _ySphere[mpos], _zSphere[mpos], radius, _sphereVertex[rowStartIndex + localIdx++]);
+    }
+}

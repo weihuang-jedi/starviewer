@@ -13,6 +13,12 @@
 
 using namespace std;
 
+struct VertexPoint {
+    float x, y, z;    // Position
+    float nx, ny, nz; // Normal
+    float r, g, b, a; // Color (or texture coordinate data)
+};
+
 class UFSGeometry : public Geometry {
     public:
         UFSGeometry();
@@ -41,6 +47,12 @@ class UFSGeometry : public Geometry {
 	int get_ntim() { return _ntim; };
 	int get_hlon() { return _hlon; };
 
+        void set_sphereVertex(int lvl);
+        void set_flatVertex(int lvl);
+
+        vector<VertexPoint> get_sphereVertex() { return _sphereVertex; };
+        vector<VertexPoint> get_flatVertex() { return _flatVertex; };
+
     protected:
         string name;
 
@@ -57,9 +69,19 @@ class UFSGeometry : public Geometry {
 	int _hlon;
 
     private:
-        void _set_default();
+	vector<VertexPoint> _sphereVertex;
+	vector<VertexPoint> _flatVertex;
 
+        int _current_sphere_level;
+        int _current_flat_level;
 	int _ntim;
+
+        void _set_default();
+        double _k2h(int k);
+        double _k2r(int k);
+
+	void _fillFlatVertex(double x, double y, double z, VertexPoint& vp);
+	void _fillSphereVertex(double xs, double ys, double zs, double radius, VertexPoint& vp);
 };
 #endif
 

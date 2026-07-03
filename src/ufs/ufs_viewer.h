@@ -37,12 +37,6 @@ using namespace std;
 #define NEAR_EAST_BOUNDARY	0.9999
 #define NEAR_WEST_BOUNDARY	-NEAR_EAST_BOUNDARY
 
-struct VertexPoint {
-    float x, y, z;    // Position
-    float nx, ny, nz; // Normal
-    float r, g, b, a; // Color (or texture coordinate data)
-};
-
 class UFS2dViewer : public QGLWidget
 {
 
@@ -82,6 +76,8 @@ class UFS2dViewer : public QGLWidget
 	unique_ptr<WindVector> windvector;
 
         string _varname;
+        string _current_sphere_varname;
+        string _current_flat_varname;
 
         int previoustimelevel;
         int current_timelevel;
@@ -144,8 +140,13 @@ class UFS2dViewer : public QGLWidget
         double _k2h(int k);
         double _k2r(int k);
 
-	void _packSphere(double lon, double lat, double radius, double fact, vector<VertexPoint>& buffer);
-	void _packFlat(double x, double y, double z, double fact, vector<VertexPoint>& buffer);
+	vector<VertexPoint> _sphereVertex;
+	vector<VertexPoint> _flatVertex;
+
+	void _fillVertex(double fact, VertexPoint& vp);
+
+	void _fillSphereVertexVector(int k, string vn);
+	void _fillFlatVertexVector(int k, string vn);
 };
 #endif
 
