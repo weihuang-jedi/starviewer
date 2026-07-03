@@ -1125,7 +1125,7 @@ void UFS2dViewer::_flatDisplay()
         f->glBindBuffer(GL_ARRAY_BUFFER, 0);
         f->glDeleteBuffers(1, &vbo);
 
-        coastline->drawOnPlane(height+0.01);
+        coastline->drawOnPlane(height+1.01);
     }
 
     // glDisable(GL_TEXTURE_1D);
@@ -1141,7 +1141,7 @@ void UFS2dViewer::_fillSphereVertexVector(int k, string vn)
 
     int i, j;
     size_t rowStartIndex;
-    size_t localIdx;
+    size_t idx;
     size_t mpos, npos;
     double fact_m, fact_n;
     double sv = 1.0 / (_valmax - _valmin);
@@ -1151,27 +1151,23 @@ void UFS2dViewer::_fillSphereVertexVector(int k, string vn)
     for(j = 1; j < _nlat; ++j)
     {
         rowStartIndex = (j - 1) * ((_nlon+1) * 2);
-        localIdx = rowStartIndex;
+        idx = rowStartIndex;
         mpos = (k * _nlat + (j - 1)) * _nlon;
         npos = (k * _nlat + j) * _nlon;
 
         for(i = 0; i < _nlon; ++i)
         {
             fact_n = sv * (pltvar[npos + i] - _valmin);
-	    _fillVertex(fact_n, _sphereVertex[localIdx]);
-            localIdx++;
+	    _fillVertex(fact_n, _sphereVertex[idx++]);
 
             fact_m = sv * (pltvar[mpos + i] - _valmin);
-	    _fillVertex(fact_m, _sphereVertex[localIdx]);
-            localIdx++;
+	    _fillVertex(fact_m, _sphereVertex[idx++]);
         }
         fact_n = sv * (pltvar[npos] - _valmin);
-        _fillVertex(fact_n, _sphereVertex[localIdx]);
-        localIdx++;
+        _fillVertex(fact_n, _sphereVertex[idx++]);
 
         fact_m = sv * (pltvar[mpos] - _valmin);
-        _fillVertex(fact_m, _sphereVertex[localIdx]);
-        localIdx++;
+        _fillVertex(fact_m, _sphereVertex[idx++]);
     }
 }
 
@@ -1184,7 +1180,7 @@ void UFS2dViewer::_fillFlatVertexVector(int k, string vn)
 
     int i, j;
     size_t rowStartIndex;
-    size_t localIdx;
+    size_t idx;
     size_t mpos, npos;
     double fact_m, fact_n;
     double sv = 1.0 / (_valmax - _valmin);
@@ -1194,30 +1190,26 @@ void UFS2dViewer::_fillFlatVertexVector(int k, string vn)
     for(j = 1; j < _nlat; ++j)
     {
         rowStartIndex = (j - 1) * (_nlon * 2);
-        localIdx = rowStartIndex;
+        idx = rowStartIndex;
         mpos = (k * _nlat + (j - 1)) * _nlon;
         npos = (k * _nlat + j) * _nlon;
 
         for(i = _hlon; i < _nlon; ++i)
         {
             fact_n = sv * (pltvar[npos + i] - _valmin);
-            _fillVertex(fact_n, _flatVertex[localIdx]);
-            localIdx++;
+            _fillVertex(fact_n, _flatVertex[idx++]);
 
             fact_m = sv * (pltvar[mpos + i] - _valmin);
-            _fillVertex(fact_m, _flatVertex[localIdx]);
-            localIdx++;
+            _fillVertex(fact_m, _flatVertex[idx++]);
         }
 
 	for(i = 0; i < _hlon; ++i)
         {
             fact_n = sv * (pltvar[npos + i] - _valmin);
-            _fillVertex(fact_n, _flatVertex[localIdx]);
-            localIdx++;
+            _fillVertex(fact_n, _flatVertex[idx++]);
 
             fact_m = sv * (pltvar[mpos + i] - _valmin);
-            _fillVertex(fact_m, _flatVertex[localIdx]);
-            localIdx++;
+            _fillVertex(fact_m, _flatVertex[idx++]);
         }
     }
 }

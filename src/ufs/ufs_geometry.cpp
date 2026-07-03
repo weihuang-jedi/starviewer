@@ -118,8 +118,8 @@ void UFSGeometry::setup()
 	throw(errno);
 	exit (-1);
     }
-    _hmax = 0.0;
-    _hmin = 1000000.0;
+    // _hmax = 0.0;
+    // _hmin = 1000000.0;
     for(j = 0; j < _nlat; ++j) {
         _yFlat[j] = _lat[j]/180.0;
       //cout << "j=" << j << ", lat[j]=" << _lat[j] <<", _yFlat[j]=" << _yFlat[j] << endl;
@@ -206,7 +206,7 @@ void UFSGeometry::set_flatVertex(int k)
 
     int i, j;
     size_t rowStartIndex;
-    size_t localIdx;
+    size_t idx;
     double height = _k2h(k);
 
     // Use OpenMP to spread the row generation across your supercomputer's CPU cores
@@ -215,20 +215,20 @@ void UFSGeometry::set_flatVertex(int k)
     {
         // Calculate the exact starting index in the pre-allocated vector for this row
         rowStartIndex = (j - 1) * (_nlon * 2);
-        localIdx = 0;
+        idx = rowStartIndex;
 
         // First half longitude loop
         for(i = _hlon; i < _nlon; ++i)
         {
-            _fillFlatVertex(_xFlat[i], _yFlat[j], height, _flatVertex[rowStartIndex + localIdx++]);
-            _fillFlatVertex(_xFlat[i], _yFlat[j-1], height, _flatVertex[rowStartIndex + localIdx++]);
+            _fillFlatVertex(_xFlat[i], _yFlat[j], height, _flatVertex[idx++]);
+            _fillFlatVertex(_xFlat[i], _yFlat[j-1], height, _flatVertex[idx++]);
         }
 
         // Second half longitude loop
         for(i = 0; i < _hlon; ++i)
         {
-            _fillFlatVertex(_xFlat[i], _yFlat[j], height, _flatVertex[rowStartIndex + localIdx++]);
-            _fillFlatVertex(_xFlat[i], _yFlat[j-1], height, _flatVertex[rowStartIndex + localIdx++]);
+            _fillFlatVertex(_xFlat[i], _yFlat[j], height, _flatVertex[idx++]);
+            _fillFlatVertex(_xFlat[i], _yFlat[j-1], height, _flatVertex[idx++]);
         }
     }
 }
@@ -269,7 +269,7 @@ void UFSGeometry::set_sphereVertex(int k)
     int i, j;
     size_t mpos, npos;
     size_t rowStartIndex;
-    size_t localIdx;
+    size_t idx;
     double radius = _k2r(k);
 
     // Use OpenMP to spread the row generation across your supercomputer's CPU cores
@@ -278,19 +278,19 @@ void UFSGeometry::set_sphereVertex(int k)
     {
         // Calculate the exact starting index in the pre-allocated vector for this row
         rowStartIndex = (j - 1) * ((_nlon+1) * 2);
-        localIdx = 0;
+        idx = rowStartIndex;
 
-        mpos = rowStartIndex = (j - 1) * _nlon;
-        npos = rowStartIndex = j * _nlon;
+        npos = j * _nlon;
+        mpos = (j - 1) * _nlon;
 
         // First half longitude loop
         for(i = 0; i < _nlon; ++i)
         {
-            _fillSphereVertex(_xSphere[npos+i], _ySphere[npos+i], _zSphere[npos+i], radius, _sphereVertex[rowStartIndex + localIdx++]);
-            _fillSphereVertex(_xSphere[mpos+i], _ySphere[mpos+i], _zSphere[mpos+i], radius, _sphereVertex[rowStartIndex + localIdx++]);
+            _fillSphereVertex(_xSphere[npos+i], _ySphere[npos+i], _zSphere[npos+i], radius, _sphereVertex[idx++]);
+            _fillSphereVertex(_xSphere[mpos+i], _ySphere[mpos+i], _zSphere[mpos+i], radius, _sphereVertex[idx++]);
         }
 
-        _fillSphereVertex(_xSphere[npos], _ySphere[npos], _zSphere[npos], radius, _sphereVertex[rowStartIndex + localIdx++]);
-        _fillSphereVertex(_xSphere[mpos], _ySphere[mpos], _zSphere[mpos], radius, _sphereVertex[rowStartIndex + localIdx++]);
+        _fillSphereVertex(_xSphere[npos], _ySphere[npos], _zSphere[npos], radius, _sphereVertex[idx++]);
+        _fillSphereVertex(_xSphere[mpos], _ySphere[mpos], _zSphere[mpos], radius, _sphereVertex[idx++]);
     }
 }
