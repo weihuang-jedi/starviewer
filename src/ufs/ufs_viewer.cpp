@@ -64,7 +64,7 @@ UFS2dViewer::~UFS2dViewer()
 
     delete lister;
     delete texture1d;
-    delete myShaderProgram;
+    delete myFlatShaderProgram;
 }
 
 void UFS2dViewer::set_geometry(UFSGeometry *gm)
@@ -222,6 +222,17 @@ void UFS2dViewer::draw()
                     glCallList(zcl);
                 else
                 {
+	            if(_current_sphere_varname != _varname)
+                    {
+			dataTexture = 0;
+		    }
+		    else
+		    {
+			if(_current_draw_level != nvoptions->get_zsec())
+			   dataTexture = 0;
+		    }
+                    _current_draw_level = nvoptions->get_zsec();
+
                     // _flatDisplay();
                     _flatDisplayGPU();
                 }
@@ -1226,8 +1237,7 @@ void UFS2dViewer::_fillFlatVertexVector(int k, string vn)
     }
 }
 
-#if 1
-void UFS2dViewer::_initStaticGPUGrid() {
+void UFS2dViewer::_initFlatStaticGPUGrid() {
     QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
     if (!f) return;
 
@@ -1264,92 +1274,30 @@ void UFS2dViewer::_initStaticGPUGrid() {
     f->glBindBuffer(GL_ARRAY_BUFFER, 0);
     f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
-#else
-void UFS2dViewer::_initStaticGPUGrid() {
-    QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
-    if (!f) return;
-
-    // Make sure shaders and static grids are allocated on the GPU before drawing
-    if (myShaderProgram == nullptr) {
-        _initShaders();
-        _initStaticGPUGrid(); // The initialization step from the previous answer
-    }
-
-    std::vector<float> vertices;
-    std::vector<unsigned int> indices;
-
-    // 1. Generate unique UV coordinates for every vertex cell crossing
-    for (int j = 0; j < _nlat; ++j) {
-        float v = (float)j / (_nlat - 1);
-        for (int i = 0; i < _nlon; ++i) {
-            float u = (float)i / (_nlon - 1);
-            vertices.push_back(u);
-            vertices.push_back(v);
-        }
-    }
-
-    // 2. Generate optimized element array indices (Triangle Strips with Primitive Restart)
-    for (int j = 0; j < _nlat - 1; ++j) {
-        for (int i = 0; i < _nlon; ++i) {
-            indices.push_back(j * _nlon + i);
-            indices.push_back((j + 1) * _nlon + i);
-        }
-        indices.push_back(0xFFFFFFFF); // Restart strip index
-    }
-    indexCount = static_cast<GLsizei>(indices.size());
-
-    // 3. Bind objects to GPU memory permanently
-    f->glGenVertexArrays(1, &gridVAO);
-    f->glGenBuffers(1, &gridVBO);
-    f->glGenBuffers(1, &gridEBO);
-
-    f->glBindVertexArray(gridVAO);
-
-    f->glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
-    f->glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-
-    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridEBO);
-    f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
-
-    f->glEnableVertexAttribArray(0);
-    f->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-
-    f->glBindVertexArray(0);
-}
-#endif
 
 void UFS2dViewer::_flatDisplayGPU()
 {
-    cout << "\nEnter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\nEnter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
     // QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     // if (!f || gridVAO == 0) return;
 
-    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if (!f) return;
 
-    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     // --- FIX: Initialize the static grid assets if they haven't been built yet ---
     if (gridVBO == 0) {
-        cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-        _initStaticGPUGrid();
-        cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-        cout << "\tgridVBO = " << gridVBO << endl;
+        _initFlatStaticGPUGrid();
         if (gridVBO == 0) return;
     }
 
-    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     int k1 = nvoptions->get_zsec() + 1;
     int k = _nlev - k1;
     double height = _k2h(k);
 
-    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    _initShaders();
+    _initFlatShaders();
 
-    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if (k >= _nlev && _nlev != 1) return;
 
-    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     // 1. Calculate offset pointer where this specific Z vertical level begins in pltvar
     size_t dataOffset = static_cast<size_t>(k) * _nlat * _nlon;
     float* rawDataPtr = &pltvar[dataOffset];
@@ -1370,7 +1318,6 @@ void UFS2dViewer::_flatDisplayGPU()
         f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
 
-    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     // 1. Create and upload the colormap if not already done
     if (colorMapTexture == 0) {
         f->glGenTextures(1, &colorMapTexture);
@@ -1391,7 +1338,6 @@ void UFS2dViewer::_flatDisplayGPU()
         f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     }
 
-    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     // Disable face culling so triangles draw regardless of vertex winding order
     glDisable(GL_CULL_FACE);
 
@@ -1416,26 +1362,25 @@ void UFS2dViewer::_flatDisplayGPU()
     f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
 
     // 3. Update uniforms (Inside _flatDisplayGPU)
-    myShaderProgram->bind();
-    myShaderProgram->setUniformValue("u_ValMin", static_cast<float>(_valmin));
-    myShaderProgram->setUniformValue("u_ValMax", static_cast<float>(_valmax));
-    myShaderProgram->setUniformValue("u_Height", static_cast<float>(height));
+    myFlatShaderProgram->bind();
+    myFlatShaderProgram->setUniformValue("u_ValMin", static_cast<float>(_valmin));
+    myFlatShaderProgram->setUniformValue("u_ValMax", static_cast<float>(_valmax));
+    myFlatShaderProgram->setUniformValue("u_Height", static_cast<float>(height));
 
     // --- ADD THESE FOUR LINES TO PASS BOUNDARIES ---
-    myShaderProgram->setUniformValue("u_XMin", static_cast<float>(_xFlat[0]));
-    myShaderProgram->setUniformValue("u_XMax", static_cast<float>(_xFlat[_nlon - 1]));
-    myShaderProgram->setUniformValue("u_YMin", static_cast<float>(_yFlat[0]));
-    myShaderProgram->setUniformValue("u_YMax", static_cast<float>(_yFlat[_nlat - 1]));
+    myFlatShaderProgram->setUniformValue("u_XMin", static_cast<float>(_xFlat[0]));
+    myFlatShaderProgram->setUniformValue("u_XMax", static_cast<float>(_xFlat[_nlon - 1]));
+    myFlatShaderProgram->setUniformValue("u_YMin", static_cast<float>(_yFlat[0]));
+    myFlatShaderProgram->setUniformValue("u_YMax", static_cast<float>(_yFlat[_nlat - 1]));
     // ----------------------------------------------
 
 
-    myShaderProgram->setUniformValue("u_PltvarTex", 0); // Unit 0
+    myFlatShaderProgram->setUniformValue("u_PltvarTex", 0); // Unit 0
 
     f->glActiveTexture(GL_TEXTURE1);
     f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
-    myShaderProgram->setUniformValue("u_ColorMap", 1);  // Unit 1
+    myFlatShaderProgram->setUniformValue("u_ColorMap", 1);  // Unit 1
 
-    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     // 4. Draw the entire 4.7 Million Point Grid instantaneously
     f->glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
     f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridEBO);
@@ -1454,7 +1399,6 @@ void UFS2dViewer::_flatDisplayGPU()
 
     f->glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, (void*)0);
 
-    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     // 5. Clean up bound contexts cleanly
     f->glDisable(GL_PRIMITIVE_RESTART);
 
@@ -1465,29 +1409,24 @@ void UFS2dViewer::_flatDisplayGPU()
     f->glBindBuffer(GL_ARRAY_BUFFER, 0);
     f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    myShaderProgram->release();
+    myFlatShaderProgram->release();
 
     // --- RESTORE DEPTH STATES BEFORE DRAWING COASTLINE ---
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LEQUAL);
 
-    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     coastline->drawOnPlane(height + 0.01);
 
-    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     coastline->drawOnPlane(height + 0.01);
-    cout << "Leave" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
-void UFS2dViewer::_initShaders()
+void UFS2dViewer::_initFlatShaders()
 {
-    cout << "\nEnter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    if (myShaderProgram != nullptr) return;
+    if (myFlatShaderProgram != nullptr) return;
 
-    myShaderProgram = new QOpenGLShaderProgram();
+    myFlatShaderProgram = new QOpenGLShaderProgram();
 
-#if 1
     const char* vertexShaderSource = R"glsl(
         #version 330 compatibility
         
@@ -1508,6 +1447,7 @@ void UFS2dViewer::_initShaders()
             } else {
                 sampleCoord.x -= 0.5;
             }
+            sampleCoord.y = 1.0 - sampleCoord.y;
 
             float rawVal = texture(u_PltvarTex, sampleCoord).r;
             float sv = 1.0 / (u_ValMax - u_ValMin);
@@ -1515,76 +1455,21 @@ void UFS2dViewer::_initShaders()
 
             v_Fact = clamp(fact, 0.0, 1.0);
 
-            // --- FIX: Fit the grid perfectly inside the camera's visual view bounds ---
-            // Your view runs from -0.75 to +0.75.
-            float x = mix(-0.75, 0.75, gl_MultiTexCoord0.x);
-            float y = mix(-0.75, 0.75, gl_MultiTexCoord0.y);
+            // Set X bounds to twice the scale of Y bounds (2:1 aspect ratio) ---
+            // Y spans 1.0 units total (-0.5 to 0.5). 
+            // X spans 2.0 units total (-1.0 to 1.0).
+            float x = mix(-1.0, 1.0, gl_MultiTexCoord0.x);
+            float y = mix(-0.5, 0.5, gl_MultiTexCoord0.y);
             // -------------------------------------------------------------------------
 
             gl_Position = gl_ModelViewProjectionMatrix * vec4(x, y, u_Height, 1.0);
         }
     )glsl";
-#else
-    // 1. Clean Vertex Shader - Compatibility Profile
-    const char* vertexShaderSource = R"glsl(
-        #version 330 compatibility
-
-        layout (location = 0) in vec2 aTexCoord;
-
-        uniform sampler2D u_PltvarTex;
-        uniform float u_ValMin;
-        uniform float u_ValMax;
-        uniform float u_Height;
-
-        uniform float u_XMin;
-        uniform float u_XMax;
-        uniform float u_YMin;
-        uniform float u_YMax;
-
-        out float v_Fact;
-
-        void main() {
-            vec2 sampleCoord = aTexCoord;
-
-            // Mirror the CPU's _hlon split shift logic:
-            if (sampleCoord.x < 0.5) {
-                sampleCoord.x += 0.5;
-            } else {
-                sampleCoord.x -= 0.5;
-            }
-
-            float rawVal = texture(u_PltvarTex, sampleCoord).r;
-            float sv = 1.0 / (u_ValMax - u_ValMin);
-            float fact = sv * (rawVal - u_ValMin);
-
-            v_Fact = clamp(fact, 0.0, 1.0);
-
-            // CRITICAL: Calculate positions inside main() so uniforms are resolved!
-            float x = mix(u_XMin, u_XMax, aTexCoord.x);
-            float y = mix(u_YMin, u_YMax, aTexCoord.y);
-
-            gl_Position = gl_ModelViewProjectionMatrix * vec4(x, y, u_Height, 1.0);
-        }
-    )glsl";
-#endif
-    if (!myShaderProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource)) {
-        qDebug() << "Vertex shader error:" << myShaderProgram->log();
+    if (!myFlatShaderProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource)) {
+        qDebug() << "Vertex shader error:" << myFlatShaderProgram->log();
     }
 
     // 2. Clean Fragment Shader - Compatibility Profile
-#if 0
-    const char* fragmentShaderSource = R"glsl(
-        #version 330 compatibility
-        in float v_Fact;
-        uniform sampler1D u_ColorMap;
-        out vec4 FragColor;
-
-        void main() {
-            // DIAGNOSTIC FALLBACK: Force every pixel to bright opaque red
-            FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-        }
-    )glsl";
-#else
     const char* fragmentShaderSource = R"glsl(
         #version 330 compatibility
         in float v_Fact;
@@ -1597,15 +1482,13 @@ void UFS2dViewer::_initShaders()
             FragColor = vec4(color, 1.0); // Explicitly force 100% opacity
         }
     )glsl";
-#endif
 
-    if (!myShaderProgram->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource)) {
-        qDebug() << "Fragment shader error:" << myShaderProgram->log();
+    if (!myFlatShaderProgram->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource)) {
+        qDebug() << "Fragment shader error:" << myFlatShaderProgram->log();
     }
 
-    if (!myShaderProgram->link()) {
-        qDebug() << "Shader program linking error:" << myShaderProgram->log();
+    if (!myFlatShaderProgram->link()) {
+        qDebug() << "Shader program linking error:" << myFlatShaderProgram->log();
     }
-    cout << "Leave" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 

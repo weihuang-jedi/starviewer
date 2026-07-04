@@ -158,11 +158,13 @@ class UFS2dViewer : public QGLWidget
 
 	GLuint colorMapTexture;
 
-        void _initStaticGPUGrid();
+	int _current_draw_level;
+
+        void _initFlatStaticGPUGrid();
 	void _flatDisplayGPU();
 
-	QOpenGLShaderProgram* myShaderProgram = nullptr;
-        void _initShaders(); // Helper function to compile them
+	QOpenGLShaderProgram* myFlatShaderProgram = nullptr;
+        void _initFlatShaders(); // Helper function to compile them
 };
 #endif
 
