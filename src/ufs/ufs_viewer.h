@@ -150,13 +150,13 @@ class UFS2dViewer : public QGLWidget
 	void _fillFlatVertexVector(int k, string vn);
 
     private:
-	GLuint gridVAO = 0;
-        GLuint gridVBO = 0;
-        GLuint gridEBO = 0;
-	GLuint dataTexture = 0;
-        GLsizei indexCount = 0;
+	GLuint gridVAO;
+        GLuint gridVBO;
+        GLuint gridEBO;
+	GLuint dataTexture;
+        GLsizei indexCount;
 
-	GLuint colorMapTexture = 0;
+	GLuint colorMapTexture;
 
         void _initStaticGPUGrid();
 	void _flatDisplayGPU();
