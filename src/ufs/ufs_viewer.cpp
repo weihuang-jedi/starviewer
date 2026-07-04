@@ -214,7 +214,10 @@ void UFS2dViewer::draw()
                 if(zcl)
                     glCallList(zcl);
                 else
-                    _flatDisplay();
+                {
+                    // _flatDisplay();
+                    _flatDisplayGPU();
+                }
             }
 
           //draw_plane_grids();
@@ -1218,7 +1221,6 @@ void UFS2dViewer::_fillFlatVertexVector(int k, string vn)
 
 void UFS2dViewer::_initStaticGPUGrid() {
     QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
-    // QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     if (!f) return;
 
     // Make sure shaders and static grids are allocated on the GPU before drawing
@@ -1271,16 +1273,31 @@ void UFS2dViewer::_initStaticGPUGrid() {
 
 void UFS2dViewer::_flatDisplayGPU()
 {
+    cout << "\nEnter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
     // QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    if (!f || gridVAO == 0) return;
+    // if (!f || gridVAO == 0) return;
 
+    if (!f) return;
+
+    // --- FIX: Initialize the static grid assets if they haven't been built yet ---
+     if (gridVAO == 0) {
+         _initStaticGPUGrid();
+         if (gridVAO == 0) return; // If initialization fails, fall back safely
+     }
+
+    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     int k1 = nvoptions->get_zsec() + 1;
     int k = _nlev - k1;
     double height = _k2h(k);
 
+    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    _initShaders();
+
+    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if (k >= _nlev && _nlev != 1) return;
 
+    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     // 1. Calculate offset pointer where this specific Z vertical level begins in pltvar
     size_t dataOffset = static_cast<size_t>(k) * _nlat * _nlon;
     float* rawDataPtr = &pltvar[dataOffset];
@@ -1291,22 +1308,62 @@ void UFS2dViewer::_flatDisplayGPU()
         f->glBindTexture(GL_TEXTURE_2D, dataTexture);
         f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	// --- ADD WRAP MODES FOR GL_TEXTURE_2D COMPLETENESS ---
+        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
     f->glBindTexture(GL_TEXTURE_2D, dataTexture);
 
     // Direct raw single-channel float upload (No CPU processing)
     f->glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, _nlon, _nlat, 0, GL_RED, GL_FLOAT, rawDataPtr);
 
-    // 3. Activate Shader Program and update uniform settings
+    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // 1. Create and upload the colormap if not already done
+    if (colorMapTexture == 0) {
+        f->glGenTextures(1, &colorMapTexture);
+        f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
+        f->glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB32F, _colorLen, 0, GL_RGB, GL_DOUBLE, _colorMap); // matching your double _colorMap array
+        f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    }
+
+    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // 2. Bind both textures to separate texture units
+    f->glActiveTexture(GL_TEXTURE0);
+    f->glBindTexture(GL_TEXTURE_2D, dataTexture);
+    
+    f->glActiveTexture(GL_TEXTURE1);
+    f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
+
+    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // Add this right before myShaderProgram->bind();
+     glDisable(GL_LIGHTING);
+     glDisable(GL_TEXTURE_2D);
+     glDisable(GL_TEXTURE_1D);
+
+    // 3. Update uniforms (Inside _flatDisplayGPU)
     myShaderProgram->bind();
     myShaderProgram->setUniformValue("u_ValMin", static_cast<float>(_valmin));
     myShaderProgram->setUniformValue("u_ValMax", static_cast<float>(_valmax));
     myShaderProgram->setUniformValue("u_Height", static_cast<float>(height));
 
+    // --- ADD THESE FOUR LINES TO PASS BOUNDARIES ---
+    myShaderProgram->setUniformValue("u_XMin", static_cast<float>(_xFlat[0]));
+    myShaderProgram->setUniformValue("u_XMax", static_cast<float>(_xFlat[_nlon - 1]));
+    myShaderProgram->setUniformValue("u_YMin", static_cast<float>(_yFlat[0]));
+    myShaderProgram->setUniformValue("u_YMax", static_cast<float>(_yFlat[_nlat - 1]));
+    // ----------------------------------------------
+
     f->glActiveTexture(GL_TEXTURE0);
     f->glBindTexture(GL_TEXTURE_2D, dataTexture);
-    myShaderProgram->setUniformValue("u_PltvarTex", 0);
+    myShaderProgram->setUniformValue("u_PltvarTex", 0); // Unit 0
 
+    f->glActiveTexture(GL_TEXTURE1);
+    f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
+    myShaderProgram->setUniformValue("u_ColorMap", 1);  // Unit 1
+
+    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     // 4. Draw the entire 4.7 Million Point Grid instantaneously
     f->glBindVertexArray(gridVAO);
     f->glEnable(GL_PRIMITIVE_RESTART);
@@ -1314,42 +1371,61 @@ void UFS2dViewer::_flatDisplayGPU()
 
     f->glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, (void*)0);
 
+    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     // 5. Clean up bound contexts
     f->glDisable(GL_PRIMITIVE_RESTART);
     f->glBindVertexArray(0);
     myShaderProgram->release();
 
+    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     coastline->drawOnPlane(height + 0.01);
+    cout << "Leave" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void UFS2dViewer::_initShaders()
 {
-    // If already initialized, don't do it again
+    cout << "\nEnter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     if (myShaderProgram != nullptr) return;
 
     myShaderProgram = new QOpenGLShaderProgram();
 
-    // 1. Define and compile the Vertex Shader
+    // 1. Clean Vertex Shader - Compatibility Profile
     const char* vertexShaderSource = R"glsl(
-        #version 330 core
+        #version 330 compatibility
+
         layout (location = 0) in vec2 aTexCoord;
+
         uniform sampler2D u_PltvarTex;
         uniform float u_ValMin;
         uniform float u_ValMax;
         uniform float u_Height;
-        out float v_Fact; // Pass 'fact' to fragment shader for colormap lookup
+
+        uniform float u_XMin;
+        uniform float u_XMax;
+        uniform float u_YMin;
+        uniform float u_YMax;
+
+        out float v_Fact;
 
         void main() {
-            float rawVal = texture(u_PltvarTex, aTexCoord).r;
+            vec2 sampleCoord = aTexCoord;
+
+            // Mirror the CPU's _hlon split shift logic:
+            if (sampleCoord.x < 0.5) {
+                sampleCoord.x += 0.5;
+            } else {
+                sampleCoord.x -= 0.5;
+            }
+
+            float rawVal = texture(u_PltvarTex, sampleCoord).r;
             float sv = 1.0 / (u_ValMax - u_ValMin);
             float fact = sv * (rawVal - u_ValMin);
 
-            v_Fact = clamp(fact, 0.0, 1.0); // Ensure it stays in bounds [0,1]
+            v_Fact = clamp(fact, 0.0, 1.0);
 
-            // Simple map: scale normalized coordinates (0 to 1) to a flat grid
-            // Adjust these coefficients if your flat domain space spans differently
-            float x = aTexCoord.x * 360.0 - 180.0;
-            float y = aTexCoord.y * 180.0 - 90.0;
+            // CRITICAL: Calculate positions inside main() so uniforms are resolved!
+            float x = mix(u_XMin, u_XMax, aTexCoord.x);
+            float y = mix(u_YMin, u_YMax, aTexCoord.y);
 
             gl_Position = gl_ModelViewProjectionMatrix * vec4(x, y, u_Height, 1.0);
         }
@@ -1359,16 +1435,17 @@ void UFS2dViewer::_initShaders()
         qDebug() << "Vertex shader error:" << myShaderProgram->log();
     }
 
-    // 2. Define and compile the Fragment Shader
+    // 2. Clean Fragment Shader - Compatibility Profile
     const char* fragmentShaderSource = R"glsl(
-        #version 330 core
+        #version 330 compatibility
         in float v_Fact;
-        uniform sampler1D u_ColorMap; // The 1D texture containing your color scale
+        uniform sampler1D u_ColorMap;
         out vec4 FragColor;
 
         void main() {
-            // Fetch the exact RGB color from your 1D texture scale
-            FragColor = texture(u_ColorMap, v_Fact);
+            // FragColor = texture(u_ColorMap, v_Fact);
+            vec3 color = texture(u_ColorMap, v_Fact).rgb;
+            FragColor = vec4(color, 1.0); // Explicitly force 100% opacity
         }
     )glsl";
 
@@ -1376,9 +1453,9 @@ void UFS2dViewer::_initShaders()
         qDebug() << "Fragment shader error:" << myShaderProgram->log();
     }
 
-    // 3. Link the shaders together into an executable GPU pipeline
     if (!myShaderProgram->link()) {
         qDebug() << "Shader program linking error:" << myShaderProgram->log();
     }
+    cout << "Leave" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 

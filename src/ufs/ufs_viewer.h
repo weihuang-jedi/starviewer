@@ -156,6 +156,8 @@ class UFS2dViewer : public QGLWidget
 	GLuint dataTexture = 0;
         GLsizei indexCount = 0;
 
+	GLuint colorMapTexture = 0;
+
         void _initStaticGPUGrid();
 	void _flatDisplayGPU();
 
