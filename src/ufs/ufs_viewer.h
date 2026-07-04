@@ -160,13 +160,12 @@ class UFS2dViewer : public QGLWidget
 
 	int _current_draw_level;
 
-        void _initFlatStaticGPUGrid();
+        void _initStaticGPUGrid();
 	void _flatDisplayGPU();
 
 	QOpenGLShaderProgram* myFlatShaderProgram = nullptr;
         void _initFlatShaders(); // Helper function to compile them
 
-        void _initSphereStaticGPUGrid();
 	void _sphereDisplayGPU();
 
 	QOpenGLShaderProgram* mySphereShaderProgram = nullptr;
