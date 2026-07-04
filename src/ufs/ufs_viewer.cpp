@@ -1509,7 +1509,6 @@ void UFS2dViewer::_initSphereShaders()
 
     mySphereShaderProgram = new QOpenGLShaderProgram();
 
-    // 1. Robust Vertex Shader
     const char* vertexShaderSource4Sphere = R"glsl(
         #version 330 compatibility
 
@@ -1523,36 +1522,35 @@ void UFS2dViewer::_initSphereShaders()
         const float PI = 3.14159265358979323846;
 
         void main() {
+            // 1. Start with raw grid texture coordinates [0.0 to 1.0]
             vec2 sampleCoord = gl_MultiTexCoord0.xy;
 
-            // Mirror the CPU's horizontal _hlon split shift logic:
-            if (sampleCoord.x < 0.5) {
-                sampleCoord.x += 0.5;
-            } else {
-                sampleCoord.x -= 0.5;
-            }
+            // --- ADJUSTABLE LONGITUDE SHIFT CONTROL ---
+            // If +0.5 didn't line it up, it means we need to shift the opposite direction.
+            // Let's apply a clean 180-degree wrap-around shift:
+            sampleCoord.x = fract(sampleCoord.x + 0.5); 
+            // ------------------------------------------
 
-            // Sample raw data value
+            // 2. Sample raw data value from the newly adjusted coordinate column
             float rawVal = texture(u_PltvarTex, sampleCoord).r;
             
-            // --- PROTECT AGAINST DIVISION BY ZERO OR UNINITIALIZED UNIFORMS ---
             float range = u_ValMax - u_ValMin;
             if (range <= 0.00001) {
                 range = 1.0; 
             }
             float fact = (rawVal - u_ValMin) / range;
             v_Fact = clamp(fact, 0.0, 1.0);
-            // -----------------------------------------------------------------
 
-            // Map UV coordinates back to spherical angles (Radians)
-            float lon_rad = gl_MultiTexCoord0.x * 2.0 * PI;
+            // 3. Keep geometry generation cleanly aligned with your native coastlines
+            float lon_rad = (gl_MultiTexCoord0.x * 2.0 * PI) - PI;
             float lat_rad = (gl_MultiTexCoord0.y * PI) - (PI / 2.0);
 
-            // Spherical Trigonometry
+            // Spherical Trigonometry 
             float dist = cos(lat_rad);
+            
             float x = dist * sin(lon_rad);
             float z = dist * cos(lon_rad);
-            float y = sin(lat_rad);
+            float y = -sin(lat_rad); // Opaque right-side-up mapping
 
             vec3 spherePos = vec3(x, y, z) * u_Radius;
 
@@ -1565,7 +1563,6 @@ void UFS2dViewer::_initSphereShaders()
         qDebug() << "Sphere Vertex shader error:" << mySphereShaderProgram->log();
     }
 
-    // 2. Fragment Shader
     const char* fragmentShaderSource4Sphere = R"glsl(
         #version 330 compatibility
         
@@ -1574,7 +1571,6 @@ void UFS2dViewer::_initSphereShaders()
         out vec4 FragColor;
 
         void main() {
-            // Fetch the RGB color from your 1D texture map scale
             vec3 color = texture(u_ColorMap, v_Fact).rgb;
             FragColor = vec4(color, 1.0); 
         }
@@ -1594,13 +1590,10 @@ void UFS2dViewer::_sphereDisplayGPU()
      QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
      if (!f) return;
 
-     // --- FIX 1: Dynamically initialize the standard flat grid VBO template ---
-     // This ensures gridVBO is allocated and generated if a user opens the 3D view first
      if (gridVBO == 0) {
-          _initStaticGPUGrid(); // Call your standard flat VBO/EBO generator!
+          _initStaticGPUGrid();
           if (gridVBO == 0) return;
      }
-     // ------------------------------------------------------------------------
 
      int k1 = nvoptions->get_zsec() + 1;
      int k = _nlev - k1;
@@ -1611,6 +1604,7 @@ void UFS2dViewer::_sphereDisplayGPU()
      size_t dataOffset = static_cast<size_t>(k) * _nlat * _nlon;
      float* rawDataPtr = &pltvar[dataOffset];
 
+     // A. Handle Data Texture Allocation
      if (dataTexture == 0) {
           f->glGenTextures(1, &dataTexture);
           f->glBindTexture(GL_TEXTURE_2D, dataTexture);
@@ -1623,8 +1617,25 @@ void UFS2dViewer::_sphereDisplayGPU()
      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
      f->glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, _nlon, _nlat, 0, GL_RED, GL_FLOAT, rawDataPtr);
 
+     // --- B. FIX: Handle ColorMap Texture Allocation if starting in Sphere view first ---
+     if (colorMapTexture == 0) {
+          f->glGenTextures(1, &colorMapTexture);
+          f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
+
+          std::vector<float> floatColorMap(_colorLen * 3);
+          for (int c = 0; c < _colorLen * 3; ++c) {
+               floatColorMap[c] = static_cast<float>(_colorMap[c]);
+          }
+
+          f->glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB32F, _colorLen, 0, GL_RGB, GL_FLOAT, floatColorMap.data());
+          f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+          f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+          f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+     }
+     // ----------------------------------------------------------------------------------
+
      if (mySphereShaderProgram == nullptr) {
-           _initSphereShaders(); 
+           _initSphereShaders();
      }
 
      glEnable(GL_DEPTH_TEST);
@@ -1633,15 +1644,13 @@ void UFS2dViewer::_sphereDisplayGPU()
      glDisable(GL_CULL_FACE);
      glDisable(GL_LIGHTING);
 
-     // Turn off fixed-function texture generation before utilizing programmable samplers
      glDisable(GL_TEXTURE_2D);
      glDisable(GL_TEXTURE_1D);
 
-     // Bind Data to Texture Unit 0
+     // Bind textures to clear pipelines
      f->glActiveTexture(GL_TEXTURE0);
      f->glBindTexture(GL_TEXTURE_2D, dataTexture);
 
-     // Bind ColorMap to Texture Unit 1
      f->glActiveTexture(GL_TEXTURE1);
      f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
 
@@ -1649,20 +1658,13 @@ void UFS2dViewer::_sphereDisplayGPU()
      mySphereShaderProgram->setUniformValue("u_ValMin", static_cast<float>(_valmin));
      mySphereShaderProgram->setUniformValue("u_ValMax", static_cast<float>(_valmax));
      mySphereShaderProgram->setUniformValue("u_Radius", static_cast<float>(radius));
-     mySphereShaderProgram->setUniformValue("u_PltvarTex", 0); // Unit 0
-     mySphereShaderProgram->setUniformValue("u_ColorMap", 1);  // Unit 1
+     mySphereShaderProgram->setUniformValue("u_PltvarTex", 0);
+     mySphereShaderProgram->setUniformValue("u_ColorMap", 1);
 
-     // --- ADD THIS LINE TO CROSS-PASS THE CAMERA MATRIX NATIVELY ---
-     GLfloat mvp[16];
-     glGetFloatv(GL_MODELVIEW_MATRIX, mvp); // Or GL_PROJECTION_MATRIX depending on your stack layout
-     mySphereShaderProgram->setUniformValueArray("u_MVPMatrix", mvp, 1, 4);
-
-     // Draw the entire multi-million node mesh instantly as a 3D Earth Sphere
      f->glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
      f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridEBO);
 
      glEnableClientState(GL_VERTEX_ARRAY);
-     // This forces the legacy fixed-function state to process 3D spatial points
      glVertexPointer(2, GL_FLOAT, 2 * sizeof(float), (void*)0);
 
      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -1682,3 +1684,4 @@ void UFS2dViewer::_sphereDisplayGPU()
 
      coastline->drawOnSphere(radius + 0.01);
 }
+
