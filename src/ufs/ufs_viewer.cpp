@@ -1358,35 +1358,38 @@ void UFS2dViewer::_flatDisplayGPU()
     if (dataTexture == 0) {
         f->glGenTextures(1, &dataTexture);
         f->glBindTexture(GL_TEXTURE_2D, dataTexture);
+
+        // --- ADD THIS LINE right before glTexImage2D ---
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        f->glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, _nlon, _nlat, 0, GL_RED, GL_FLOAT, rawDataPtr);
+
         f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	// --- ADD WRAP MODES FOR GL_TEXTURE_2D COMPLETENESS ---
         f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
-    f->glBindTexture(GL_TEXTURE_2D, dataTexture);
-
-    // Direct raw single-channel float upload (No CPU processing)
-    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, _nlon, _nlat, 0, GL_RED, GL_FLOAT, rawDataPtr);
 
     cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     // 1. Create and upload the colormap if not already done
     if (colorMapTexture == 0) {
         f->glGenTextures(1, &colorMapTexture);
         f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
-        f->glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB32F, _colorLen, 0, GL_RGB, GL_DOUBLE, _colorMap); // matching your double _colorMap array
+
+        // --- FIX: Pack doubles into standard floats for safe GPU consumption ---
+        std::vector<float> floatColorMap(_colorLen * 3);
+        for (int c = 0; c < _colorLen * 3; ++c) {
+            floatColorMap[c] = static_cast<float>(_colorMap[c]);
+        }
+
+        // Upload as standard GL_FLOAT instead of GL_DOUBLE
+        f->glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB32F, _colorLen, 0, GL_RGB, GL_FLOAT, floatColorMap.data());
+        // ------------------------------------------------------------------------
+	
         f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     }
-
-    cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    // 2. Bind both textures to separate texture units
-    f->glActiveTexture(GL_TEXTURE0);
-    f->glBindTexture(GL_TEXTURE_2D, dataTexture);
-    
-    f->glActiveTexture(GL_TEXTURE1);
-    f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
 
     cout << "\tin" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     // Disable face culling so triangles draw regardless of vertex winding order
@@ -1401,6 +1404,17 @@ void UFS2dViewer::_flatDisplayGPU()
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_TEXTURE_1D);
 
+    // Clear texturing overrides
+     glDisable(GL_LIGHTING);
+
+    // Bind Data to Texture Unit 0
+    f->glActiveTexture(GL_TEXTURE0);
+    f->glBindTexture(GL_TEXTURE_2D, dataTexture);
+
+    // Bind ColorMap to Texture Unit 1
+    f->glActiveTexture(GL_TEXTURE1);
+    f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
+
     // 3. Update uniforms (Inside _flatDisplayGPU)
     myShaderProgram->bind();
     myShaderProgram->setUniformValue("u_ValMin", static_cast<float>(_valmin));
@@ -1414,8 +1428,7 @@ void UFS2dViewer::_flatDisplayGPU()
     myShaderProgram->setUniformValue("u_YMax", static_cast<float>(_yFlat[_nlat - 1]));
     // ----------------------------------------------
 
-    f->glActiveTexture(GL_TEXTURE0);
-    f->glBindTexture(GL_TEXTURE_2D, dataTexture);
+
     myShaderProgram->setUniformValue("u_PltvarTex", 0); // Unit 0
 
     f->glActiveTexture(GL_TEXTURE1);
@@ -1559,7 +1572,7 @@ void UFS2dViewer::_initShaders()
     }
 
     // 2. Clean Fragment Shader - Compatibility Profile
-#if 1
+#if 0
     const char* fragmentShaderSource = R"glsl(
         #version 330 compatibility
         in float v_Fact;
