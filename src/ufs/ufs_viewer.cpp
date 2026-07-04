@@ -222,7 +222,7 @@ void UFS2dViewer::draw()
                     glCallList(zcl);
                 else
                 {
-	            if(_current_sphere_varname != _varname)
+	            if(_current_flat_varname != _varname)
                     {
 			dataTexture = 0;
 		    }
@@ -264,8 +264,19 @@ void UFS2dViewer::draw()
                     glCallList(zcl);
                 else
                 {
-                    // _sphereDisplayOriginal();
-                    _sphereDisplay();
+	            if(_current_sphere_varname != _varname)
+                    {
+			dataTexture = 0;
+		    }
+		    else
+		    {
+			if(_current_draw_level != nvoptions->get_zsec())
+			   dataTexture = 0;
+		    }
+
+                    _current_draw_level = nvoptions->get_zsec();
+                    // _sphereDisplay();
+                    _sphereDisplayGPU();
 		}
             }
     
@@ -1490,5 +1501,279 @@ void UFS2dViewer::_initFlatShaders()
     if (!myFlatShaderProgram->link()) {
         qDebug() << "Shader program linking error:" << myFlatShaderProgram->log();
     }
+}
+
+void UFS2dViewer::_initSphereStaticGPUGrid() {
+    QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
+    if (!f) return;
+
+    std::vector<float> vertices;
+    std::vector<unsigned int> indices;
+    float halfdelt = 0.5/_nlat;
+    float u, v;
+    int i, j;
+
+    for (j = 0; j < _nlat; ++j) {
+        v = halfdelt + (float)j / _nlat;
+        for (i = 0; i < _nlon; ++i) {
+            u = (float)i / _nlon;
+            vertices.push_back(u);
+            vertices.push_back(v);
+        }
+        vertices.push_back(1.0);
+        vertices.push_back(v);
+    }
+
+    for (j = 0; j < _nlat - 1; ++j) {
+        for (i = 0; i < _nlon; ++i) {
+            indices.push_back(j * _nlon + i);
+            indices.push_back((j + 1) * _nlon + i);
+        }
+        indices.push_back(j * _nlon);
+        indices.push_back((j + 1) * _nlon);
+        indices.push_back(0xFFFFFFFF); 
+    }
+    indexCount = static_cast<GLsizei>(indices.size());
+
+    f->glGenBuffers(1, &gridVBO);
+    f->glGenBuffers(1, &gridEBO);
+
+    f->glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
+    f->glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridEBO);
+    f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+
+    f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void UFS2dViewer::_initSphereShaders()
+{
+    if (mySphereShaderProgram != nullptr) return;
+
+    mySphereShaderProgram = new QOpenGLShaderProgram();
+
+    const char* vertexShaderSource4Sphere = R"glsl(
+        #version 330 compatibility
+
+        uniform sampler2D u_PltvarTex;
+        uniform float u_ValMin;
+        uniform float u_ValMax;
+        uniform float u_Radius; // Pass the _k2r(k) radius calculated in C++
+
+        out float v_Fact;
+
+        const float PI = 3.14159265358979323846;
+
+        void main() {
+            vec2 sampleCoord = gl_MultiTexCoord0.xy;
+
+            // 1. Mirror the CPU's horizontal _hlon split shift logic:
+            if (sampleCoord.x < 0.5) {
+                sampleCoord.x += 0.5;
+            } else {
+                sampleCoord.x -= 0.5;
+            }
+
+            // 2. Sample raw value and calculate colormap scaling factor
+            float rawVal = texture(u_PltvarTex, sampleCoord).r;
+            float sv = 1.0 / (u_ValMax - u_ValMin);
+            float fact = sv * (rawVal - u_ValMin);
+            v_Fact = clamp(fact, 0.0, 1.0);
+
+            // 3. Map normalized UV coordinates back to angles (Radians)
+            // Longitude (u: 0 to 1) -> 0 to 360 degrees
+            float lon_rad = gl_MultiTexCoord0.x * 2.0 * PI; 
+            // Latitude (v: 0 to 1) -> -90 to +90 degrees (South Pole to North Pole)
+            float lat_rad = (gl_MultiTexCoord0.y * PI) - (PI / 2.0); 
+        
+            // 4. Spherical Trigonometry (Direct port of your _lonlat2xyz math)
+            float dist = cos(lat_rad);
+    
+            float x = dist * sin(lon_rad);
+            float z = dist * cos(lon_rad);
+            float y = sin(lat_rad);
+
+            // 5. Scale the 3D point outward by the sphere's atmospheric radius
+            vec3 spherePos = vec3(x, y, z) * u_Radius;
+
+            // 6. Set normal attributes natively for lighting calculations on the sphere
+            gl_Normal = normalize(gl_NormalMatrix * vec3(x, y, z));
+
+            // 7. Project via OpenGL view matrix
+            gl_Position = gl_ModelViewProjectionMatrix * vec4(spherePos, 1.0);
+        }
+    )glsl";
+    if (!mySphereShaderProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource4Sphere)) {
+        qDebug() << "Sphere Vertex shader error:" << mySphereShaderProgram->log();
+    }
+
+    // 2. Clean Fragment Shader - Compatibility Profile
+    const char* fragmentShaderSource4Sphere = R"glsl(
+        #version 330 compatibility
+        in float v_Fact;
+        uniform sampler1D u_ColorMap; 
+        out vec4 FragColor;
+
+        void main() {
+            vec3 color = texture(u_ColorMap, v_Fact).rgb;
+            FragColor = vec4(color, 1.0); 
+        }
+    )glsl";
+
+    if (!mySphereShaderProgram->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource4Sphere)) {
+        qDebug() << "Sphere Fragment shader error:" << mySphereShaderProgram->log();
+    }
+
+    if (!mySphereShaderProgram->link()) {
+        qDebug() << "Sphere Shader program linking error:" << mySphereShaderProgram->log();
+    }
+}
+
+void UFS2dViewer::_sphereDisplayGPU()
+{
+    // cout << "\nEnter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
+    // QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    // if (!f || gridVAO == 0) return;
+
+    if (!f) return;
+
+    // --- FIX: Initialize the static grid assets if they haven't been built yet ---
+    if (gridVBO == 0) {
+        _initSphereStaticGPUGrid();
+        if (gridVBO == 0) return;
+    }
+
+    int k1 = nvoptions->get_zsec() + 1;
+    int k = _nlev - k1;
+    double height = _k2h(k);
+
+    _initSphereShaders();
+
+    if (k >= _nlev && _nlev != 1) return;
+
+    // 1. Calculate offset pointer where this specific Z vertical level begins in pltvar
+    size_t dataOffset = static_cast<size_t>(k) * _nlat * _nlon;
+    float* rawDataPtr = &pltvar[dataOffset];
+
+    // 2. Stream raw data bytes to the GPU texture allocation
+    if (dataTexture == 0) {
+        f->glGenTextures(1, &dataTexture);
+        f->glBindTexture(GL_TEXTURE_2D, dataTexture);
+
+        // --- ADD THIS LINE right before glTexImage2D ---
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        f->glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, _nlon, _nlat, 0, GL_RED, GL_FLOAT, rawDataPtr);
+
+        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	// --- ADD WRAP MODES FOR GL_TEXTURE_2D COMPLETENESS ---
+        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
+
+    // 1. Create and upload the colormap if not already done
+    if (colorMapTexture == 0) {
+        f->glGenTextures(1, &colorMapTexture);
+        f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
+
+        // --- FIX: Pack doubles into standard floats for safe GPU consumption ---
+        std::vector<float> floatColorMap(_colorLen * 3);
+        for (int c = 0; c < _colorLen * 3; ++c) {
+            floatColorMap[c] = static_cast<float>(_colorMap[c]);
+        }
+
+        // Upload as standard GL_FLOAT instead of GL_DOUBLE
+        f->glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB32F, _colorLen, 0, GL_RGB, GL_FLOAT, floatColorMap.data());
+        // ------------------------------------------------------------------------
+	
+        f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    }
+
+    // Disable face culling so triangles draw regardless of vertex winding order
+    glDisable(GL_CULL_FACE);
+
+     // Temporarily turn off the depth filter test so the grid isn't masked out by structural overlays
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+
+    // Ensure fixed-function fragment color modifications are turned off
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_1D);
+
+    // Clear texturing overrides
+     glDisable(GL_LIGHTING);
+
+    // Bind Data to Texture Unit 0
+    f->glActiveTexture(GL_TEXTURE0);
+    f->glBindTexture(GL_TEXTURE_2D, dataTexture);
+
+    // Bind ColorMap to Texture Unit 1
+    f->glActiveTexture(GL_TEXTURE1);
+    f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
+
+    // 3. Update uniforms (Inside _SphereDisplayGPU)
+    mySphereShaderProgram->bind();
+    mySphereShaderProgram->setUniformValue("u_ValMin", static_cast<float>(_valmin));
+    mySphereShaderProgram->setUniformValue("u_ValMax", static_cast<float>(_valmax));
+    mySphereShaderProgram->setUniformValue("u_Height", static_cast<float>(height));
+
+    // --- ADD THESE FOUR LINES TO PASS BOUNDARIES ---
+    mySphereShaderProgram->setUniformValue("u_XMin", static_cast<float>(_xFlat[0]));
+    mySphereShaderProgram->setUniformValue("u_XMax", static_cast<float>(_xFlat[_nlon - 1]));
+    mySphereShaderProgram->setUniformValue("u_YMin", static_cast<float>(_yFlat[0]));
+    mySphereShaderProgram->setUniformValue("u_YMax", static_cast<float>(_yFlat[_nlat - 1]));
+    // ----------------------------------------------
+
+
+    mySphereShaderProgram->setUniformValue("u_PltvarTex", 0); // Unit 0
+
+    f->glActiveTexture(GL_TEXTURE1);
+    f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
+    mySphereShaderProgram->setUniformValue("u_ColorMap", 1);  // Unit 1
+
+    // 4. Draw the entire 4.7 Million Point Grid instantaneously
+    f->glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridEBO);
+
+    // --- FIX: Enable GL_VERTEX_ARRAY so the GPU triggers the draw call ---
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(2, GL_FLOAT, 2 * sizeof(float), (void*)0);
+
+    // Keep your texture coordinate mapping active for the shader
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glTexCoordPointer(2, GL_FLOAT, 2 * sizeof(float), (void*)0);
+    // ---------------------------------------------------------------------
+
+    f->glEnable(GL_PRIMITIVE_RESTART);
+    f->glPrimitiveRestartIndex(0xFFFFFFFF);
+
+    f->glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, (void*)0);
+
+    // 5. Clean up bound contexts cleanly
+    f->glDisable(GL_PRIMITIVE_RESTART);
+
+    // Disable both states cleanly
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+    f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    mySphereShaderProgram->release();
+
+    // --- RESTORE DEPTH STATES BEFORE DRAWING COASTLINE ---
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    glDepthFunc(GL_LEQUAL);
+
+    coastline->drawOnPlane(height + 0.01);
+
+    coastline->drawOnPlane(height + 0.01);
 }
 
