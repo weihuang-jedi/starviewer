@@ -1,8 +1,6 @@
 #ifndef _WindVector_H
 #define _WindVector_H
 
-//$Id: windvector.h 4875 2014-01-05 19:48:41Z starviewer $
-
 #include <iostream>
 #include <vector>
 #include <stdio.h>
@@ -10,6 +8,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+
+#include <QOpenGLShaderProgram>
+#include <QOpenGLFunctions_3_3_Core>
 
 #include "evaluator.h"
 #include "arrow.h"
@@ -29,6 +30,7 @@ class WindVector
        ~WindVector();
 
         void draw(int k, double z);
+	void drawGPU(int k, double z);
 
         void setup(int nx, int ny, int nz,
                    float* u, float* v, float*w);
@@ -88,6 +90,19 @@ class WindVector
         double _dist(double vin[3]);
 
         void _set_color(double spd, float* color);
+
+        // GPU Asset tracking IDs
+        GLuint windVBO = 0;
+        GLuint texU = 0;
+        GLuint texV = 0;
+        GLuint texW = 0;
+	GLuint colorMapTexture = 0;
+        QOpenGLShaderProgram* windShader = nullptr;
+
+        void _initWindGPUAssets();
+
+	int _colorLen;
+	float* _colorMap;
 };
 #endif
 

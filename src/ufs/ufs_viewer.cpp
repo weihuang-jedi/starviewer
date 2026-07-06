@@ -1016,8 +1016,8 @@ double UFS2dViewer::_k2r(int k)
 
 void UFS2dViewer::setup_wind(float* u, float* v)
 {
-    // cout << "function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
-    // cout << "setup u and v" << endl;
+    cout << "function: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+    cout << "setup u and v" << endl;
     _u = u;
     _v = v;
 
@@ -1439,8 +1439,8 @@ void UFS2dViewer::_flatDisplayGPU()
     glDepthFunc(GL_LEQUAL);
 
     coastline->drawOnPlane(height + 0.01);
-
-    coastline->drawOnPlane(height + 0.01);
+    // windvector->draw(k, height+0.01);
+    windvector->drawGPU(k, height+0.01);
 }
 
 void UFS2dViewer::_initFlatShaders()

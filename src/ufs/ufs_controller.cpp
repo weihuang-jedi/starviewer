@@ -94,7 +94,8 @@ void UFSController::setup()
 
     // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //_varname = string("sst");
-    _varname = string("hgtsfc");
+  //_varname = string("hgtsfc");
+    _varname = string("tmp");
 
     _sphere = false;
     _initialized = false;
