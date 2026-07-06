@@ -416,7 +416,7 @@ void WindVector::setup_xyFlat(double* xFlat, double* yFlat)
     // cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
-void WindVector::_initWindGPUAssets()
+void WindVector::_initWindGPUAssets6lines()
 {
     QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
     if (!f || windVBO != 0) return;
@@ -555,6 +555,174 @@ void WindVector::_initWindGPUAssets()
     windShader->link();
 }
 
+void WindVector::_initWindGPUAssets()
+{
+    QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
+    if (!f || windVBO != 0) return;
+
+    std::vector<float> arrowMesh;
+    const int segments = 8; // Number of slices around the circular tubes
+    const float PI = 3.1415926535f;
+
+    // Geometry Proportions (Normalized template sizing pointing along +X)
+    // float cylLength = 0.75f;
+    // float cylRadius = 0.02f;
+    // float coneLength = 0.25f;
+    // float coneRadius = 0.06f;
+
+    // Geometry Proportions (Normalized template sizing pointing along +X)
+    float cylLength = 0.75f;
+    float coneLength = 0.25f;
+
+    // CHANGE THIS: from 0.02f to 0.005f (or 0.008f depending on how thin you want them)
+    float cylRadius = 0.005f;
+
+    // CHANGE THIS: from 0.06f to 0.025f to keep the arrowhead proportional to the thinner shaft
+    float coneRadius = 0.010f;
+
+    // 1. GENERATE CYLINDER SHAFT MESH (GL_TRIANGLES)
+    for (int i = 0; i < segments; ++i) {
+        float angle1 = (float)i / segments * 2.0f * PI;
+        float angle2 = (float)(i + 1) / segments * 2.0f * PI;
+
+        float y1 = cosf(angle1) * cylRadius; float z1 = sinf(angle1) * cylRadius;
+        float y2 = cosf(angle2) * cylRadius; float z2 = sinf(angle2) * cylRadius;
+
+        // Triangle 1
+        arrowMesh.push_back(0.0f);      arrowMesh.push_back(y1); arrowMesh.push_back(z1);
+        arrowMesh.push_back(cylLength); arrowMesh.push_back(y1); arrowMesh.push_back(z1);
+        arrowMesh.push_back(cylLength); arrowMesh.push_back(y2); arrowMesh.push_back(z2);
+
+        // Triangle 2
+        arrowMesh.push_back(0.0f);      arrowMesh.push_back(y1); arrowMesh.push_back(z1);
+        arrowMesh.push_back(cylLength); arrowMesh.push_back(y2); arrowMesh.push_back(z2);
+        arrowMesh.push_back(0.0f);      arrowMesh.push_back(y2); arrowMesh.push_back(z2);
+    }
+
+    // 2. GENERATE ARROWHEAD CONE MESH (GL_TRIANGLES)
+    float coneBaseX = cylLength;
+    float coneTipX  = cylLength + coneLength;
+    for (int i = 0; i < segments; ++i) {
+        float angle1 = (float)i / segments * 2.0f * PI;
+        float angle2 = (float)(i + 1) / segments * 2.0f * PI;
+
+        float y1 = cosf(angle1) * coneRadius; float z1 = sinf(angle1) * coneRadius;
+        float y2 = cosf(angle2) * coneRadius; float z2 = sinf(angle2) * coneRadius;
+
+        // Cone Slanted Sides pointing to the tip
+        arrowMesh.push_back(coneBaseX); arrowMesh.push_back(y1); arrowMesh.push_back(z1);
+        arrowMesh.push_back(coneBaseX); arrowMesh.push_back(y2); arrowMesh.push_back(z2);
+        arrowMesh.push_back(coneTipX);  arrowMesh.push_back(0.0f); arrowMesh.push_back(0.0f);
+
+        // Cone Flat Base Cap
+        arrowMesh.push_back(coneBaseX); arrowMesh.push_back(0.0f); arrowMesh.push_back(0.0f);
+        arrowMesh.push_back(coneBaseX); arrowMesh.push_back(y2); arrowMesh.push_back(z2);
+        arrowMesh.push_back(coneBaseX); arrowMesh.push_back(y1); arrowMesh.push_back(z1);
+    }
+
+    // Cache vertex layout sizes to pass to your draw call loop
+    windVertexCount = static_cast<GLsizei>(arrowMesh.size() / 3);
+
+    f->glGenBuffers(1, &windVBO);
+    f->glBindBuffer(GL_ARRAY_BUFFER, windVBO);
+    f->glBufferData(GL_ARRAY_BUFFER, arrowMesh.size() * sizeof(float), arrowMesh.data(), GL_STATIC_DRAW);
+    f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // 3. VERTEX SHADER: Uses a standard LookAt Rotation Matrix to point the 3D meshes along the wind vector
+    const char* vs = R"glsl(
+        #version 330 compatibility
+
+        layout(location = 0) in vec3 a_Position;
+
+        uniform sampler2D u_TexU;
+        uniform sampler2D u_TexV;
+        uniform sampler2D u_TexW;
+        uniform int u_HasW;
+
+        uniform int u_NX;
+        uniform int u_NY;
+        uniform int u_Stepsize;
+
+        uniform float u_Scale;
+        uniform float u_ZScale;
+        uniform float u_BaseZ;
+
+        uniform float u_XMin;
+        uniform float u_XMax;
+        uniform float u_YMin;
+        uniform float u_YMax;
+
+        out float v_Speed;
+
+        void main() {
+            int instancesPerRow = (u_NX + u_Stepsize - 1) / u_Stepsize;
+            int gridI = (gl_InstanceID % instancesPerRow) * u_Stepsize;
+            int gridJ = (gl_InstanceID / instancesPerRow) * u_Stepsize;
+
+            if (gridJ >= u_NY) return;
+
+            vec2 uvSample = vec2(float(gridI) / float(u_NX - 1), float(gridJ) / float(u_NY - 1));
+
+            float uVal = texture(u_TexU, uvSample).r;
+            float vVal = texture(u_TexV, uvSample).r;
+            float wVal = (u_HasW == 1) ? texture(u_TexW, uvSample).r : 0.0;
+
+            float speed = sqrt(uVal*uVal + vVal*vVal + wVal*wVal);
+            v_Speed = speed;
+
+            float tailX = mix(u_XMin, u_XMax, uvSample.x);
+            float tailY = mix(u_YMin, u_YMax, uvSample.y);
+
+            // Calculate directional offsets from data velocities
+            float su = uVal * u_Scale;
+            float sv = vVal * u_Scale;
+            float sw = wVal * u_ZScale;
+            vec3 dirVec = vec3(su, sv, sw) * 20.0; // Keeps your chosen scale boost active
+
+            float finalLength = length(dirVec);
+            if (finalLength < 0.00001) finalLength = 1.0;
+            vec3 heading = dirVec / finalLength;
+
+            // --- BUILD 3D ROTATION MATRIX TO ALIGN +X TEMPLATE WITH HEADING DIRECTION ---
+            // Construct orthogonal coordinate axis handles dynamically
+            vec3 up = (abs(heading.z) < 0.999) ? vec3(0.0, 0.0, 1.0) : vec3(0.0, 1.0, 0.0);
+            vec3 right = normalize(cross(up, heading));
+            vec3 localUp = cross(heading, right);
+
+            mat3 rotationMatrix = mat3(heading, right, localUp);
+            // ----------------------------------------------------------------------------
+
+            // Scale the template's longitudinal length dynamically based on wind speed,
+            // while keeping its radial thickness structural and clean
+            vec3 localVertexPos = a_Position;
+            localVertexPos.x *= finalLength;
+
+            // Rotate local vertex into world space, then anchor it to grid coordinate points
+            vec3 worldSpacePos = (rotationMatrix * localVertexPos) + vec3(tailX, tailY, u_BaseZ);
+
+            gl_Position = gl_ModelViewProjectionMatrix * vec4(worldSpacePos, 1.0);
+        }
+    )glsl";
+
+    const char* fs = R"glsl(
+        #version 330 compatibility
+
+        in float v_Speed;
+        uniform sampler1D u_ColorMap;
+        uniform float u_MaxSpeed;
+
+        void main() {
+            float fact = clamp(v_Speed / u_MaxSpeed, 0.0, 1.0);
+            gl_FragColor = vec4(texture(u_ColorMap, fact).rgb, 1.0);
+        }
+    )glsl";
+
+    windShader = new QOpenGLShaderProgram();
+    windShader->addShaderFromSourceCode(QOpenGLShader::Vertex, vs);
+    windShader->addShaderFromSourceCode(QOpenGLShader::Fragment, fs);
+    windShader->link();
+}
+
 void WindVector::drawGPU(int k, double z)
 {
     QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
@@ -626,10 +794,6 @@ void WindVector::drawGPU(int k, double z)
     // Bind colormap from legacy starviewer framework texture assets
     f->glActiveTexture(GL_TEXTURE3); f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
 
-    // To this:
-    // f->glActiveTexture(GL_TEXTURE3);
-    // f->glBindTexture(GL_TEXTURE_1D, colorTable->get_textureID());
-
     windShader->bind();
     windShader->setUniformValue("u_TexU", 0);
     windShader->setUniformValue("u_TexV", 1);
@@ -657,8 +821,14 @@ void WindVector::drawGPU(int k, double z)
     f->glEnableVertexAttribArray(0);
     f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
+    // --- CHANGE THIS: ---
     // Draw thousands of distinct field arrows simultaneously!
-    f->glDrawArraysInstanced(GL_LINES, 0, 6, totalInstances);
+    // f->glDrawArraysInstanced(GL_LINES, 0, 6, totalInstances);
+
+    // --- TO THIS: ---
+    // Switch primitive type to GL_TRIANGLES, using our dynamic vertexCount tracker
+    f->glDrawArraysInstanced(GL_TRIANGLES, 0, windVertexCount, totalInstances);
+    // ----------------
 
     f->glDisableVertexAttribArray(0);
     f->glBindBuffer(GL_ARRAY_BUFFER, 0);

@@ -97,8 +97,10 @@ class WindVector
         GLuint texV = 0;
         GLuint texW = 0;
 	GLuint colorMapTexture = 0;
+	GLsizei windVertexCount = 0;
         QOpenGLShaderProgram* windShader = nullptr;
 
+        void _initWindGPUAssets6lines();
         void _initWindGPUAssets();
 
 	int _colorLen;
