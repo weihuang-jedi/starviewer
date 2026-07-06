@@ -291,7 +291,10 @@ void UFS2dViewer::draw()
                 if(xcl)
                     glCallList(xcl);
                 else
-                    _sphereXplane(nvoptions->get_xsec());
+		{
+                    // _sphereXplane(nvoptions->get_xsec());
+                    _sphereXplane_GPU(nvoptions->get_xsec());
+		}
             }
     
             if((nvoptions->get_ysec() > 5) && (nvoptions->get_ysec() < (_nlat-5)))
@@ -299,7 +302,10 @@ void UFS2dViewer::draw()
                 if(ycl)
                     glCallList(ycl);
                 else
-                    _sphereYplane(nvoptions->get_ysec());
+		{
+                    // _sphereYplane(nvoptions->get_ysec());
+                    _sphereYplane_GPU(nvoptions->get_ysec());
+		}
             }
     
           //draw_sphere_grids();
@@ -1993,5 +1999,294 @@ void UFS2dViewer::_display_Yflat_plane_GPU(int ys)
     f->glBindBuffer(GL_ARRAY_BUFFER, 0);
     f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     crossShaderProgram->release();
+}
+
+void UFS2dViewer::_initSphereCrossShaders()
+{
+    if (sphereCrossShaderProgram != nullptr) return;
+
+    sphereCrossShaderProgram = new QOpenGLShaderProgram();
+
+    // 1. Spherical Cross-Section Vertex Shader
+    const char* vsSource = R"glsl(
+        #version 330 compatibility
+        
+        uniform float u_SliceAngleRad; // The fixed angle (lon_rad for X-plane, lat_rad for Y-plane)
+        uniform int u_IsXSlice;        // 1 if X-plane (constant longitude), 0 if Y-plane (constant latitude)
+        
+        // Arrays mapping grid indices to exact radians passed from CPU arrays (_lon / _lat)
+        uniform float u_MinAngleRad;
+        uniform float u_MaxAngleRad;
+        
+        uniform float u_Radii[128];    // Atmospheric shell radius values array (_k2r calculations)
+
+        const float PI = 3.14159265358979323846;
+
+        void main() {
+            vec2 uv = gl_MultiTexCoord0.xy;
+            gl_TexCoord[0] = gl_MultiTexCoord0;
+
+            // Extract vertical layer radius index
+            int kIndex = int(uv.y);
+            float currentRadius = u_Radii[kIndex];
+
+            // Interpolate dynamic slice angle smoothly across the grid span
+            float dynamicAngle = mix(u_MinAngleRad, u_MaxAngleRad, uv.x);
+
+            float lon_rad;
+            float lat_rad;
+
+            if (u_IsXSlice == 1) {
+                // X-plane slicing: Longitude is fixed, Latitude varies
+                lon_rad = u_SliceAngleRad;
+                lat_rad = dynamicAngle;
+            } else {
+                // Y-plane slicing: Longitude varies, Latitude is fixed
+                lon_rad = dynamicAngle;
+                lat_rad = u_SliceAngleRad;
+            }
+
+            // Apply our working spherical geometry transformations (including the -PI horizontal fix)
+            float adjusted_lon = lon_rad - PI;
+            float dist = cos(lat_rad);
+            
+            float x = dist * sin(adjusted_lon);
+            float z = dist * cos(adjusted_lon);
+            float y = -sin(lat_rad); // Inverted matching right-side up orientation
+
+            vec3 spherePos = vec3(x, y, z) * currentRadius;
+
+            gl_Position = gl_ModelViewProjectionMatrix * vec4(spherePos, 1.0);
+        }
+    )glsl";
+
+    // 2. Fragment Shader
+    const char* fsSource = R"glsl(
+        #version 330 compatibility
+        
+        uniform sampler2D u_SliceDataTex;
+        uniform sampler1D u_ColorMap;
+        uniform float u_ValMin;
+        uniform float u_ValMax;
+
+        void main() {
+            vec2 uv = gl_TexCoord[0].xy;
+            
+            // Re-normalize texture sampling index rows cleanly
+            float v_norm = uv.y / (textureSize(u_SliceDataTex, 0).y - 1.0);
+            vec2 samplePos = vec2(uv.x, v_norm);
+
+            float rawVal = texture(u_SliceDataTex, samplePos).r;
+
+            float range = u_ValMax - u_ValMin;
+            if (range <= 0.00001) range = 1.0;
+
+            float fact = clamp((rawVal - u_ValMin) / range, 0.0, 1.0);
+            
+            vec3 color = texture(u_ColorMap, fact).rgb;
+            gl_FragColor = vec4(color, 1.0);
+        }
+    )glsl";
+
+    sphereCrossShaderProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, vsSource);
+    sphereCrossShaderProgram->addShaderFromSourceCode(QOpenGLShader::Fragment, fsSource);
+    sphereCrossShaderProgram->link();
+}
+
+void UFS2dViewer::_initSphereCrossStaticGrid(int horizontalSize)
+{
+    QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
+    if (!f) return;
+
+    std::vector<float> vertices;
+    std::vector<unsigned int> indices;
+
+    for (int k = 0; k < _nlev; ++k) {
+        for (int i = 0; i < horizontalSize; ++i) {
+            float u_tex = (float)i / (horizontalSize - 1);
+            vertices.push_back(u_tex);
+            vertices.push_back((float)k);
+        }
+    }
+
+    for (int k = 0; k < _nlev - 1; ++k) {
+        for (int i = 0; i < horizontalSize; ++i) {
+            indices.push_back(k * horizontalSize + i);
+            indices.push_back((k + 1) * horizontalSize + i);
+        }
+        indices.push_back(0xFFFFFFFF);
+    }
+
+    if (sphereCrossVBO == 0) f->glGenBuffers(1, &sphereCrossVBO);
+    if (sphereCrossEBO == 0) f->glGenBuffers(1, &sphereCrossEBO);
+
+    f->glBindBuffer(GL_ARRAY_BUFFER, sphereCrossVBO);
+    f->glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereCrossEBO);
+    f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+
+    f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void UFS2dViewer::_sphereXplane_GPU(int xs)
+{
+    QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
+    if (!f) return;
+
+    int i = xs - 1;
+
+    _initSphereCrossStaticGrid(_nlat);
+    _initSphereCrossShaders();
+
+    // 1. Pack 3D slice array column 
+    std::vector<float> sliceData(_nlat * _nlev);
+    for (int k = 0; k < _nlev; ++k) {
+        for (int j = 0; j < _nlat; ++j) {
+            size_t mpos = (static_cast<size_t>(k) * _nlat + j) * _nlon;
+            sliceData[k * _nlat + j] = pltvar[mpos + i];
+        }
+    }
+
+    // 2. Stream Data texture
+    if (sphereCrossDataTex == 0) f->glGenTextures(1, &sphereCrossDataTex);
+    f->glBindTexture(GL_TEXTURE_2D, sphereCrossDataTex);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, _nlat, _nlev, 0, GL_RED, GL_FLOAT, sliceData.data());
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    // 3. Map radii configuration values 
+    std::vector<float> fRadii(_nlev);
+    for (int k = 0; k < _nlev; ++k) fRadii[k] = static_cast<float>(_k2r(k));
+
+    // 4. Bind parameters
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_CULL_FACE);
+
+    f->glActiveTexture(GL_TEXTURE0);
+    f->glBindTexture(GL_TEXTURE_2D, sphereCrossDataTex);
+    f->glActiveTexture(GL_TEXTURE1);
+    f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
+
+    sphereCrossShaderProgram->bind();
+    sphereCrossShaderProgram->setUniformValue("u_SliceAngleRad", static_cast<float>(_lon[i] * M_PI / 180.0));
+    sphereCrossShaderProgram->setUniformValue("u_IsXSlice", 1);
+    sphereCrossShaderProgram->setUniformValue("u_MinAngleRad", static_cast<float>(_lat[0] * M_PI / 180.0));
+    sphereCrossShaderProgram->setUniformValue("u_MaxAngleRad", static_cast<float>(_lat[_nlat - 1] * M_PI / 180.0));
+    sphereCrossShaderProgram->setUniformValue("u_ValMin", static_cast<float>(_valmin));
+    sphereCrossShaderProgram->setUniformValue("u_ValMax", static_cast<float>(_valmax));
+    sphereCrossShaderProgram->setUniformValue("u_SliceDataTex", 0);
+    sphereCrossShaderProgram->setUniformValue("u_ColorMap", 1);
+    sphereCrossShaderProgram->setUniformValueArray("u_Radii", fRadii.data(), _nlev, 1);
+
+    // 5. Draw
+    f->glBindBuffer(GL_ARRAY_BUFFER, sphereCrossVBO);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereCrossEBO);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(2, GL_FLOAT, 2 * sizeof(float), (void*)0);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glTexCoordPointer(2, GL_FLOAT, 2 * sizeof(float), (void*)0);
+
+    f->glEnable(GL_PRIMITIVE_RESTART);
+    f->glPrimitiveRestartIndex(0xFFFFFFFF);
+
+    GLsizei localIndexCount = (_nlev - 1) * (_nlat * 2 + 1);
+    f->glDrawElements(GL_TRIANGLE_STRIP, localIndexCount, GL_UNSIGNED_INT, (void*)0);
+
+    f->glDisable(GL_PRIMITIVE_RESTART);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    sphereCrossShaderProgram->release();
+}
+
+void UFS2dViewer::_sphereYplane_GPU(int ys)
+{
+    QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
+    if (!f) return;
+
+    int j = ys - 1;
+
+    // Allocate +1 extra horizontal column size to account for the loop wrap-around cleanly
+    _initSphereCrossStaticGrid(_nlon + 1);
+    _initSphereCrossShaders();
+
+    // 1. Extract data slice and cleanly wrap the final column row array
+    std::vector<float> sliceData((_nlon + 1) * _nlev);
+    for (int k = 0; k < _nlev; ++k) {
+        size_t mpos = (static_cast<size_t>(k) * _nlat + j) * _nlon;
+        
+        // Native columns copy
+        for (int i = 0; i < _nlon; ++i) {
+            sliceData[k * (_nlon + 1) + i] = pltvar[mpos + i];
+        }
+        // Force loop back closure wrap-around explicitly into the final column index slot
+        sliceData[k * (_nlon + 1) + _nlon] = pltvar[mpos];
+    }
+
+    // 2. Stream Data texture
+    if (sphereCrossDataTex == 0) f->glGenTextures(1, &sphereCrossDataTex);
+    f->glBindTexture(GL_TEXTURE_2D, sphereCrossDataTex);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, _nlon + 1, _nlev, 0, GL_RED, GL_FLOAT, sliceData.data());
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    std::vector<float> fRadii(_nlev);
+    for (int k = 0; k < _nlev; ++k) fRadii[k] = static_cast<float>(_k2r(k));
+
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_CULL_FACE);
+
+    f->glActiveTexture(GL_TEXTURE0);
+    f->glBindTexture(GL_TEXTURE_2D, sphereCrossDataTex);
+    f->glActiveTexture(GL_TEXTURE1);
+    f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
+
+    sphereCrossShaderProgram->bind();
+    sphereCrossShaderProgram->setUniformValue("u_SliceAngleRad", static_cast<float>(_lat[j] * M_PI / 180.0));
+    sphereCrossShaderProgram->setUniformValue("u_IsXSlice", 0);
+    sphereCrossShaderProgram->setUniformValue("u_MinAngleRad", static_cast<float>(_lon[0] * M_PI / 180.0));
+    
+    // Explicitly pass 360 degrees as max boundary to seal wrap-around seams perfectly
+    sphereCrossShaderProgram->setUniformValue("u_MaxAngleRad", static_cast<float>(360.0 * M_PI / 180.0));
+    
+    sphereCrossShaderProgram->setUniformValue("u_ValMin", static_cast<float>(_valmin));
+    sphereCrossShaderProgram->setUniformValue("u_ValMax", static_cast<float>(_valmax));
+    sphereCrossShaderProgram->setUniformValue("u_SliceDataTex", 0);
+    sphereCrossShaderProgram->setUniformValue("u_ColorMap", 1);
+    sphereCrossShaderProgram->setUniformValueArray("u_Radii", fRadii.data(), _nlev, 1);
+
+    // 3. Draw
+    f->glBindBuffer(GL_ARRAY_BUFFER, sphereCrossVBO);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereCrossEBO);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(2, GL_FLOAT, 2 * sizeof(float), (void*)0);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glTexCoordPointer(2, GL_FLOAT, 2 * sizeof(float), (void*)0);
+
+    f->glEnable(GL_PRIMITIVE_RESTART);
+    f->glPrimitiveRestartIndex(0xFFFFFFFF);
+
+    GLsizei localIndexCount = (_nlev - 1) * ((_nlon + 1) * 2 + 1);
+    f->glDrawElements(GL_TRIANGLE_STRIP, localIndexCount, GL_UNSIGNED_INT, (void*)0);
+
+    f->glDisable(GL_PRIMITIVE_RESTART);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    sphereCrossShaderProgram->release();
 }
 

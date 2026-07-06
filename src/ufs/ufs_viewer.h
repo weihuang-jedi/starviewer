@@ -180,6 +180,16 @@ class UFS2dViewer : public QGLWidget
 	void _initCrossStaticGrid(int horizontalSize);
 	void _display_Xflat_plane_GPU(int xs);
 	void _display_Yflat_plane_GPU(int ys);
+
+	GLuint sphereCrossVBO = 0;
+        GLuint sphereCrossEBO = 0;
+        GLuint sphereCrossDataTex = 0;
+        QOpenGLShaderProgram* sphereCrossShaderProgram = nullptr;
+
+	void _initSphereCrossShaders();
+	void _initSphereCrossStaticGrid(int horizontalSize);
+	void _sphereXplane_GPU(int xs);
+	void _sphereYplane_GPU(int ys);
 };
 #endif
 
