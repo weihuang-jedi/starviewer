@@ -245,7 +245,10 @@ void UFS2dViewer::draw()
                 if(xcl)
                     glCallList(xcl);
                 else
-                    _display_Xflat_plane(nvoptions->get_xsec());
+		{
+                    // _display_Xflat_plane(nvoptions->get_xsec());
+                    _display_Xflat_plane_GPU(nvoptions->get_xsec());
+		}
             }
 
             if((nvoptions->get_ysec() > 5) && (nvoptions->get_ysec() < (_nlat-5)))
@@ -253,7 +256,10 @@ void UFS2dViewer::draw()
                 if(ycl)
                     glCallList(ycl);
                 else
-                    _display_Yflat_plane(nvoptions->get_ysec());
+		{
+                    // _display_Yflat_plane(nvoptions->get_ysec());
+                    _display_Yflat_plane_GPU(nvoptions->get_ysec());
+		}
             }
         }
         else
@@ -708,7 +714,6 @@ void UFS2dViewer::_sphereYplane(int ys)
     glPopMatrix();
     glEndList();
 }
-
 
 void UFS2dViewer::_display_Xflat_plane(int xs)
 {
@@ -1683,5 +1688,310 @@ void UFS2dViewer::_sphereDisplayGPU()
      mySphereShaderProgram->release();
 
      coastline->drawOnSphere(radius + 0.01);
+}
+
+void UFS2dViewer::_initCrossShaders()
+{
+    if (crossShaderProgram != nullptr) return;
+
+    crossShaderProgram = new QOpenGLShaderProgram();
+
+    // 1. Precise Cross-Section Vertex Shader
+    const char* vsSource = R"glsl(
+        #version 330 compatibility
+
+        uniform float u_SliceCoord; // Static X or Y plane position
+        uniform int u_IsXSlice;     // 1 if X-plane (Longitude), 0 if Y-plane (Latitude)
+
+        uniform float u_MinCoord;   // Minimum spatial boundary limit
+        uniform float u_MaxCoord;   // Maximum spatial boundary limit
+
+        uniform float u_Heights[128]; // Atmospheric altitude array tracker
+
+        void main() {
+            // Unpack layout coordinates
+            vec2 incomingUV = gl_MultiTexCoord0.xy;
+
+            // Pass the clean texture coordinates directly to the fragment pipeline
+            gl_TexCoord[0] = gl_MultiTexCoord0;
+
+            // Extract vertical layer depth index
+            int kIndex = int(incomingUV.y);
+            float currentHeight = u_Heights[kIndex];
+
+            // Linearly scale spatial positions dynamically between true data bounds
+            float dynamicCoord = mix(u_MinCoord, u_MaxCoord, incomingUV.x);
+
+            vec3 pos;
+            if (u_IsXSlice == 1) {
+                // X-plane slice: X is fixed, Y varies across the bounds, Z is height
+                pos = vec3(u_SliceCoord, dynamicCoord, currentHeight);
+            } else {
+                // Y-plane slice: X varies across the bounds, Y is fixed, Z is height
+                pos = vec3(dynamicCoord, u_SliceCoord, currentHeight);
+            }
+
+            gl_Position = gl_ModelViewProjectionMatrix * vec4(pos, 1.0);
+        }
+    )glsl";
+
+    // 2. Fragment Shader
+    const char* fsSource = R"glsl(
+        #version 330 compatibility
+
+        uniform sampler2D u_SliceDataTex;
+        uniform sampler1D u_ColorMap;
+        uniform float u_ValMin;
+        uniform float u_ValMax;
+
+        void main() {
+            // Scale and map texture sampling components linearly
+            vec2 uv = gl_TexCoord[0].xy;
+
+            // Extract the true float height layer factor from raw incoming integer metrics
+            // (Converts structural vertex layer integer steps back to clean 0.0-1.0 UV space)
+            float v_norm = uv.y / (textureSize(u_SliceDataTex, 0).y - 1.0);
+            vec2 samplePos = vec2(uv.x, v_norm);
+
+            // Sample raw data value from the cross-section coordinate map
+            float rawVal = texture(u_SliceDataTex, samplePos).r;
+
+            float range = u_ValMax - u_ValMin;
+            if (range <= 0.00001) range = 1.0;
+
+            float fact = clamp((rawVal - u_ValMin) / range, 0.0, 1.0);
+
+            vec3 color = texture(u_ColorMap, fact).rgb;
+            gl_FragColor = vec4(color, 1.0);
+        }
+    )glsl";
+
+    crossShaderProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, vsSource);
+    crossShaderProgram->addShaderFromSourceCode(QOpenGLShader::Fragment, fsSource);
+    crossShaderProgram->link();
+}
+
+void UFS2dViewer::_initCrossStaticGrid(int horizontalSize)
+{
+    QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
+    if (!f) return;
+
+    std::vector<float> vertices;
+    std::vector<unsigned int> indices;
+
+    // Generate UV positions
+    for (int k = 0; k < _nlev; ++k) {
+        float v_tex = (float)k / (_nlev - 1);
+        for (int i = 0; i < horizontalSize; ++i) {
+            float u_tex = (float)i / (horizontalSize - 1);
+
+            vertices.push_back(u_tex);
+            vertices.push_back((float)k); // Pass index directly as float for shader matching
+        }
+    }
+
+    // Interleave index quad strip rows
+    for (int k = 0; k < _nlev - 1; ++k) {
+        for (int i = 0; i < horizontalSize; ++i) {
+            indices.push_back(k * horizontalSize + i);
+            indices.push_back((k + 1) * horizontalSize + i);
+        }
+        indices.push_back(0xFFFFFFFF); // Restart strip
+    }
+
+    if (crossVBO == 0) f->glGenBuffers(1, &crossVBO);
+    if (crossEBO == 0) f->glGenBuffers(1, &crossEBO);
+
+    f->glBindBuffer(GL_ARRAY_BUFFER, crossVBO);
+    f->glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, crossEBO);
+    f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+
+    f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void UFS2dViewer::_display_Xflat_plane_GPU(int xs)
+{
+    QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
+    if (!f) return;
+
+    int i = xs - 1;
+
+    // 1. Re-initialize coordinate layouts on demand
+    _initCrossStaticGrid(_nlat);
+    _initCrossShaders();
+
+    // 2. Extract and pack the slice data from the 3D volume into a clean 2D slice buffer
+    std::vector<float> sliceData(_nlat * _nlev);
+    for (int k = 0; k < _nlev; ++k) {
+        for (int j = 0; j < _nlat; ++j) {
+            size_t mpos = (static_cast<size_t>(k) * _nlat + j) * _nlon;
+            sliceData[k * _nlat + j] = pltvar[mpos + i];
+        }
+    }
+
+    // 3. Stream data texture to GPU allocation
+    if (crossDataTex == 0) {
+        f->glGenTextures(1, &crossDataTex);
+    }
+    f->glBindTexture(GL_TEXTURE_2D, crossDataTex);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, _nlat, _nlev, 0, GL_RED, GL_FLOAT, sliceData.data());
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    // 4. Capture current height layers into float precision vectors
+    std::vector<float> fHeights(_nlev);
+    for (int k = 0; k < _nlev; ++k) fHeights[k] = static_cast<float>(_k2h(k));
+
+    // 5. Update pipeline state overrides
+    glDisable(GL_LIGHTING);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_TEXTURE_2D);
+
+    f->glActiveTexture(GL_TEXTURE0);
+    f->glBindTexture(GL_TEXTURE_2D, crossDataTex);
+
+    f->glActiveTexture(GL_TEXTURE1);
+    f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
+
+    crossShaderProgram->bind();
+    crossShaderProgram->setUniformValue("u_SliceCoord", static_cast<float>(_xFlat[i]));
+    crossShaderProgram->setUniformValue("u_IsXSlice", 1);
+
+    // --- ADD BOUNDARY UNIFORMS TO STOP THE HORIZONTAL STRETCH OVERFLOW ---
+    crossShaderProgram->setUniformValue("u_MinCoord", static_cast<float>(_yFlat[0]));
+    crossShaderProgram->setUniformValue("u_MaxCoord", static_cast<float>(_yFlat[_nlat - 1]));
+    // ---------------------------------------------------------------------
+
+    crossShaderProgram->setUniformValue("u_ValMin", static_cast<float>(_valmin));
+    crossShaderProgram->setUniformValue("u_ValMax", static_cast<float>(_valmax));
+    crossShaderProgram->setUniformValue("u_SliceDataTex", 0);
+    crossShaderProgram->setUniformValue("u_ColorMap", 1);
+    crossShaderProgram->setUniformValueArray("u_Heights", fHeights.data(), _nlev, 1);
+
+    // 6. Draw the complete cross-section plane instantaneously
+    f->glBindBuffer(GL_ARRAY_BUFFER, crossVBO);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, crossEBO);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(2, GL_FLOAT, 2 * sizeof(float), (void*)0);
+
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glTexCoordPointer(2, GL_FLOAT, 2 * sizeof(float), (void*)0);
+
+    f->glEnable(GL_PRIMITIVE_RESTART);
+    f->glPrimitiveRestartIndex(0xFFFFFFFF);
+
+    // Dynamic element draw based on index count size calculations
+    GLsizei localIndexCount = (_nlev - 1) * (_nlat * 2 + 1);
+    f->glDrawElements(GL_TRIANGLE_STRIP, localIndexCount, GL_UNSIGNED_INT, (void*)0);
+
+    f->glDisable(GL_PRIMITIVE_RESTART);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    crossShaderProgram->release();
+}
+
+void UFS2dViewer::_display_Yflat_plane_GPU(int ys)
+{
+    QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
+    if (!f) return;
+
+    int j = ys - 1;
+    if ((-85.0 > _lat[j]) || (85.0 < _lat[j])) return;
+
+    // 1. Re-initialize assets
+    _initCrossStaticGrid(_nlon);
+    _initCrossShaders();
+
+    // 2. Extract data slice and account for the horizontal _hlon shift check
+    std::vector<float> sliceData(_nlon * _nlev);
+    for (int k = 0; k < _nlev; ++k) {
+        size_t mpos = (static_cast<size_t>(k) * _nlat + j) * _nlon;
+        int idx = 0;
+
+        // First part: from _hlon to end
+        for (int i = _hlon; i < _nlon; ++i) {
+            sliceData[k * _nlon + idx] = pltvar[mpos + i];
+            idx++;
+        }
+        // Second part: from 0 wrap-around to _hlon
+        for (int i = 0; i < _hlon; ++i) {
+            sliceData[k * _nlon + idx] = pltvar[mpos + i];
+            idx++;
+        }
+    }
+
+    // 3. Upload data texture to target GPU slot
+    if (crossDataTex == 0) {
+        f->glGenTextures(1, &crossDataTex);
+    }
+    f->glBindTexture(GL_TEXTURE_2D, crossDataTex);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, _nlon, _nlev, 0, GL_RED, GL_FLOAT, sliceData.data());
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    // 4. Capture heights array
+    std::vector<float> fHeights(_nlev);
+    for (int k = 0; k < _nlev; ++k) fHeights[k] = static_cast<float>(_k2h(k));
+
+    // 5. Setup shader uniforms
+    glDisable(GL_LIGHTING);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_TEXTURE_2D);
+
+    f->glActiveTexture(GL_TEXTURE0);
+    f->glBindTexture(GL_TEXTURE_2D, crossDataTex);
+
+    f->glActiveTexture(GL_TEXTURE1);
+    f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
+
+    crossShaderProgram->bind();
+    crossShaderProgram->setUniformValue("u_SliceCoord", static_cast<float>(_yFlat[j]));
+    crossShaderProgram->setUniformValue("u_IsXSlice", 0); // Explicitly zero out for Y-Plane tracking layout
+
+    // --- ADD BOUNDARY UNIFORMS MATCHING YOUR FLAT HORIZONTAL ASPECT SIZE ---
+    crossShaderProgram->setUniformValue("u_MinCoord", -1.0f);
+    crossShaderProgram->setUniformValue("u_MaxCoord", 1.0f);
+    // ----------------------------------------------------------------------
+
+    crossShaderProgram->setUniformValue("u_ValMin", static_cast<float>(_valmin));
+    crossShaderProgram->setUniformValue("u_ValMax", static_cast<float>(_valmax));
+    crossShaderProgram->setUniformValue("u_SliceDataTex", 0);
+    crossShaderProgram->setUniformValue("u_ColorMap", 1);
+    crossShaderProgram->setUniformValueArray("u_Heights", fHeights.data(), _nlev, 1);
+
+    // 6. Push data elements array down the pipeline loop instantly
+    f->glBindBuffer(GL_ARRAY_BUFFER, crossVBO);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, crossEBO);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(2, GL_FLOAT, 2 * sizeof(float), (void*)0);
+
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glTexCoordPointer(2, GL_FLOAT, 2 * sizeof(float), (void*)0);
+
+    f->glEnable(GL_PRIMITIVE_RESTART);
+    f->glPrimitiveRestartIndex(0xFFFFFFFF);
+
+    GLsizei localIndexCount = (_nlev - 1) * (_nlon * 2 + 1);
+    f->glDrawElements(GL_TRIANGLE_STRIP, localIndexCount, GL_UNSIGNED_INT, (void*)0);
+
+    f->glDisable(GL_PRIMITIVE_RESTART);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    crossShaderProgram->release();
 }
 

@@ -170,6 +170,16 @@ class UFS2dViewer : public QGLWidget
 
 	QOpenGLShaderProgram* mySphereShaderProgram = nullptr;
         void _initSphereShaders(); // Helper function to compile them
+
+	GLuint crossVBO = 0;
+        GLuint crossEBO = 0;
+        GLuint crossDataTex = 0;
+        QOpenGLShaderProgram* crossShaderProgram = nullptr;
+
+	void _initCrossShaders();
+	void _initCrossStaticGrid(int horizontalSize);
+	void _display_Xflat_plane_GPU(int xs);
+	void _display_Yflat_plane_GPU(int ys);
 };
 #endif
 
