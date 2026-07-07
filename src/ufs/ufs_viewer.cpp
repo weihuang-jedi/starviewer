@@ -1438,8 +1438,53 @@ void UFS2dViewer::_flatDisplayGPU()
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LEQUAL);
 
+#if 1
+    // ---------------------------------------------------------------------
+    // --- ADD THIS BLOCK AT THE BOTTOM OF _flatDisplayGPU TO RENDER GRID ---
+    // ---------------------------------------------------------------------
+    _initStaticGridLines();
+    _initGridLinesShaders();
+
+    // Smooth out line aliasing jaggy artifacts
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_LINE_SMOOTH);
+    glLineWidth(5.2f); // Set line thickness structural look
+
+    gridLinesShader->bind();
+    gridLinesShader->setUniformValue("u_XMin", static_cast<float>(_xFlat[0]));
+    gridLinesShader->setUniformValue("u_XMax", static_cast<float>(_xFlat[_nlon - 1]));
+    gridLinesShader->setUniformValue("u_YMin", static_cast<float>(_yFlat[0]));
+    gridLinesShader->setUniformValue("u_YMax", static_cast<float>(_yFlat[_nlat - 1]));
+    gridLinesShader->setUniformValue("u_Height", static_cast<float>(height + 0.015)); // Sit on top safely
+
+    // Choose Grid Color (RGBA: e.g., Semi-transparent white/gray works best)
+    // gridLinesShader->setUniformValue("u_GridColor", QColor(220, 220, 220, 160));
+    gridLinesShader->setUniformValue("u_GridColor", QColor(255, 0, 0, 255));
+
+    f->glBindBuffer(GL_ARRAY_BUFFER, gridLinesVBO);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridLinesEBO);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(2, GL_FLOAT, 2 * sizeof(float), (void*)0);
+
+    f->glEnable(GL_PRIMITIVE_RESTART);
+    f->glPrimitiveRestartIndex(0xFFFFFFFF);
+
+    // Draw the entire structural line grid in 1 parallel GPU call
+    f->glDrawElements(GL_LINES, gridLinesIndexCount, GL_UNSIGNED_INT, (void*)0);
+
+    f->glDisable(GL_PRIMITIVE_RESTART);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    gridLinesShader->release();
+    glDisable(GL_LINE_SMOOTH);
+    // ---------------------------------------------------------------------
+#endif
+
     coastline->drawOnPlane(height + 0.01);
-    // windvector->draw(k, height+0.01);
     windvector->drawGPU(k, height+0.01);
 }
 
@@ -2288,5 +2333,116 @@ void UFS2dViewer::_sphereYplane_GPU(int ys)
     f->glBindBuffer(GL_ARRAY_BUFFER, 0);
     f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     sphereCrossShaderProgram->release();
+}
+
+void UFS2dViewer::_initGridLinesShaders()
+{
+    if (gridLinesShader != nullptr) return;
+
+    gridLinesShader = new QOpenGLShaderProgram();
+
+    // Vertex Shader: Projects lines dynamically across flat map boundaries
+    const char* vsSource = R"glsl(
+        #version 330 compatibility
+
+        layout(location = 0) in vec2 a_TexCoord; // Reuse normalized [0,1] coordinates
+
+        uniform float u_XMin;
+        uniform float u_XMax;
+        uniform float u_YMin;
+        uniform float u_YMax;
+        uniform float u_Height;
+
+        void main() {
+            // Linearly interpolate the normalized VBO vertex across actual map bounds
+            float xPos = mix(u_XMin, u_XMax, a_TexCoord.x);
+            float yPos = mix(u_YMin, u_YMax, a_TexCoord.y);
+
+            gl_Position = gl_ModelViewProjectionMatrix * vec4(xPos, yPos, u_Height, 1.0);
+        }
+    )glsl";
+
+    // Fragment Shader: Outputs a customizable, solid line overlay color
+    const char* fsSource = R"glsl(
+        #version 330 compatibility
+
+        uniform vec4 u_GridColor;
+
+        void main() {
+            gl_FragColor = u_GridColor;
+        }
+    )glsl";
+
+    gridLinesShader->addShaderFromSourceCode(QOpenGLShader::Vertex, vsSource);
+    gridLinesShader->addShaderFromSourceCode(QOpenGLShader::Fragment, fsSource);
+    gridLinesShader->link();
+}
+
+void UFS2dViewer::_initStaticGridLines()
+{
+    QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
+    if (!f || gridLinesVBO != 0) return;
+
+    // Define intervals (e.g., line every 10% of the map space)
+    const int xLines = 13; // E.g., Every 30 degrees across 360 degrees
+    const int yLines = 7;  // E.g., Every 30 degrees across latitudes
+    const int lineRes = 50; // Smoothness resolution of each line path
+
+    std::vector<float> vertices;
+    std::vector<unsigned int> indices;
+
+    // 1. Generate Constant Longitude Lines (Vertical Paths running North-South)
+    for (int i = 0; i < xLines; ++i) {
+        float u = (float)i / (xLines - 1);
+        for (int r = 0; r < lineRes; ++r) {
+            float v = (float)r / (lineRes - 1);
+            vertices.push_back(u); vertices.push_back(v);
+        }
+    }
+
+    // 2. Generate Constant Latitude Lines (Horizontal Paths running East-West)
+    for (int j = 0; j < yLines; ++j) {
+        float v = (float)j / (yLines - 1);
+        for (int r = 0; r < lineRes; ++r) {
+            float u = (float)r / (lineRes - 1);
+            vertices.push_back(u); vertices.push_back(v);
+        }
+    }
+
+    // 3. Assemble Index Array Topology for GL_LINES using primitive restart separating strips
+    unsigned int vertexOffset = 0;
+
+    // Connect Vertical Longitude Lines
+    for (int i = 0; i < xLines; ++i) {
+        for (int r = 0; r < lineRes - 1; ++r) {
+            indices.push_back(vertexOffset + r);
+            indices.push_back(vertexOffset + r + 1);
+        }
+        indices.push_back(0xFFFFFFFF); // Restart line strip
+        vertexOffset += lineRes;
+    }
+
+    // Connect Horizontal Latitude Lines
+    for (int j = 0; j < yLines; ++j) {
+        for (int r = 0; r < lineRes - 1; ++r) {
+            indices.push_back(vertexOffset + r);
+            indices.push_back(vertexOffset + r + 1);
+        }
+        indices.push_back(0xFFFFFFFF);
+        vertexOffset += lineRes;
+    }
+
+    gridLinesIndexCount = static_cast<GLsizei>(indices.size());
+
+    f->glGenBuffers(1, &gridLinesVBO);
+    f->glBindBuffer(GL_ARRAY_BUFFER, gridLinesVBO);
+    f->glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+    f->glGenBuffers(1, &gridLinesEBO);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridLinesEBO);
+    f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+
+    f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 

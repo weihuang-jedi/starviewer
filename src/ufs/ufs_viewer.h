@@ -190,6 +190,14 @@ class UFS2dViewer : public QGLWidget
 	void _initSphereCrossStaticGrid(int horizontalSize);
 	void _sphereXplane_GPU(int xs);
 	void _sphereYplane_GPU(int ys);
+
+	GLuint gridLinesVBO = 0;
+        GLuint gridLinesEBO = 0;
+        GLsizei gridLinesIndexCount = 0;
+        QOpenGLShaderProgram* gridLinesShader = nullptr;
+
+	void _initGridLinesShaders();
+	void _initStaticGridLines();
 };
 #endif
 
