@@ -75,6 +75,8 @@ if [[ "${MACHINE_ID}" == "ursa" ]]; then
     export RUNTIME_DIR=/scratch5/purged/Wei.Huang/tmp/runtime-dir
     export CONTAINER_SIF=${CONTAINER_DIR}/starviewer.sif
 
+    export OMP_NUM_THREADS=16
+
     if [ ! -d $RUNTIME_DIR ]; then
         mkdir -p $RUNTIME_DIR
         chmod 700 $RUNTIME_DIR
@@ -83,6 +85,9 @@ if [[ "${MACHINE_ID}" == "ursa" ]]; then
 # Ensure the cookie is extracted right before running singularity
 xauth extract /tmp/mysession.xauth ${DISPLAY}
 chmod 644 /tmp/mysession.xauth
+
+export XDG_RUNTIME_DIR=/tmp/runtime-$USER
+mkdir -p $XDG_RUNTIME_DIR
 
 singularity exec --rocm \
   -B /tmp:/tmp \

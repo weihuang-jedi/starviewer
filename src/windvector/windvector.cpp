@@ -572,13 +572,16 @@ void WindVector::_initWindGPUAssets()
 
     // Geometry Proportions (Normalized template sizing pointing along +X)
     float cylLength = 0.75f;
-    float coneLength = 0.25f;
+    // float coneLength = 0.25f;
+    float coneLength = 0.375;
 
     // CHANGE THIS: from 0.02f to 0.005f (or 0.008f depending on how thin you want them)
-    float cylRadius = 0.005f;
+    // float cylRadius = 0.005f;
+    float cylRadius = 0.0025f;
 
     // CHANGE THIS: from 0.06f to 0.025f to keep the arrowhead proportional to the thinner shaft
-    float coneRadius = 0.010f;
+    // float coneRadius = 0.010f;
+    float coneRadius = 0.005;
 
     // 1. GENERATE CYLINDER SHAFT MESH (GL_TRIANGLES)
     for (int i = 0; i < segments; ++i) {

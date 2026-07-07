@@ -198,6 +198,22 @@ class UFS2dViewer : public QGLWidget
 
 	void _initGridLinesShaders();
 	void _initStaticGridLines();
+
+	GLuint sphereGridLinesVBO = 0;
+        GLuint sphereGridLinesEBO = 0;
+        GLsizei sphereGridLinesIndexCount = 0;
+        QOpenGLShaderProgram* sphereGridLinesShader = nullptr;
+
+	void _initSphereGridLinesShaders();
+	void _initStaticSphereGridLines(double radius);
+
+	QOpenGLShaderProgram* bumpShaderProgram = nullptr;
+	void _initBumpShaders();
+	void _flatBumpGPU();
+
+	QOpenGLShaderProgram* sphereBumpShaderProgram = nullptr;
+	void _initSphereBumpShaders();
+	void _sphereBumpGPU();
 };
 #endif
 
