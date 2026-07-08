@@ -2592,42 +2592,78 @@ void UFS2dViewer::_initBumpShaders()
 
     bumpShaderProgram = new QOpenGLShaderProgram();
 
+    // Vertex Shader: Offsets the Z coordinate natively on the GPU
     const char* vsSource = R"glsl(
         #version 330 compatibility
-
-        layout(location = 0) in vec3 a_Position; // Clean 3D vertex position input
-        layout(location = 1) in vec2 a_TexCoord; // Clean 2D texture coordinate coordinate input
 
         uniform sampler2D u_PltvarTex;
         uniform float u_ValMin;
         uniform float u_ValMax;
 
+        uniform float u_XMin;
+        uniform float u_XMax;
+        uniform float u_YMin;
+        uniform float u_YMax;
+
+        // Sizing multipliers from your original CPU setup
+        uniform float u_Magnifier;
+        uniform float u_Amp;
+
         out float v_Fact;
+        out float v_Alpha;
 
         void main() {
-            vec2 sampleCoord = a_TexCoord;
+            vec2 sampleCoord = gl_MultiTexCoord0.xy;
 
-            // Extract data value and compute relative scaling factor
+            // Maintain your structural horizontal split shift logic
+            if (sampleCoord.x < 0.5) {
+                sampleCoord.x += 0.5;
+            } else {
+                sampleCoord.x -= 0.5;
+            }
+
+            // Extract data value and compute relative color scale factor
             float rawVal = texture(u_PltvarTex, sampleCoord).r;
             float range = u_ValMax - u_ValMin;
             if (range <= 0.00001) range = 1.0;
-            
-            v_Fact = clamp((rawVal - u_ValMin) / range, 0.0, 1.0);
 
-            // Project the exact, pre-calculated 3D positions directly onto the screen
-            gl_Position = gl_ModelViewProjectionMatrix * vec4(a_Position, 1.0);
+            float fact = (rawVal - u_ValMin) / range;
+            v_Fact = clamp(fact, 0.0, 1.0);
+
+            // Compute custom Alpha values natively on the core pipeline
+            float alpha = u_Amp * v_Fact;
+            if (alpha < 0.0001) alpha = 0.0;
+            else if (alpha > 1.0) alpha = 1.0;
+            v_Alpha = alpha;
+
+            // Map layout positions dynamically across your true boundaries
+            float xPos = mix(u_XMin, u_XMax, gl_MultiTexCoord0.x);
+            float yPos = mix(u_YMin, u_YMax, gl_MultiTexCoord0.y);
+
+            // --- CRITICAL DISPLACEMENT LINE: Elevate Z based on data value ---
+            float zPos = u_Magnifier * v_Fact;
+            // -----------------------------------------------------------------
+
+            gl_Position = gl_ModelViewProjectionMatrix * vec4(xPos, yPos, zPos, 1.0);
+
+            // Generate standard normals matching your original pipeline setup
+            // gl_Normal = gl_NormalMatrix * normalize(vec3(0.0, yPos, zPos));
         }
     )glsl";
 
+    // Fragment Shader: Colors and blends pixels using color map or fallback grayscale
     const char* fsSource = R"glsl(
         #version 330 compatibility
 
         in float v_Fact;
+        in float v_Alpha;
+
+        uniform sampler1D u_ColorMap;
 
         void main() {
-            // Apply our proven high-intensity exponential power curve
-            float intenseAlpha = pow(v_Fact, 2.5);
-            gl_FragColor = vec4(1.0, 1.0, 1.0, intenseAlpha);
+            // Fetch color scale matching your active 1D lookup configurations
+            vec3 color = texture(u_ColorMap, v_Fact).rgb;
+            gl_FragColor = vec4(color, v_Alpha);
         }
     )glsl";
 
@@ -2641,25 +2677,19 @@ void UFS2dViewer::_flatBumpGPU()
     QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
     if (!f) return;
 
+    // 1. Maintain layout asset integrity checks
+    if (gridVBO == 0) {
+        _initStaticGPUGrid();
+        if (gridVBO == 0) return;
+    }
+
     int k1 = nvoptions->get_zsec() + 1;
     int k = _nlev - k1;
     if (k >= _nlev && _nlev != 1) return;
 
     _initBumpShaders();
 
-    // 1. RENDER SOLID BACKGROUND MAP LAYER FIRST
-    f->glActiveTexture(GL_TEXTURE0); f->glBindTexture(GL_TEXTURE_2D, 0);
-    glEnable(GL_DEPTH_TEST);
-    glDepthMask(GL_TRUE);
-    glDisable(GL_BLEND);
-    glDisable(GL_LIGHTING);
-
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-    earth->draw_plane(-0.001);
-    coastline->drawOnPlane(0.01);
-
-    // --- 2. RESTORED: ALLOCATE AND STREAM RAW METEOROLOGICAL DATA TEXTURE ---
+    // 2. Stream target raw data slice to GPU texture cache spaces
     size_t dataOffset = static_cast<size_t>(k) * _nlat * _nlon;
     float* rawDataPtr = &pltvar[dataOffset];
 
@@ -2677,106 +2707,84 @@ void UFS2dViewer::_flatBumpGPU()
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         f->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _nlon, _nlat, GL_RED, GL_FLOAT, rawDataPtr);
     }
-    // ------------------------------------------------------------------------
 
-    // 3. CONSTRUCT AN EXPLICIT QUAD-BASED MESH
-    double sv = 1.0 / (_valmax - _valmin);
-    double magnifier = 0.125;
-    size_t mpos, npos;
-
-    std::vector<float> vertices; // Layout: X, Y, Z, U, V
-    std::vector<unsigned int> indices;
-    unsigned int vIdx = 0;
-
-    auto appendQuadVertex = [&](int i, int j, size_t rowPos) {
-        float u = (float)i / (_nlon - 1);
-        float v = (float)j / (_nlat - 1);
-        float fact = static_cast<float>(sv * (pltvar[rowPos + i] - _valmin));
-
-        vertices.push_back(static_cast<float>(_xFlat[i]));
-        vertices.push_back(static_cast<float>(_yFlat[j]));
-        vertices.push_back(static_cast<float>(magnifier * qBound(0.0f, fact, 1.0f)));
-        vertices.push_back(u);
-        vertices.push_back(v);
-    };
-
-    for (int j = 1; j < _nlat; ++j) {
-        mpos = (k * _nlat + (j - 1)) * _nlon;
-        npos = (k * _nlat + j) * _nlon;
-
-        auto buildCellQuad = [&](int i) {
-            unsigned int p0 = vIdx; appendQuadVertex(i, j - 1, mpos);
-            unsigned int p1 = vIdx; appendQuadVertex(i + 1, j - 1, mpos);
-            unsigned int p2 = vIdx; appendQuadVertex(i + 1, j, npos);
-            unsigned int p3 = vIdx; appendQuadVertex(i, j, npos);
-
-            indices.push_back(p0); indices.push_back(p1); indices.push_back(p2);
-            indices.push_back(p0); indices.push_back(p2); indices.push_back(p3);
-        };
-
-        for (int i = _hlon; i < _nlon - 1; ++i) {
-            buildCellQuad(i);
+    // Allocate colormap if starting here first
+    if (colorMapTexture == 0) {
+        f->glGenTextures(1, &colorMapTexture);
+        f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
+        std::vector<float> floatColorMap(_colorLen * 3);
+        for (int c = 0; c < _colorLen * 3; ++c) {
+            floatColorMap[c] = static_cast<float>(_colorMap[c]);
         }
-        if (_hlon < _nlon && _hlon > 0) {
-            unsigned int p0 = vIdx; appendQuadVertex(_nlon - 1, j - 1, mpos);
-            unsigned int p1 = vIdx; appendQuadVertex(0, j - 1, mpos);
-            unsigned int p2 = vIdx; appendQuadVertex(0, j, npos);
-            unsigned int p3 = vIdx; appendQuadVertex(_nlon - 1, j, npos);
-            indices.push_back(p0); indices.push_back(p1); indices.push_back(p2);
-            indices.push_back(p0); indices.push_back(p2); indices.push_back(p3);
-        }
-        for (int i = 0; i < _hlon - 1; ++i) {
-            buildCellQuad(i);
-        }
+        f->glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB32F, _colorLen, 0, GL_RGB, GL_FLOAT, floatColorMap.data());
+        f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     }
 
-    // 4. STREAM TO TRANSIENT GPU BUFFERS
-    GLuint localVBO, localEBO;
-    f->glGenBuffers(1, &localVBO);
-    f->glBindBuffer(GL_ARRAY_BUFFER, localVBO);
-    f->glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STREAM_DRAW);
+    // 3. Clear pipeline overrides and set states
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    glDepthFunc(GL_LEQUAL);
 
-    f->glGenBuffers(1, &localEBO);
-    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, localEBO);
-    f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STREAM_DRAW);
-
-    // 5. BIND SHADER AND RENDER TRANSPARENT GRIDS
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDepthMask(GL_FALSE);
+    glEnable(GL_NORMALIZE);
 
-    // --- RESTORED: ACTIVELY ENGAGE SAMPLER AND TEXTURE UNIT 0 ---
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_1D);
+
+    // 4. Bind Active textures maps
     f->glActiveTexture(GL_TEXTURE0);
     f->glBindTexture(GL_TEXTURE_2D, dataTexture);
-    // -------------------------------------------------------------
 
+    f->glActiveTexture(GL_TEXTURE1);
+    f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
+
+    // 5. Load configuration uniforms variables
     bumpShaderProgram->bind();
     bumpShaderProgram->setUniformValue("u_ValMin", static_cast<float>(_valmin));
     bumpShaderProgram->setUniformValue("u_ValMax", static_cast<float>(_valmax));
-    bumpShaderProgram->setUniformValue("u_PltvarTex", 0); // Explicitly points to unit 0
+    bumpShaderProgram->setUniformValue("u_XMin", static_cast<float>(_xFlat[0]));
+    bumpShaderProgram->setUniformValue("u_XMax", static_cast<float>(_xFlat[_nlon - 1]));
+    bumpShaderProgram->setUniformValue("u_YMin", static_cast<float>(_yFlat[0]));
+    bumpShaderProgram->setUniformValue("u_YMax", static_cast<float>(_yFlat[_nlat - 1]));
 
-    GLsizei strideBytes = 5 * sizeof(float);
-    f->glEnableVertexAttribArray(0);
-    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, strideBytes, (void*)0);
-    f->glEnableVertexAttribArray(1);
-    f->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, strideBytes, (void*)(3 * sizeof(float)));
+    // Original configuration settings passed directly
+    bumpShaderProgram->setUniformValue("u_Amp", 1.05f);
+    bumpShaderProgram->setUniformValue("u_Magnifier", 0.125f);
 
-    f->glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, (void*)0);
+    bumpShaderProgram->setUniformValue("u_PltvarTex", 0);
+    bumpShaderProgram->setUniformValue("u_ColorMap", 1);
 
-    // 6. RESTORE CONTEXT STATES
-    f->glDisableVertexAttribArray(0);
-    f->glDisableVertexAttribArray(1);
+    // 6. Execute complete parallel rendering call instantly
+    f->glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridEBO);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(2, GL_FLOAT, 2 * sizeof(float), (void*)0);
+
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glTexCoordPointer(2, GL_FLOAT, 2 * sizeof(float), (void*)0);
+
+    f->glEnable(GL_PRIMITIVE_RESTART);
+    f->glPrimitiveRestartIndex(0xFFFFFFFF);
+
+    f->glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, (void*)0);
+
+    // 7. Cleanup bounds registers
+    f->glDisable(GL_PRIMITIVE_RESTART);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     f->glBindBuffer(GL_ARRAY_BUFFER, 0);
     f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    f->glDeleteBuffers(1, &localVBO);
-    f->glDeleteBuffers(1, &localEBO);
-
     bumpShaderProgram->release();
-    glDepthMask(GL_TRUE);
 
-    // Unbind cleanly to preserve background module state integrity
-    f->glBindTexture(GL_TEXTURE_2D, 0);
+    // Render underlying vector profiles on top
+    earth->draw_plane(-0.001);
+    coastline->drawOnPlane(0.01);
 }
 
 void UFS2dViewer::_initSphereBumpShaders()
@@ -2785,13 +2793,14 @@ void UFS2dViewer::_initSphereBumpShaders()
 
     sphereBumpShaderProgram = new QOpenGLShaderProgram();
 
+    // 1. Vertex Shader: Offsets vertex radii radially from the center of the sphere
     const char* vsSource = R"glsl(
         #version 330 compatibility
 
         uniform sampler2D u_PltvarTex;
         uniform float u_ValMin;
         uniform float u_ValMax;
-        
+
         uniform float u_MinLonRad;
         uniform float u_MaxLonRad;
         uniform float u_MinLatRad;
@@ -2807,53 +2816,49 @@ void UFS2dViewer::_initSphereBumpShaders()
         void main() {
             vec2 sampleCoord = gl_MultiTexCoord0.xy;
 
+            // Extract raw data values from the slice matrix
             float rawVal = texture(u_PltvarTex, sampleCoord).r;
             float range = u_ValMax - u_ValMin;
             if (range <= 0.00001) range = 1.0;
-            
+
             float fact = (rawVal - u_ValMin) / range;
             v_Fact = clamp(fact, 0.0, 1.0);
 
+            // Dynamically calculate the precise current angle (Radians)
             float lon_rad = mix(u_MinLonRad, u_MaxLonRad, gl_MultiTexCoord0.x);
-            
-            // --- FIX 1: Match the true structural index progression of the layout ---
-            // If the Southern Hemisphere is overly opaque, it means the latitude mapping 
-            // is compressed or flipped relative to the data grid rows.
-            float lat_rad = mix(u_MaxLatRad, u_MinLatRad, gl_MultiTexCoord0.y);
-            // ------------------------------------------------------------------------
+            float lat_rad = mix(u_MinLatRad, u_MaxLatRad, gl_MultiTexCoord0.y);
 
+            // --- CRITICAL DISPLACEMENT STEP: Radial elevation expansion ---
             float currentRadius = u_Radius + (u_Magnifier * v_Fact);
+            // --------------------------------------------------------------
 
-            // float adjusted_lon = lon_rad - PI;
-            float adjusted_lon = lon_rad;
+            // Apply your working spherical geometry transformations (including the -PI shift)
+            float adjusted_lon = lon_rad - PI;
             float dist = cos(lat_rad);
-            
+
             float x = dist * sin(adjusted_lon);
             float z = dist * cos(adjusted_lon);
-            float y = -sin(lat_rad); 
+            float y = -sin(lat_rad); // Keeps your right-side up orientation intact
 
             vec3 spherePos = vec3(x, y, z) * currentRadius;
 
             gl_Position = gl_ModelViewProjectionMatrix * vec4(spherePos, 1.0);
+
+            // Standard normal assignments matching your vector profiles
+            // gl_Normal = gl_NormalMatrix * normalize(spherePos);
         }
     )glsl";
 
-    // UPDATED Fragment Shader: Uses a power function to intensify peak values
+    // 2. Fragment Shader: Colors the dynamic peaks and valleys with your 1D colormap
     const char* fsSource = R"glsl(
         #version 330 compatibility
 
         in float v_Fact;
+        uniform sampler1D u_ColorMap;
 
         void main() {
-            // --- OPTIMIZATION: EXPONENTIAL OPACITY SCALE ---
-            // Raising v_Fact to the power of 2.0 or 3.0 keeps the low/mid values
-            // beautifully translucent while forcing the high-value peaks to
-            // clamp instantly to a bright, solid, fully opaque white.
-            //
-            // Try pow(v_Fact, 2.0) for a smooth curve, or pow(v_Fact, 3.0) for an aggressive peak pop.
-            float intenseAlpha = pow(v_Fact, 2.5);
-
-            gl_FragColor = vec4(1.0, 1.0, 1.0, intenseAlpha);
+            vec3 color = texture(u_ColorMap, v_Fact).rgb;
+            gl_FragColor = vec4(color, 1.0); // Opaque layout shading profiles
         }
     )glsl";
 
@@ -2876,22 +2881,7 @@ void UFS2dViewer::_sphereBumpGPU()
     int k = _nlev - k1;
     if (k >= _nlev && _nlev != 1) return;
 
-    // --- 1. RENDER BACKGROUND LAYER FIRST ---
-    // Ensure fixed-function states are clean so the legacy earth module draws perfectly
-    f->glActiveTexture(GL_TEXTURE1); f->glBindTexture(GL_TEXTURE_1D, 0);
-    f->glActiveTexture(GL_TEXTURE0); f->glBindTexture(GL_TEXTURE_2D, 0);
-
-    glEnable(GL_DEPTH_TEST);
-    glDepthMask(GL_TRUE); // Let the earth write its depth maps securely
-    glDisable(GL_BLEND);  // No blending needed for solid landmasses
-
-    // Set your background clear color here if desired
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Pure crisp black space backdrop
-
-    earth->draw(0.999);
-    coastline->drawOnSphere(0.01);
-
-    // --- 2. PREPARE THE TRANSPARENT WHITE BUMP MESH ---
+    // --- FIX 1: STREAM AND LOAD DATA SEPARATELY ---
     size_t dataOffset = static_cast<size_t>(k) * _nlat * _nlon;
     float* rawDataPtr = &pltvar[dataOffset];
 
@@ -2910,20 +2900,45 @@ void UFS2dViewer::_sphereBumpGPU()
         f->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _nlon, _nlat, GL_RED, GL_FLOAT, rawDataPtr);
     }
 
-    // Turn on transparent blending controls
+    if (colorMapTexture == 0) {
+        f->glGenTextures(1, &colorMapTexture);
+        f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
+        std::vector<float> floatColorMap(_colorLen * 3);
+        for (int c = 0; c < _colorLen * 3; ++c) {
+            floatColorMap[c] = static_cast<float>(_colorMap[c]);
+        }
+        f->glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB32F, _colorLen, 0, GL_RGB, GL_FLOAT, floatColorMap.data());
+        f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        f->glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    }
+
+    // --- FIX 2: RESET AND ISOLATE STATE CHANGES COMPLETELY ---
+    // Make sure no leftover fixed-function textures block our custom sampler variables
+    f->glActiveTexture(GL_TEXTURE1); f->glBindTexture(GL_TEXTURE_1D, 0);
+    f->glActiveTexture(GL_TEXTURE0); f->glBindTexture(GL_TEXTURE_2D, 0);
+
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_1D);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_CULL_FACE);
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    glDepthFunc(GL_LEQUAL);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    // CRITICAL: Lock the depth buffer to read-only for transparent overlays.
-    // This stops the white mesh from blocking or cutting out the Earth background.
-    glDepthMask(GL_FALSE);
     glEnable(GL_NORMALIZE);
-    glDisable(GL_LIGHTING);
 
+    // Initialize our shaders after the state reset
     _initSphereBumpShaders();
 
+    // --- FIX 3: TARGET EXPLICIT ACTIVE BINDINGS ---
     f->glActiveTexture(GL_TEXTURE0);
     f->glBindTexture(GL_TEXTURE_2D, dataTexture);
+
+    f->glActiveTexture(GL_TEXTURE1);
+    f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
 
     sphereBumpShaderProgram->bind();
     sphereBumpShaderProgram->setUniformValue("u_ValMin", static_cast<float>(_valmin));
@@ -2936,9 +2951,11 @@ void UFS2dViewer::_sphereBumpGPU()
 
     sphereBumpShaderProgram->setUniformValue("u_Radius", 1.0f);
     sphereBumpShaderProgram->setUniformValue("u_Magnifier", 0.125f);
-    sphereBumpShaderProgram->setUniformValue("u_PltvarTex", 0);
 
-    // Draw the transparent topography mesh
+    sphereBumpShaderProgram->setUniformValue("u_PltvarTex", 0); // Directly maps to Texture Unit 0
+    sphereBumpShaderProgram->setUniformValue("u_ColorMap", 1);  // Directly maps to Texture Unit 1
+
+    // Draw our topographic mesh
     f->glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
     f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridEBO);
 
@@ -2953,7 +2970,7 @@ void UFS2dViewer::_sphereBumpGPU()
 
     f->glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, (void*)0);
 
-    // --- 3. PIPELINE RECOVERY CLEANUP ---
+    // Clean up
     f->glDisable(GL_PRIMITIVE_RESTART);
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -2961,10 +2978,13 @@ void UFS2dViewer::_sphereBumpGPU()
     f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     sphereBumpShaderProgram->release();
 
-    // Restore depth writing so other modules can render normally later
-    glDepthMask(GL_TRUE);
+    // --- FIX 4: DRAW EARTH AND BACKGROUND LANDMASSES LAST ---
+    // Unbind our custom textures completely so earth->draw can use its own legacy pipeline safely
+    f->glActiveTexture(GL_TEXTURE1); f->glBindTexture(GL_TEXTURE_1D, 0);
+    f->glActiveTexture(GL_TEXTURE0); f->glBindTexture(GL_TEXTURE_2D, 0);
 
-    f->glActiveTexture(GL_TEXTURE0);
-    f->glBindTexture(GL_TEXTURE_2D, 0);
+    // Draw background layers
+    earth->draw(0.999);
+    coastline->drawOnSphere(0.01);
 }
 
