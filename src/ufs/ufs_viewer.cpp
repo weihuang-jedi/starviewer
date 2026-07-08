@@ -2740,8 +2740,10 @@ void UFS2dViewer::_sphereBumpGPU()
     sphereBumpShaderProgram->setUniformValue("u_ValMin", static_cast<float>(_valmin));
     sphereBumpShaderProgram->setUniformValue("u_ValMax", static_cast<float>(_valmax));
 
-    sphereBumpShaderProgram->setUniformValue("u_MinLonRad", static_cast<float>(_lon[0] * M_PI / 180.0));
-    sphereBumpShaderProgram->setUniformValue("u_MaxLonRad", static_cast<float>(_lon[_nlon - 1] * M_PI / 180.0));
+    // sphereBumpShaderProgram->setUniformValue("u_MinLonRad", static_cast<float>(_lon[0] * M_PI / 180.0));
+    // sphereBumpShaderProgram->setUniformValue("u_MaxLonRad", static_cast<float>(_lon[_nlon - 1] * M_PI / 180.0));
+    sphereBumpShaderProgram->setUniformValue("u_MinLonRad", static_cast<float>(0.000 * M_PI / 180.0));
+    sphereBumpShaderProgram->setUniformValue("u_MaxLonRad", static_cast<float>(360.0 * M_PI / 180.0));
     sphereBumpShaderProgram->setUniformValue("u_MinLatRad", static_cast<float>(_lat[0] * M_PI / 180.0));
     sphereBumpShaderProgram->setUniformValue("u_MaxLatRad", static_cast<float>(_lat[_nlat - 1] * M_PI / 180.0));
 
