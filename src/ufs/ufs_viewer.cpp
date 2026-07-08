@@ -1269,8 +1269,8 @@ void UFS2dViewer::_initStaticGPUGrid() {
     QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
     if (!f) return;
 
-    std::vector<float> vertices;
-    std::vector<unsigned int> indices;
+    vector<float> vertices;
+    vector<unsigned int> indices;
 
     for (int j = 0; j < _nlat; ++j) {
         float v = (float)j / (_nlat - 1);
@@ -1352,7 +1352,7 @@ void UFS2dViewer::_flatDisplayGPU()
         f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
 
         // --- FIX: Pack doubles into standard floats for safe GPU consumption ---
-        std::vector<float> floatColorMap(_colorLen * 3);
+        vector<float> floatColorMap(_colorLen * 3);
         for (int c = 0; c < _colorLen * 3; ++c) {
             floatColorMap[c] = static_cast<float>(_colorMap[c]);
         }
@@ -1454,7 +1454,7 @@ void UFS2dViewer::_flatDisplayGPU()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
-    glLineWidth(1.5f); 
+    glLineWidth(1.0f); 
 
     gridLinesShader->bind();
     gridLinesShader->setUniformValue("u_Height", static_cast<float>(height + 0.015)); 
@@ -1672,7 +1672,7 @@ void UFS2dViewer::_sphereDisplayGPU()
           f->glGenTextures(1, &colorMapTexture);
           f->glBindTexture(GL_TEXTURE_1D, colorMapTexture);
 
-          std::vector<float> floatColorMap(_colorLen * 3);
+          vector<float> floatColorMap(_colorLen * 3);
           for (int c = 0; c < _colorLen * 3; ++c) {
                floatColorMap[c] = static_cast<float>(_colorMap[c]);
           }
@@ -1867,8 +1867,8 @@ void UFS2dViewer::_initCrossStaticGrid(int horizontalSize)
     QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
     if (!f) return;
 
-    std::vector<float> vertices;
-    std::vector<unsigned int> indices;
+    vector<float> vertices;
+    vector<unsigned int> indices;
 
     // Generate UV positions
     for (int k = 0; k < _nlev; ++k) {
@@ -1915,7 +1915,7 @@ void UFS2dViewer::_display_Xflat_plane_GPU(int xs)
     _initCrossShaders();
 
     // 2. Extract and pack the slice data from the 3D volume into a clean 2D slice buffer
-    std::vector<float> sliceData(_nlat * _nlev);
+    vector<float> sliceData(_nlat * _nlev);
     for (int k = 0; k < _nlev; ++k) {
         for (int j = 0; j < _nlat; ++j) {
             size_t mpos = (static_cast<size_t>(k) * _nlat + j) * _nlon;
@@ -1936,7 +1936,7 @@ void UFS2dViewer::_display_Xflat_plane_GPU(int xs)
     f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     // 4. Capture current height layers into float precision vectors
-    std::vector<float> fHeights(_nlev);
+    vector<float> fHeights(_nlev);
     for (int k = 0; k < _nlev; ++k) fHeights[k] = static_cast<float>(_k2h(k));
 
     // 5. Update pipeline state overrides
@@ -2003,7 +2003,7 @@ void UFS2dViewer::_display_Yflat_plane_GPU(int ys)
     _initCrossShaders();
 
     // 2. Extract data slice and account for the horizontal _hlon shift check
-    std::vector<float> sliceData(_nlon * _nlev);
+    vector<float> sliceData(_nlon * _nlev);
     for (int k = 0; k < _nlev; ++k) {
         size_t mpos = (static_cast<size_t>(k) * _nlat + j) * _nlon;
         int idx = 0;
@@ -2033,7 +2033,7 @@ void UFS2dViewer::_display_Yflat_plane_GPU(int ys)
     f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     // 4. Capture heights array
-    std::vector<float> fHeights(_nlev);
+    vector<float> fHeights(_nlev);
     for (int k = 0; k < _nlev; ++k) fHeights[k] = static_cast<float>(_k2h(k));
 
     // 5. Setup shader uniforms
@@ -2183,8 +2183,8 @@ void UFS2dViewer::_initSphereCrossStaticGrid(int horizontalSize)
     QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
     if (!f) return;
 
-    std::vector<float> vertices;
-    std::vector<unsigned int> indices;
+    vector<float> vertices;
+    vector<unsigned int> indices;
 
     for (int k = 0; k < _nlev; ++k) {
         for (int i = 0; i < horizontalSize; ++i) {
@@ -2226,7 +2226,7 @@ void UFS2dViewer::_sphereXplane_GPU(int xs)
     _initSphereCrossShaders();
 
     // 1. Pack 3D slice array column 
-    std::vector<float> sliceData(_nlat * _nlev);
+    vector<float> sliceData(_nlat * _nlev);
     for (int k = 0; k < _nlev; ++k) {
         for (int j = 0; j < _nlat; ++j) {
             size_t mpos = (static_cast<size_t>(k) * _nlat + j) * _nlon;
@@ -2245,7 +2245,7 @@ void UFS2dViewer::_sphereXplane_GPU(int xs)
     f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     // 3. Map radii configuration values 
-    std::vector<float> fRadii(_nlev);
+    vector<float> fRadii(_nlev);
     for (int k = 0; k < _nlev; ++k) fRadii[k] = static_cast<float>(_k2r(k));
 
     // 4. Bind parameters
@@ -2304,7 +2304,7 @@ void UFS2dViewer::_sphereYplane_GPU(int ys)
     _initSphereCrossShaders();
 
     // 1. Extract data slice and cleanly wrap the final column row array
-    std::vector<float> sliceData((_nlon + 1) * _nlev);
+    vector<float> sliceData((_nlon + 1) * _nlev);
     for (int k = 0; k < _nlev; ++k) {
         size_t mpos = (static_cast<size_t>(k) * _nlat + j) * _nlon;
         
@@ -2326,7 +2326,7 @@ void UFS2dViewer::_sphereYplane_GPU(int ys)
     f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    std::vector<float> fRadii(_nlev);
+    vector<float> fRadii(_nlev);
     for (int k = 0; k < _nlev; ++k) fRadii[k] = static_cast<float>(_k2r(k));
 
     glEnable(GL_DEPTH_TEST);
@@ -2417,8 +2417,8 @@ void UFS2dViewer::_initStaticGridLines()
     int xStep = qMax(1, _nlon / 12);
     int yStep = qMax(1, _nlat / 6);
 
-    std::vector<float> vertices;
-    std::vector<unsigned int> indices;
+    vector<float> vertices;
+    vector<unsigned int> indices;
     unsigned int vIdx = 0;
 
     // 1. Generate Real-Coordinate Vertical Longitude Lines
@@ -2515,8 +2515,8 @@ void UFS2dViewer::_initStaticSphereGridLines(double radius)
     // Define line density sampling step counts
     const int lineRes = 60;          // Smoothness resolution of the circular ring arcs
 
-    std::vector<float> vertices;
-    std::vector<unsigned int> indices;
+    vector<float> vertices;
+    vector<unsigned int> indices;
     unsigned int vIdx = 0;
 
     const double S_PI = 3.14159265358979323846;
@@ -2584,199 +2584,6 @@ void UFS2dViewer::_initStaticSphereGridLines(double radius)
 
     f->glBindBuffer(GL_ARRAY_BUFFER, 0);
     f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
-
-void UFS2dViewer::_initBumpShaders()
-{
-    if (bumpShaderProgram != nullptr) return;
-
-    bumpShaderProgram = new QOpenGLShaderProgram();
-
-    const char* vsSource = R"glsl(
-        #version 330 compatibility
-
-        layout(location = 0) in vec3 a_Position; // Clean 3D vertex position input
-        layout(location = 1) in vec2 a_TexCoord; // Clean 2D texture coordinate coordinate input
-
-        uniform sampler2D u_PltvarTex;
-        uniform float u_ValMin;
-        uniform float u_ValMax;
-
-        out float v_Fact;
-
-        void main() {
-            vec2 sampleCoord = a_TexCoord;
-
-            // Extract data value and compute relative scaling factor
-            float rawVal = texture(u_PltvarTex, sampleCoord).r;
-            float range = u_ValMax - u_ValMin;
-            if (range <= 0.00001) range = 1.0;
-            
-            v_Fact = clamp((rawVal - u_ValMin) / range, 0.0, 1.0);
-
-            // Project the exact, pre-calculated 3D positions directly onto the screen
-            gl_Position = gl_ModelViewProjectionMatrix * vec4(a_Position, 1.0);
-        }
-    )glsl";
-
-    const char* fsSource = R"glsl(
-        #version 330 compatibility
-
-        in float v_Fact;
-
-        void main() {
-            // Apply our proven high-intensity exponential power curve
-            float intenseAlpha = pow(v_Fact, 2.5);
-            gl_FragColor = vec4(1.0, 1.0, 1.0, intenseAlpha);
-        }
-    )glsl";
-
-    bumpShaderProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, vsSource);
-    bumpShaderProgram->addShaderFromSourceCode(QOpenGLShader::Fragment, fsSource);
-    bumpShaderProgram->link();
-}
-
-void UFS2dViewer::_flatBumpGPU()
-{
-    QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
-    if (!f) return;
-
-    int k1 = nvoptions->get_zsec() + 1;
-    int k = _nlev - k1;
-    if (k >= _nlev && _nlev != 1) return;
-
-    _initBumpShaders();
-
-    // 1. RENDER SOLID BACKGROUND MAP LAYER FIRST
-    f->glActiveTexture(GL_TEXTURE0); f->glBindTexture(GL_TEXTURE_2D, 0);
-    glEnable(GL_DEPTH_TEST);
-    glDepthMask(GL_TRUE);
-    glDisable(GL_BLEND);
-    glDisable(GL_LIGHTING);
-
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-    earth->draw_plane(-0.001);
-    coastline->drawOnPlane(0.01);
-
-    // --- 2. RESTORED: ALLOCATE AND STREAM RAW METEOROLOGICAL DATA TEXTURE ---
-    size_t dataOffset = static_cast<size_t>(k) * _nlat * _nlon;
-    float* rawDataPtr = &pltvar[dataOffset];
-
-    if (dataTexture == 0) {
-        f->glGenTextures(1, &dataTexture);
-        f->glBindTexture(GL_TEXTURE_2D, dataTexture);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        f->glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, _nlon, _nlat, 0, GL_RED, GL_FLOAT, rawDataPtr);
-        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    } else {
-        f->glBindTexture(GL_TEXTURE_2D, dataTexture);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        f->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _nlon, _nlat, GL_RED, GL_FLOAT, rawDataPtr);
-    }
-    // ------------------------------------------------------------------------
-
-    // 3. CONSTRUCT AN EXPLICIT QUAD-BASED MESH
-    double sv = 1.0 / (_valmax - _valmin);
-    double magnifier = 0.125;
-    size_t mpos, npos;
-
-    std::vector<float> vertices; // Layout: X, Y, Z, U, V
-    std::vector<unsigned int> indices;
-    unsigned int vIdx = 0;
-
-    auto appendQuadVertex = [&](int i, int j, size_t rowPos) {
-        float u = (float)i / (_nlon - 1);
-        float v = (float)j / (_nlat - 1);
-        float fact = static_cast<float>(sv * (pltvar[rowPos + i] - _valmin));
-
-        vertices.push_back(static_cast<float>(_xFlat[i]));
-        vertices.push_back(static_cast<float>(_yFlat[j]));
-        vertices.push_back(static_cast<float>(magnifier * qBound(0.0f, fact, 1.0f)));
-        vertices.push_back(u);
-        vertices.push_back(v);
-    };
-
-    for (int j = 1; j < _nlat; ++j) {
-        mpos = (k * _nlat + (j - 1)) * _nlon;
-        npos = (k * _nlat + j) * _nlon;
-
-        auto buildCellQuad = [&](int i) {
-            unsigned int p0 = vIdx; appendQuadVertex(i, j - 1, mpos);
-            unsigned int p1 = vIdx; appendQuadVertex(i + 1, j - 1, mpos);
-            unsigned int p2 = vIdx; appendQuadVertex(i + 1, j, npos);
-            unsigned int p3 = vIdx; appendQuadVertex(i, j, npos);
-
-            indices.push_back(p0); indices.push_back(p1); indices.push_back(p2);
-            indices.push_back(p0); indices.push_back(p2); indices.push_back(p3);
-        };
-
-        for (int i = _hlon; i < _nlon - 1; ++i) {
-            buildCellQuad(i);
-        }
-        if (_hlon < _nlon && _hlon > 0) {
-            unsigned int p0 = vIdx; appendQuadVertex(_nlon - 1, j - 1, mpos);
-            unsigned int p1 = vIdx; appendQuadVertex(0, j - 1, mpos);
-            unsigned int p2 = vIdx; appendQuadVertex(0, j, npos);
-            unsigned int p3 = vIdx; appendQuadVertex(_nlon - 1, j, npos);
-            indices.push_back(p0); indices.push_back(p1); indices.push_back(p2);
-            indices.push_back(p0); indices.push_back(p2); indices.push_back(p3);
-        }
-        for (int i = 0; i < _hlon - 1; ++i) {
-            buildCellQuad(i);
-        }
-    }
-
-    // 4. STREAM TO TRANSIENT GPU BUFFERS
-    GLuint localVBO, localEBO;
-    f->glGenBuffers(1, &localVBO);
-    f->glBindBuffer(GL_ARRAY_BUFFER, localVBO);
-    f->glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STREAM_DRAW);
-
-    f->glGenBuffers(1, &localEBO);
-    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, localEBO);
-    f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STREAM_DRAW);
-
-    // 5. BIND SHADER AND RENDER TRANSPARENT GRIDS
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDepthMask(GL_FALSE);
-
-    // --- RESTORED: ACTIVELY ENGAGE SAMPLER AND TEXTURE UNIT 0 ---
-    f->glActiveTexture(GL_TEXTURE0);
-    f->glBindTexture(GL_TEXTURE_2D, dataTexture);
-    // -------------------------------------------------------------
-
-    bumpShaderProgram->bind();
-    bumpShaderProgram->setUniformValue("u_ValMin", static_cast<float>(_valmin));
-    bumpShaderProgram->setUniformValue("u_ValMax", static_cast<float>(_valmax));
-    bumpShaderProgram->setUniformValue("u_PltvarTex", 0); // Explicitly points to unit 0
-
-    GLsizei strideBytes = 5 * sizeof(float);
-    f->glEnableVertexAttribArray(0);
-    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, strideBytes, (void*)0);
-    f->glEnableVertexAttribArray(1);
-    f->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, strideBytes, (void*)(3 * sizeof(float)));
-
-    f->glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, (void*)0);
-
-    // 6. RESTORE CONTEXT STATES
-    f->glDisableVertexAttribArray(0);
-    f->glDisableVertexAttribArray(1);
-    f->glBindBuffer(GL_ARRAY_BUFFER, 0);
-    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    f->glDeleteBuffers(1, &localVBO);
-    f->glDeleteBuffers(1, &localEBO);
-
-    bumpShaderProgram->release();
-    glDepthMask(GL_TRUE);
-
-    // Unbind cleanly to preserve background module state integrity
-    f->glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void UFS2dViewer::_initSphereBumpShaders()
@@ -2851,7 +2658,11 @@ void UFS2dViewer::_initSphereBumpShaders()
             // clamp instantly to a bright, solid, fully opaque white.
             //
             // Try pow(v_Fact, 2.0) for a smooth curve, or pow(v_Fact, 3.0) for an aggressive peak pop.
-            float intenseAlpha = pow(v_Fact, 2.5);
+            // float intenseAlpha = pow(v_Fact, 2.5);
+            // float intenseAlpha = pow(v_Fact, 0.5);
+            // float alpha = 1.25*v_Fact;
+            float alpha = 1.75*pow(v_Fact, 2.5);
+            float intenseAlpha = clamp(alpha, 0.0, 1.0);
 
             gl_FragColor = vec4(1.0, 1.0, 1.0, intenseAlpha);
         }
@@ -2965,6 +2776,173 @@ void UFS2dViewer::_sphereBumpGPU()
     glDepthMask(GL_TRUE);
 
     f->glActiveTexture(GL_TEXTURE0);
+    f->glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void UFS2dViewer::_initBumpShaders()
+{
+    if (bumpShaderProgram != nullptr) return;
+
+    bumpShaderProgram = new QOpenGLShaderProgram();
+
+    const char* vsSource = R"glsl(
+        #version 330 compatibility
+
+        uniform sampler2D u_PltvarTex;
+        uniform float u_ValMin;
+        uniform float u_ValMax;
+        uniform float u_Height;
+        uniform float u_Magnifier;
+
+        out float v_Fact;
+
+        void main() {
+            vec2 sampleCoord = gl_MultiTexCoord0.xy;
+
+            // Longitudinal split-shift matching your data layout
+            if (sampleCoord.x < 0.5) {
+                sampleCoord.x += 0.5;
+            } else {
+                sampleCoord.x -= 0.5;
+            }
+
+            float rawVal = texture(u_PltvarTex, sampleCoord).r;
+            float range = u_ValMax - u_ValMin;
+            if (range <= 0.00001) range = 1.0;
+
+            v_Fact = clamp((rawVal - u_ValMin) / range, 0.0, 1.0);
+
+            // Use the unshifted texture coordinates to place the vertices linearly
+            float xPos = mix(-1.0, 1.0, gl_MultiTexCoord0.x);
+            
+            // --- FIX 1: FLIP Y-AXIS DIRECTION TO RENDER RIGHT-SIDE UP ---
+            float yPos = mix(0.5, -0.5, gl_MultiTexCoord0.y); 
+            // -------------------------------------------------------------
+
+            float zPos = u_Height + u_Magnifier * v_Fact;
+
+            gl_Position = gl_ModelViewProjectionMatrix * vec4(xPos, yPos, zPos, 1.0);
+        }
+    )glsl";
+
+    const char* fsSource = R"glsl(
+        #version 330 compatibility
+
+        in float v_Fact;
+
+        void main() {
+            float magAlpha = 1.75 * pow(v_Fact, 2.0);
+            float intenseAlpha = clamp(magAlpha, 0.0, 1.0);
+
+            gl_FragColor = vec4(1.0, 1.0, 1.0, intenseAlpha);
+        }
+    )glsl";
+
+    bumpShaderProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, vsSource);
+    bumpShaderProgram->addShaderFromSourceCode(QOpenGLShader::Fragment, fsSource);
+    bumpShaderProgram->link();
+}
+
+void UFS2dViewer::_flatBumpGPU()
+{
+    QOpenGLFunctions_3_3_Core *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
+    if (!f) return;
+
+    if (gridVBO == 0) {
+        _initStaticGPUGrid();
+        if (gridVBO == 0) return;
+    }
+
+    int k1 = nvoptions->get_zsec() + 1;
+    int k = _nlev - k1;
+    if (k >= _nlev && _nlev != 1) return;
+    double height = _k2h(k);
+
+    _initBumpShaders();
+
+    // 1. RENDER BACKGROUND TILES FIRST
+    f->glActiveTexture(GL_TEXTURE1); f->glBindTexture(GL_TEXTURE_1D, 0);
+    f->glActiveTexture(GL_TEXTURE0); f->glBindTexture(GL_TEXTURE_2D, 0);
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+    glDisable(GL_LIGHTING);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+    earth->draw_plane(-0.001);
+    coastline->drawOnPlane(0.01);
+
+    // 2. STREAM THE DATA INTO TEXTURE UNIT 0
+    size_t dataOffset = static_cast<size_t>(k) * _nlat * _nlon;
+    float* rawDataPtr = &pltvar[dataOffset];
+
+    if (dataTexture == 0) {
+        f->glGenTextures(1, &dataTexture);
+        f->glBindTexture(GL_TEXTURE_2D, dataTexture);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        f->glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, _nlon, _nlat, 0, GL_RED, GL_FLOAT, rawDataPtr);
+        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    } else {
+        f->glBindTexture(GL_TEXTURE_2D, dataTexture);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        f->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _nlon, _nlat, GL_RED, GL_FLOAT, rawDataPtr);
+    }
+
+    // --- 3. FIX: ENABLE STANDARD ALPHA BLENDING CONFIGURATIONS ---
+    glEnable(GL_BLEND);
+    // Standard alpha blending allows the white color to scale down dynamically
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glDepthMask(GL_FALSE);
+    glDisable(GL_CULL_FACE);
+    // ---------------------------------------------------------------
+
+    f->glActiveTexture(GL_TEXTURE0);
+    f->glBindTexture(GL_TEXTURE_2D, dataTexture);
+
+    bumpShaderProgram->bind();
+    bumpShaderProgram->setUniformValue("u_ValMin", static_cast<float>(_valmin));
+    bumpShaderProgram->setUniformValue("u_ValMax", static_cast<float>(_valmax));
+    bumpShaderProgram->setUniformValue("u_XMin", static_cast<float>(_xFlat[0]));
+    bumpShaderProgram->setUniformValue("u_XMax", static_cast<float>(_xFlat[_nlon - 1]));
+    bumpShaderProgram->setUniformValue("u_YMin", static_cast<float>(_yFlat[0]));
+    bumpShaderProgram->setUniformValue("u_YMax", static_cast<float>(_yFlat[_nlat - 1]));
+
+    bumpShaderProgram->setUniformValue("u_Height", static_cast<float>(height)); 
+    bumpShaderProgram->setUniformValue("u_Magnifier", 0.25f);
+    bumpShaderProgram->setUniformValue("u_PltvarTex", 0);
+
+    // 4. BIND STATIC VERTEX BUFFERS
+    f->glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridEBO);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(2, GL_FLOAT, 2 * sizeof(float), (void*)0);
+
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glTexCoordPointer(2, GL_FLOAT, 2 * sizeof(float), (void*)0);
+
+    f->glEnable(GL_PRIMITIVE_RESTART);
+    f->glPrimitiveRestartIndex(0xFFFFFFFF);
+
+    // 5. EXECUTE THE DRAW CALL
+    f->glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, (void*)0);
+
+    // 6. PIPELINE RECOVERY CLEANUP
+    f->glDisable(GL_PRIMITIVE_RESTART);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+    f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    bumpShaderProgram->release();
+
+    glDepthMask(GL_TRUE); // Restore standard depth permissions safely
     f->glBindTexture(GL_TEXTURE_2D, 0);
 }
 
