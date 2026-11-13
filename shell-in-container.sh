@@ -20,7 +20,6 @@ elif [[ "${MACHINE_ID}" == "hercules" ]]; then
     singularity shell -B /work -B /work2 \
         /work2/noaa/epic/weihuang/nv/starviewer/starviewer.sif
 else
-    singularity shell -B /scratch \
-        /scratch/wei/cadre/starviewer/starviewer.sif
+    apptainer shell -B /home ./starviewer.sif
 fi
 

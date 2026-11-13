@@ -3,6 +3,7 @@
 #include "ufsincrparser.h"
 #include "ufsmom6parser.h"
 #include "mpasparser.h"
+#include "mpasgridparser.h"
 #include "eagleparser.h"
 #include "eagleglobalparser.h"
 #include "eaglelamparser.h"
@@ -65,6 +66,11 @@ MainWindow::MainWindow(string yamlfile)
     {
         nvoptions->set_model(MPAS);
         userConfig = ModelType::MPAS;
+    }
+    else if(0 == tmpstr.compare("mpasgrid"))
+    {
+        nvoptions->set_model(MPASGRID);
+        userConfig = ModelType::MPASGRID;
     }
 
     // cout << "\tfile: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -153,6 +159,10 @@ void MainWindow::_setup()
             setWindowTitle(tr("MPAS MODEL"));
             mpas();
             break;
+        case MPASGRID:
+            setWindowTitle(tr("MPAS GRID"));
+            mpasgrid();
+            break;
         case EAGLE:
             setWindowTitle(tr("EAGLE"));
             eagle();
@@ -183,6 +193,7 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
     menu.addAction(ufsincrAct);
     menu.addAction(ufsmom6Act);
     menu.addAction(mpasAct);
+    menu.addAction(mpasgridAct);
     menu.addAction(mpidemoAct);
 
     menu.exec(event->globalPos());
@@ -305,6 +316,19 @@ void MainWindow::mpas()
     // cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
 }
 
+void MainWindow::mpasgrid()
+{
+    cout << "\nEnter function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    setWindowTitle(tr("MPASGRID"));
+
+    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    _setup_controlPanel();
+
+    cout << "\tfunction: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+    _setup_display();
+    cout << "Leave function: <" << __PRETTY_FUNCTION__ << ">, in file: <" << __FILE__ << ">, at line: " << __LINE__ << endl;
+}
+
 void MainWindow::eagleglobal()
 {
     setWindowTitle(tr("NV for EAGLEGLOBAL"));
@@ -371,6 +395,11 @@ void MainWindow::createActions()
   //mpasAct->setShortcut(QKeySequence::Global);
     mpasAct->setStatusTip(tr("Try to activate 'mpas' application"));
     connect(mpasAct, SIGNAL(triggered()), this, SLOT(mpas()));
+
+    mpasgridAct = new QAction(tr("&MPASGRID"), this);
+  //mpasgridAct->setShortcut(QKeySequence::Global);
+    mpasgridAct->setStatusTip(tr("Try to activate 'mpasgrid' application"));
+    connect(mpasgridAct, SIGNAL(triggered()), this, SLOT(mpasgrid()));
 
     eagleAct = new QAction(tr("&EAGLE"), this);
     eagleAct->setStatusTip(tr("Try to activate 'eagle' application"));
@@ -488,6 +517,7 @@ void MainWindow::createMenus()
     appsMenu->addAction(ufsincrAct);
     appsMenu->addAction(ufsmom6Act);
     appsMenu->addAction(mpasAct);
+    appsMenu->addAction(mpasgridAct);
     appsMenu->addAction(mpidemoAct);
     appsMenu->addSeparator();
 
@@ -565,6 +595,7 @@ void MainWindow::inspector_func()
     {
         case UFS:
         case MPAS:
+        case MPASGRID:
              inspectorWidget->set_lon(360);
              inspectorWidget->set_lat(180);
              break;

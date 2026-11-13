@@ -6,6 +6,7 @@
 #include "ufsparser.h"
 #include "ufsincrparser.h"
 #include "mpasparser.h"
+#include "mpasgridparser.h"
 #include "ufsmom6parser.h"
 #include "eagleparser.h"
 #include "eagleglobalparser.h"
@@ -27,6 +28,8 @@ public:
                 return unique_ptr<ModelParser>(new UFSMOM6Parser());
             case ModelType::MPAS:
                 return unique_ptr<ModelParser>(new MPASParser());
+            case ModelType::MPASGRID:
+                return unique_ptr<ModelParser>(new MPASGridParser());
             case ModelType::EAGLE:
                 return unique_ptr<ModelParser>(new EagleParser());
             case ModelType::EAGLEGLOBAL:

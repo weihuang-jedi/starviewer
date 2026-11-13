@@ -28,6 +28,7 @@
 #include "ufs_translator.h"
 #include "ufsincr_translator.h"
 #include "mpastranslator.h"
+#include "mpasgridtranslator.h"
 #include "mom6_translator.h"
 #include "eagle_translator.h"
 #include "eagleglobal_translator.h"
@@ -72,6 +73,7 @@ class MainWindow : public QMainWindow
         void ufsincr();
         void ufsmom6();
         void mpas();
+        void mpasgrid();
         void eagle();
         void eagleglobal();
         void eaglelam();
@@ -142,6 +144,7 @@ class MainWindow : public QMainWindow
         QAction *ufsincrAct;
         QAction *ufsmom6Act;
         QAction *mpasAct;
+        QAction *mpasgridAct;
         QAction *eagleAct;
         QAction *eagleglobalAct;
         QAction *eaglelamAct;

@@ -30,6 +30,7 @@ add_executable(starviewer
     ufsincrparser.cpp
     ufsmom6parser.cpp
     mpasparser.cpp
+    mpasgridparser.cpp
     eagleparser.cpp
     eagleglobalparser.cpp
     eaglelamparser.cpp
@@ -73,6 +74,7 @@ target_include_directories(starviewer PUBLIC
     ${CMAKE_SOURCE_DIR}/ufsincr
     ${CMAKE_SOURCE_DIR}/ufsmom6
     ${CMAKE_SOURCE_DIR}/mpas
+    ${CMAKE_SOURCE_DIR}/mpasgrid
     ${CMAKE_SOURCE_DIR}/eagle
     ${CMAKE_SOURCE_DIR}/eagleglobal
     ${CMAKE_SOURCE_DIR}/eaglelam
@@ -93,6 +95,7 @@ target_link_libraries(starviewer PRIVATE
     ufsincr
     ufsmom6
     mpas
+    mpasgrid
     eagle
     eagleglobal
     eaglelam
