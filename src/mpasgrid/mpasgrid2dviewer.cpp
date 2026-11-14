@@ -1,8 +1,6 @@
-//$Id: mpas2dviewer.cpp 5194 2014-08-18 19:51:52Z starviewer $
-
 #include <QtOpenGL>
 
-#include <mpas2dviewer.h>
+#include <mpasgrid2dviewer.h>
 
 #define	MINIDIST	1.0e-6
 
@@ -22,6 +20,7 @@
 
 MPASGrid2dViewer::MPASGrid2dViewer(ColorTable *ct, NVOptions* opt)
 {
+    cout << "Enter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     colorTable = ct;
     nvoptions = opt;
 
@@ -46,6 +45,7 @@ MPASGrid2dViewer::MPASGrid2dViewer(ColorTable *ct, NVOptions* opt)
     nvoptions->set_ysec(180);
     nvoptions->set_ysec2(180);
     nvoptions->set_zsec(0);
+    cout << "Leave" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 MPASGrid2dViewer::~MPASGrid2dViewer()
@@ -58,58 +58,42 @@ MPASGrid2dViewer::~MPASGrid2dViewer()
     delete evaluator;
 }
 
-void MPASGrid2dViewer::set_geometry(MPASGridGeometry *gm)
+void MPASGrid2dViewer::set_geometry(MPASGeometry *gm)
 {
+    // cout << "Enter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     geometry = gm;
 
     _initialize();
+    // cout << "Leave" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
-void MPASGrid2dViewer::setup(string vn, float *var)
+void MPASGrid2dViewer::setup(string vn, int *var)
 {
     size_t gridsize;
+    cout << "Enter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tvarname: " << vn << endl;
 
     reset();
 
     _varname  = vn;
     _var = var;
-
-  //gridsize = geometry->get_nt() * geometry->get_nCells() * geometry->get_nVertLevels();
-  //evaluator->set_value(gridsize, _var);
-
-    gridsize = geometry->get_nCells() * geometry->get_nVertLevels();
-  //evaluator->set_value(gridsize, &_var[3*gridsize]);
-    evaluator->set_value(gridsize, _var);
-
-    _minval = evaluator->get_min();
-    _maxval = evaluator->get_max();
-
-  //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tgeometry->get_nt() = " << geometry->get_nt() << endl;
-  //cout << "\t_minval = " << _minval << ", _maxval = " << _maxval << endl;
-
-    nvoptions->set_trueminimum(_minval);
-    nvoptions->set_truemaximum(_maxval);
-  //_workMinVal = _minval;
-  //_workMaxVal = _maxval;
+    cout << "Leave" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void MPASGrid2dViewer::reset()
 {
-    lister->reinitialize(361, 181, geometry->get_nVertLevels()+1);
+    lister->reinitialize(361, 181, 1);
 }
 
 void MPASGrid2dViewer::_initialize()
 {
-    lister->reinitialize(361, 181, geometry->get_nVertLevels()+1);
+    lister->reinitialize(361, 181, 1);
 }
 
 void MPASGrid2dViewer::draw()
 {
     cout << "\nEnter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     zcl = lister->get_zid(nvoptions->get_zsec());
-    ycl = lister->get_yid(nvoptions->get_ysec()+90);
-    xcl = lister->get_xid(nvoptions->get_xsec());
 
     if(nvoptions->get_cb(NV_RESET))
     {
@@ -118,18 +102,7 @@ void MPASGrid2dViewer::draw()
         reset();
     }
 
-    if(nvoptions->get_cb(NV_HASMINMAX))
-    {
-        _workMinVal = nvoptions->get_userminimum();
-        _workMaxVal = nvoptions->get_usermaximum();
-    }
-    else
-    {
-        _workMinVal = nvoptions->get_trueminimum();
-        _workMaxVal = nvoptions->get_truemaximum();
-    }
-
-    if(nvoptions->get_cb(NV_MPASGrid_SUBSET))
+    if(nvoptions->get_cb(NV_MPASGRID_SUBSET))
     {
         if((geometry->get_nVertLevels() > nvoptions->get_zsec()) && (0 <= nvoptions->get_zsec()))
         {
@@ -164,37 +137,12 @@ void MPASGrid2dViewer::draw()
                 glCallList(zcl);
             else
             {
-                  cout << "\t_varname: <" << _varname << ">, zcl = " << zcl << ", xcl = " << xcl << endl;
-                  cout << "\tnvoptions->get_cb(NV_SUBSET) = " << nvoptions->get_cb(NV_SUBSET) << endl;
+                cout << "\t_varname: <" << _varname << ">, zcl = " << zcl << ", xcl = " << xcl << endl;
+                cout << "\tnvoptions->get_cb(NV_SUBSET) = " << nvoptions->get_cb(NV_SUBSET) << endl;
                 if(nvoptions->get_cb(NV_SUBSET))
                     _flatSubset();
                 else
                     _flatDisplay();
-            }
-        }
-
-        if(geometry->get_nVertLevels() > 1)
-        {
-            if((360 > nvoptions->get_xsec()) && (0 <= nvoptions->get_xsec()))
-            {
-              //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-              //cout << "\t_varname: <" << _varname << ">, xcl = " << xcl << endl;
-
-                if(xcl)
-                    glCallList(xcl);
-                else
-                    _flatDisplayXsec();
-            }
-
-            if((FAR_NORTH > nvoptions->get_ysec()) && (FAR_SOUTH < nvoptions->get_ysec()))
-            {
-              //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-              //cout << "\t_varname: <" << _varname << ">, ycl = " << ycl << endl;
-
-                if(ycl)
-                    glCallList(ycl);
-                else
-                    _flatDisplayYsec();
             }
         }
     }
@@ -210,31 +158,6 @@ void MPASGrid2dViewer::draw()
                     _sphereSubset();
                 else
                     _sphereDisplay();
-            }
-        }
-
-        if(geometry->get_nVertLevels() > 1)
-        {
-            if((360 > nvoptions->get_xsec()) && (0 <= nvoptions->get_xsec()))
-            {
-              //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-              //cout << "\t_varname: <" << _varname << ">, xcl = " << xcl << endl;
-
-                if(xcl)
-                    glCallList(xcl);
-                else
-                    _sphereDisplayXsec();
-            }
-
-            if((FAR_NORTH > nvoptions->get_ysec()) && (FAR_SOUTH < nvoptions->get_ysec()))
-            {
-              //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-              //cout << "\t_varname: <" << _varname << ">, ycl = " << ycl << endl;
-
-                if(ycl)
-                    glCallList(ycl);
-                else
-                    _sphereDisplayYsec();
             }
         }
     }
@@ -270,15 +193,15 @@ void MPASGrid2dViewer::_sphereDisplay()
     pnt3d pnt;
     pnt3d norm;
 
-    float* current_var_ptr;
+    int* current_var_ptr;
 
     k = nvoptions->get_zsec();
 
-    // cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    // cout << "\t_varname: <" << _varname << ">" << endl;
-    // cout << "\tnVertLevels = " << nVertLevels << ", nvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
-    // cout << "\tnvoptions->get_tsec() = " << nvoptions->get_tsec() << ", vertexDegree = " << vertexDegree << endl;
-    // cout << "\tnCells = " << nCells << ", nVertices = " << nVertices << endl;
+    cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t_varname: <" << _varname << ">" << endl;
+    cout << "\tnVertLevels = " << nVertLevels << ", nvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
+    cout << "\tnvoptions->get_tsec() = " << nvoptions->get_tsec() << ", vertexDegree = " << vertexDegree << endl;
+    cout << "\tnCells = " << nCells << ", nVertices = " << nVertices << endl;
 
     current_var_ptr = &_var[nCells * nVertLevels * nvoptions->get_tsec()];
 
@@ -287,18 +210,15 @@ void MPASGrid2dViewer::_sphereDisplay()
     if(0 < zcl)
         return;
 
-    radius = 1.001 + 0.5 * (float) k / (float) nVertLevels;
-
     locator->set_height(radius);
 
     sv = 1.0 / (_workMaxVal - _workMinVal);
 
     zcl = glGenLists(1);
-  //glNewList(zcl, GL_COMPILE);
     glNewList(zcl, GL_COMPILE_AND_EXECUTE);
 
-    // cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    // cout << "\tzcl = " << zcl << endl;
+    cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tzcl = " << zcl << endl;
 
     glPushMatrix();
 
@@ -319,7 +239,8 @@ void MPASGrid2dViewer::_sphereDisplay()
         {
             c = cellsOnVertex[i+v*vertexDegree];
             n = nVertLevels * c + k;
-            fact = sv * (current_var_ptr[n] - _workMinVal);
+            // fact = sv * (current_var_ptr[n] - _workMinVal);
+            fact = (float) v / (float) nVertices;
 
             pnt = geometry->polar2xyz(c, radius);
 
@@ -354,7 +275,7 @@ void MPASGrid2dViewer::_sphereDisplay()
     glEndList();
 
     lister->set_zid(k, zcl);
-    // cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void MPASGrid2dViewer::_flatDisplay()
@@ -369,7 +290,7 @@ void MPASGrid2dViewer::_flatDisplay()
 
     float sv = 1.0;
     float fact;
-    float height = 0.0;
+    float height = 1.01;
 
     float x[5];
     float y[5];
@@ -378,7 +299,7 @@ void MPASGrid2dViewer::_flatDisplay()
     float dx;
   //float dy;
 
-    float* current_var_ptr;
+    int* current_var_ptr;
 
     pnt2d pnt;
     pnt2d pnt0;
@@ -397,27 +318,15 @@ void MPASGrid2dViewer::_flatDisplay()
         return;
 
     zcl = glGenLists(1);
-  //glNewList(zcl, GL_COMPILE);
     glNewList(zcl, GL_COMPILE_AND_EXECUTE);
 
-    if(1 < nVertLevels)
-        height = (float) k / (float) nVertLevels - 0.5;
-    else
-        height = 0.0;
-
     locator->set_height(height);
-
-    _innerPoints = geometry->get_innerPoints();
-    _nBoundaryPoints = geometry->get_nBoundaryPoints();
-    _boundaryType = geometry->get_boundaryType();
-    _boundaryPoints = geometry->get_boundaryPoints();
 
     sv = 1.0 / (_workMaxVal - _workMinVal);
 
     cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     cout << "\t_varname: <" << _varname << ">" << endl;
     cout << "\tnVertices = " << nVertices << ", nvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
-    cout << "\t_nBoundaryPoints = " << _nBoundaryPoints << endl;
 
     glPushMatrix();
 
@@ -705,478 +614,6 @@ void MPASGrid2dViewer::reset_texture1d(ColorTable *ct)
     texture1d->set_name(ct->get_name());
 }
 
-void MPASGrid2dViewer::_sphereDisplayXsec()
-{
-    xcl = 0;
-    int c, v, i, k, n;
-
-  //int nCells         = geometry->get_nCells();
-    int nVertLevels    = geometry->get_nVertLevels();
-    int nVertices      = geometry->get_nVertices();
-    int vertexDegree   = geometry->get_vertexDegree();
-    int* cellsOnVertex = geometry->get_cellsOnVertex();
-
-    double sv = 1.0;
-    double fact;
-    double height[nVertLevels];
-
-    double* lon = NULL;
-    double* lat = NULL;
-
-    float tlon[3];
-    float tlat[3];
-
-    double clon = (double) nvoptions->get_xsec();
-    double alon = DEG2ARC * clon;
-
-    double alat[3];
-    float dx;
-
-    float val[3][nVertLevels];
-    float cval[3][nVertLevels];
-
-    bool need_shift_low  = false;
-    bool need_shift_high = false;
-
-    pnt3d pnt0;
-    pnt3d pnt1;
-
-    int idx[3];
-
-    xcl = lister->get_xid(nvoptions->get_xsec());
-
-    if(0 < xcl)
-        return;
-
-    xcl = glGenLists(1);
-  //glNewList(xcl, GL_COMPILE);
-    glNewList(xcl, GL_COMPILE_AND_EXECUTE);
-
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t_varname: <" << _varname << ">" << endl;
-  //cout << "\tnVertLevels = " << nVertLevels << ", nvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
-
-    for(k = 0; k < nVertLevels; ++k)
-        height[k] = 1.001 + 0.5 * (float) k / (float) nVertLevels;
-
-    if(LOWBOUND > clon)
-        need_shift_low = true;
-    if(HIGHBOUND < clon)
-        need_shift_high = true;
-
-    lon = geometry->get_lonCell();
-    lat = geometry->get_latCell();
-
-    sv = 1.0 / (_workMaxVal - _workMinVal);
-
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\txcl = " << xcl << endl;
-
-    glPushMatrix();
-
-    glColor3f(1.0, 1.0, 1.0);
-
-    glNormal3f(0.0, 0.0, -1.0);
-
-    glEnable(GL_TEXTURE_1D);
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
-    for(v = 0; v < nVertices; ++v)
-    {
-        for(i = 0; i < vertexDegree; i++)
-        {
-            c = cellsOnVertex[i+v*vertexDegree];
-
-            idx[i] = nVertLevels * c;
-            tlon[i] = ARC2DEG * lon[c];
-            tlat[i] = ARC2DEG * lat[c];
-
-            if(NEAR_NORTH_POLE < tlat[i])
-                tlon[i] = clon;
-            if(NEAR_SOUTH_POLE > tlat[i])
-                tlon[i] = clon;
-        }
-
-        if(need_shift_low)
-        {
-            for(i = 0; i < vertexDegree; i++)
-            {
-                if(HIGHBOUND < tlon[i])
-                   tlon[i] -= 360.0;
-
-                if(NEAR_NORTH_POLE < tlat[i])
-                    tlon[i] = clon;
-                if(NEAR_SOUTH_POLE > tlat[i])
-                    tlon[i] = clon;
-            }
-        }
-
-        if(need_shift_high)
-        {
-            for(i = 0; i < vertexDegree; i++)
-            {
-                if(LOWBOUND > tlon[i])
-                   tlon[i] += 360.0;
-
-                if(NEAR_NORTH_POLE < tlat[i])
-                    tlon[i] = clon;
-                if(NEAR_SOUTH_POLE > tlat[i])
-                    tlon[i] = clon;
-            }
-        }
-
-        if((tlon[0] > clon) && (tlon[1] > clon) && (tlon[2] > clon))
-            continue;
-        if((tlon[0] < clon) && (tlon[1] < clon) && (tlon[2] < clon))
-            continue;
-
-        if((180.0 < fabs(tlon[1]-tlon[0])) ||
-           (180.0 < fabs(tlon[2]-tlon[0])) ||
-           (180.0 < fabs(tlon[2]-tlon[1])))
-        {
-          //cout << "\n\tclon = " << clon << endl;
-
-          //for(i = 0; i < vertexDegree; ++i)
-          //{
-          //    cout << "\ttlat[" << i << "] = " << tlat[i]
-          //         << "\ttlon[" << i << "] = " << tlon[i] << endl;
-          //}
-            continue;
-        }
-
-        for(i = 0; i < vertexDegree; ++i)
-        {
-          //cout << "\ttlat[" << i << "] = " << tlat[i]
-          //     << "\ttlon[" << i << "] = " << tlon[i] << endl;
-
-            n = idx[i];
-            for(k = 0; k < nVertLevels; ++k)
-            {
-                val[i][k] = _var[n+k];
-            }
-        }
-
-        n = 0;
-
-        if(((tlon[0] <= clon) && (tlon[1] >= clon)) ||
-           ((tlon[0] >= clon) && (tlon[1] <= clon)))
-        {
-            fact = tlon[1] - tlon[0];
-            if(MINIDIST < fabs(fact))
-                dx = (clon - tlon[0]) / fact;
-            else
-                dx = 0.5;
-
-            alat[n] = (1.0 - dx) * tlat[0] + dx * tlat[1];
-
-            for(k = 0; k < nVertLevels; ++k)
-            {
-                cval[n][k] = (1.0 - dx) * val[0][k] + dx * val[1][k];
-            }
-
-          //cout << "\talat[" << n << "] = " << alat[n] << endl;
-            alat[n] *= DEG2ARC;
-
-            ++n;
-        }
-
-        if(((tlon[0] <= clon) && (tlon[2] >= clon)) ||
-           ((tlon[0] >= clon) && (tlon[2] <= clon)))
-        {
-            fact = tlon[2] - tlon[0];
-            if(MINIDIST < fabs(fact))
-                dx = (clon - tlon[0]) / fact;
-            else
-                dx = 0.5;
-
-            alat[n] = (1.0 - dx) * tlat[0] + dx * tlat[2];
-
-            for(k = 0; k < nVertLevels; ++k)
-            {
-                cval[n][k] = (1.0 - dx) * val[0][k] + dx * val[2][k];
-            }
-
-          //cout << "\talat[" << n << "] = " << alat[n] << endl;
-            alat[n] *= DEG2ARC;
-
-            ++n;
-        }
-
-        if(((tlon[1] <= clon) && (tlon[2] >= clon)) ||
-           ((tlon[1] >= clon) && (tlon[2] <= clon)))
-        {
-            fact = tlon[2] - tlon[1];
-            if(MINIDIST < fabs(fact))
-                dx = (clon - tlon[1]) / fact;
-            else
-                dx = 0.5;
-
-            alat[n] = (1.0 - dx) * tlat[1] + dx * tlat[2];
-
-            for(k = 0; k < nVertLevels; ++k)
-            {
-                cval[n][k] = (1.0 - dx) * val[1][k] + dx * val[2][k];
-            }
-
-          //cout << "\talat[" << n << "] = " << alat[n] << endl;
-            alat[n] *= DEG2ARC;
-
-            ++n;
-        }
-
-        glBegin(GL_QUAD_STRIP);
-        for(k = 0; k < nVertLevels; ++k)
-        {
-            fact = sv * (cval[0][k] - _workMinVal);
-            glTexCoord1d(fact);
-            pnt0 = polar2xyz(alon, alat[0], height[k]);
-            glVertex3d(pnt0.x, pnt0.y, pnt0.z);
-
-          //cout << "\tpnt0.x = " << pnt0.x
-          //     << ", pnt0.y = " << pnt0.y
-          //     << ", pnt0.z = " << pnt0.z << endl;
-
-            fact = sv * (cval[1][k] - _workMinVal);
-            glTexCoord1d(fact);
-            pnt1 = polar2xyz(alon, alat[1], height[k]);
-            glVertex3d(pnt1.x, pnt1.y, pnt1.z);
-
-          //cout << "\tpnt1.x = " << pnt1.x
-          //     << ", pnt1.y = " << pnt1.y
-          //     << ", pnt1.z = " << pnt1.z << endl;
-        }
-        glEnd();
-    }
-
-    glDisable(GL_TEXTURE_1D);
-
-    glPopMatrix();
-
-    glEndList();
-
-    lister->set_xid(nvoptions->get_xsec(), xcl);
-}
-
-void MPASGrid2dViewer::_sphereDisplayYsec()
-{
-    ycl = 0;
-    int c, v, i, k, n;
-    int ml, mh;
-
-  //int nCells         = geometry->get_nCells();
-    int nVertLevels    = geometry->get_nVertLevels();
-    int nVertices      = geometry->get_nVertices();
-    int vertexDegree   = geometry->get_vertexDegree();
-    int* cellsOnVertex = geometry->get_cellsOnVertex();
-
-    double sv = 1.0;
-    double fact;
-    double height[nVertLevels];
-
-    double* lon = NULL;
-    double* lat = NULL;
-
-    double tlon[3];
-    double tlat[3];
-
-    double clat = (float) nvoptions->get_ysec();
-    double alat = DEG2ARC * clat;
-
-    double alon[3];
-    float dy;
-
-    float val[3][nVertLevels];
-    float cval[3][nVertLevels];
-
-    pnt3d pnt0;
-    pnt3d pnt1;
-
-    int idx[3];
-
-    ycl = lister->get_yid(nvoptions->get_ysec()+90);
-
-    if(0 < ycl)
-        return;
-
-    ycl = glGenLists(1);
-  //glNewList(ycl, GL_COMPILE);
-    glNewList(ycl, GL_COMPILE_AND_EXECUTE);
-
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t_varname: <" << _varname << ">" << endl;
-  //cout << "\tnVertLevels = " << nVertLevels << ", nvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
-
-    for(k = 0; k < nVertLevels; ++k)
-        height[k] = 1.001 + 0.5 * (float) k / (float) nVertLevels;
-
-    lon = geometry->get_lonCell();
-    lat = geometry->get_latCell();
-
-    sv = 1.0 / (_workMaxVal - _workMinVal);
-
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tycl = " << ycl << endl;
-
-    glPushMatrix();
-
-    glColor3f(1.0, 1.0, 1.0);
-
-    glNormal3f(0.0, 0.0, 1.0);
-
-    glEnable(GL_TEXTURE_1D);
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
-    for(v = 0; v < nVertices; ++v)
-    {
-        n = 0;
-        for(i = 0; i < vertexDegree; i++)
-        {
-            c = cellsOnVertex[i+v*vertexDegree];
-
-            idx[i] = nVertLevels * c;
-            tlon[i] = ARC2DEG * lon[c];
-            tlat[i] = ARC2DEG * lat[c];
-
-            if(clat < tlat[i])
-                ++n;
-            if(clat > tlat[i])
-                --n;
-        }
-
-        if((3 == n) || ((-3) == n))
-            continue;
-
-      //cout << "\nclat = " << clat << endl;
-
-        ml = 0;
-        mh = 0;
-        for(i = 0; i < vertexDegree; ++i)
-        {
-          //cout << "\ttlat[" << i << "] = " << tlat[i]
-          //     << "\ttlon[" << i << "] = " << tlon[i] << endl;
-
-            n = idx[i];
-            for(k = 0; k < nVertLevels; ++k)
-            {
-                val[i][k] = _var[n+k];
-            }
-
-            if(LOWBOUND > tlon[i])
-                ++ml;
-            if(HIGHBOUND < tlon[i])
-                ++mh;
-        }
-
-        if(ml && mh)
-        {
-            for(i = 0; i < vertexDegree; ++i)
-            {
-                if(LOWBOUND > tlon[i])
-                    tlon[i] += 360.0;
-            }
-        }
-
-        n = 0;
-
-        if(((tlat[0] <= clat) && (tlat[1] >= clat)) ||
-           ((tlat[0] >= clat) && (tlat[1] <= clat)))
-        {
-            fact = tlat[1] - tlat[0];
-            if(MINIDIST < fabs(fact))
-                dy = (clat - tlat[0]) / fact;
-            else
-                dy = 0.5;
-
-            alon[n] = (1.0 - dy) * tlon[0] + dy * tlon[1];
-
-            for(k = 0; k < nVertLevels; ++k)
-            {
-                cval[n][k] = (1.0 - dy) * val[0][k] + dy * val[1][k];
-            }
-
-          //cout << "\talon[" << n << "] = " << alon[n] << endl;
-            alon[n] *= DEG2ARC;
-
-            ++n;
-        }
-
-        if(((tlat[0] <= clat) && (tlat[2] >= clat)) ||
-           ((tlat[0] >= clat) && (tlat[2] <= clat)))
-        {
-            fact = tlat[2] - tlat[0];
-            if(MINIDIST < fabs(fact))
-                dy = (clat - tlat[0]) / fact;
-            else
-                dy = 0.5;
-
-            alon[n] = (1.0 - dy) * tlon[0] + dy * tlon[2];
-
-            for(k = 0; k < nVertLevels; ++k)
-            {
-                cval[n][k] = (1.0 - dy) * val[0][k] + dy * val[2][k];
-            }
-
-          //cout << "\talon[" << n << "] = " << alon[n] << endl;
-            alon[n] *= DEG2ARC;
-
-            ++n;
-        }
-
-        if(((tlat[1] <= clat) && (tlat[2] >= clat)) ||
-           ((tlat[1] >= clat) && (tlat[2] <= clat)))
-        {
-            fact = tlat[2] - tlat[1];
-            if(MINIDIST < fabs(fact))
-                dy = (clat - tlat[1]) / fact;
-            else
-                dy = 0.5;
-
-            alon[n] = (1.0 - dy) * tlon[1] + dy * tlon[2];
-
-            for(k = 0; k < nVertLevels; ++k)
-            {
-                cval[n][k] = (1.0 - dy) * val[1][k] + dy * val[2][k];
-            }
-
-          //cout << "\talon[" << n << "] = " << alon[n] << endl;
-            alon[n] *= DEG2ARC;
-
-            ++n;
-        }
-
-        glBegin(GL_QUAD_STRIP);
-        for(k = 0; k < nVertLevels; ++k)
-        {
-            fact = sv * (cval[0][k] - _workMinVal);
-            glTexCoord1d(fact);
-            pnt0 = polar2xyz(alon[0], alat, height[k]);
-            glVertex3d(pnt0.x, pnt0.y, pnt0.z);
-
-          //cout << "\tpnt0.x = " << pnt0.x
-          //     << ", pnt0.y = " << pnt0.y
-          //     << ", pnt0.z = " << pnt0.z << endl;
-
-            fact = sv * (cval[1][k] - _workMinVal);
-            glTexCoord1d(fact);
-            pnt1 = polar2xyz(alon[1], alat, height[k]);
-            glVertex3d(pnt1.x, pnt1.y, pnt1.z);
-
-          //cout << "\tpnt1.x = " << pnt1.x
-          //     << ", pnt1.y = " << pnt1.y
-          //     << ", pnt1.z = " << pnt1.z << endl;
-        }
-        glEnd();
-    }
-
-    glDisable(GL_TEXTURE_1D);
-
-    glPopMatrix();
-
-    glEndList();
-
-    lister->set_yid(nvoptions->get_ysec()+90, ycl);
-}
-
 pnt3d MPASGrid2dViewer::polar2xyz(double lon, double lat, double r)
 {
    pnt3d pnt;
@@ -1198,460 +635,6 @@ pnt3d MPASGrid2dViewer::polar2flat(double lon, double lat, double h)
    pnt.z = h;
 
    return pnt;
-}
-
-void MPASGrid2dViewer::_flatDisplayXsec()
-{
-    xcl = 0;
-    int c, v, i, k, n;
-
-  //int nCells         = geometry->get_nCells();
-    int nVertLevels    = geometry->get_nVertLevels();
-    int nVertices      = geometry->get_nVertices();
-    int vertexDegree   = geometry->get_vertexDegree();
-    int* cellsOnVertex = geometry->get_cellsOnVertex();
-
-    double sv = 1.0;
-    double fact;
-    double height[nVertLevels];
-
-    double* lon = NULL;
-    double* lat = NULL;
-
-    double tlon[3];
-    double tlat[3];
-
-    double clon = (float) nvoptions->get_xsec();
-    double alon = clon;
-
-    double alat[3];
-    float dx;
-
-    float val[3][nVertLevels];
-    float cval[3][nVertLevels];
-
-    bool need_shift_low  = false;
-    bool need_shift_high = false;
-
-    pnt3d pnt0;
-    pnt3d pnt1;
-
-    int idx[3];
-
-    xcl = lister->get_xid(nvoptions->get_xsec());
-
-    if(0 < xcl)
-        return;
-
-    xcl = glGenLists(1);
-  //glNewList(xcl, GL_COMPILE);
-    glNewList(xcl, GL_COMPILE_AND_EXECUTE);
-
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t_varname: <" << _varname << ">" << endl;
-  //cout << "\tnVertLevels = " << nVertLevels << ", nvoptions->get_xsec() = " << nvoptions->get_xsec() << endl;
-
-    for(k = 0; k < nVertLevels; ++k)
-        height[k] = 0.75 * (float) k / (float) nVertLevels - 0.5;
-
-    if(LOWBOUND > clon)
-        need_shift_low = true;
-    if(HIGHBOUND < clon)
-        need_shift_high = true;
-
-    lon = geometry->get_lonCell();
-    lat = geometry->get_latCell();
-
-    sv = 1.0 / (_workMaxVal - _workMinVal);
-
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\txcl = " << xcl << endl;
-
-    glPushMatrix();
-
-    glColor3f(1.0, 1.0, 1.0);
-
-    glNormal3f(1.0, 0.0, 0.0);
-
-    glEnable(GL_TEXTURE_1D);
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
-    for(v = 0; v < nVertices; ++v)
-    {
-        for(i = 0; i < vertexDegree; i++)
-        {
-            c = cellsOnVertex[i+v*vertexDegree];
-
-            idx[i] = nVertLevels * c;
-            tlon[i] = ARC2DEG * lon[c];
-            tlat[i] = ARC2DEG * lat[c];
-
-            if(NEAR_NORTH_POLE < tlat[i])
-                tlon[i] = clon;
-            if(NEAR_SOUTH_POLE > tlat[i])
-                tlon[i] = clon;
-        }
-
-        if(need_shift_low)
-        {
-            for(i = 0; i < vertexDegree; i++)
-            {
-                if(HIGHBOUND < tlon[i])
-                   tlon[i] -= 360.0;
-
-                if(NEAR_NORTH_POLE < tlat[i])
-                    tlon[i] = clon;
-                if(NEAR_SOUTH_POLE > tlat[i])
-                    tlon[i] = clon;
-            }
-        }
-
-        if(need_shift_high)
-        {
-            for(i = 0; i < vertexDegree; i++)
-            {
-                if(LOWBOUND > tlon[i])
-                   tlon[i] += 360.0;
-
-                if(NEAR_NORTH_POLE < tlat[i])
-                    tlon[i] = clon;
-                if(NEAR_SOUTH_POLE > tlat[i])
-                    tlon[i] = clon;
-            }
-        }
-
-        if((tlon[0] > clon) && (tlon[1] > clon) && (tlon[2] > clon))
-            continue;
-        if((tlon[0] < clon) && (tlon[1] < clon) && (tlon[2] < clon))
-            continue;
-
-        if((180.0 < fabs(tlon[1]-tlon[0])) ||
-           (180.0 < fabs(tlon[2]-tlon[0])) ||
-           (180.0 < fabs(tlon[2]-tlon[1])))
-        {
-          //cout << "\n\tclon = " << clon << endl;
-
-          //for(i = 0; i < vertexDegree; ++i)
-          //{
-          //    cout << "\ttlat[" << i << "] = " << tlat[i]
-          //         << "\ttlon[" << i << "] = " << tlon[i] << endl;
-          //}
-            continue;
-        }
-
-        for(i = 0; i < vertexDegree; ++i)
-        {
-          //cout << "\ttlat[" << i << "] = " << tlat[i]
-          //     << "\ttlon[" << i << "] = " << tlon[i] << endl;
-
-            n = idx[i];
-            for(k = 0; k < nVertLevels; ++k)
-            {
-                val[i][k] = _var[n+k];
-            }
-        }
-
-        n = 0;
-
-        if(((tlon[0] <= clon) && (tlon[1] >= clon)) ||
-           ((tlon[0] >= clon) && (tlon[1] <= clon)))
-        {
-            fact = tlon[1] - tlon[0];
-            if(MINIDIST < fabs(fact))
-                dx = (clon - tlon[0]) / fact;
-            else
-                dx = 0.5;
-
-            alat[n] = (1.0 - dx) * tlat[0] + dx * tlat[1];
-
-            for(k = 0; k < nVertLevels; ++k)
-            {
-                cval[n][k] = (1.0 - dx) * val[0][k] + dx * val[1][k];
-            }
-
-            ++n;
-        }
-
-        if(((tlon[0] <= clon) && (tlon[2] >= clon)) ||
-           ((tlon[0] >= clon) && (tlon[2] <= clon)))
-        {
-            fact = tlon[2] - tlon[0];
-            if(MINIDIST < fabs(fact))
-                dx = (clon - tlon[0]) / fact;
-            else
-                dx = 0.5;
-
-            alat[n] = (1.0 - dx) * tlat[0] + dx * tlat[2];
-
-            for(k = 0; k < nVertLevels; ++k)
-            {
-                cval[n][k] = (1.0 - dx) * val[0][k] + dx * val[2][k];
-            }
-
-            ++n;
-        }
-
-        if(((tlon[1] <= clon) && (tlon[2] >= clon)) ||
-           ((tlon[1] >= clon) && (tlon[2] <= clon)))
-        {
-            fact = tlon[2] - tlon[1];
-            if(MINIDIST < fabs(fact))
-                dx = (clon - tlon[1]) / fact;
-            else
-                dx = 0.5;
-
-            alat[n] = (1.0 - dx) * tlat[1] + dx * tlat[2];
-
-            for(k = 0; k < nVertLevels; ++k)
-            {
-                cval[n][k] = (1.0 - dx) * val[1][k] + dx * val[2][k];
-            }
-
-            ++n;
-        }
-
-        glBegin(GL_QUAD_STRIP);
-        for(k = 0; k < nVertLevels; ++k)
-        {
-            fact = sv * (cval[0][k] - _workMinVal);
-            glTexCoord1d(fact);
-            pnt0 = polar2flat(alon, alat[0], height[k]);
-            glVertex3d(pnt0.x, pnt0.y, pnt0.z);
-
-          //cout << "\tpnt0.x = " << pnt0.x
-          //     << ", pnt0.y = " << pnt0.y
-          //     << ", pnt0.z = " << pnt0.z << endl;
-
-            fact = sv * (cval[1][k] - _workMinVal);
-            glTexCoord1d(fact);
-            pnt1 = polar2flat(alon, alat[1], height[k]);
-            glVertex3d(pnt1.x, pnt1.y, pnt1.z);
-
-          //cout << "\tpnt1.x = " << pnt1.x
-          //     << ", pnt1.y = " << pnt1.y
-          //     << ", pnt1.z = " << pnt1.z << endl;
-        }
-        glEnd();
-    }
-
-    glDisable(GL_TEXTURE_1D);
-
-    glPopMatrix();
-
-    glEndList();
-
-    lister->set_xid(nvoptions->get_xsec(), xcl);
-}
-
-void MPASGrid2dViewer::_flatDisplayYsec()
-{
-    ycl = 0;
-    int c, v, i, k, n;
-    int ml, mh;
-
-  //int nCells         = geometry->get_nCells();
-    int nVertLevels    = geometry->get_nVertLevels();
-    int nVertices      = geometry->get_nVertices();
-    int vertexDegree   = geometry->get_vertexDegree();
-    int* cellsOnVertex = geometry->get_cellsOnVertex();
-
-    double sv = 1.0;
-    double fact;
-    double height[nVertLevels];
-
-    double* lon = NULL;
-    double* lat = NULL;
-
-    double tlon[3];
-    double tlat[3];
-
-    double clat = (float) nvoptions->get_ysec();
-    double alat = clat;
-
-    double alon[3];
-    float dy;
-
-    float val[3][nVertLevels];
-    float cval[3][nVertLevels];
-
-    pnt3d pnt0;
-    pnt3d pnt1;
-
-    int idx[3];
-
-    ycl = lister->get_yid(nvoptions->get_ysec()+90);
-
-    if(0 < ycl)
-        return;
-
-    ycl = glGenLists(1);
-  //glNewList(ycl, GL_COMPILE);
-    glNewList(ycl, GL_COMPILE_AND_EXECUTE);
-
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\t_varname: <" << _varname << ">" << endl;
-  //cout << "\tnVertLevels = " << nVertLevels << ", nvoptions->get_ysec() = " << nvoptions->get_ysec() << endl;
-
-    for(k = 0; k < nVertLevels; ++k)
-        height[k] = 0.75 * (float) k / (float) nVertLevels - 0.5;
-
-    lon = geometry->get_lonCell();
-    lat = geometry->get_latCell();
-
-    sv = 1.0 / (_workMaxVal - _workMinVal);
-
-  //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tycl = " << ycl << endl;
-
-    glPushMatrix();
-
-    glColor3f(1.0, 1.0, 1.0);
-
-    glNormal3f(0.0, 1.0, 0.0);
-
-    glEnable(GL_TEXTURE_1D);
-    glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
-
-    for(v = 0; v < nVertices; ++v)
-    {
-        n = 0;
-        for(i = 0; i < vertexDegree; i++)
-        {
-            c = cellsOnVertex[i+v*vertexDegree];
-
-            idx[i] = nVertLevels * c;
-            tlon[i] = ARC2DEG * lon[c];
-            tlat[i] = ARC2DEG * lat[c];
-
-            if(clat < tlat[i])
-                ++n;
-            if(clat > tlat[i])
-                --n;
-        }
-
-        if((3 == n) || ((-3) == n))
-            continue;
-
-      //cout << "\nclat = " << clat << endl;
-
-        ml = 0;
-        mh = 0;
-        for(i = 0; i < vertexDegree; ++i)
-        {
-          //cout << "\ttlat[" << i << "] = " << tlat[i]
-          //     << "\ttlon[" << i << "] = " << tlon[i] << endl;
-
-            n = idx[i];
-            for(k = 0; k < nVertLevels; ++k)
-            {
-                val[i][k] = _var[n+k];
-            }
-
-            if(LOWBOUND > tlon[i])
-                ++ml;
-            if(HIGHBOUND < tlon[i])
-                ++mh;
-        }
-
-        if(ml && mh)
-        {
-            for(i = 0; i < vertexDegree; ++i)
-            {
-                if(LOWBOUND > tlon[i])
-                    tlon[i] += 360.0;
-            }
-        }
-
-        n = 0;
-
-        if(((tlat[0] <= clat) && (tlat[1] >= clat)) ||
-           ((tlat[0] >= clat) && (tlat[1] <= clat)))
-        {
-            fact = tlat[1] - tlat[0];
-            if(MINIDIST < fabs(fact))
-                dy = (clat - tlat[0]) / fact;
-            else
-                dy = 0.5;
-
-            alon[n] = (1.0 - dy) * tlon[0] + dy * tlon[1];
-
-            for(k = 0; k < nVertLevels; ++k)
-            {
-                cval[n][k] = (1.0 - dy) * val[0][k] + dy * val[1][k];
-            }
-
-            ++n;
-        }
-
-        if(((tlat[0] <= clat) && (tlat[2] >= clat)) ||
-           ((tlat[0] >= clat) && (tlat[2] <= clat)))
-        {
-            fact = tlat[2] - tlat[0];
-            if(MINIDIST < fabs(fact))
-                dy = (clat - tlat[0]) / fact;
-            else
-                dy = 0.5;
-
-            alon[n] = (1.0 - dy) * tlon[0] + dy * tlon[2];
-
-            for(k = 0; k < nVertLevels; ++k)
-            {
-                cval[n][k] = (1.0 - dy) * val[0][k] + dy * val[2][k];
-            }
-
-            ++n;
-        }
-
-        if(((tlat[1] <= clat) && (tlat[2] >= clat)) ||
-           ((tlat[1] >= clat) && (tlat[2] <= clat)))
-        {
-            fact = tlat[2] - tlat[1];
-            if(MINIDIST < fabs(fact))
-                dy = (clat - tlat[1]) / fact;
-            else
-                dy = 0.5;
-
-            alon[n] = (1.0 - dy) * tlon[1] + dy * tlon[2];
-
-            for(k = 0; k < nVertLevels; ++k)
-            {
-                cval[n][k] = (1.0 - dy) * val[1][k] + dy * val[2][k];
-            }
-
-            ++n;
-        }
-
-        glBegin(GL_QUAD_STRIP);
-        for(k = 0; k < nVertLevels; ++k)
-        {
-            fact = sv * (cval[0][k] - _workMinVal);
-            glTexCoord1d(fact);
-            pnt0 = polar2flat(alon[0], alat, height[k]);
-            glVertex3d(pnt0.x, pnt0.y, pnt0.z);
-
-          //cout << "\tpnt0.x = " << pnt0.x
-          //     << ", pnt0.y = " << pnt0.y
-          //     << ", pnt0.z = " << pnt0.z << endl;
-
-            fact = sv * (cval[1][k] - _workMinVal);
-            glTexCoord1d(fact);
-            pnt1 = polar2flat(alon[1], alat, height[k]);
-            glVertex3d(pnt1.x, pnt1.y, pnt1.z);
-
-          //cout << "\tpnt1.x = " << pnt1.x
-          //     << ", pnt1.y = " << pnt1.y
-          //     << ", pnt1.z = " << pnt1.z << endl;
-        }
-        glEnd();
-    }
-
-    glDisable(GL_TEXTURE_1D);
-
-    glPopMatrix();
-
-    glEndList();
-
-    lister->set_yid(nvoptions->get_ysec()+90, ycl);
 }
 
 void MPASGrid2dViewer::_draw_cross(double radius)
@@ -1745,9 +728,9 @@ void MPASGrid2dViewer::_flatSubset()
 
     double sv = 1.0;
     double fact;
-    double height = 0.0;
+    double height = 1.01;
 
-    float* current_var_ptr;
+    int* current_var_ptr;
 
     int nwest, neast, nsouth, nnorth;
     float west, east, south, north;
@@ -1764,13 +747,7 @@ void MPASGrid2dViewer::_flatSubset()
         return;
 
     zcl = glGenLists(1);
-  //glNewList(zcl, GL_COMPILE);
     glNewList(zcl, GL_COMPILE_AND_EXECUTE);
-
-    if(1 < nVertLevels)
-        height = (float) k / (float) nVertLevels - 0.5;
-    else
-        height = 0.0;
 
     locator->set_height(height);
 
@@ -1919,7 +896,7 @@ void MPASGrid2dViewer::_sphereSubset()
     double fact;
     double height = 1.001;
 
-    float* current_var_ptr;
+    int* current_var_ptr;
 
     int nwest, neast, nsouth, nnorth;
     float west, east, south, north;
@@ -1943,8 +920,6 @@ void MPASGrid2dViewer::_sphereSubset()
     zcl = glGenLists(1);
   //glNewList(zcl, GL_COMPILE);
     glNewList(zcl, GL_COMPILE_AND_EXECUTE);
-
-    height = 1.001 + 0.5 * (float) k / (float) nVertLevels;
 
     locator->set_height(height);
 
@@ -2105,7 +1080,7 @@ void MPASGrid2dViewer::draw_sphere_grids()
 
     k = nvoptions->get_zsec();
 
-    radius = 1.020 + 0.5 * (float) k / (float) nVertLevels;
+    radius = 1.01;
 
     locator->set_height(radius);
 
@@ -2161,7 +1136,7 @@ void MPASGrid2dViewer::draw_plane_grids()
     float x[5];
     float y[5];
     float dx;
-    float height;
+    float height = 1.001;
 
     pnt2d pnt;
     pnt2d pnt0;
@@ -2170,17 +1145,7 @@ void MPASGrid2dViewer::draw_plane_grids()
 
     k = nvoptions->get_zsec();
 
-    if(1 < nVertLevels)
-        height = (float) k / (float) nVertLevels - 0.5;
-    else
-        height = 0.0;
-
     locator->set_height(height);
-
-    _innerPoints = geometry->get_innerPoints();
-    _nBoundaryPoints = geometry->get_nBoundaryPoints();
-    _boundaryType = geometry->get_boundaryType();
-    _boundaryPoints = geometry->get_boundaryPoints();
 
     glPushMatrix();
 

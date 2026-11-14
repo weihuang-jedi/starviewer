@@ -17,6 +17,8 @@ class ModelParserFactory {
 public:
     // Factory Method
     static unique_ptr<ModelParser> createParser(ModelType type) {
+        // cout << "Enter <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+        // cout << "\ttype:" << type << endl;
         switch (type) {
             case ModelType::MPIDEMO:
                 return unique_ptr<ModelParser>(new MPIDEMOParser());
@@ -29,6 +31,7 @@ public:
             case ModelType::MPAS:
                 return unique_ptr<ModelParser>(new MPASParser());
             case ModelType::MPASGRID:
+                // cout << "\tfor MPASGRID" << endl;
                 return unique_ptr<ModelParser>(new MPASGridParser());
             case ModelType::EAGLE:
                 return unique_ptr<ModelParser>(new EagleParser());
@@ -39,6 +42,7 @@ public:
             default:
                 return nullptr;
         }
+        // cout << "Leave <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     }
 };
 

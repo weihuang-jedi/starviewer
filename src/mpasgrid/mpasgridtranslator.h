@@ -53,7 +53,7 @@ class MPASGridTranslator : public BaseTranslator
         void writeLocatorMsg();
 
     private:
-        MPASGridGeometry* geometry;
+        MPASGeometry* geometry;
         MPASGridController* mpasgridcontroller;
 
         bool _saveJpg;

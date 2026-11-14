@@ -33,7 +33,7 @@ void MPASGridTranslator::setup()
 {
     // cout << "\nEnter Funciton: " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     mpasgridcontroller = new MPASGridController(colorTable, nvoptions,
-                                        _static_flnm, _data_flnm);
+                                                _static_flnm, _data_flnm);
     // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     mpasgridcontroller->setup();
 
@@ -52,14 +52,12 @@ void MPASGridTranslator::setup()
     // evaluator = mpasgridcontroller->get_evaluator();
  
     // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    _varname = string("surface_pressure");
+    _varname = string("pic");
 
     // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     mpasgridcontroller->set2dvarname(_varname);
 
-    // _varname = mpasgridcontroller->get_varname();
-    _minval = mpasgridcontroller->get_minval();
-    _maxval = mpasgridcontroller->get_maxval();
+    _varname = mpasgridcontroller->get_varname();
 
     nvoptions->set_xsec(-1);
     nvoptions->set_ysec(-1);

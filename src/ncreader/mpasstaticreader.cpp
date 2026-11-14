@@ -112,6 +112,7 @@ void MPASStaticReader::get_var_info() {
     int var_natts;
     char var_name[NC_MAX_NAME+1];
 
+    // cout << "Enter functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     num_v2ds = 0;
     num_v3ds = 0;
     v2d_names.resize(num_vars);
@@ -140,6 +141,7 @@ void MPASStaticReader::get_var_info() {
 
     v2d_names.resize(num_v2ds);
     v3d_names.resize(num_v3ds);
+    // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 // Function to dimensions, and variables
@@ -164,12 +166,14 @@ void MPASStaticReader::exploreFile() {
     _xCell = getDouble("xCell");
     _yCell = getDouble("yCell");
     _zCell = getDouble("zCell");
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     _lonVertex = getDouble("lonVertex");
     _latVertex = getDouble("latVertex");
     _xVertex = getDouble("xVertex");
     _yVertex = getDouble("yVertex");
     _zVertex = getDouble("zVertex");
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     _indexToCellID = getInt("indexToCellID");
     _indexToVertexID = getInt("indexToVertexID");
@@ -178,7 +182,9 @@ void MPASStaticReader::exploreFile() {
     _verticesOnCell = getInt("verticesOnCell");
     _cellsOnVertex = getInt("cellsOnVertex");
 
-    _xtime = getChar("xtime");
+    // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
+
+    // _xtime = getChar("xtime");
 
     // cout << "Leave functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }

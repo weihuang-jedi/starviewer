@@ -38,6 +38,7 @@ target_include_directories(mpasgrid PUBLIC
     ${CMAKE_SOURCE_DIR}/control
     ${CMAKE_SOURCE_DIR}/ncreader
     ${CMAKE_SOURCE_DIR}/view
+    ${CMAKE_SOURCE_DIR}/mpas
     ${CMAKE_SOURCE_DIR}/windvector
     ${CMAKE_SOURCE_DIR}/marchingCube
     ${CMAKE_SOURCE_DIR}/translator
@@ -50,6 +51,7 @@ target_include_directories(mpasgrid PUBLIC
 target_link_libraries(mpasgrid PUBLIC
     ${OPENGL_LIBRARIES}
     ${NetCDF_LIBRARIES}
+    ncreader
     ${GLU_LIBRARY}
     Qt5::Core
     Qt5::Widgets

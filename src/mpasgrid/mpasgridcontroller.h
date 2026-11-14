@@ -6,7 +6,7 @@
 #include "colorTable.h"
 #include "coastline.h"
 #include "mpasstaticreader.h"
-#include "mpasdatareader.h"
+#include "mpasgridreader.h"
 #include "mpasgeometry.h"
 #include "mpasgrid2dviewer.h"
 #include "locator.h"
@@ -23,8 +23,8 @@ class MPASGridController
         int get_nCells() { return geometry->get_nCells(); };
         int get_nVertices() { return geometry->get_nVertices(); };
 
-        int get_nz() { return geometry->get_nVertLevels(); };
-        int get_nt() { return geometry->get_nTime(); };
+        int get_nz() { return 1; };
+        int get_nt() { return 1; };
         int get_tl() { return _tvalue; };
 
         void set_colorTable(ColorTable *ct);
@@ -42,8 +42,7 @@ class MPASGridController
         string get_title() { return _title; };
         string* get_timestring();
 
-      //MPASGridEvaluator* get_evaluator() { return evaluator; };
-        MPASGridGeometry* get_geometry() { return geometry; };
+        MPASGeometry* get_geometry() { return geometry; };
 
         int get_curTime() { return _curTime; };
         int get_ndv(int n);
@@ -54,19 +53,19 @@ class MPASGridController
         void set_fileNtime(int nf, int nt);
         void setup();
 
-        float get_minval() { return _minval; };
-        float get_maxval() { return _maxval; };
+        int get_minval() { return _minval; };
+        int get_maxval() { return _maxval; };
 
 	bool is2d(string vn);
 	bool is3d(string vn);
 
     protected:
-        MPASGridStaticReader* ncstatic;
-        MPASGridDataReader* ncdata;
+        MPASStaticReader* ncstatic;
+        MPASGridReader* ncdata;
         Locator* locator;
         ColorTable* colorTable;
         NVOptions* nvoptions;
-        MPASGridGeometry* geometry;
+        MPASGeometry* geometry;
 
         MPASGrid2dViewer *mpasgrid2dviewer;
 
@@ -91,9 +90,9 @@ class MPASGridController
         int* _varsize;
         int* _ntimes;
 
-        float* _value;
-        float _minval;
-        float _maxval;
+        int* _value;
+        int _minval;
+        int _maxval;
 
         void _set_glbTime();
 };

@@ -19,12 +19,12 @@ export CXX=/usr/bin/g++
 export CC=/usr/bin/gcc
 # Add the Fortran compiler export
 export FC=/usr/bin/gfortran
+# -DCMAKE_C_COMPILER_WORKS=1 \
 
 cmake ../src \
   -DCMAKE_BUILD_TYPE=Release \
   "-DCMAKE_EXE_LINKER_FLAGS=-Wl,-rpath,/usr/lib/x86_64-linux-gnu -lOpenGL -lGL -lGLU -lX11 -lXrender -Wl,--copy-dt-needed-entries" \
   -DCMAKE_CXX_COMPILER_WORKS=1 \
-  -DCMAKE_C_COMPILER_WORKS=1 \
   -DCMAKE_Fortran_COMPILER_WORKS=1 \
   -DNetCDF_INCLUDE_DIRS=/usr/include \
   -DNetCDF_LIBRARIES=/usr/lib/x86_64-linux-gnu/libnetcdf.so \

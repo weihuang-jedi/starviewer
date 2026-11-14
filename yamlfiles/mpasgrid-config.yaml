@@ -1,0 +1,19 @@
+application:
+  name: StarViewer
+  model: mpasgrid
+  version: 0.0.1
+
+earth:
+  name: data/earth.bmp
+
+coastline:
+  name: data/gshhg-shp-2.3.7/GSHHS_shp
+  resolution: c
+
+mpas:
+  static:
+    - /home/weihuang/work/MPAS-Model/data/x1.655362.grid.nc
+
+  data:
+    - /home/weihuang/work/MPAS-Model/utils/partition_analysis.nc
+

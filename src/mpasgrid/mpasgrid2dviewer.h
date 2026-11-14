@@ -33,16 +33,16 @@ class MPASGrid2dViewer
         void draw_plane_grids();
 
         void reset();
-        void setup(string vn, float* var);
-        void set_geometry(MPASGridGeometry* gm);
+        void setup(string vn, int* var);
+        void set_geometry(MPASGeometry* gm);
         void reset_texture1d(ColorTable *ct);
 
         void set_tvalue(int n) { _tvalue = n; };
 
         void set_locator(Locator* l) { locator = l; };
 
-        float get_minval() { return _minval; };
-        float get_maxval() { return _maxval; };
+        int get_minval() { return _minval; };
+        int get_maxval() { return _maxval; };
 
     protected:
         Locator* locator;
@@ -50,7 +50,7 @@ class MPASGrid2dViewer
         Texture1d* texture1d;
         CoastLine* coastline;
         ColorTable* colorTable;
-        MPASGridGeometry* geometry;
+        MPASGeometry* geometry;
         Evaluator* evaluator;
         NVOptions* nvoptions;
 
@@ -68,24 +68,20 @@ class MPASGrid2dViewer
         vector<int> _boundaryPoints;
         vector<int> _subsetVertices;
 
-        float* _var;
+        int* _var;
 
-        float  _minval, _workMinVal;
-        float  _maxval, _workMaxVal;
+        int  _minval, _workMinVal;
+        int  _maxval, _workMaxVal;
 
         void _initialize();
-        void _evaluate(float* var);
+        void _evaluate(int* var);
 
         void _flatSubset();
         void _sphereSubset();
 
         void _flatDisplay();
-        void _flatDisplayXsec();
-        void _flatDisplayYsec();
 
         void _sphereDisplay();
-        void _sphereDisplayXsec();
-        void _sphereDisplayYsec();
 
         void _draw_cross(double radius);
         void _draw_triangle(double radius);
