@@ -39,7 +39,6 @@ void MPASGridTranslator::setup()
 
     // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     _title = mpasgridcontroller->get_title();
-    _timestr = mpasgridcontroller->get_timestring();
  
     // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     _jpgNotSaved = true;
@@ -55,9 +54,11 @@ void MPASGridTranslator::setup()
     _varname = string("pic");
 
     // cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\t_varname: " << _varname << endl;
     mpasgridcontroller->set2dvarname(_varname);
 
     _varname = mpasgridcontroller->get_varname();
+    // cout << "\t_varname: " << _varname << endl;
 
     nvoptions->set_xsec(-1);
     nvoptions->set_ysec(-1);
@@ -115,10 +116,7 @@ void MPASGridTranslator::writeFrameInfo()
 
 void MPASGridTranslator::createVarInfo()
 {
-    _varinfo = "Dim cells="+QString::number(geometry->get_nCells())
-             + ", level=" + QString::number(geometry->get_nVertLevels())
-             + "\nVar min=" + QString::number(mpasgridcontroller->get_minval())
-             + ", max=" + QString::number( mpasgridcontroller->get_maxval());
+    _varinfo = "Dim cells="+QString::number(geometry->get_nCells());
 }
 
 void MPASGridTranslator::writeVarInfo()
@@ -132,20 +130,7 @@ void MPASGridTranslator::make_timeNpositionString()
     int framenumb = 0;
 
     framenumb = mpasgridcontroller->get_curTime();
-    if((0 <= framenumb) && (NULL != _timestr))
-    {
-      //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
-      //cout << "\tframenumb = " << framenumb << endl;
-      //cout << "\t_timestr[" << framenumb << "] = <" << _timestr[framenumb] << ">" << endl;
-      //_timeinfo = "          " + _timestr[framenumb];
-        _timeinfo = _timestr[framenumb];
-    }
-    else
-    {
-        string tstr = number2string<int>(_glbTime);
-        _timeinfo = "Time: ";
-        _timeinfo += tstr;
-    }
+    _timeinfo = "Time: ";
 
     _position = "Position: ";
     string xstr = number2string<int>(nvoptions->get_xsec());
@@ -177,10 +162,6 @@ void MPASGridTranslator::select2dVar(const QString& str)
 
     mpasgridcontroller->set1dvarname(_varname);
     _title = mpasgridcontroller->get_title();
-    _timestr = mpasgridcontroller->get_timestring();
-
-    _minval = mpasgridcontroller->get_minval();
-    _maxval = mpasgridcontroller->get_maxval();
 
     sliderNspinX->set_max(360);
     sliderNspinX->set_min(360);
@@ -190,7 +171,7 @@ void MPASGridTranslator::select2dVar(const QString& str)
     sliderNspinY->setValue(90);
     sliderNspinZ->set_max(1);
     sliderNspinZ->setValue(0);
-    sliderNspinT->set_max(geometry->get_nTime());
+    sliderNspinT->set_max(1);
     sliderNspinT->setValue(0);
 
     nvoptions->set_zsec(0);
@@ -204,14 +185,9 @@ void MPASGridTranslator::select3dVar(const QString& str)
 
     mpasgridcontroller->set3dvarname(_varname);
     _title = mpasgridcontroller->get_title();
-    _timestr = mpasgridcontroller->get_timestring();
-
-    _minval = mpasgridcontroller->get_minval();
-    _maxval = mpasgridcontroller->get_maxval();
 
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "\t2d var: <" << str.toStdString() << "> is selected." << endl;
-  //cout << "\tgeometry->get_nVertLevels() = " << geometry->get_nVertLevels() << endl;
  
     sliderNspinX->set_max(360);
     sliderNspinX->set_min(0);
@@ -219,9 +195,9 @@ void MPASGridTranslator::select3dVar(const QString& str)
     sliderNspinY->set_max(90);
     sliderNspinY->set_min(-90);
     sliderNspinY->setValue(90);
-    sliderNspinZ->set_max(geometry->get_nVertLevels());
+    sliderNspinZ->set_max(1);
     sliderNspinZ->setValue(0);
-    sliderNspinT->set_max(geometry->get_nTime());
+    sliderNspinT->set_max(1);
     sliderNspinT->setValue(0);
 
     nvoptions->set_zsec(0);
@@ -243,7 +219,6 @@ void MPASGridTranslator::update_frame()
 
         _set_current_time();
         mpasgridcontroller->set_fileNtime(_curFile, _curTime);
-        _timestr = mpasgridcontroller->get_timestring();
 
         updateGL();
     }

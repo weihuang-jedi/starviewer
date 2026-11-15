@@ -20,7 +20,7 @@
 
 MPASGrid2dViewer::MPASGrid2dViewer(ColorTable *ct, NVOptions* opt)
 {
-    cout << "Enter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Enter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     colorTable = ct;
     nvoptions = opt;
 
@@ -45,7 +45,7 @@ MPASGrid2dViewer::MPASGrid2dViewer(ColorTable *ct, NVOptions* opt)
     nvoptions->set_ysec(180);
     nvoptions->set_ysec2(180);
     nvoptions->set_zsec(0);
-    cout << "Leave" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 MPASGrid2dViewer::~MPASGrid2dViewer()
@@ -70,14 +70,14 @@ void MPASGrid2dViewer::set_geometry(MPASGeometry *gm)
 void MPASGrid2dViewer::setup(string vn, int *var)
 {
     size_t gridsize;
-    cout << "Enter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    cout << "\tvarname: " << vn << endl;
+    // cout << "Enter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\tvarname: " << vn << endl;
 
     reset();
 
     _varname  = vn;
     _var = var;
-    cout << "Leave" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "Leave" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
 
 void MPASGrid2dViewer::reset()
@@ -92,7 +92,7 @@ void MPASGrid2dViewer::_initialize()
 
 void MPASGrid2dViewer::draw()
 {
-    cout << "\nEnter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // cout << "\nEnter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     zcl = lister->get_zid(nvoptions->get_zsec());
 
     if(nvoptions->get_cb(NV_RESET))
@@ -123,22 +123,22 @@ void MPASGrid2dViewer::draw()
         return;
     }
 
-    cout << "\t_varname: <" << _varname << ">, zcl = " << zcl << ", xcl = " << xcl << endl;
-    cout << "\tnvoptions->get_cb(NV_FLATON) = " << nvoptions->get_cb(NV_FLATON) << endl;
+    // cout << "\t_varname: <" << _varname << ">, zcl = " << zcl << ", xcl = " << xcl << endl;
+    // cout << "\tnvoptions->get_cb(NV_FLATON) = " << nvoptions->get_cb(NV_FLATON) << endl;
 
     if(nvoptions->get_cb(NV_FLATON))
     {
-        cout << "\t_varname: <" << _varname << ">, zcl = " << zcl << ", xcl = " << xcl << endl;
-        cout << "\tgeometry->get_nVertLevels() = " << geometry->get_nVertLevels() << endl;
-        cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
+        // cout << "\t_varname: <" << _varname << ">, zcl = " << zcl << ", xcl = " << xcl << endl;
+        //      << "\tgeometry->get_nVertLevels() = " << geometry->get_nVertLevels() << endl;
+        //      << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
         if((geometry->get_nVertLevels() > nvoptions->get_zsec()) && (0 <= nvoptions->get_zsec()))
         {
             if(zcl)
                 glCallList(zcl);
             else
             {
-                cout << "\t_varname: <" << _varname << ">, zcl = " << zcl << ", xcl = " << xcl << endl;
-                cout << "\tnvoptions->get_cb(NV_SUBSET) = " << nvoptions->get_cb(NV_SUBSET) << endl;
+                // cout << "\t_varname: <" << _varname << ">, zcl = " << zcl << ", xcl = " << xcl << endl;
+                // cout << "\tnvoptions->get_cb(NV_SUBSET) = " << nvoptions->get_cb(NV_SUBSET) << endl;
                 if(nvoptions->get_cb(NV_SUBSET))
                     _flatSubset();
                 else
@@ -268,6 +268,8 @@ void MPASGrid2dViewer::_sphereDisplay()
         if((NULL != nvoptions) && nvoptions->get_cb(NV_GRIDON))
             _draw_triangle(radius + 0.01);
     }
+#else
+    _draw_triangle(radius + 0.01);
 #endif
 
     glPopMatrix();
@@ -294,10 +296,8 @@ void MPASGrid2dViewer::_flatDisplay()
 
     float x[5];
     float y[5];
-  //float z[5];
     float val[5];
     float dx;
-  //float dy;
 
     int* current_var_ptr;
 
@@ -683,7 +683,6 @@ void MPASGrid2dViewer::_draw_triangle(double radius)
     int* cellsOnVertex = geometry->get_cellsOnVertex();
 
     pnt3d pnt;
-  //pnt3d norm;
 
     glPushMatrix();
 
@@ -697,15 +696,11 @@ void MPASGrid2dViewer::_draw_triangle(double radius)
         {
             c = cellsOnVertex[i+v*vertexDegree];
             pnt = geometry->polar2xyz(c, radius);
-          //norm = nvop(pnt, radius);
-          //glNormal3d(norm.x, norm.y, norm.z);
             glVertex3d(pnt.x, pnt.y, pnt.z);
         }
 
         c = cellsOnVertex[v*vertexDegree];
         pnt = geometry->polar2xyz(c, radius);
-      //norm = nvop(pnt, radius);
-      //glNormal3d(norm.x, norm.y, norm.z);
         glVertex3d(pnt.x, pnt.y, pnt.z);
 
         glEnd();

@@ -101,7 +101,9 @@ void MPASGridController::setup()
 
 void MPASGridController::draw()
 {
+    // cout << "Enter <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     mpasgrid2dviewer->draw();
+    // cout << "Leave <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 }
 
 bool MPASGridController::is2d(string vn)
