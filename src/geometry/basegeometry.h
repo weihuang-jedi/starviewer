@@ -1,11 +1,12 @@
 #ifndef _BaseGeometry_H
 #define _BaseGeometry_H
 
-//$Id: basegeometry.h 4865 2014-01-01 15:49:23Z starviewer $
-
 #include <string>          // <--- Add this for 'string'
 #include <QString>         // <--- Add this if you want to use Qt strings
 #include <QOpenGLWidget>
+
+#include "point2d.h"
+#include "point3d.h"
 
 using namespace std;
 

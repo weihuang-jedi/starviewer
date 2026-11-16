@@ -7,7 +7,7 @@
 #include "coastline.h"
 #include "mpasstaticreader.h"
 #include "mpasgridreader.h"
-#include "mpasgeometry.h"
+#include "mpasgridgeometry.h"
 #include "mpasgrid2dviewer.h"
 #include "locator.h"
 
@@ -42,7 +42,7 @@ class MPASGridController
         string get_title() { return _title; };
         string* get_timestring();
 
-        MPASGeometry* get_geometry() { return geometry; };
+        MPASGridGeometry* get_geometry() { return geometry; };
 
         int get_curTime() { return _curTime; };
         int get_ndv(int n);
@@ -65,7 +65,7 @@ class MPASGridController
         Locator* locator;
         ColorTable* colorTable;
         NVOptions* nvoptions;
-        MPASGeometry* geometry;
+        MPASGridGeometry* geometry;
 
         MPASGrid2dViewer *mpasgrid2dviewer;
 

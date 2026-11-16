@@ -22,6 +22,7 @@ class MPASStaticReader : public NCBaseReader
     int get_nCells() { return _nCells; };
     int get_nVertices() { return _nVertices; };
     int get_nEdges() { return _nEdges; };
+    int get_maxEdges() { return _maxEdges; };
     int get_nTime() { return _nTime; };
 
     int get_vertexDegree() { return _vertexDegree; };
@@ -44,8 +45,9 @@ class MPASStaticReader : public NCBaseReader
     int* get_indexToCellID() { return _indexToCellID; };
     int* get_indexToVertexID() { return _indexToVertexID; };
     int* get_cellsOnCell() { return _cellsOnCell; };
-    int* get_verticesOnCell() { return _verticesOnCell; };
     int* get_cellsOnVertex() { return _cellsOnVertex; };
+    int* get_verticesOnCell() { return _verticesOnCell; };
+    int* get_nEdgesOnCell() { return _nEdgesOnCell; };
 
     char* get_xtime() { return _xtime; };
 
@@ -74,6 +76,7 @@ class MPASStaticReader : public NCBaseReader
     int* _cellsOnCell;
     int* _verticesOnCell;
     int* _cellsOnVertex;
+    int* _nEdgesOnCell;
 
     char* _xtime;
 

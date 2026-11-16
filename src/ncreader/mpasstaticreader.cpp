@@ -59,10 +59,12 @@ MPASStaticReader::~MPASStaticReader() {
         delete[] _indexToVertexID;
     if (_cellsOnCell)
         delete[] _cellsOnCell;
-    if (_verticesOnCell)
-        delete[] _verticesOnCell;
     if (_cellsOnVertex)
         delete[] _cellsOnVertex;
+    if (_verticesOnCell)
+        delete[] _verticesOnCell;
+    if (_nEdgesOnCell)
+        delete[] _nEdgesOnCell;
     close();
 }
  
@@ -179,8 +181,9 @@ void MPASStaticReader::exploreFile() {
     _indexToVertexID = getInt("indexToVertexID");
 
     _cellsOnCell = getInt("cellsOnCell");
-    _verticesOnCell = getInt("verticesOnCell");
     _cellsOnVertex = getInt("cellsOnVertex");
+    _verticesOnCell = getInt("verticesOnCell");
+    _nEdgesOnCell = getInt("nEdgesOnCell");
 
     // cout << "\tfunctions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 

@@ -58,7 +58,7 @@ MPASGrid2dViewer::~MPASGrid2dViewer()
     delete evaluator;
 }
 
-void MPASGrid2dViewer::set_geometry(MPASGeometry *gm)
+void MPASGrid2dViewer::set_geometry(MPASGridGeometry *gm)
 {
     // cout << "Enter" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     geometry = gm;
@@ -104,19 +104,16 @@ void MPASGrid2dViewer::draw()
 
     if(nvoptions->get_cb(NV_MPASGRID_SUBSET))
     {
-        if((geometry->get_nVertLevels() > nvoptions->get_zsec()) && (0 <= nvoptions->get_zsec()))
+        if(zcl)
+            glCallList(zcl);
+        else
         {
-            if(zcl)
-                glCallList(zcl);
-            else
+            if(nvoptions->get_cb(NV_SUBSET))
             {
-                if(nvoptions->get_cb(NV_SUBSET))
-                {
-                    if(nvoptions->get_cb(NV_FLATON))
-                        _flatSubset();
-                    else
-                        _sphereSubset();
-                }
+                if(nvoptions->get_cb(NV_FLATON))
+                    _flatSubset();
+                else
+                    _sphereSubset();
             }
         }
 
@@ -128,37 +125,28 @@ void MPASGrid2dViewer::draw()
 
     if(nvoptions->get_cb(NV_FLATON))
     {
-        // cout << "\t_varname: <" << _varname << ">, zcl = " << zcl << ", xcl = " << xcl << endl;
-        //      << "\tgeometry->get_nVertLevels() = " << geometry->get_nVertLevels() << endl;
-        //      << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
-        if((geometry->get_nVertLevels() > nvoptions->get_zsec()) && (0 <= nvoptions->get_zsec()))
+        if(zcl)
+            glCallList(zcl);
+        else
         {
-            if(zcl)
-                glCallList(zcl);
+            // cout << "\t_varname: <" << _varname << ">, zcl = " << zcl << ", xcl = " << xcl << endl;
+            // cout << "\tnvoptions->get_cb(NV_SUBSET) = " << nvoptions->get_cb(NV_SUBSET) << endl;
+            if(nvoptions->get_cb(NV_SUBSET))
+                _flatSubset();
             else
-            {
-                // cout << "\t_varname: <" << _varname << ">, zcl = " << zcl << ", xcl = " << xcl << endl;
-                // cout << "\tnvoptions->get_cb(NV_SUBSET) = " << nvoptions->get_cb(NV_SUBSET) << endl;
-                if(nvoptions->get_cb(NV_SUBSET))
-                    _flatSubset();
-                else
-                    _flatDisplay();
-            }
+                _flatDisplay();
         }
     }
     else
     {
-        if((geometry->get_nVertLevels() > nvoptions->get_zsec()) && (0 <= nvoptions->get_zsec()))
+        if(zcl)
+            glCallList(zcl);
+        else
         {
-            if(zcl)
-                glCallList(zcl);
+            if(nvoptions->get_cb(NV_SUBSET))
+                _sphereSubset();
             else
-            {
-                if(nvoptions->get_cb(NV_SUBSET))
-                    _sphereSubset();
-                else
-                    _sphereDisplay();
-            }
+                _sphereDisplay();
         }
     }
     // cout << "Leave" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
@@ -180,15 +168,22 @@ void MPASGrid2dViewer::_sphereDisplay()
     zcl = 0;
     int c, v, i, k, n;
 
-    int nCells         = geometry->get_nCells();
-    int nVertLevels    = geometry->get_nVertLevels();
-    int nVertices      = geometry->get_nVertices();
-    int vertexDegree   = geometry->get_vertexDegree();
-    int* cellsOnVertex = geometry->get_cellsOnVertex();
+    int n_partitions = mpaspartition->get_n_partitions();
+    int n_total_cells = mpaspartition->get_total_cells();
+    int max_cells_per_partition = mpaspartition->get_max_cells_per_partition();
 
-    double sv = 1.0;
+    int nCells          = geometry->get_nCells();
+    int nVertices       = geometry->get_nVertices();
+    int maxEdges        = geometry->get_maxEdges();
+    int vertexDegree    = geometry->get_vertexDegree();
+    int* nEdgesOnCell   = geometry->get_nEdgesOnCell();
+    int* verticesOnCell = geometry->get_verticesOnCell();
+
     double fact;
     float radius = 1.001;
+
+    int* nic = mpaspartition->get_iv("nic");
+    int* partition_assignment = mpaspartition->get_iv("partition_assignment");
 
     pnt3d pnt;
     pnt3d norm;
@@ -199,11 +194,12 @@ void MPASGrid2dViewer::_sphereDisplay()
 
     cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     cout << "\t_varname: <" << _varname << ">" << endl;
-    cout << "\tnVertLevels = " << nVertLevels << ", nvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
+    cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
     cout << "\tnvoptions->get_tsec() = " << nvoptions->get_tsec() << ", vertexDegree = " << vertexDegree << endl;
     cout << "\tnCells = " << nCells << ", nVertices = " << nVertices << endl;
+    cout << "\tnic[0] = " << nic[0] << ", partition_assignment[0] = " << partition_assignment[0] << endl;
 
-    current_var_ptr = &_var[nCells * nVertLevels * nvoptions->get_tsec()];
+    current_var_ptr = _var;
 
     zcl = lister->get_zid(k);
 
@@ -212,12 +208,10 @@ void MPASGrid2dViewer::_sphereDisplay()
 
     locator->set_height(radius);
 
-    sv = 1.0 / (_workMaxVal - _workMinVal);
-
     zcl = glGenLists(1);
     glNewList(zcl, GL_COMPILE_AND_EXECUTE);
 
-    cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     cout << "\tzcl = " << zcl << endl;
 
     glPushMatrix();
@@ -232,25 +226,24 @@ void MPASGrid2dViewer::_sphereDisplay()
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
-    glBegin(GL_TRIANGLES);
-    for(v = 0; v < nVertices; ++v)
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    for(c = 0; c < nCells; ++c)
     {
-        for(i = 0; i < vertexDegree; i++)
+        fact = (float) partition_assignment[c] / (float) n_partitions;
+        cout << "\t#Cell" <<  c << ", Node #: " << partition_assignment[c] << ", fact: " << fact << endl;
+        cout << "\t#nEdgeOnCell[" << c << "] = " << nEdgesOnCell[c] << endl;
+        norm = nvop(pnt, radius);
+        glBegin(GL_POLYGON);
+        glNormal3d(norm.x, norm.y, norm.z);
+        glTexCoord1d(fact);
+        for(i = 0; i < nEdgesOnCell[c]; i++)
         {
-            c = cellsOnVertex[i+v*vertexDegree];
-            n = nVertLevels * c + k;
-            // fact = sv * (current_var_ptr[n] - _workMinVal);
-            fact = (float) v / (float) nVertices;
-
-            pnt = geometry->polar2xyz(c, radius);
-
-            norm = nvop(pnt, radius);
-            glNormal3d(norm.x, norm.y, norm.z);
-            glTexCoord1d(fact);
+            v = verticesOnCell[i+c*maxEdges];
+            pnt = geometry->polar2xyz(v, radius);
             glVertex3d(pnt.x, pnt.y, pnt.z);
         }
+        glEnd();
     }
-    glEnd();
 
     coastline->drawOnSphere(radius+0.01);
 
@@ -284,11 +277,10 @@ void MPASGrid2dViewer::_flatDisplay()
 {
     int c, v, i, k, n, cp1, cp2;
 
-    int nVertLevels    = geometry->get_nVertLevels();
     int nVertices      = geometry->get_nVertices();
     int nCells         = geometry->get_nCells();
     int vertexDegree   = geometry->get_vertexDegree();
-    int* cellsOnVertex = geometry->get_cellsOnVertex();
+    int* verticesOnCell = geometry->get_verticesOnCell();
 
     float sv = 1.0;
     float fact;
@@ -310,7 +302,7 @@ void MPASGrid2dViewer::_flatDisplay()
     zcl = 0;
     k = nvoptions->get_zsec();
 
-    current_var_ptr = &_var[nCells * nVertLevels * nvoptions->get_tsec()];
+    current_var_ptr = _var;
 
     zcl = lister->get_zid(k);
 
@@ -321,8 +313,6 @@ void MPASGrid2dViewer::_flatDisplay()
     glNewList(zcl, GL_COMPILE_AND_EXECUTE);
 
     locator->set_height(height);
-
-    sv = 1.0 / (_workMaxVal - _workMinVal);
 
     cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
     cout << "\t_varname: <" << _varname << ">" << endl;
@@ -348,9 +338,8 @@ void MPASGrid2dViewer::_flatDisplay()
         {
             for(i = 0; i < vertexDegree; i++)
             {
-                c = cellsOnVertex[i+v*vertexDegree];
-                n = nVertLevels * c + k;
-                fact = sv * (current_var_ptr[n] - _workMinVal);
+                c = verticesOnCell[i+v*vertexDegree];
+                fact = (float)current_var_ptr[v]/160;
                 glTexCoord1d(fact);
 
                 pnt = geometry->latlon2xy(c);
@@ -400,9 +389,9 @@ void MPASGrid2dViewer::_flatDisplay()
                  y[2] = pnt2.y;
                  y[4] = pnt1.y;
 
-                 val[0] = current_var_ptr[nVertLevels * c + k];
-                 val[2] = current_var_ptr[nVertLevels * cp2 + k];
-                 val[4] = current_var_ptr[nVertLevels * cp1 + k];
+                 val[0] = current_var_ptr[c + k];
+                 val[2] = current_var_ptr[cp2 + k];
+                 val[4] = current_var_ptr[cp1 + k];
 
                  x[1] = -1.0;
                  x[3] = -1.0;
@@ -445,9 +434,9 @@ void MPASGrid2dViewer::_flatDisplay()
                  y[2] = pnt2.y;
                  y[4] = pnt1.y;
 
-                 val[0] = current_var_ptr[nVertLevels * c + k];
-                 val[2] = current_var_ptr[nVertLevels * cp2 + k];
-                 val[4] = current_var_ptr[nVertLevels * cp1 + k];
+                 val[0] = current_var_ptr[c + k];
+                 val[2] = current_var_ptr[cp2 + k];
+                 val[4] = current_var_ptr[cp1 + k];
 
                  x[1] = -1.0;
                  x[3] = -1.0;
@@ -483,9 +472,9 @@ void MPASGrid2dViewer::_flatDisplay()
                  y[0] = pnt1.y;
                  y[4] = pnt2.y;
 
-                 val[2] = current_var_ptr[nVertLevels * c + k];
-                 val[0] = current_var_ptr[nVertLevels * cp1 + k];
-                 val[4] = current_var_ptr[nVertLevels * cp2 + k];
+                 val[2] = current_var_ptr[c + k];
+                 val[0] = current_var_ptr[cp1 + k];
+                 val[4] = current_var_ptr[cp2 + k];
 
                  x[1] = 1.0;
                  x[3] = 1.0;
@@ -528,9 +517,9 @@ void MPASGrid2dViewer::_flatDisplay()
                  y[4] = pnt1.y;
                  y[2] = pnt2.y;
 
-                 val[0] = current_var_ptr[nVertLevels * c + k];
-                 val[4] = current_var_ptr[nVertLevels * cp1 + k];
-                 val[2] = current_var_ptr[nVertLevels * cp2 + k];
+                 val[0] = current_var_ptr[c + k];
+                 val[4] = current_var_ptr[cp1 + k];
+                 val[2] = current_var_ptr[cp2 + k];
 
                  x[1] = 1.0;
                  x[3] = 1.0;
@@ -680,7 +669,7 @@ void MPASGrid2dViewer::_draw_triangle(double radius)
     int c, i, v;
     int nVertices      = geometry->get_nVertices();
     int vertexDegree   = geometry->get_vertexDegree();
-    int* cellsOnVertex = geometry->get_cellsOnVertex();
+    int* verticesOnCell = geometry->get_verticesOnCell();
 
     pnt3d pnt;
 
@@ -694,12 +683,12 @@ void MPASGrid2dViewer::_draw_triangle(double radius)
         glBegin ( GL_LINE_STRIP );
         for(i = 0; i < vertexDegree; i++)
         {
-            c = cellsOnVertex[i+v*vertexDegree];
+            c = verticesOnCell[i+v*vertexDegree];
             pnt = geometry->polar2xyz(c, radius);
             glVertex3d(pnt.x, pnt.y, pnt.z);
         }
 
-        c = cellsOnVertex[v*vertexDegree];
+        c = verticesOnCell[v*vertexDegree];
         pnt = geometry->polar2xyz(c, radius);
         glVertex3d(pnt.x, pnt.y, pnt.z);
 
@@ -715,11 +704,10 @@ void MPASGrid2dViewer::_flatSubset()
     int c, v, i, k, n;
     unsigned int m;
 
-    int nVertLevels    = geometry->get_nVertLevels();
     int nVertices      = geometry->get_nVertices();
     int nCells         = geometry->get_nCells();
     int vertexDegree   = geometry->get_vertexDegree();
-    int* cellsOnVertex = geometry->get_cellsOnVertex();
+    int* verticesOnCell = geometry->get_verticesOnCell();
 
     double sv = 1.0;
     double fact;
@@ -734,7 +722,7 @@ void MPASGrid2dViewer::_flatSubset()
 
     k = nvoptions->get_zsec();
 
-    current_var_ptr = &_var[nCells * nVertLevels * nvoptions->get_tsec()];
+    current_var_ptr = _var;
 
     zcl = lister->get_zid(k);
 
@@ -749,7 +737,6 @@ void MPASGrid2dViewer::_flatSubset()
     sv = 1.0 / (_workMaxVal - _workMinVal);
 
   //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-  //cout << "\tnVertLevels = " << nVertLevels << endl;
   //cout << "\tnvoptions->get_cb(NV_SUBSET): <" << nvoptions->get_cb(NV_SUBSET) << ">" << endl;
   //cout << "\tnvoptions->get_minlon() = " << nvoptions->get_minlon() << endl;
   //cout << "\tnvoptions->get_maxlon() = " << nvoptions->get_maxlon() << endl;
@@ -809,7 +796,7 @@ void MPASGrid2dViewer::_flatSubset()
 
             for(i = 0; i < vertexDegree; i++)
             {
-                c = cellsOnVertex[i+v*vertexDegree];
+                c = verticesOnCell[i+v*vertexDegree];
                 pnt = geometry->latlon2xy(c);
 
                 if(west > pnt.x)
@@ -853,9 +840,8 @@ void MPASGrid2dViewer::_flatSubset()
 
         for(i = 0; i < vertexDegree; i++)
         {
-            c = cellsOnVertex[i+v*vertexDegree];
-            n = nVertLevels * c + k;
-            fact = sv * (current_var_ptr[n] - _workMinVal);
+            c = verticesOnCell[i+v*vertexDegree];
+            fact = sv * (current_var_ptr[c] - _workMinVal);
             glTexCoord1d(fact);
 
             pnt = geometry->latlon2xy(c);
@@ -881,11 +867,10 @@ void MPASGrid2dViewer::_sphereSubset()
     int c, v, i, k, n;
     unsigned int m;
 
-    int nVertLevels    = geometry->get_nVertLevels();
-    int nVertices      = geometry->get_nVertices();
     int nCells         = geometry->get_nCells();
+    int nVertices      = geometry->get_nVertices();
     int vertexDegree   = geometry->get_vertexDegree();
-    int* cellsOnVertex = geometry->get_cellsOnVertex();
+    int* verticesOnCell = geometry->get_verticesOnCell();
 
     double sv = 1.0;
     double fact;
@@ -897,15 +882,15 @@ void MPASGrid2dViewer::_sphereSubset()
     float west, east, south, north;
     float xc, yc;
 
-    double* lon = geometry->get_lonCell();
-    double* lat = geometry->get_latCell();
+    double* lon = geometry->get_lonVertex();
+    double* lat = geometry->get_latVertex();
 
     pnt3d pnt;
     pnt3d norm;
 
     k = nvoptions->get_zsec();
 
-    current_var_ptr = &_var[nCells * nVertLevels * nvoptions->get_tsec()];
+    current_var_ptr = _var;
 
     zcl = lister->get_zid(k);
 
@@ -990,7 +975,7 @@ void MPASGrid2dViewer::_sphereSubset()
 
             for(i = 0; i < vertexDegree; i++)
             {
-                c = cellsOnVertex[i+v*vertexDegree];
+                c = verticesOnCell[i+v*vertexDegree];
 
                 if(west > lon[c])
                     ++nwest;
@@ -1033,9 +1018,8 @@ void MPASGrid2dViewer::_sphereSubset()
 
         for(i = 0; i < vertexDegree; i++)
         {
-            c = cellsOnVertex[i+v*vertexDegree];
-            n = nVertLevels * c + k;
-            fact = sv * (current_var_ptr[n] - _workMinVal);
+            c = verticesOnCell[i+v*vertexDegree];
+            fact = sv * (current_var_ptr[c] - _workMinVal);
 
             pnt = geometry->polar2xyz(c, height);
 
@@ -1063,10 +1047,9 @@ void MPASGrid2dViewer::draw_sphere_grids()
     int c, v, i, k, n;
 
     int nCells         = geometry->get_nCells();
-    int nVertLevels    = geometry->get_nVertLevels();
     int nVertices      = geometry->get_nVertices();
     int vertexDegree   = geometry->get_vertexDegree();
-    int* cellsOnVertex = geometry->get_cellsOnVertex();
+    int* verticesOnCell = geometry->get_verticesOnCell();
 
     float radius;
 
@@ -1090,7 +1073,7 @@ void MPASGrid2dViewer::draw_sphere_grids()
     {
         for(i = 0; i < vertexDegree; i++)
         {
-            c = cellsOnVertex[i+v*vertexDegree];
+            c = verticesOnCell[i+v*vertexDegree];
             pnt = geometry->polar2xyz(c, radius);
 
           //norm = nvop(pnt, height);
@@ -1122,11 +1105,10 @@ void MPASGrid2dViewer::draw_plane_grids()
 {
     int c, v, i, k, n, cp1, cp2;
 
-    int nVertLevels    = geometry->get_nVertLevels();
     int nVertices      = geometry->get_nVertices();
     int nCells         = geometry->get_nCells();
     int vertexDegree   = geometry->get_vertexDegree();
-    int* cellsOnVertex = geometry->get_cellsOnVertex();
+    int* verticesOnCell = geometry->get_verticesOnCell();
 
     float x[5];
     float y[5];
@@ -1155,7 +1137,7 @@ void MPASGrid2dViewer::draw_plane_grids()
             glBegin(GL_POLYGON);
             for(i = 0; i < vertexDegree; i++)
             {
-                c = cellsOnVertex[i+v*vertexDegree];
+                c = verticesOnCell[i+v*vertexDegree];
                 pnt = geometry->latlon2xy(c);
                 glVertex3d(pnt.x, pnt.y, height);
             }

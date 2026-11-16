@@ -12,17 +12,8 @@
 #include <assert.h>
 
 #include "geometry.h"
-#include "point3d.h"
 
 using namespace std;
-
-struct _point2d
-{
-    double x;
-    double y;
-};
-
-typedef struct _point2d pnt2d;
 
 class MPASGeometry : public Geometry
 {

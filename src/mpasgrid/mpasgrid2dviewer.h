@@ -15,7 +15,8 @@
 #include "colorTable.h"
 #include "coastline.h"
 #include "texture1d.h"
-#include "mpasgeometry.h"
+#include "mpasgridgeometry.h"
+#include "mpasgridreader.h"
 #include "evaluator.h"
 #include "locator.h"
 #include "nvoptions.h"
@@ -34,7 +35,8 @@ class MPASGrid2dViewer
 
         void reset();
         void setup(string vn, int* var);
-        void set_geometry(MPASGeometry* gm);
+        void set_geometry(MPASGridGeometry* gm);
+        void set_mpaspartition(MPASGridReader* pg) { mpaspartition = pg; };
         void reset_texture1d(ColorTable *ct);
 
         void set_tvalue(int n) { _tvalue = n; };
@@ -50,7 +52,8 @@ class MPASGrid2dViewer
         Texture1d* texture1d;
         CoastLine* coastline;
         ColorTable* colorTable;
-        MPASGeometry* geometry;
+        MPASGridGeometry* geometry;
+        MPASGridReader* mpaspartition;
         Evaluator* evaluator;
         NVOptions* nvoptions;
 

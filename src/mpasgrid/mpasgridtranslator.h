@@ -1,8 +1,6 @@
 #ifndef MPASGridTRANSLATOR_H
 #define MPASGridTRANSLATOR_H
 
-//$Id: mpastranslator.h 5315 2015-02-06 21:24:34Z starviewer $
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -53,7 +51,7 @@ class MPASGridTranslator : public BaseTranslator
         void writeLocatorMsg();
 
     private:
-        MPASGeometry* geometry;
+        MPASGridGeometry* geometry;
         MPASGridController* mpasgridcontroller;
 
         bool _saveJpg;

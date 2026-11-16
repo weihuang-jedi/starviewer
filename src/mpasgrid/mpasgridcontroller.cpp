@@ -18,7 +18,7 @@ MPASGridController::MPASGridController(ColorTable *ct, NVOptions* opt,
     _value = NULL;
     mpasgrid2dviewer = NULL;
 
-    geometry = new MPASGeometry();
+    geometry = new MPASGridGeometry();
     geometry->set_name(static_flnm);
 
     // cout << "\tat <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
@@ -38,8 +38,6 @@ MPASGridController::MPASGridController(ColorTable *ct, NVOptions* opt,
     geometry->set_nCells(ncstatic->get_nCells());
     geometry->set_nVertices(ncstatic->get_nVertices());
     geometry->set_vertexDegree(ncstatic->get_vertexDegree());
-    geometry->set_nVertLevels(1);
-    geometry->set_nTime(ncstatic->get_nTime());
 
     geometry->set_mx(360);
     geometry->set_my(180);
@@ -50,9 +48,10 @@ MPASGridController::MPASGridController(ColorTable *ct, NVOptions* opt,
     geometry->set_nz(1);
     geometry->set_nt(1);
 
-    geometry->set_lonCell(ncstatic->get_lonCell());
-    geometry->set_latCell(ncstatic->get_latCell());
-    geometry->set_cellsOnVertex(ncstatic->get_cellsOnVertex());
+    geometry->set_lonVertex(ncstatic->get_lonVertex());
+    geometry->set_latVertex(ncstatic->get_latVertex());
+    geometry->set_verticesOnCell(ncstatic->get_verticesOnCell());
+    geometry->set_nEdgesOnCell(ncstatic->get_nEdgesOnCell());
 
     geometry->setup();
 
@@ -85,15 +84,14 @@ void MPASGridController::setup()
     // cout << "\nEnter <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     // cout << "\tMPASGridController nCells      : " << geometry->get_nCells() << endl;
     // cout << "\tMPASGridController nVertices   : " << geometry->get_nVertices() << endl;
-    // cout << "\tMPASGridController nVertLevels : " << geometry->get_nVertLevels() << endl;
     // cout << "\tMPASGridController vertexDegree: " << geometry->get_vertexDegree() << endl;
 
     mpasgrid2dviewer = new MPASGrid2dViewer(colorTable, nvoptions);
 
     _value = ncdata->get_iv(_varname.c_str());
-    geometry->set_nVertLevels(1);
 
     mpasgrid2dviewer->set_geometry(geometry);
+    mpasgrid2dviewer->set_mpaspartition(ncdata);
     mpasgrid2dviewer->setup(_varname, _value);
 
     // cout << "Leave <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
@@ -150,8 +148,6 @@ void MPASGridController::set1dvarname(string vn)
   //cout << "\nfile: " << __FILE__ << ", line: " << __LINE__ << endl;
   //cout << "setup for <" << vn << ">" << endl;
 
-    geometry->set_nVertLevels(1);
-
     mpasgrid2dviewer->set_geometry(geometry);
     mpasgrid2dviewer->setup(vn, _value);
 
@@ -183,10 +179,6 @@ void MPASGridController::set2dvarname(string vn)
 
     // cout << "\t" << __PRETTY_FUNCTION__ << ": line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     // cout << "\tnis2d(" << vn << ") = " << is2d(vn) << endl;
-
-    geometry->set_nVertLevels(1);
-
-    // cout << "\t" << __PRETTY_FUNCTION__ << ": line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     mpasgrid2dviewer->set_geometry(geometry);
     // cout << "\t" << __PRETTY_FUNCTION__ << ": line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
@@ -223,10 +215,6 @@ void MPASGridController::set3dvarname(string vn)
 
     // cout << "\t" << __PRETTY_FUNCTION__ << ": line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     // cout << "\tnis2d(" << vn << ") = " << is2d(vn) << endl;
-
-    geometry->set_nVertLevels(1);
-
-    // cout << "\t" << __PRETTY_FUNCTION__ << ": line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
 
     mpasgrid2dviewer->set_geometry(geometry);
     // cout << "\t" << __PRETTY_FUNCTION__ << ": line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
@@ -280,13 +268,10 @@ string* MPASGridController::get_timestring()
 
 void MPASGridController::set_fileNtime(int nf, int nt)
 {
-    size_t gridsize = 1;
-
   //cout << "\nIn functions: <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
   //cout << "\tcurFile: " << nf << ", curTime: " << nt << ", varname: <" << _varname << ">" << endl;
 
     _curFile = nf;
-    _curTime = nt;
 
     if(_preFile != _curFile)
     {
@@ -297,22 +282,12 @@ void MPASGridController::set_fileNtime(int nf, int nt)
 
         _value = ncdata->get_iv(_varname.c_str());
         _title = string("MPASGrid");
-        // _title = ncdata->get_title();
-
-        geometry->set_nt(_ntimes[_curFile]);
-
-        _set_glbTime();
-        _minval = mpasgrid2dviewer->get_minval();
-        _maxval = mpasgrid2dviewer->get_maxval();
-
         _initialized = true;
     }
 
     _preFile = _curFile;
 
-    gridsize = _curTime * geometry->get_nVertices() *  geometry->get_nVertLevels();
-
-    mpasgrid2dviewer->setup(_varname, &_value[gridsize]);
+    mpasgrid2dviewer->setup(_varname, _value);
 }
 
 void MPASGridController::_set_glbTime()
