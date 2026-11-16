@@ -198,6 +198,8 @@ void MPASGrid2dViewer::_sphereDisplay()
     cout << "\tnvoptions->get_tsec() = " << nvoptions->get_tsec() << ", vertexDegree = " << vertexDegree << endl;
     cout << "\tnCells = " << nCells << ", nVertices = " << nVertices << endl;
     cout << "\tnic[0] = " << nic[0] << ", partition_assignment[0] = " << partition_assignment[0] << endl;
+    cout << "\tnEdgesOnCell[0] = " << nEdgesOnCell[0] << ", verticesOnCell[0] = " << verticesOnCell[0] << endl;
+    cout << "\tmaxEdges = " << maxEdges << endl;
 
     current_var_ptr = _var;
 
@@ -226,20 +228,35 @@ void MPASGrid2dViewer::_sphereDisplay()
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D, texture1d->get_textureID());
 
+    glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+
+    glDisable(GL_TEXTURE_1D);
+    glDisable(GL_TEXTURE_2D);
+
     cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    // for(c = 0; c < nCells; c += 100)
     for(c = 0; c < nCells; ++c)
     {
         fact = (float) partition_assignment[c] / (float) n_partitions;
-        cout << "\t#Cell" <<  c << ", Node #: " << partition_assignment[c] << ", fact: " << fact << endl;
-        cout << "\t#nEdgeOnCell[" << c << "] = " << nEdgesOnCell[c] << endl;
-        norm = nvop(pnt, radius);
+        // cout << "\tpa[" << c << "] = " << partition_assignment[c] << ", fact = " << fact
+        //      << ", nvertices = " << nEdgesOnCell[c] << endl;
+        int id = c;
+        float r = ((id * 137 + 43) % 256) / 255.0f;
+        float g = ((id * 251 + 97) % 256) / 255.0f;
+        float b = ((id * 193 + 17) % 256) / 255.0f;
+
+        glColor3f(r, g, b);
         glBegin(GL_POLYGON);
-        glNormal3d(norm.x, norm.y, norm.z);
-        glTexCoord1d(fact);
         for(i = 0; i < nEdgesOnCell[c]; i++)
         {
-            v = verticesOnCell[i+c*maxEdges];
+            // v = verticesOnCell[i+c*maxEdges];
+            v = verticesOnCell[i + c * maxEdges] - 1;
+            if (v < 0 || v >= nVertices) continue;
+        
             pnt = geometry->polar2xyz(v, radius);
+            glNormal3d(norm.x, norm.y, norm.z);
+            glTexCoord1d(fact);
             glVertex3d(pnt.x, pnt.y, pnt.z);
         }
         glEnd();
@@ -250,20 +267,7 @@ void MPASGrid2dViewer::_sphereDisplay()
     glDisable(GL_POLYGON_OFFSET_FILL);
     glDisable(GL_TEXTURE_1D);
 
-#if 0
-    if(locator->on())
-    {
-      //cout << "\n" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-      //cout << "\tlocation = (" << locator->x() << ", " << locator->y() << ")" << endl;
-
-        _draw_cross(radius + 0.01);
-
-        if((NULL != nvoptions) && nvoptions->get_cb(NV_GRIDON))
-            _draw_triangle(radius + 0.01);
-    }
-#else
-    _draw_triangle(radius + 0.01);
-#endif
+    // _draw_triangle(radius + 0.01);
 
     glPopMatrix();
 

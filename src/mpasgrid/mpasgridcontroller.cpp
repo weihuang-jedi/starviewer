@@ -37,6 +37,7 @@ MPASGridController::MPASGridController(ColorTable *ct, NVOptions* opt,
     // cout << "\tat <" << __PRETTY_FUNCTION__ << ">, line: " << __LINE__ << ", file: <" << __FILE__ << ">" << endl;
     geometry->set_nCells(ncstatic->get_nCells());
     geometry->set_nVertices(ncstatic->get_nVertices());
+    geometry->set_maxEdges(ncstatic->get_maxEdges());
     geometry->set_vertexDegree(ncstatic->get_vertexDegree());
 
     geometry->set_mx(360);
