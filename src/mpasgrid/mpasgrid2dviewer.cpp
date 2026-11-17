@@ -1,6 +1,7 @@
 #include <QtOpenGL>
 
 #include <mpasgrid2dviewer.h>
+#include <mpasgridpartition.h>
 
 #define	MINIDIST	1.0e-6
 
@@ -163,6 +164,155 @@ pnt3d MPASGrid2dViewer::nvop(pnt3d p, double height)
     return np;
 }
 
+#if 1
+void MPASGrid2dViewer::_sphereDisplay()
+{
+    zcl = 0;
+    int c, v, i, k, n;
+
+    // int n_partitions = mpaspartition->get_n_partitions();
+    // int n_total_cells = mpaspartition->get_total_cells();
+    // int max_cells_per_partition = mpaspartition->get_max_cells_per_partition();
+
+    int nCells          = geometry->get_nCells();
+    int nVertices       = geometry->get_nVertices();
+    int maxEdges        = geometry->get_maxEdges();
+    int vertexDegree    = geometry->get_vertexDegree();
+    int* nEdgesOnCell   = geometry->get_nEdgesOnCell();
+    int* verticesOnCell = geometry->get_verticesOnCell();
+
+    double fact;
+    float radius = 1.001;
+
+    pnt3d pnt;
+    pnt3d norm;
+
+    // int* current_var_ptr;
+
+    k = nvoptions->get_zsec();
+
+    cout << "\nEnter " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\t_varname: <" << _varname << ">" << endl;
+    cout << "\tnvoptions->get_zsec() = " << nvoptions->get_zsec() << endl;
+    cout << "\tnvoptions->get_tsec() = " << nvoptions->get_tsec() << ", vertexDegree = " << vertexDegree << endl;
+    cout << "\tnCells = " << nCells << ", nVertices = " << nVertices << endl;
+    // cout << "\tnic[0] = " << nic[0] << ", partition_assignment[0] = " << partition_assignment[0] << endl;
+    cout << "\tnEdgesOnCell[0] = " << nEdgesOnCell[0] << ", verticesOnCell[0] = " << verticesOnCell[0] << endl;
+    cout << "\tmaxEdges = " << maxEdges << endl;
+
+    // current_var_ptr = _var;
+
+    zcl = lister->get_zid(k);
+
+    if(0 < zcl)
+        return;
+
+    locator->set_height(radius);
+
+    zcl = glGenLists(1);
+    glNewList(zcl, GL_COMPILE_AND_EXECUTE);
+
+    cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+    cout << "\tzcl = " << zcl << endl;
+
+    glPushMatrix();
+
+    MpasPartition part;
+    // if (!part.load("x1.655362.graph.info.part.40", -1, 4)) {
+    // if (!part.load("x1.655362.graph.info.part.160", -1, 4)) {
+    if (!part.load("global_hierarchical.part.160", -1, 4)) {
+        return;
+    }
+
+    int n_partitions = part.numPartitions();
+    int n_total_cells = part.numCells();
+    int max_cells_per_partition = part.maxCellsPerPartition();
+    const int* nic = part.nicPtr();
+    const int* current_var_ptr = part.cellsPtr();
+
+    part.buildHierarchicalColors(4);
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+    glEnable(GL_POLYGON_OFFSET_FILL);
+    glPolygonOffset(-1.0f, -1.0f);
+
+    for (n = 0; n < n_partitions; ++n) {
+        glColor3fv(part.colorPtr(n));
+
+        for (k = 0; k < nic[n]; ++k) {
+            c = current_var_ptr[k + n * max_cells_per_partition];
+
+            glBegin(GL_POLYGON);
+
+            v = verticesOnCell[c * maxEdges];
+            pnt = geometry->polar2xyz(v, radius);
+            norm = nvop(pnt, radius);
+            glNormal3d(norm.x, norm.y, norm.z);
+
+            for (i = 1; i < nEdgesOnCell[c]; ++i) {
+                v = verticesOnCell[i + c * maxEdges];
+                pnt = geometry->polar2xyz(v, radius);
+                glVertex3d(pnt.x, pnt.y, pnt.z);
+            }
+            glEnd();
+        }
+    }
+
+    glDisable(GL_POLYGON_OFFSET_FILL);
+
+    coastline->drawOnSphere(radius+0.01);
+    // _draw_triangle(radius + 0.01);
+
+    // --- Pass 2: Hierarchical Borders (slightly lifted above 'radius') ---
+    glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_CURRENT_BIT);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_1D);
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    double border_radius = radius * 1.001; // Lifts lines slightly off sphere surface to prevent z-fighting
+
+    // 1. Thin subtle borders between q sub-groups (dark charcoal, semi-transparent)
+    glLineWidth(2.0f);
+    glColor4f(0.15f, 0.15f, 0.15f, 0.55f);
+    glBegin(GL_LINES);
+    for (const auto& edge : part.subEdges()) {
+        if (edge.v1 < 0 || edge.v1 >= nVertices || edge.v2 < 0 || edge.v2 >= nVertices) continue;
+        auto p1 = geometry->polar2xyz(edge.v1, border_radius);
+        auto p2 = geometry->polar2xyz(edge.v2, border_radius);
+        glVertex3d(p1.x, p1.y, p1.z);
+        glVertex3d(p2.x, p2.y, p2.z);
+    }
+    glEnd();
+
+    // 2. Thick bold borders between p parent groups (solid black or white)
+    glLineWidth(5.0f);
+    glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+    glBegin(GL_LINES);
+    for (const auto& edge : part.parentEdges()) {
+        if (edge.v1 < 0 || edge.v1 >= nVertices || edge.v2 < 0 || edge.v2 >= nVertices) continue;
+        auto p1 = geometry->polar2xyz(edge.v1, border_radius);
+        auto p2 = geometry->polar2xyz(edge.v2, border_radius);
+        glVertex3d(p1.x, p1.y, p1.z);
+        glVertex3d(p2.x, p2.y, p2.z);
+    }
+    glEnd();
+
+    glPopAttrib();
+
+    glPopMatrix();
+
+    glEndList();
+
+    lister->set_zid(k, zcl);
+    cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
+}
+#else
 void MPASGrid2dViewer::_sphereDisplay()
 {
     zcl = 0;
@@ -181,9 +331,6 @@ void MPASGrid2dViewer::_sphereDisplay()
 
     double fact;
     float radius = 1.001;
-
-    int* nic = mpaspartition->get_iv("nic");
-    int* partition_assignment = mpaspartition->get_iv("partition_assignment");
 
     pnt3d pnt;
     pnt3d norm;
@@ -218,6 +365,10 @@ void MPASGrid2dViewer::_sphereDisplay()
 
     glPushMatrix();
 
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW); // MPAS verticesOnCell are counter-clockwise
+
     glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(1, 1);
 
@@ -235,36 +386,52 @@ void MPASGrid2dViewer::_sphereDisplay()
     glDisable(GL_TEXTURE_2D);
 
     cout << "\t" << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
-    // for(c = 0; c < nCells; c += 100)
-    for(c = 0; c < nCells; ++c)
-    {
-        fact = (float) partition_assignment[c] / (float) n_partitions;
-        // cout << "\tpa[" << c << "] = " << partition_assignment[c] << ", fact = " << fact
-        //      << ", nvertices = " << nEdgesOnCell[c] << endl;
-        int id = c;
-        float r = ((id * 137 + 43) % 256) / 255.0f;
-        float g = ((id * 251 + 97) % 256) / 255.0f;
-        float b = ((id * 193 + 17) % 256) / 255.0f;
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
 
+    // Prevent z-fighting with any underlying base sphere at the same radius
+    glEnable(GL_POLYGON_OFFSET_FILL);
+    glPolygonOffset(-1.0f, -1.0f);
+
+    for(n = 0; n < n_partitions; ++n)
+    {
+        int p_idx = n / q_count;
+        int q_idx = n % q_count;
+
+        float h = fmodf(p_idx * golden_ratio_conjugate, 1.0f);
+        float s = (q_count == 4) ? sub_s[q_idx] : (0.50f + 0.45f * q_idx / (q_count - 1));
+        float val = (q_count == 4) ? sub_v[q_idx] : (0.98f - 0.50f * q_idx / (q_count - 1));
+
+        hsv2rgb(h, s, val, r, g, b);
         glColor3f(r, g, b);
-        glBegin(GL_POLYGON);
-        for(i = 0; i < nEdgesOnCell[c]; i++)
+
+        for(k = 0; k < nic[n]; k++)
         {
-            // v = verticesOnCell[i+c*maxEdges];
-            v = verticesOnCell[i + c * maxEdges] - 1;
-            if (v < 0 || v >= nVertices) continue;
-        
-            pnt = geometry->polar2xyz(v, radius);
+            // Remove '- 1' if current_var_ptr is already 0-based!
+            c = current_var_ptr[k + n * max_cells_per_partition];
+
+            v = verticesOnCell[c * maxEdges];
+            pnt = latlon2xyz(latVertex[v], lonVertex[v]);
+            norm = nvop(pnt, radius);
             glNormal3d(norm.x, norm.y, norm.z);
-            glTexCoord1d(fact);
-            glVertex3d(pnt.x, pnt.y, pnt.z);
+
+            glBegin(GL_POLYGON);
+            for(i = 0; i < nEdgesOnCell[c]; i++)
+            {
+                v = verticesOnCell[i + c * maxEdges];
+                pnt = latlon2xyz(latVertex[v], lonVertex[v]);
+                glVertex3d(pnt.x, pnt.y, pnt.z);
+            }
+            glEnd();
         }
-        glEnd();
     }
+
+    glDisable(GL_POLYGON_OFFSET_FILL);
 
     coastline->drawOnSphere(radius+0.01);
 
-    glDisable(GL_POLYGON_OFFSET_FILL);
     glDisable(GL_TEXTURE_1D);
 
     // _draw_triangle(radius + 0.01);
@@ -276,6 +443,7 @@ void MPASGrid2dViewer::_sphereDisplay()
     lister->set_zid(k, zcl);
     cout << "Leave " << __PRETTY_FUNCTION__ << ", file: " << __FILE__ << ", line: " << __LINE__ << endl;
 }
+#endif
 
 void MPASGrid2dViewer::_flatDisplay()
 {
@@ -607,25 +775,25 @@ void MPASGrid2dViewer::reset_texture1d(ColorTable *ct)
     texture1d->set_name(ct->get_name());
 }
 
-pnt3d MPASGrid2dViewer::polar2xyz(double lon, double lat, double r)
+pnt3d MPASGrid2dViewer::latlon2xyz(double lat, double lon)
 {
    pnt3d pnt;
-   double delt = r * cos(lat);
+   double delt = cos(lat);
 
    pnt.x = delt * sin(lon);
-   pnt.y =    r * sin(lat);
+   pnt.y =        sin(lat);
    pnt.z = delt * cos(lon);
 
    return pnt;
 }
 
-pnt3d MPASGrid2dViewer::polar2flat(double lon, double lat, double h)
+pnt3d MPASGrid2dViewer::latlon2flat(double lat, double lon)
 {
    pnt3d pnt;
 
    pnt.x = lon/180.0 - 1.0;
    pnt.y = lat/180.0;
-   pnt.z = h;
+   pnt.z = 1.001;
 
    return pnt;
 }

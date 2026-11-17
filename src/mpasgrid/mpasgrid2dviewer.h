@@ -89,8 +89,8 @@ class MPASGrid2dViewer
         void _draw_cross(double radius);
         void _draw_triangle(double radius);
 
-        pnt3d polar2xyz(double lon, double lat, double r);
-        pnt3d polar2flat(double lon, double lat, double h);
+        pnt3d latlon2xyz(double lon, double lat);
+        pnt3d latlon2flat(double lon, double lat);
         pnt3d nvop(pnt3d p, double height);
 };
 #endif
